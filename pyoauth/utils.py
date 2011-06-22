@@ -17,6 +17,7 @@ try:
 except ImportError:
     from cgi import parse_qs
 
+from pyoauth.unicode import to_utf8
 
 def url_equals(url1, url2):
     """
@@ -38,7 +39,7 @@ def url_equals(url1, url2):
         u1.scheme == u2.scheme and \
         u1.path == u2.path and \
         u1.netloc == u2.netloc and \
-        parse_qs(u1.query) == parse_qs(u2.query)
+        parse_qs(u1.query, keep_blank_values=True) == parse_qs(u2.query, keep_blank_values=True)
 
 
 def url_concat(url, query_params=None):
@@ -167,7 +168,8 @@ def oauth_get_signature_base_string(url, method, query_params):
     query_parameters.
 
     :param url:
-        The base URL.
+        The URL. If this includes a query string, query parameters are first
+        extracted and encoded as well.
     :param method:
         HTTP request method.
     :param query_params:
@@ -203,8 +205,9 @@ def oauth_get_signature_base_string(url, method, query_params):
             request components without using additional protections such as SSL/
             TLS or other methods.
     """
-    normalized_url = _oauth_get_normalized_url(url)
-    query_string = oauth_get_normalized_query_string(query_params)
+    normalized_url, url_query_params = _oauth_get_normalized_url(url)
+    url_query_params.update(query_params)
+    query_string = oauth_get_normalized_query_string(url_query_params)
     base_elems = [method.upper(), normalized_url, query_string]
     base_string = "&".join(oauth_escape(e) for e in base_elems)
     return base_string
@@ -307,7 +310,10 @@ def oauth_get_normalized_query_string(query_params):
         return ""
     encoded = []
     for k, v in query_params.iteritems():
-        if isinstance(v, basestring):
+        k = to_utf8(k)
+        if k == "oauth_signature":
+            continue
+        elif isinstance(v, basestring):
             encoded.append((oauth_escape(k), oauth_escape(v),))
         else:
             try:
@@ -336,7 +342,7 @@ def _oauth_get_normalized_url(url):
         Normalized URL.
     """
     parts = urlparse.urlparse(url)
-    scheme, netloc, path = parts[:3]
+    scheme, netloc, path, _, query_string = parts[:5]
     normalized_url = scheme.lower() + "://" + netloc.lower() + path
-    return normalized_url
-
+    query_params = parse_qs(query_string.encode("utf-8"), keep_blank_values=True)
+    return normalized_url, query_params
