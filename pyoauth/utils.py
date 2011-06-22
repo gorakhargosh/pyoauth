@@ -311,6 +311,23 @@ def oauth_get_normalized_query_string(query_params):
                  a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9dj
                  dj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1
                  &oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7
+
+    Usage::
+
+        >>> qs = oauth_get_normalized_query_string({ \
+                'b5': ['=%3D'], \
+                'a3': ['a', '2 q'], \
+                'c@': [''], \
+                'a2': ['r b'], \
+                'oauth_consumer_key': '9djdj82h48djs9d2', \
+                'oauth_token': 'kkk9d7dh3k39sjv7', \
+                'oauth_signature_method': 'HMAC-SHA1', \
+                'oauth_timestamp': '137131201', \
+                'oauth_nonce': '7d8f3e4a', \
+                'c2': [''], \
+            })
+        >>> assert qs == "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
+
     """
     if not query_params:
         return ""
@@ -454,5 +471,11 @@ def oauth_parse_qs(qs):
     Parses a query parameter string according to the OAuth spec.
 
     See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
+
+    Usage::
+
+        >>> qs = 'b5=%3D%253D&a3=a&c%40=&a2=r%20b' + '&' + 'c2&a3=2+q'
+        >>> q = oauth_parse_qs(qs)
+        >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
     """
     return parse_qs(qs.encode("utf-8"), keep_blank_values=True)
