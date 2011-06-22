@@ -445,5 +445,14 @@ def oauth_get_normalized_url_and_query_params(url):
     parts = urlparse.urlparse(url)
     scheme, netloc, path, _, query_string = parts[:5]
     normalized_url = scheme.lower() + "://" + netloc.lower() + path
-    query_params = parse_qs(query_string.encode("utf-8"), keep_blank_values=True)
+    query_params = oauth_parse_qs(query_string)
     return normalized_url, query_params
+
+
+def oauth_parse_qs(qs):
+    """
+    Parses a query parameter string according to the OAuth spec.
+
+    See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
+    """
+    return parse_qs(qs.encode("utf-8"), keep_blank_values=True)
