@@ -210,7 +210,7 @@ def oauth_get_signature_base_string(url, method, query_params):
             request components without using additional protections such as SSL/
             TLS or other methods.
     """
-    normalized_url, url_query_params = oauth_get_normalized_url(url)
+    normalized_url, url_query_params = oauth_get_normalized_url_and_query_params(url)
     url_query_params.update(query_params)
     query_string = oauth_get_normalized_query_string(url_query_params)
     base_elems = [method.upper(), normalized_url, query_string]
@@ -338,7 +338,7 @@ def oauth_get_normalized_query_string(query_params):
     return query_string
 
 
-def oauth_get_normalized_url(url):
+def oauth_get_normalized_url_and_query_params(url):
     """
     Normalizes a URL that will be used in the oauth signature and parses
     query parameters as well.
@@ -431,13 +431,13 @@ def oauth_get_normalized_url(url):
 
     Usage::
 
-        >>> u, q = oauth_get_normalized_url("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b")
+        >>> u, q = oauth_get_normalized_url_and_query_params("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b")
         >>> assert u == "http://example.com/request"
         >>> assert q == {'a2': ['r b'], 'a3': ['a'], 'b5': ['=%3D'], 'c@': ['']}
-        >>> u, q = oauth_get_normalized_url("http://example.com/request?c2&a3=2+q")
+        >>> u, q = oauth_get_normalized_url_and_query_params("http://example.com/request?c2&a3=2+q")
         >>> assert u == "http://example.com/request"
         >>> assert q == {'a3': ['2 q'], 'c2': ['']}
-        >>> u, q = oauth_get_normalized_url("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q")
+        >>> u, q = oauth_get_normalized_url_and_query_params("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q")
         >>> assert u == "http://example.com/request"
         >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
 
