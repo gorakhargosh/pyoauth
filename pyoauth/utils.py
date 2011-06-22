@@ -210,7 +210,7 @@ def oauth_get_signature_base_string(url, method, query_params):
             request components without using additional protections such as SSL/
             TLS or other methods.
     """
-    normalized_url, url_query_params = _oauth_get_normalized_url(url)
+    normalized_url, url_query_params = oauth_get_normalized_url(url)
     url_query_params.update(query_params)
     query_string = oauth_get_normalized_query_string(url_query_params)
     base_elems = [method.upper(), normalized_url, query_string]
@@ -338,14 +338,99 @@ def oauth_get_normalized_query_string(query_params):
     return query_string
 
 
-def _oauth_get_normalized_url(url):
+def oauth_get_normalized_url(url):
     """
     Normalizes a URL that will be used in the oauth signature.
 
     :param url:
         The URL to normalize.
     :returns:
-        Normalized URL.
+        Tuple as (normalized URL, query parameters dictionary) as follows::
+
+            The parameters from the following sources are collected into a single
+            list of name/value pairs:
+
+            o  The query component of the HTTP request URI as defined by
+              [RFC3986], Section 3.4.  The query component is parsed into a list
+              of name/value pairs by treating it as an
+              "application/x-www-form-urlencoded" string, separating the names
+              and values and decoding them as defined by
+              [W3C.REC-html40-19980424], Section 17.13.4.
+
+            o  The OAuth HTTP "Authorization" header field (Section 3.5.1) if
+              present.  The header's content is parsed into a list of name/value
+              pairs excluding the "realm" parameter if present.  The parameter
+              values are decoded as defined by Section 3.5.1.
+
+            o  The HTTP request entity-body, but only if all of the following
+              conditions are met:
+
+              *  The entity-body is single-part.
+
+              *  The entity-body follows the encoding requirements of the
+                 "application/x-www-form-urlencoded" content-type as defined by
+                 [W3C.REC-html40-19980424].
+
+              *  The HTTP request entity-header includes the "Content-Type"
+                 header field set to "application/x-www-form-urlencoded".
+
+              The entity-body is parsed into a list of decoded name/value pairs
+              as described in [W3C.REC-html40-19980424], Section 17.13.4.
+
+            The "oauth_signature" parameter MUST be excluded from the signature
+            base string if present.  Parameters not explicitly included in the
+            request MUST be excluded from the signature base string (e.g., the
+            "oauth_version" parameter when omitted).
+
+            For example, the HTTP request:
+
+               POST /request?b5=%3D%253D&a3=a&c%40=&a2=r%20b HTTP/1.1
+               Host: example.com
+               Content-Type: application/x-www-form-urlencoded
+               Authorization: OAuth realm="Example",
+                              oauth_consumer_key="9djdj82h48djs9d2",
+                              oauth_token="kkk9d7dh3k39sjv7",
+                              oauth_signature_method="HMAC-SHA1",
+                              oauth_timestamp="137131201",
+                              oauth_nonce="7d8f3e4a",
+                              oauth_signature="djosJKDKJSD8743243%2Fjdk33klY%3D"
+
+               c2&a3=2+q
+
+            contains the following (fully decoded) parameters used in the
+            signature base sting:
+
+                       +------------------------+------------------+
+                       |          Name          |       Value      |
+                       +------------------------+------------------+
+                       |           b5           |       =%3D       |
+                       |           a3           |         a        |
+                       |           c@           |                  |
+                       |           a2           |        r b       |
+                       |   oauth_consumer_key   | 9djdj82h48djs9d2 |
+                       |       oauth_token      | kkk9d7dh3k39sjv7 |
+                       | oauth_signature_method |     HMAC-SHA1    |
+                       |     oauth_timestamp    |     137131201    |
+                       |       oauth_nonce      |     7d8f3e4a     |
+                       |           c2           |                  |
+                       |           a3           |        2 q       |
+                       +------------------------+------------------+
+
+            Note that the value of "b5" is "=%3D" and not "==".  Both "c@" and
+            "c2" have empty values.  While the encoding rules specified in this
+            specification for the purpose of constructing the signature base
+            string exclude the use of a "+" character (ASCII code 43) to
+            represent an encoded space character (ASCII code 32), this practice
+            is widely used in "application/x-www-form-urlencoded" encoded values,
+            and MUST be properly decoded, as demonstrated by one of the "a3"
+            parameter instances (the "a3" parameter is used twice in this
+            request).
+
+    Usage::
+
+        >>> u, q = oauth_get_normalized_url("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b")
+        >>> assert u == "http://example.com/request"
+        >>> assert q == {'a2': ['r b'], 'a3': ['a'], 'b5': ['=%3D'], 'c@': ['']}
     """
     parts = urlparse.urlparse(url)
     scheme, netloc, path, _, query_string = parts[:5]
