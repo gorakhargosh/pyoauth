@@ -167,9 +167,14 @@ def oauth_get_signature_base_string(url, method, query_params):
     Calculates a signature base string based on the URL, method, and
     query_parameters.
 
+    Any query parameter by the name "oauth_signature" will be excluded
+    from the base string.
+
     :param url:
         The URL. If this includes a query string, query parameters are first
-        extracted and encoded as well.
+        extracted and encoded as well. Query parameters in the URL are
+        overridden by those found in the ``query_params`` argument to this
+        function.
     :param method:
         HTTP request method.
     :param query_params:
@@ -218,7 +223,8 @@ def oauth_get_normalized_query_string(query_params):
     Normalizes a dictionary of query parameters according to OAuth spec.
 
     :param query_params:
-        Query string parameters.
+        Query string parameters. A query parameter by the name
+        "oauth_signature", if present, will be excluded from the query string.
     :returns:
         Normalized string of query parameters as follows::
 
