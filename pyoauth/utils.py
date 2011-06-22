@@ -433,6 +433,13 @@ def oauth_get_normalized_url(url):
         >>> u, q = oauth_get_normalized_url("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b")
         >>> assert u == "http://example.com/request"
         >>> assert q == {'a2': ['r b'], 'a3': ['a'], 'b5': ['=%3D'], 'c@': ['']}
+        >>> u, q = oauth_get_normalized_url("http://example.com/request?c2&a3=2+q")
+        >>> assert u == "http://example.com/request"
+        >>> assert q == {'a3': ['2 q'], 'c2': ['']}
+        >>> u, q = oauth_get_normalized_url("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q")
+        >>> assert u == "http://example.com/request"
+        >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
+
     """
     parts = urlparse.urlparse(url)
     scheme, netloc, path, _, query_string = parts[:5]
