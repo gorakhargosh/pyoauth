@@ -75,7 +75,7 @@ def url_concat(url, query_params=None):
     return url + urllib.urlencode(query_params)
 
 
-def generate_nonce():
+def oauth_generate_nonce():
     """
     Calculates an OAuth nonce.
 
@@ -95,7 +95,7 @@ def generate_nonce():
     return binascii.b2a_hex(uuid.uuid4().bytes)
 
 
-def generate_timestamp():
+def oauth_generate_timestamp():
     """
     Generates an OAuth timestamp.
 
@@ -328,6 +328,11 @@ def oauth_get_normalized_query_string(query_params):
             })
         >>> assert qs == "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
 
+        >>> # Do not UTF-8 encode byte strings. Only Unicode strings should be UTF-8 encoded.
+        >>> bytestring = '\x1d\t\xa8\x93\xf9\xc9A\xed\xae\x08\x18\xf5\xe8W\xbd\xd5'
+        >>> q = oauth_get_normalized_query_string(dict(bytestring=bytestring))
+        >>> parse_qs('bytestring=%1D%09%A8%93%F9%C9A%ED%AE%08%18%F5%E8W%BD%D5')['bytestring'][0] == bytestring
+        True
     """
     if not query_params:
         return ""
