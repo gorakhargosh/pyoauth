@@ -347,6 +347,8 @@ def oauth_get_normalized_url(url):
     :returns:
         Tuple as (normalized URL, query parameters dictionary) as follows::
 
+            Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
+            ------------------------------------------------------------------------
             The parameters from the following sources are collected into a single
             list of name/value pairs:
 
