@@ -1,0 +1,6 @@
+*.py?
+*.so
+*.egg-info
+
+.idea/
+
