@@ -340,7 +340,8 @@ def oauth_get_normalized_query_string(query_params):
 
 def oauth_get_normalized_url(url):
     """
-    Normalizes a URL that will be used in the oauth signature.
+    Normalizes a URL that will be used in the oauth signature and parses
+    query parameters as well.
 
     :param url:
         The URL to normalize.
