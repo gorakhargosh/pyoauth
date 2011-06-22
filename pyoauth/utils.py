@@ -314,27 +314,27 @@ def oauth_get_normalized_query_string(query_params):
     """
     if not query_params:
         return ""
-    encoded = []
+    encoded_pairs = []
     for k, v in query_params.iteritems():
-        k = to_utf8(k)
-        if k == "oauth_signature":
+        # Keys are also percent-encoded according to OAuth spec.
+        k = oauth_escape(to_utf8(k))
+        if k == "oauth_signature": # TODO: or k == "realm": # from the Authentication header?
             continue
         elif isinstance(v, basestring):
-            encoded.append((oauth_escape(k), oauth_escape(v),))
+            encoded_pairs.append((k, oauth_escape(v),))
         else:
             try:
                 v = list(v)
             except TypeError, e:
                 assert "is not iterable" in str(e)
-                encoded.append((oauth_escape(k), oauth_escape(str(v)), ))
+                encoded_pairs.append((k, oauth_escape(str(v)), ))
             else:
-                encoded_k = oauth_escape(k)
                 for i in v:
                     if isinstance(i, basestring):
-                        encoded.append((encoded_k, oauth_escape(i), ))
+                        encoded_pairs.append((k, oauth_escape(i), ))
                     else:
-                        encoded.append((encoded_k, oauth_escape(str(i)), ))
-    query_string = "&".join(["%s=%s" % (k, v) for k, v in sorted(encoded)])
+                        encoded_pairs.append((k, oauth_escape(str(i)), ))
+    query_string = "&".join(["%s=%s" % (k, v) for k, v in sorted(encoded_pairs)])
     return query_string
 
 
