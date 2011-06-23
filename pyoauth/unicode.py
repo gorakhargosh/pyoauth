@@ -26,3 +26,8 @@ def to_utf8_if_string(s):
         return to_utf8(s)
     else:
         return s
+
+
+def is_unicode(s):
+    return isinstance(s, unicode)
+

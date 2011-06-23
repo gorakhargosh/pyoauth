@@ -18,78 +18,7 @@ try:
 except ImportError:
     from cgi import parse_qs
 
-from pyoauth.unicode import to_utf8
-
-def url_equals(url1, url2):
-    """
-    Compares two URLs and determines whether they are the equal.
-
-    :param url1:
-        First URL.
-    :param url2:
-        Second URL.
-    :returns:
-        ``True`` if equal; ``False`` otherwise.
-
-    Usage::
-
-        >>> url_equals("http://www.google.com/a", "http://www.google.com/a")
-        True
-        >>> url_equals("https://www.google.com/a", "http://www.google.com/a")
-        False
-        >>> url_equals("http://www.google.com/", "http://www.example.com/")
-        False
-        >>> url_equals("http://example.com:80/", "http://example.com:8000/")
-        False
-        >>> url_equals("http://user@example.com/", "http://user2@example.com.com/")
-        False
-        >>> url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment")
-        True
-        >>> url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment2")
-        False
-        >>> url_equals("http://www.google.com/request?a=b", "http://www.google.com/request?b=c")
-        False
-    """
-    u1 = urlparse.urlparse(url1)
-    u2 = urlparse.urlparse(url2)
-    return u1.scheme == u2.scheme and \
-        u1.path == u2.path and \
-        u1.netloc == u2.netloc and \
-        u1.fragment == u2.fragment and \
-        parse_qs(u1.query, keep_blank_values=True) == parse_qs(u2.query, keep_blank_values=True)
-
-
-def url_concat(url, query_params=None):
-    """
-    Concatenate URL and query parameters regardless of whether
-    the URL has existing query parameters.
-
-    :param url:
-        The URL to add the query parameters to.
-    :param query_params:
-        Query parameter dictionary.
-
-    >>> url = url_concat("http://www.example.com/foo?a=b", dict(c="d"))
-    >>> url_equals("http://www.example.com/foo?a=b&c=d", url)
-    True
-
-    >>> url = url_concat("http://www.example.com/", dict(c="d"))
-    >>> url_equals("http://www.example.com/?c=d", url)
-    True
-
-    >>> url = url_concat("http://www.example.com/", dict(c="d"))
-    >>> url_equals("http://www.example.com/?c=d", url)
-    True
-
-    >>> url = url_concat("http://www.example.com/foo?a=b", dict(a="d"))
-    >>> url_equals("http://www.example.com/foo?a=b&a=d", url)
-    True
-    """
-    if not query_params:
-        return url
-    if url[-1] not in ("?", "&"):
-        url += "&" if ("?" in url) else "?"
-    return url + urllib.urlencode(query_params)
+from pyoauth.unicode import to_utf8, is_unicode
 
 
 def oauth_generate_nonce():
@@ -148,15 +77,35 @@ def oauth_generate_timestamp():
     return str(int(time.time()))
 
 
+def oauth_parse_qs(qs):
+    """
+    Parses a query parameter string according to the OAuth spec.
+
+    Use only with OAuth query strings.
+
+    See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
+
+    Usage::
+
+        >>> qs = 'b5=%3D%253D&a3=a&c%40=&a2=r%20b' + '&' + 'c2&a3=2+q'
+        >>> q = oauth_parse_qs(qs)
+        >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
+    """
+    return parse_qs(qs.encode("utf-8"), keep_blank_values=True)
+
+
 def oauth_escape(val):
     """
     Escapes the value of a query string parameter according to the OAuth spec.
 
-    Use only in constructing the signature base string and the "Authorization"
+    Used ONLY in constructing the signature base string and the "Authorization"
     header field.
 
     :param val:
-        Query string parameter value to escape.
+        Query string parameter value to escape. If the value is a Unicode
+        string, it will be encoded to UTF-8. A byte string is considered
+        exactly that, a byte string and will not be UTF-8 encoded—however, it
+        will be percent-encoded.
     :returns:
         String representing escaped value as follows::
 
@@ -196,7 +145,7 @@ def oauth_escape(val):
             lowercase hexadecimal characters).
 
     """
-    if isinstance(val, unicode):
+    if is_unicode(val):
         val = val.encode("utf-8")
     return urllib.quote(val, safe="~")
 
@@ -477,7 +426,7 @@ def oauth_get_normalized_query_string(**query_params):
         >>> # Do not UTF-8 encode byte strings. Only Unicode strings should be UTF-8 encoded.
         >>> bytestring = '\x1d\t\xa8\x93\xf9\xc9A\xed\xae\x08\x18\xf5\xe8W\xbd\xd5'
         >>> q = oauth_get_normalized_query_string(bytestring=bytestring)
-        >>> parse_qs('bytestring=%1D%09%A8%93%F9%C9A%ED%AE%08%18%F5%E8W%BD%D5')['bytestring'][0] == bytestring
+        >>> oauth_parse_qs('bytestring=%1D%09%A8%93%F9%C9A%ED%AE%08%18%F5%E8W%BD%D5')['bytestring'][0] == bytestring
         True
     """
     if not query_params:
@@ -497,12 +446,13 @@ def oauth_get_normalized_query_string(**query_params):
                 assert "is not iterable" in str(e)
                 encoded_pairs.append((k, oauth_escape(str(v)), ))
             else:
+                # Loop over the sequence.
                 for i in v:
                     if isinstance(i, basestring):
                         encoded_pairs.append((k, oauth_escape(i), ))
                     else:
                         encoded_pairs.append((k, oauth_escape(str(i)), ))
-    query_string = "&".join(["%s=%s" % (k, v) for k, v in sorted(encoded_pairs)])
+    query_string = "&".join([k+"="+v for k, v in sorted(encoded_pairs)])
     return query_string
 
 
@@ -616,18 +566,4 @@ def oauth_get_normalized_url_and_query_params(url):
     query_params = oauth_parse_qs(query_string)
     return normalized_url, query_params
 
-
-def oauth_parse_qs(qs):
-    """
-    Parses a query parameter string according to the OAuth spec.
-
-    See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
-
-    Usage::
-
-        >>> qs = 'b5=%3D%253D&a3=a&c%40=&a2=r%20b' + '&' + 'c2&a3=2+q'
-        >>> q = oauth_parse_qs(qs)
-        >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
-    """
-    return parse_qs(qs.encode("utf-8"), keep_blank_values=True)
 
