@@ -3,10 +3,10 @@
 # OAuth utility functions.
 #
 # Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
+# Copyright (C) 2011 Rick Copeland
 
 
 import binascii
-import hashlib
 import hmac
 import time
 import urlparse
@@ -17,6 +17,21 @@ try:
     from urlparse import parse_qs
 except ImportError:
     from cgi import parse_qs
+
+try:
+    from Crypto.PublicKey import RSA
+    from Crypto.Util.number import long_to_bytes, bytes_to_long
+except ImportError:
+    RSA = None
+    def long_to_bytes(v):
+        raise NotImplementedError()
+    def bytes_to_long(v):
+        raise NotImplementedError()
+
+try:
+    from hashlib import sha1
+except ImportError:
+    import sha as sha1  # Deprecated
 
 from pyoauth.unicode import to_utf8, is_unicode
 
@@ -150,7 +165,7 @@ def oauth_escape(val):
     return urllib.quote(val, safe="~")
 
 
-def oauth_hmac_sha1_signature(consumer_secret, method, url, query_params=None, token_secret=None):
+def oauth_get_hmac_sha1_signature(consumer_secret, method, url, query_params=None, token_secret=None):
     """
     Calculates an HMAC-SHA1 signature for a base string.
 
@@ -196,17 +211,65 @@ def oauth_hmac_sha1_signature(consumer_secret, method, url, query_params=None, t
     """
     query_params = query_params or {}
     base_string = oauth_get_signature_base_string(url, method, **query_params)
-    key = oauth_plaintext_signature(consumer_secret, token_secret=token_secret)
-    hashed = hmac.new(key, base_string, hashlib.sha1)
+    key = _oauth_get_plaintext_signature(consumer_secret, token_secret=token_secret)
+    hashed = hmac.new(key, base_string, sha1)
     return binascii.b2a_base64(hashed.digest())[:-1]
 
 
-def oauth_plaintext_signature(consumer_secret, token_secret=None):
+def oauth_get_rsa_sha1_signature(consumer_secret, method, url, query_params=None, token_secret=None):
+    query_params = query_params or {}
+
+    if RSA is None:
+        raise NotImplementedError()
+
+    base_string = oauth_get_signature_base_string(url, method, **query_params)
+    key = RSA.importKey(consumer_secret)
+
+    digest = sha1(base_string).digest()
+    signature = key.sign(_pkcs1imify(key, digest), "")[0]
+    signature_bytes = long_to_bytes(signature)
+
+    return binascii.b2a_base64(signature_bytes)[:-1]
+
+
+def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, query_params=None, token_secret=None):
+    query_params = query_params or {}
+    if RSA is None:
+        raise NotImplementedError()
+    base_string = oauth_get_signature_base_string(url, method, **query_params)
+    key = RSA.importKey(consumer_secret)
+
+    digest = sha1(base_string).digest()
+    signature = bytes_to_long(binascii.a2b_base64(signature))
+    data = _pkcs1imify(key, digest)
+
+    return key.publickey().verify(data, (signature,))
+
+
+def _pkcs1imify(key, data):
+    """Adapted from paramiko.
+
+    turn a 20-byte SHA1 hash into a blob of data as large as the key's N,
+    using PKCS1's \"emsa-pkcs1-v1_5\" encoding.  totally bizarre.
+    """
+    SHA1_DIGESTINFO = '\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14'
+    size = len(long_to_bytes(key.n))
+    filler = '\xff' * (size - len(SHA1_DIGESTINFO) - len(data) - 3)
+    return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + data
+
+
+def oauth_get_plaintext_signature(consumer_secret, method, url, query_params=None, token_secret=None):
     """
     Calculates a PLAINTEXT signature for a base string.
 
     :param consumer_secret:
         Client (consumer) shared secret
+    :param method:
+        Base string HTTP method.
+    :param url:
+        Base string URL.
+    :param query_params:
+        Base string query parameters.
     :param token_secret:
         Token shared secret if available.
     :returns:
@@ -232,9 +295,29 @@ def oauth_plaintext_signature(consumer_secret, token_secret=None):
 
     Usage::
 
-        >>> a = oauth_plaintext_signature("abcd", None)
+        >>> a = oauth_get_plaintext_signature("abcd", None)
         >>> assert a == "abcd&"
-        >>> a = oauth_plaintext_signature("abcd", "47fba")
+        >>> a = oauth_get_plaintext_signature("abcd", "47fba")
+        >>> assert a == "abcd&47fba"
+    """
+    return _oauth_get_plaintext_signature(consumer_secret, token_secret=token_secret)
+
+
+def _oauth_get_plaintext_signature(consumer_secret, token_secret=None):
+    """
+    Calculates the PLAINTEXT signature.
+
+    :param consumer_secret:
+        Client (consumer) secret
+    :param token_secret:
+        Token secret if available.
+    :returns:
+        PLAINTEXT signature.
+    Usage::
+
+        >>> a = _oauth_get_plaintext_signature("abcd", None)
+        >>> assert a == "abcd&"
+        >>> a = _oauth_get_plaintext_signature("abcd", "47fba")
         >>> assert a == "abcd&47fba"
     """
     sig_elems = [oauth_escape(consumer_secret)]
