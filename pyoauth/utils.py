@@ -217,6 +217,61 @@ def oauth_get_hmac_sha1_signature(consumer_secret, method, url, query_params=Non
 
 
 def oauth_get_rsa_sha1_signature(consumer_secret, method, url, query_params=None, token_secret=None):
+    """
+    Calculates an RSA-SHA1 OAuth signature.
+
+    :param consumer_secret:
+        Client (consumer) secret
+    :param method:
+        Base string HTTP method.
+    :param url:
+        Base string URL.
+    :param query_params:
+        Base string query parameters.
+    :param token_secret:
+        Token secret if available.
+    :returns:
+        Signature as follows::
+
+            RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
+            -----------------------------------------------------------
+            The "RSA-SHA1" signature method uses the RSASSA-PKCS1-v1_5 signature
+            algorithm as defined in [RFC3447], Section 8.2 (also known as
+            PKCS#1), using SHA-1 as the hash function for EMSA-PKCS1-v1_5.  To
+            use this method, the client MUST have established client credentials
+            with the server that included its RSA public key (in a manner that is
+            beyond the scope of this specification).
+
+            The signature base string is signed using the client's RSA private
+            key per [RFC3447], Section 8.2.1:
+
+             S = RSASSA-PKCS1-V1_5-SIGN (K, M)
+
+            Where:
+
+            K     is set to the client's RSA private key,
+
+            M     is set to the value of the signature base string from
+                 Section 3.4.1.1, and
+
+            S     is the result signature used to set the value of the
+                 "oauth_signature" protocol parameter, after the result octet
+                 string is base64-encoded per [RFC2045] section 6.8.
+
+            The server verifies the signature per [RFC3447] section 8.2.2:
+
+             RSASSA-PKCS1-V1_5-VERIFY ((n, e), M, S)
+
+            Where:
+
+            (n, e) is set to the client's RSA public key,
+
+            M      is set to the value of the signature base string from
+                  Section 3.4.1.1, and
+
+            S      is set to the octet string value of the "oauth_signature"
+                  protocol parameter received from the client.
+    """
     query_params = query_params or {}
 
     if RSA is None:
@@ -230,13 +285,33 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, query_params=None
 
     base_string = oauth_get_signature_base_string(url, method, query_params)
     digest = sha1(base_string).digest()
-    signature = key.sign(_pkcs1imify(key, digest), "")[0]
+    signature = key.sign(_pkcs1_v1_5_encode(key, digest), "")[0]
     signature_bytes = long_to_bytes(signature)
 
     return binascii.b2a_base64(signature_bytes)[:-1]
 
 
 def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, query_params=None, token_secret=None):
+    """
+    Verifies a RSA-SHA1 OAuth signature.
+
+    :author:
+        Rick Copeland <rcopeland@geek.net>
+    :param signature:
+        RSA-SHA1 OAuth signature.
+    :param consumer_secret:
+        Client (consumer) secret
+    :param method:
+        Base string HTTP method.
+    :param url:
+        Base string URL.
+    :param query_params:
+        Base string query parameters.
+    :param token_secret:
+        Token secret if available.
+    :returns:
+        ``True`` if verified to be correct; ``False`` otherwise.
+    """
     query_params = query_params or {}
 
     if RSA is None:
@@ -251,21 +326,32 @@ def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, quer
     base_string = oauth_get_signature_base_string(url, method, query_params)
     digest = sha1(base_string).digest()
     signature = bytes_to_long(binascii.a2b_base64(signature))
-    data = _pkcs1imify(key, digest)
+    data = _pkcs1_v1_5_encode(key, digest)
 
     return key.publickey().verify(data, (signature,))
 
 
-def _pkcs1imify(key, data):
-    """Adapted from paramiko.
+def _pkcs1_v1_5_encode(rsa_key, sha1_digest):
+    """
+    Encodes a SHA1 digest using PKCS1's emsa-pkcs1-v1_5 encoding.
 
-    turn a 20-byte SHA1 hash into a blob of data as large as the key's N,
-    using PKCS1's \"emsa-pkcs1-v1_5\" encoding.  totally bizarre.
+    Adapted from paramiko.
+
+    :author:
+        Rick Copeland <rcopeland@geek.net>
+
+    :param rsa_key:
+        RSA Key.
+    :param sha1_digest:
+        20-byte SHA1 digest.
+    :returns:
+        A blob of data as large as the key's N, using PKCS1's
+        "emsa-pkcs1-v1_5" encoding.
     """
     SHA1_DIGESTINFO = '\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14'
-    size = len(long_to_bytes(key.n))
-    filler = '\xff' * (size - len(SHA1_DIGESTINFO) - len(data) - 3)
-    return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + data
+    size = len(long_to_bytes(rsa_key.n))
+    filler = '\xff' * (size - len(SHA1_DIGESTINFO) - len(sha1_digest) - 3)
+    return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + sha1_digest
 
 
 def oauth_get_plaintext_signature(consumer_secret, method, url, query_params=None, token_secret=None):
