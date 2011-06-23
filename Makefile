@@ -24,7 +24,7 @@ dist: clean
 build: doc
 	@bin/python setup.py build
 
-doc: develop
+doc: # develop
 	@make SPHINXBUILD=../bin/sphinx-build -C docs/ html
 
 upload-doc: doc
