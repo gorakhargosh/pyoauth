@@ -3,4 +3,8 @@
 *.egg-info
 
 .idea/
+bin/
+develop-eggs/
+parts/
+.installed.cfg
 
