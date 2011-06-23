@@ -9,4 +9,4 @@ parts/
 .installed.cfg
 .coverage
 htmlcov/
-
+docs/build/
