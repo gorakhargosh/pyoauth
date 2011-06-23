@@ -1,6 +1,6 @@
 RM = rm -rf
 
-.PHONY: all
+.PHONY: all clean distclean develop test upload-doc view-doc doc build dist release auto submodules
 
 all: build
 
