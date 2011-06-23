@@ -38,8 +38,8 @@ test:
 	@bin/python-tests tests/run_tests.py
 	@bin/coverage html
 
-auto: scripts/nosy.py
-	@bin/python scripts/nosy.py .
+auto: tools/nosy.py
+	@bin/python tools/nosy.py .
 
 # Development environment targets and dependencies.
 develop: submodules bin/python
@@ -48,7 +48,7 @@ submodules:
 	@git submodule update --init --recursive
 
 bin/buildout: buildout.cfg setup.py
-	@python scripts/bootstrap.py --distribute
+	@python tools/bootstrap.py --distribute
 
 bin/python: bin/buildout
 	@bin/buildout
