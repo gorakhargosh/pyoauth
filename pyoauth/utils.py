@@ -13,6 +13,7 @@ import time
 import urlparse
 import urllib
 import uuid
+import re
 
 try:
     from urlparse import parse_qs
@@ -173,6 +174,12 @@ def oauth_escape(val):
     if is_unicode(val):
         val = val.encode("utf-8")
     return urllib.quote(val, safe="~")
+
+
+def oauth_unescape(val):
+    if is_unicode(val):
+        val = val.encode("utf-8")
+    return urllib.unquote(val.replace('+', ' '))
 
 
 def oauth_get_hmac_sha1_signature(consumer_secret, method, url, query_params=None, token_secret=None):
@@ -773,3 +780,122 @@ def oauth_get_normalized_url_and_query_params(url):
     normalized_url = scheme.lower() + "://" + netloc.lower() + path
     query_params = oauth_parse_qs(query_string)
     return normalized_url, query_params
+
+
+def oauth_parse_auth_header(header_value):
+    """
+    Parses the OAuth Authorization header.
+
+    :param header_value:
+        Header value.
+    :returns:
+        Dictionary of parameter name value pairs.
+    """
+    d = {}
+    for name, value in _oauth_parse_auth_header_l(header_value):
+        if name in d:
+            d[name].append(value)
+        else:
+            d[name] = [value]
+    return d
+
+
+def _oauth_parse_auth_header_l(header_value):
+    """
+    Parses the OAuth Authorization header.
+
+    :param header_value:
+        Header value.
+    :returns:
+        List of parameter name value pairs::
+
+            Protocol parameters can be transmitted using the HTTP "Authorization"
+            header field as defined by [RFC2617] with the auth-scheme name set to
+            "OAuth" (case insensitive).
+
+            For example:
+
+             Authorization: OAuth realm="Example",
+                oauth_consumer_key="0685bd9184jfhq22",
+                oauth_token="ad180jjd733klru7",
+                oauth_signature_method="HMAC-SHA1",
+                oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",
+                oauth_timestamp="137131200",
+                oauth_nonce="4572616e48616d6d65724c61686176",
+                oauth_version="1.0"
+
+            Protocol parameters SHALL be included in the "Authorization" header
+            field as follows:
+
+            1.  Parameter names and values are encoded per Parameter Encoding
+               (Section 3.6).
+
+            2.  Each parameter's name is immediately followed by an "=" character
+               (ASCII code 61), a '"' character (ASCII code 34), the parameter
+               value (MAY be empty), and another '"' character (ASCII code 34).
+
+            3.  Parameters are separated by a "," character (ASCII code 44) and
+               OPTIONAL linear whitespace per [RFC2617].
+
+            4.  The OPTIONAL "realm" parameter MAY be added and interpreted per
+               [RFC2617] section 1.2.
+
+            Servers MAY indicate their support for the "OAuth" auth-scheme by
+            returning the HTTP "WWW-Authenticate" response header field upon
+            client requests for protected resources.  As per [RFC2617], such a
+            response MAY include additional HTTP "WWW-Authenticate" header
+            fields:
+
+            For example:
+
+             WWW-Authenticate: OAuth realm="http://server.example.com/"
+
+            The realm parameter defines a protection realm per [RFC2617], Section
+            1.2.
+    """
+    # Remove the auth-scheme from the value.
+    header_value = re.sub("(^OAuth[\s]+)", "", to_utf8(header_value).strip(), 1, re.IGNORECASE)
+
+    pairs = [param_pair.strip() for param_pair in header_value.split(",")]
+    decoded_pairs = []
+    for param in pairs:
+        if not param:
+            continue
+        nv = param.split("=", 1)
+        if len(nv) != 2:
+            raise ValueError("bad parameter field: %r" % (param, ))
+        name, value = nv[0].strip(), nv[1].strip()
+        if len(value) < 2:
+            raise ValueError("bad parameter value: %r -- missing quotes?" % (param, ))
+        if value[0] != '"' or value[-1] != '"':
+            raise ValueError("missing quotes around parameter value: %r -- values must be quoted using (\")" % (param, ))
+
+        # We only need to remove a single pair of quotes. Do not use str.strip('"').
+        # We need to be able to detect problems with the values too.
+        value = value[1:-1]
+        name = oauth_unescape(name)
+        if name != "realm":
+            # The realm parameter value is a simple quoted string.
+            # It is neither percent-encoded nor percent-decoded in OAuth.
+            value = oauth_unescape(value)
+        decoded_pairs.append((name, value))
+    return decoded_pairs
+
+
+'''
+    for name, value in pairs:
+        name = oauth_unescape(name.strip())
+        value = value.strip()
+        if value:
+            if len(value) > 2:
+                if name == "realm":
+                    value = value.strip('"')
+                else:
+                    value = oauth_unescape(value.strip('"'))
+                decoded_pairs.append((name, value))
+            else:
+                raise ValueError("Invalid value found in OAuth Authorization header.")
+        else:
+            raise ValueError("Invalid value found in OAuth Authorization header.")
+    return decoded_pairs
+'''
