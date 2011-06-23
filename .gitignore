@@ -10,3 +10,4 @@ parts/
 .coverage
 htmlcov/
 docs/build/
+build/
