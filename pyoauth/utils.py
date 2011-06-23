@@ -95,21 +95,21 @@ def oauth_generate_nonce():
     return binascii.b2a_hex(uuid.uuid4().bytes)
 
 
-def oauth_generate_verifier(length=8):
+def oauth_generate_verification_code(length=8):
     """
-    Calculates an OAuth verifier code.
+    Calculates an OAuth verification code.
 
-    The verifier code will be displayed by the server if a callback URL
+    The verification code will be displayed by the server if a callback URL
     is not provided by the client. The resource owner (the end-user) may
-    need to enter this verifier code on a limited device. Therefore,
+    need to enter this verification code on a limited device. Therefore,
     we limit the length of this code to 8 characters to keep it suitable
     for manual entry.
 
     :param length:
-        Length of the verifier code. Defaults to 8.
+        Length of the verification code. Defaults to 8.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth
-        verifier code.
+        verification code.
     """
     return oauth_generate_nonce()[:length]
 
