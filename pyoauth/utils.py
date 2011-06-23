@@ -220,7 +220,7 @@ def oauth_get_hmac_sha1_signature(consumer_secret, method, url, query_params=Non
                    per [RFC2045], Section 6.8.
     """
     query_params = query_params or {}
-    base_string = oauth_get_signature_base_string(url, method, query_params)
+    base_string = oauth_get_signature_base_string(method, url, query_params)
     key = _oauth_get_plaintext_signature(consumer_secret, token_secret=token_secret)
     hashed = hmac.new(key, base_string, sha1)
     return binascii.b2a_base64(hashed.digest())[:-1]
@@ -293,7 +293,7 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, query_params=None
     except AttributeError:
         key = RSA.importKey(consumer_secret)
 
-    base_string = oauth_get_signature_base_string(url, method, query_params)
+    base_string = oauth_get_signature_base_string(method, url, query_params)
     digest = sha1(base_string).digest()
     signature = key.sign(_pkcs1_v1_5_encode(key, digest), "")[0]
     signature_bytes = long_to_bytes(signature)
@@ -333,7 +333,7 @@ def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, quer
     except AttributeError:
         key = RSA.importKey(consumer_secret)
 
-    base_string = oauth_get_signature_base_string(url, method, query_params)
+    base_string = oauth_get_signature_base_string(method, url, query_params)
     digest = sha1(base_string).digest()
     signature = bytes_to_long(binascii.a2b_base64(signature))
     data = _pkcs1_v1_5_encode(key, digest)
@@ -431,7 +431,7 @@ def _oauth_get_plaintext_signature(consumer_secret, token_secret=None):
     return "&".join(sig_elems)
 
 
-def oauth_get_signature_base_string(url, method, query_params):
+def oauth_get_signature_base_string(method, url, query_params):
     """
     Calculates a signature base string based on the URL, method, and
     query_parameters.
@@ -439,13 +439,13 @@ def oauth_get_signature_base_string(url, method, query_params):
     Any query parameter by the name "oauth_signature" will be excluded
     from the base string.
 
+    :param method:
+        HTTP request method.
     :param url:
         The URL. If this includes a query string, query parameters are first
         extracted and encoded as well. Query parameters in the URL are
         overridden by those found in the ``query_params`` argument to this
         function.
-    :param method:
-        HTTP request method.
     :param query_params:
         Query string parameters.
     :returns:
@@ -483,22 +483,31 @@ def oauth_get_signature_base_string(url, method, query_params):
 
     Usage::
 
-        >>> base_string = oauth_get_signature_base_string( \
+        >>> base_string = oauth_get_signature_base_string( "POST", \
                 "http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q", \
-                "POST", dict( \
-                oauth_consumer_key="9djdj82h48djs9d2", \
-                oauth_token="kkk9d7dh3k39sjv7", \
-                oauth_signature_method="HMAC-SHA1", \
-                oauth_timestamp="137131201", \
-                oauth_nonce="7d8f3e4a", \
-                oauth_signature="bYT5CMsGcbgUdFHObYMEfcx6bsw%3D"))
+                dict( \
+                    oauth_consumer_key="9djdj82h48djs9d2", \
+                    oauth_token="kkk9d7dh3k39sjv7", \
+                    oauth_signature_method="HMAC-SHA1", \
+                    oauth_timestamp="137131201", \
+                    oauth_nonce="7d8f3e4a", \
+                    oauth_signature="bYT5CMsGcbgUdFHObYMEfcx6bsw%3D"))
         >>> base_string == "POST&http%3A%2F%2Fexample.com%2Frequest&a2%3Dr%2520b%26a3%3D2%2520q%26a3%3Da%26b5%3D%253D%25253D%26c%2540%3D%26c2%3D%26oauth_consumer_key%3D9djdj82h48djs9d2%26oauth_nonce%3D7d8f3e4a%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131201%26oauth_token%3Dkkk9d7dh3k39sjv7"
         True
+
+        >>> oauth_get_signature_base_string("TYPO", "http://example.com/request", {})
+        Traceback (most recent call last):
+            ...
+        ValueError: Method must be one of the HTTP methods ('POST', 'PUT', 'GET', 'DELETE', 'OPTIONS', 'TRACE', 'HEAD', 'CONNECT', 'PATCH'): got `TYPO` instead
     """
+    allowed_methods = ("POST", "PUT", "GET", "DELETE", "OPTIONS", "TRACE", "HEAD", "CONNECT", "PATCH")
+    method_normalized = method.upper()
+    if method_normalized not in allowed_methods:
+        raise ValueError("Method must be one of the HTTP methods %s: got `%s` instead" % (allowed_methods, method))
     normalized_url, url_query_params = oauth_get_normalized_url_and_query_params(url)
     url_query_params.update(query_params)
     query_string = oauth_get_normalized_query_string(**url_query_params)
-    return "&".join(oauth_escape(e) for e in [method.upper(), normalized_url, query_string])
+    return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
 
 
 def oauth_get_normalized_query_string(**query_params):
@@ -620,7 +629,7 @@ def oauth_get_normalized_query_string(**query_params):
         >>> assert "aFlag=True&bFlag=False" == oauth_get_normalized_query_string(aFlag=True, bFlag=False)
 
         # Order
-        >>> assert "a=1&b=2&b=4&b8" == oauth_get_normalized_query_string(a=1, b=[2, 4, 8])
+        >>> assert "a=1&b=2&b=4&b=8" == oauth_get_normalized_query_string(a=1, b=[2, 4, 8])
 
         >>> # Do not UTF-8 encode byte strings. Only Unicode strings should be UTF-8 encoded.
         >>> bytestring = '\x1d\t\xa8\x93\xf9\xc9A\xed\xae\x08\x18\xf5\xe8W\xbd\xd5'
