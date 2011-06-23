@@ -542,66 +542,96 @@ def oauth_parse_qs(qs):
     return parse_qs(qs.encode("utf-8"), keep_blank_values=True)
 
 
-def oauth_hmac_sha1_signature(consumer, method, url, query_params=None, token=None):
+def oauth_hmac_sha1_signature(consumer_secret, method, url, query_params=None, token_secret=None):
     """
-    HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)
-    ------------------------------------------------------------
-    The "HMAC-SHA1" signature method uses the HMAC-SHA1 signature
-    algorithm as defined in [RFC2104]:
+    Calculates an HMAC-SHA1 signature for a base string.
 
-     digest = HMAC-SHA1 (key, text)
+    :param consumer_secret:
+        Consumer secret
+    :param method:
+        Base string HTTP method.
+    :param url:
+        Base string URL.
+    :param query_params:
+        Base string query parameters.
+    :param token_secret:
+        Token secret if available.
+    :returns:
+        Signature as follows::
 
-    The HMAC-SHA1 function variables are used in following way:
+            HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)
+            ------------------------------------------------------------
+            The "HMAC-SHA1" signature method uses the HMAC-SHA1 signature
+            algorithm as defined in [RFC2104]:
 
-    text    is set to the value of the signature base string from
-           Section 3.4.1.1.
+             digest = HMAC-SHA1 (key, text)
 
-    key     is set to the concatenated values of:
+            The HMAC-SHA1 function variables are used in following way:
 
-           1.  The client shared-secret, after being encoded
-               (Section 3.6).
+            text    is set to the value of the signature base string from
+                   Section 3.4.1.1.
 
-           2.  An "&" character (ASCII code 38), which MUST be included
-               even when either secret is empty.
+            key     is set to the concatenated values of:
 
-           3.  The token shared-secret, after being encoded
-               (Section 3.6).
+                   1.  The client shared-secret, after being encoded
+                       (Section 3.6).
 
-    digest  is used to set the value of the "oauth_signature" protocol
-           parameter, after the result octet string is base64-encoded
-           per [RFC2045], Section 6.8.
+                   2.  An "&" character (ASCII code 38), which MUST be included
+                       even when either secret is empty.
+
+                   3.  The token shared-secret, after being encoded
+                       (Section 3.6).
+
+            digest  is used to set the value of the "oauth_signature" protocol
+                   parameter, after the result octet string is base64-encoded
+                   per [RFC2045], Section 6.8.
     """
     query_params = query_params or {}
     base_string = oauth_get_signature_base_string(url, method, query_params)
 
-    key_elems = [oauth_escape(consumer.secret)]
-    key_elems.append(oauth_escape(token.secret) if token else "")
+    key_elems = [oauth_escape(consumer_secret)]
+    key_elems.append(oauth_escape(token_secret) if token_secret else "")
     key = "&".join(key_elems)
 
     hashed = hmac.new(key, base_string, hashlib.sha1)
     return binascii.b2a_base64(hashed.digest())[:-1]
 
 
-def oauth_plaintext_signature(consumer, method, url, query_params=None, token=None):
+def oauth_plaintext_signature(consumer_secret, method, url, query_params=None, token_secret=None):
     """
-    PLAINTEXT (http://tools.ietf.org/html/rfc5849#section-3.4.4)
-    ------------------------------------------------------------
-    The "PLAINTEXT" method does not employ a signature algorithm.  It
-    MUST be used with a transport-layer mechanism such as TLS or SSL (or
-    sent over a secure channel with equivalent protections).  It does not
-    utilize the signature base string or the "oauth_timestamp" and
-    "oauth_nonce" parameters.
+    Calculates a PLAINTEXT signature for a base string.
 
-    The "oauth_signature" protocol parameter is set to the concatenated
-    value of:
+    :param consumer_secret:
+        Consumer secret
+    :param method:
+        Base string HTTP method.
+    :param url:
+        Base string URL.
+    :param query_params:
+        Base string query parameters.
+    :param token_secret:
+        Token secret if available.
+    :returns:
+        Signature as follows::
 
-    1.  The client shared-secret, after being encoded (Section 3.6).
+            PLAINTEXT (http://tools.ietf.org/html/rfc5849#section-3.4.4)
+            ------------------------------------------------------------
+            The "PLAINTEXT" method does not employ a signature algorithm.  It
+            MUST be used with a transport-layer mechanism such as TLS or SSL (or
+            sent over a secure channel with equivalent protections).  It does not
+            utilize the signature base string or the "oauth_timestamp" and
+            "oauth_nonce" parameters.
 
-    2.  An "&" character (ASCII code 38), which MUST be included even
-       when either secret is empty.
+            The "oauth_signature" protocol parameter is set to the concatenated
+            value of:
 
-    3.  The token shared-secret, after being encoded (Section 3.6).
+            1.  The client shared-secret, after being encoded (Section 3.6).
+
+            2.  An "&" character (ASCII code 38), which MUST be included even
+               when either secret is empty.
+
+            3.  The token shared-secret, after being encoded (Section 3.6).
     """
-    sig_elems = [oauth_escape(consumer.secret)]
-    sig_elems.append(oauth_escape(token.secret) if token else "")
+    sig_elems = [oauth_escape(consumer_secret)]
+    sig_elems.append(oauth_escape(token_secret) if token_secret else "")
     return "&".join(sig_elems)
