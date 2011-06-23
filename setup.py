@@ -23,7 +23,10 @@ setup(
     platforms="any",
     packages=["pyoauth"],
     include_package_data=True,
-    install_requires=["httplib2 >=0.7.1"],
+    install_requires=[
+        "httplib2 >=0.7.1",
+        "PyCrypto >=2.3"
+    ],
     keywords=' '.join([
         "python",
         "oauth",
