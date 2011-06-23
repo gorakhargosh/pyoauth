@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # OAuth utility functions.
 #
+# Copyright (C) 2010 Rick Copeland <rcopeland@geek.net>
 # Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
-# Copyright (C) 2011 Rick Copeland
 
 
 import binascii
