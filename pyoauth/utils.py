@@ -116,6 +116,9 @@ def oauth_escape(val):
     """
     Escapes the value of a query string parameter according to the OAuth spec.
 
+    Use only in constructing the signature base string and the "Authorization"
+    header field.
+
     :param val:
         Query string parameter value to escape.
     :returns:
@@ -209,6 +212,8 @@ def oauth_get_signature_base_string(url, method, query_params):
             note that the server cannot verify the authenticity of the excluded
             request components without using additional protections such as SSL/
             TLS or other methods.
+
+            ...
     """
     normalized_url, url_query_params = oauth_get_normalized_url_and_query_params(url)
     url_query_params.update(query_params)
@@ -340,7 +345,7 @@ def oauth_get_normalized_query_string(query_params):
     for k, v in query_params.iteritems():
         # Keys are also percent-encoded according to OAuth spec.
         k = oauth_escape(to_utf8(k))
-        if k == "oauth_signature": # TODO: or k == "realm": # from the Authentication header?
+        if k == "oauth_signature": # TODO: or k == "realm": # from the Authorization header?
             continue
         elif isinstance(v, basestring):
             encoded_pairs.append((k, oauth_escape(v),))
