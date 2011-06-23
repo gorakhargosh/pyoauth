@@ -1,6 +1,6 @@
 from nose.tools import assert_equal
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_authorization_header, oauth_parse_qs, oauth_get_normalized_query_string
+from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string
 
 class TestLongToBytes:
     def test_long_to_bytes(self):
@@ -95,8 +95,8 @@ class TestOauthGetNormalizedUrlAndQueryParams:
 
 
 class TestOauthParseAuthorizationHeader:
-    def test_oauth_parse_authorization_header(self):
-        # assert_equal(expected, oauth_parse_authorization_header(header_value))
+    def test_oauth_parse_authorization_header_value(self):
+        # assert_equal(expected, oauth_parse_authorization_header_value(header_value))
         expected_value = {
             'realm': ['Examp%20le'],
             'oauth_nonce': ['4572616e48616d6d65724c61686176'],
@@ -107,7 +107,7 @@ class TestOauthParseAuthorizationHeader:
             'oauth_token': ['ad180jjd733klru7'], 'oauth_empty': [''],
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
         }
-        assert_equal(expected_value, oauth_parse_authorization_header('''
+        assert_equal(expected_value, oauth_parse_authorization_header_value('''
             OAuth
 
             realm="Examp%20le",

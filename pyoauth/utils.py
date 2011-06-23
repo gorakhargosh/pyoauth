@@ -791,7 +791,7 @@ def oauth_get_normalized_authorization_header_value(query_params, realm=None):
     s += ",\n    ".join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
 
-def oauth_parse_authorization_header(header_value):
+def oauth_parse_authorization_header_value(header_value):
     """
     Parses the OAuth Authorization header.
 
@@ -801,7 +801,7 @@ def oauth_parse_authorization_header(header_value):
         Dictionary of parameter name value pairs.
     """
     d = {}
-    for name, value in _oauth_parse_authorization_header_l(header_value):
+    for name, value in _oauth_parse_authorization_header_value_l(header_value):
         if name in d:
             d[name].append(value)
         else:
@@ -809,7 +809,7 @@ def oauth_parse_authorization_header(header_value):
     return d
 
 
-def _oauth_parse_authorization_header_l(header_value):
+def _oauth_parse_authorization_header_value_l(header_value):
     """
     Parses the OAuth Authorization header.
 
