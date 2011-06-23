@@ -210,7 +210,7 @@ def oauth_get_hmac_sha1_signature(consumer_secret, method, url, query_params=Non
                    per [RFC2045], Section 6.8.
     """
     query_params = query_params or {}
-    base_string = oauth_get_signature_base_string(url, method, **query_params)
+    base_string = oauth_get_signature_base_string(url, method, query_params)
     key = _oauth_get_plaintext_signature(consumer_secret, token_secret=token_secret)
     hashed = hmac.new(key, base_string, sha1)
     return binascii.b2a_base64(hashed.digest())[:-1]
@@ -222,7 +222,7 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, query_params=None
     if RSA is None:
         raise NotImplementedError()
 
-    base_string = oauth_get_signature_base_string(url, method, **query_params)
+    base_string = oauth_get_signature_base_string(url, method, query_params)
 
     try:
         getattr(consumer_secret, "sign")
@@ -241,7 +241,7 @@ def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, quer
     query_params = query_params or {}
     if RSA is None:
         raise NotImplementedError()
-    base_string = oauth_get_signature_base_string(url, method, **query_params)
+    base_string = oauth_get_signature_base_string(url, method, query_params)
 
     try:
         getattr(consumer_secret, "publickey")
@@ -305,9 +305,9 @@ def oauth_get_plaintext_signature(consumer_secret, method, url, query_params=Non
 
     Usage::
 
-        >>> a = oauth_get_plaintext_signature("abcd", None)
+        >>> a = oauth_get_plaintext_signature("abcd", "POST", "http://example.com/request", {}, None)
         >>> assert a == "abcd&"
-        >>> a = oauth_get_plaintext_signature("abcd", "47fba")
+        >>> a = oauth_get_plaintext_signature("abcd", "POST", "http://example.com/request", {}, "47fba")
         >>> assert a == "abcd&47fba"
     """
     return _oauth_get_plaintext_signature(consumer_secret, token_secret=token_secret)
@@ -335,7 +335,7 @@ def _oauth_get_plaintext_signature(consumer_secret, token_secret=None):
     return "&".join(sig_elems)
 
 
-def oauth_get_signature_base_string(url, method, **query_params):
+def oauth_get_signature_base_string(url, method, query_params):
     """
     Calculates a signature base string based on the URL, method, and
     query_parameters.
@@ -389,13 +389,13 @@ def oauth_get_signature_base_string(url, method, **query_params):
 
         >>> base_string = oauth_get_signature_base_string( \
                 "http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q", \
-                "POST", \
+                "POST", dict( \
                 oauth_consumer_key="9djdj82h48djs9d2", \
                 oauth_token="kkk9d7dh3k39sjv7", \
                 oauth_signature_method="HMAC-SHA1", \
                 oauth_timestamp="137131201", \
                 oauth_nonce="7d8f3e4a", \
-                oauth_signature="bYT5CMsGcbgUdFHObYMEfcx6bsw%3D")
+                oauth_signature="bYT5CMsGcbgUdFHObYMEfcx6bsw%3D"))
         >>> base_string == "POST&http%3A%2F%2Fexample.com%2Frequest&a2%3Dr%2520b%26a3%3D2%2520q%26a3%3Da%26b5%3D%253D%25253D%26c%2540%3D%26c2%3D%26oauth_consumer_key%3D9djdj82h48djs9d2%26oauth_nonce%3D7d8f3e4a%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131201%26oauth_token%3Dkkk9d7dh3k39sjv7"
         True
     """
