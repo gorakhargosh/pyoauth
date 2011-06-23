@@ -53,6 +53,9 @@ def oauth_generate_nonce():
             channel.  The nonce value MUST be unique across all requests with the
             same timestamp, client credentials, and token combinations.
 
+    Usage::
+
+        >>> assert oauth_generate_nonce() != oauth_generate_nonce()
     """
     return binascii.b2a_hex(uuid.uuid4().bytes)
 
@@ -72,6 +75,10 @@ def oauth_generate_verification_code(length=8):
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth
         verification code.
+
+    Usage::
+        >>> assert oauth_generate_verification_code() != oauth_generate_verification_code()
+        >>> assert len(oauth_generate_verification_code(10)) == 10
     """
     return oauth_generate_nonce()[:length]
 
@@ -89,6 +96,9 @@ def oauth_generate_timestamp():
             specified by the server's documentation, the timestamp is expressed
             in the number of seconds since January 1, 1970 00:00:00 GMT.
 
+    Usage::
+
+        >>> assert int(oauth_generate_timestamp()) > 0
     """
     return str(int(time.time()))
 
@@ -159,7 +169,6 @@ def oauth_escape(val):
             It MAY be different from the percent-encoding functions provided by
             web-development frameworks (e.g., encode different characters, use
             lowercase hexadecimal characters).
-
     """
     if is_unicode(val):
         val = val.encode("utf-8")
@@ -604,6 +613,10 @@ def oauth_get_normalized_query_string(**query_params):
                 'c2': [''], \
             })
         >>> assert qs == "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
+
+        >>> assert "" == oauth_get_normalized_query_string()
+        >>> assert "a=5" == oauth_get_normalized_query_string(a=5)
+        >>> assert "a=5&a=8" == oauth_get_normalized_query_string(a=[5, 8])
 
         >>> # Do not UTF-8 encode byte strings. Only Unicode strings should be UTF-8 encoded.
         >>> bytestring = '\x1d\t\xa8\x93\xf9\xc9A\xed\xae\x08\x18\xf5\xe8W\xbd\xd5'
