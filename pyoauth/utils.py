@@ -638,13 +638,19 @@ def oauth_get_normalized_query_string(**query_params):
         # Order
         >>> assert "a=1&b=2&b=4&b=8" == oauth_get_normalized_query_string(b=[8, 2, 4], a=1)
     """
+    encoded_pairs = _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=("oauth_signature", "realm"))
+    query_string = "&".join([k+"="+v for k, v in encoded_pairs])
+    return query_string
+
+
+def _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=None):
     if not query_params:
         return ""
     encoded_pairs = []
     for k, v in query_params.iteritems():
         # Keys are also percent-encoded according to OAuth spec.
         k = oauth_escape(to_utf8(k))
-        if k in ("oauth_signature", "realm"):
+        if ignored_names and k in ignored_names:
             continue
         elif isinstance(v, basestring):
             encoded_pairs.append((k, oauth_escape(v),))
@@ -661,8 +667,8 @@ def oauth_get_normalized_query_string(**query_params):
                         encoded_pairs.append((k, oauth_escape(i), ))
                     else:
                         encoded_pairs.append((k, oauth_escape(str(i)), ))
-    query_string = "&".join([k+"="+v for k, v in sorted(encoded_pairs)])
-    return query_string
+    return sorted(encoded_pairs)
+
 
 
 def oauth_get_normalized_url_and_query_params(url):
@@ -775,6 +781,15 @@ def oauth_get_normalized_url_and_query_params(url):
     query_params = oauth_parse_qs(query_string)
     return normalized_url, query_params
 
+
+def oauth_get_normalized_authorization_header_value(query_params, realm=None):
+    if realm:
+        s = 'OAuth realm="' + str(realm) + '",\n    '
+    else:
+        s = 'OAuth '
+    normalized_param_pairs = _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=("realm"))
+    s += ",\n    ".join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
+    return s
 
 def oauth_parse_authorization_header(header_value):
     """
