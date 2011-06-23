@@ -29,14 +29,27 @@ def url_equals(url1, url2):
         Second URL.
     :returns:
         ``True`` if equal; ``False`` otherwise.
+
+    Usage::
+
+        >>> url_equals("http://www.google.com/a", "http://www.google.com/a")
+        True
+        >>> url_equals("https://www.google.com/a", "http://www.google.com/a")
+        False
+        >>> url_equals("http://www.google.com/", "http://www.example.com/")
+        False
+        >>> url_equals("http://example.com:80/", "http://example.com:8000/")
+        False
+        >>> url_equals("http://user@example.com/", "http://user2@example.com.com/")
+        False
+        >>> url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment")
+        True
+        >>> url_equals("http://www.google.com/request?a=b", "http://www.google.com/request?b=c")
+        False
     """
     u1 = urlparse.urlparse(url1)
     u2 = urlparse.urlparse(url2)
-    return u1.hostname == u2.hostname and \
-        u1.password == u2.password and \
-        u1.port == u2.port and \
-        u1.username == u2.username and \
-        u1.scheme == u2.scheme and \
+    return u1.scheme == u2.scheme and \
         u1.path == u2.path and \
         u1.netloc == u2.netloc and \
         parse_qs(u1.query, keep_blank_values=True) == parse_qs(u2.query, keep_blank_values=True)
