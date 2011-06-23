@@ -223,7 +223,12 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, query_params=None
         raise NotImplementedError()
 
     base_string = oauth_get_signature_base_string(url, method, **query_params)
-    key = RSA.importKey(consumer_secret)
+
+    try:
+        getattr(consumer_secret, "sign")
+        key = consumer_secret
+    except AttributeError:
+        key = RSA.importKey(consumer_secret)
 
     digest = sha1(base_string).digest()
     signature = key.sign(_pkcs1imify(key, digest), "")[0]
@@ -237,7 +242,12 @@ def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, quer
     if RSA is None:
         raise NotImplementedError()
     base_string = oauth_get_signature_base_string(url, method, **query_params)
-    key = RSA.importKey(consumer_secret)
+
+    try:
+        getattr(consumer_secret, "publickey")
+        key = consumer_secret
+    except AttributeError:
+        key = RSA.importKey(consumer_secret)
 
     digest = sha1(base_string).digest()
     signature = bytes_to_long(binascii.a2b_base64(signature))
