@@ -565,5 +565,3 @@ def oauth_get_normalized_url_and_query_params(url):
     normalized_url = scheme.lower() + "://" + netloc.lower() + path
     query_params = oauth_parse_qs(query_string)
     return normalized_url, query_params
-
-
