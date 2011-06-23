@@ -150,11 +150,11 @@ def oauth_escape(val):
     return urllib.quote(val, safe="~")
 
 
-def oauth_hmac_sha1_signature(client_secret, method, url, query_params=None, token_secret=None):
+def oauth_hmac_sha1_signature(consumer_secret, method, url, query_params=None, token_secret=None):
     """
     Calculates an HMAC-SHA1 signature for a base string.
 
-    :param client_secret:
+    :param consumer_secret:
         Client (consumer) secret
     :param method:
         Base string HTTP method.
@@ -196,16 +196,16 @@ def oauth_hmac_sha1_signature(client_secret, method, url, query_params=None, tok
     """
     query_params = query_params or {}
     base_string = oauth_get_signature_base_string(url, method, **query_params)
-    key = oauth_plaintext_signature(client_secret, token_secret=token_secret)
+    key = oauth_plaintext_signature(consumer_secret, token_secret=token_secret)
     hashed = hmac.new(key, base_string, hashlib.sha1)
     return binascii.b2a_base64(hashed.digest())[:-1]
 
 
-def oauth_plaintext_signature(client_secret, token_secret=None):
+def oauth_plaintext_signature(consumer_secret, token_secret=None):
     """
     Calculates a PLAINTEXT signature for a base string.
 
-    :param client_secret:
+    :param consumer_secret:
         Client (consumer) shared secret
     :param token_secret:
         Token shared secret if available.
@@ -237,7 +237,7 @@ def oauth_plaintext_signature(client_secret, token_secret=None):
         >>> a = oauth_plaintext_signature("abcd", "47fba")
         >>> assert a == "abcd&47fba"
     """
-    sig_elems = [oauth_escape(client_secret)]
+    sig_elems = [oauth_escape(consumer_secret)]
     sig_elems.append(oauth_escape(token_secret) if token_secret else "")
     return "&".join(sig_elems)
 
@@ -435,7 +435,7 @@ def oauth_get_normalized_query_string(**query_params):
     for k, v in query_params.iteritems():
         # Keys are also percent-encoded according to OAuth spec.
         k = oauth_escape(to_utf8(k))
-        if k == "oauth_signature" or k == "OAuth realm":
+        if k == "oauth_signature" or k == "realm":
             continue
         elif isinstance(v, basestring):
             encoded_pairs.append((k, oauth_escape(v),))
