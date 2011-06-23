@@ -249,6 +249,21 @@ def oauth_get_signature_base_string(url, method, query_params):
             TLS or other methods.
 
             ...
+
+    Usage::
+
+        >>> base_string = oauth_get_signature_base_string( \
+                "http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q", \
+                "POST", \
+                dict( \
+                    oauth_consumer_key="9djdj82h48djs9d2", \
+                    oauth_token="kkk9d7dh3k39sjv7", \
+                    oauth_signature_method="HMAC-SHA1", \
+                    oauth_timestamp="137131201", \
+                    oauth_nonce="7d8f3e4a", \
+                    oauth_signature="bYT5CMsGcbgUdFHObYMEfcx6bsw%3D"))
+        >>> base_string == "POST&http%3A%2F%2Fexample.com%2Frequest&a2%3Dr%2520b%26a3%3D2%2520q%26a3%3Da%26b5%3D%253D%25253D%26c%2540%3D%26c2%3D%26oauth_consumer_key%3D9djdj82h48djs9d2%26oauth_nonce%3D7d8f3e4a%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131201%26oauth_token%3Dkkk9d7dh3k39sjv7"
+        True
     """
     normalized_url, url_query_params = oauth_get_normalized_url_and_query_params(url)
     url_query_params.update(query_params)
@@ -262,7 +277,8 @@ def oauth_get_normalized_query_string(query_params):
 
     :param query_params:
         Query string parameters. A query parameter by the name
-        "oauth_signature", if present, will be excluded from the query string.
+        "oauth_signature" or "OAuth realm", if present, will be excluded
+        from the query string.
     :returns:
         Normalized string of query parameters as follows::
 
@@ -378,7 +394,7 @@ def oauth_get_normalized_query_string(query_params):
     for k, v in query_params.iteritems():
         # Keys are also percent-encoded according to OAuth spec.
         k = oauth_escape(to_utf8(k))
-        if k == "oauth_signature": # TODO: or k == "realm": # from the Authorization header?
+        if k == "oauth_signature" or k == "OAuth realm":
             continue
         elif isinstance(v, basestring):
             encoded_pairs.append((k, oauth_escape(v),))
@@ -522,3 +538,4 @@ def oauth_parse_qs(qs):
         >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
     """
     return parse_qs(qs.encode("utf-8"), keep_blank_values=True)
+
