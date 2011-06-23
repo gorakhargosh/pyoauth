@@ -1,6 +1,6 @@
 from nose.tools import assert_equal
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_auth_header
+from pyoauth.utils import oauth_parse_auth_header, oauth_parse_qs, oauth_get_normalized_query_string
 
 class TestLongToBytes:
     def test_long_to_bytes(self):
@@ -81,9 +81,11 @@ class TestOauthGetSignatureBaseString:
 
 
 class TestOauthGetNormalizedQueryString:
-    def test_oauth_get_normalized_query_string(self):
-        # assert_equal(expected, oauth_get_normalized_query_string(**query_params))
-        raise SkipTest # TODO: implement your test here
+    def test_bytestrings_are_not_utf8_encoded(self):
+        # Do not UTF-8 encode byte strings. Only Unicode strings should be UTF-8 encoded.
+        bytestring = '\x1d\t\xa8\x93\xf9\xc9A\xed\xae\x08\x18\xf5\xe8W\xbd\xd5'
+        q = oauth_get_normalized_query_string(bytestring=bytestring)
+        assert_equal(oauth_parse_qs(q)['bytestring'][0], bytestring)
 
 
 class TestOauthGetNormalizedUrlAndQueryParams:

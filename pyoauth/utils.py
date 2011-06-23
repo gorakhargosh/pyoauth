@@ -637,12 +637,6 @@ def oauth_get_normalized_query_string(**query_params):
 
         # Order
         >>> assert "a=1&b=2&b=4&b=8" == oauth_get_normalized_query_string(b=[8, 2, 4], a=1)
-
-        >>> # Do not UTF-8 encode byte strings. Only Unicode strings should be UTF-8 encoded.
-        >>> bytestring = '\x1d\t\xa8\x93\xf9\xc9A\xed\xae\x08\x18\xf5\xe8W\xbd\xd5'
-        >>> q = oauth_get_normalized_query_string(bytestring=bytestring)
-        >>> oauth_parse_qs('bytestring=%1D%09%A8%93%F9%C9A%ED%AE%08%18%F5%E8W%BD%D5')['bytestring'][0] == bytestring
-        True
     """
     if not query_params:
         return ""
