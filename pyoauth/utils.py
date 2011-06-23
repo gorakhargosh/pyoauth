@@ -507,6 +507,8 @@ def oauth_get_normalized_query_string(**query_params):
                 'a3': ['a', '2 q'], \
                 'c@': [''], \
                 'a2': ['r b'], \
+                'oauth_signature': 'ja87asdkhasd', \
+                'realm': 'http://example.com', \
                 'oauth_consumer_key': '9djdj82h48djs9d2', \
                 'oauth_token': 'kkk9d7dh3k39sjv7', \
                 'oauth_signature_method': 'HMAC-SHA1', \
@@ -528,7 +530,7 @@ def oauth_get_normalized_query_string(**query_params):
     for k, v in query_params.iteritems():
         # Keys are also percent-encoded according to OAuth spec.
         k = oauth_escape(to_utf8(k))
-        if k == "oauth_signature" or k == "realm":
+        if k in ("oauth_signature", "realm"):
             continue
         elif isinstance(v, basestring):
             encoded_pairs.append((k, oauth_escape(v),))
