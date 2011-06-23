@@ -880,22 +880,3 @@ def _oauth_parse_auth_header_l(header_value):
             value = oauth_unescape(value)
         decoded_pairs.append((name, value))
     return decoded_pairs
-
-
-'''
-    for name, value in pairs:
-        name = oauth_unescape(name.strip())
-        value = value.strip()
-        if value:
-            if len(value) > 2:
-                if name == "realm":
-                    value = value.strip('"')
-                else:
-                    value = oauth_unescape(value.strip('"'))
-                decoded_pairs.append((name, value))
-            else:
-                raise ValueError("Invalid value found in OAuth Authorization header.")
-        else:
-            raise ValueError("Invalid value found in OAuth Authorization header.")
-    return decoded_pairs
-'''
