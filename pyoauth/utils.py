@@ -253,9 +253,7 @@ def oauth_get_signature_base_string(url, method, query_params):
     normalized_url, url_query_params = oauth_get_normalized_url_and_query_params(url)
     url_query_params.update(query_params)
     query_string = oauth_get_normalized_query_string(url_query_params)
-    base_elems = [method.upper(), normalized_url, query_string]
-    base_string = "&".join(oauth_escape(e) for e in base_elems)
-    return base_string
+    return "&".join(oauth_escape(e) for e in [method.upper(), normalized_url, query_string])
 
 
 def oauth_get_normalized_query_string(query_params):
