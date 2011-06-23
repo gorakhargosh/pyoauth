@@ -44,6 +44,8 @@ def url_equals(url1, url2):
         False
         >>> url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment")
         True
+        >>> url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment2")
+        False
         >>> url_equals("http://www.google.com/request?a=b", "http://www.google.com/request?b=c")
         False
     """
@@ -52,6 +54,7 @@ def url_equals(url1, url2):
     return u1.scheme == u2.scheme and \
         u1.path == u2.path and \
         u1.netloc == u2.netloc and \
+        u1.fragment == u2.fragment and \
         parse_qs(u1.query, keep_blank_values=True) == parse_qs(u2.query, keep_blank_values=True)
 
 
