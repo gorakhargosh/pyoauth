@@ -147,10 +147,50 @@ class Test_oauth_escape(object):
             assert_equal(oauth_escape(char)[0], "%", "Character not percent-encoded.")
 
 class Test_oauth_unescape(object):
-    #def test_unicode_input_encoded_to_utf8(self):
-    #    assert_equal(oauth_unescape("%FF%FE%E5%00%E9%00%EE%00%F8%00%FC%00"),
-    #                 u'åéîøü'.encode("utf-16"))
-    pass
+    _unsafe_characters = [" ",
+                       ":",
+                       "!",
+                       "@",
+                       "#",
+                       "$",
+                       "%",
+                       "^",
+                       "&",
+                       "*",
+                       "(",
+                       ")",
+                       "+",
+                       "{",
+                       "}",
+                       "[",
+                       "]",
+                       "|",
+                       "\\",
+                       ":",
+                       ";",
+                       '"',
+                       "'",
+                       ",",
+                       "<",
+                       ">",
+                       "?",
+                       "/",
+                       "`",
+                       "´",
+                       u"å",
+                       ]
+
+    def test_percent_encoded_unicode_input(self):
+        assert_equal(oauth_unescape("%FF%FE%E5%00%E9%00%EE%00%F8%00%FC%00"),
+                     u'åéîøü'.encode("utf-16"))
+
+    def test_plus_is_treated_as_space_character(self):
+        assert_equal(oauth_unescape('+'), ' ', "Plus character in encoding is not treated as space character.")
+
+
+    def test_percent_encode_decode(self):
+        for char in self._unsafe_characters:
+            assert_equal(oauth_unescape(oauth_escape(char)), char, "Percent-encode-decode failed for char: %r" % char)
 
 
 class Test_oauth_get_normalized_authorization_header_value(object):

@@ -183,7 +183,7 @@ def oauth_unescape(val):
     See Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
 
     :param val:
-        Value to percent-decode. Value will be UTF-8 if it is a Unicode string.
+        Value to percent-decode. Value will be UTF-8 encoded if it is a Unicode string.
     :returns:
         Percent-decoded value.
     """
