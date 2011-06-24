@@ -655,7 +655,7 @@ def oauth_get_normalized_query_string(**query_params):
 
 def _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=None):
     """
-    Returns a sorted list of normalized query parameters according to
+    Returns a sorted list of query parameters normalized according to
     http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
 
     :param query_params:
