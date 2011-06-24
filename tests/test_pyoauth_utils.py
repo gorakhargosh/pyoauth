@@ -2,7 +2,7 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature
+from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature
 
 class Test_oauth_generate_nonce(object):
     def test_uniqueness(self):
@@ -382,6 +382,62 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
             query_params=self.query_params,
             token_secret=self.oauth_token_secret
         ))
+
+
+class Test_oauth_get_plaintext_signature(object):
+    def setUp(self):
+        self.oauth_signature_method = "PLAINTEXT"
+        self.oauth_token_key = "token test key"
+        self.oauth_token_secret = "token test secret"
+        self.oauth_consumer_key = "consumer test key"
+        self.oauth_consumer_secret = "consumer test secret"
+        self.query_params = dict(
+            oauth_version='1.0',
+            oauth_nonce="4572616e48616d6d65724c61686176",
+            oauth_timestamp="137131200",
+            oauth_token=self.oauth_token_key,
+            oauth_consumer_key=self.oauth_consumer_key,
+            oauth_signature_method=self.oauth_signature_method,
+            bar="blerg",
+            multi=["FOO", "BAR"],
+            foo=59
+        )
+
+    def test_when_both_secrets_present(self):
+        assert_equal(oauth_get_plaintext_signature(
+            consumer_secret=self.oauth_consumer_secret,
+            method="POST",
+            url="http://example.com/",
+            query_params=self.query_params,
+            token_secret=self.oauth_token_secret,
+        ), "consumer%20test%20secret&token%20test%20secret")
+
+    def test_when_consumer_secret_present(self):
+        assert_equal(oauth_get_plaintext_signature(
+            consumer_secret=self.oauth_consumer_secret,
+            method="POST",
+            url="http://example.com/",
+            query_params=self.query_params,
+            token_secret=None
+        ), "consumer%20test%20secret&")
+
+    def test_when_token_secret_present(self):
+        assert_equal(oauth_get_plaintext_signature(
+            consumer_secret="",
+            method="POST",
+            url="http://example.com/",
+            query_params=self.query_params,
+            token_secret=self.oauth_token_secret
+        ), "&token%20test%20secret")
+
+    def test_when_neither_secret_present(self):
+        assert_equal(oauth_get_plaintext_signature(
+            consumer_secret="",
+            method="POST",
+            url="http://example.com/",
+            query_params=self.query_params,
+            token_secret=None
+        ), "&")
 
 
 class Test_oauth_get_normalized_authorization_header_value(object):
