@@ -2,7 +2,7 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature
+from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature
 
 class Test_oauth_generate_nonce(object):
     def test_uniqueness(self):
@@ -308,7 +308,8 @@ class Test_oauth_get_hmac_sha1_signature(object):
         assert_equal(sig, ex["REQUEST_TOKEN_OAUTH_SIGNATURE"])
 
 
-class Test_oauth_get_rsa_sha1_signature(object):
+class Test_oauth_get_and_check_rsa_sha1_signature(object):
+    # Taken from https://github.com/rick446/python-oauth2/commit/a8bee2ad1a993faa1e13a04f14f1754489ad35bd
     def setUp(self):
         self.oauth_signature_method = "RSA-SHA1"
         self.oauth_token_key = "tok-test-key"
@@ -338,7 +339,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         )
         self.oauth_signature = "D2rdx9TiFajZbXChqMca6eaal8FxZhLMU1bdNX0glIN+BT4nrYGJqmIW92kWZYEYKHsVz7e67oDBEYlIIQMKWg=="
 
-    def test_valid_signature(self):
+    def test_get_signature(self):
         assert_equal(oauth_get_rsa_sha1_signature(
             consumer_secret=self.oauth_consumer_secret,
             method=self.http_method,
@@ -346,6 +347,16 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
             query_params=self.query_params,
             token_secret=self.oauth_token_secret
         ), self.oauth_signature)
+
+    def test_check_signature(self):
+        assert_true(oauth_check_rsa_sha1_signature(
+            signature=self.oauth_signature,
+            consumer_secret=self.oauth_consumer_secret,
+            method=self.http_method,
+            url=self.url,
+            query_params=self.query_params,
+            token_secret=self.oauth_token_secret
+        ))
 
 
 class Test_oauth_get_normalized_authorization_header_value(object):
