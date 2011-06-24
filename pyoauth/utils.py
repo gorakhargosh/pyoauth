@@ -177,6 +177,16 @@ def oauth_escape(val):
 
 
 def oauth_unescape(val):
+    """
+    Used to percent-decode OAuth parameters.
+
+    See Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
+
+    :param val:
+        Value to percent-decode. Value will be UTF-8 if it is a Unicode string.
+    :returns:
+        Percent-decoded value.
+    """
     if is_unicode(val):
         val = val.encode("utf-8")
     return urllib.unquote(val.replace('+', ' '))
@@ -644,6 +654,18 @@ def oauth_get_normalized_query_string(**query_params):
 
 
 def _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=None):
+    """
+    Returns a sorted list of normalized query parameters according to
+    http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
+
+    :param query_params:
+        Query parameters.
+    :param ignored_names:
+        Names included in this list will be excluded from the parameter list.
+    :returns:
+        Returns a sorted list of normalized query parameters according to
+        http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
+    """
     if not query_params:
         return ""
     encoded_pairs = []
@@ -783,6 +805,20 @@ def oauth_get_normalized_url_and_query_params(url):
 
 
 def oauth_get_normalized_authorization_header_value(query_params, realm=None):
+    """
+    Builds the Authorization header value.
+
+    See Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
+
+    :param query_params:
+        The OAuth query parameters that will be correctly encoded according
+        to the OAuth spec.
+    :param realm:
+        If specified, the realm is included into the Authorization header.
+        The realm is never percent-encoded according to the OAuth spec.
+    :returns:
+        A properly formatted Authorization header value.
+    """
     if realm:
         s = 'OAuth realm="' + str(realm) + '",\n    '
     else:
@@ -791,33 +827,20 @@ def oauth_get_normalized_authorization_header_value(query_params, realm=None):
     s += ",\n    ".join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
 
+
 def oauth_parse_authorization_header_value(header_value):
     """
     Parses the OAuth Authorization header.
 
-    :param header_value:
-        Header value.
-    :returns:
-        Dictionary of parameter name value pairs.
-    """
-    d = {}
-    for name, value in _oauth_parse_authorization_header_value_l(header_value):
-        if name in d:
-            d[name].append(value)
-        else:
-            d[name] = [value]
-    return d
-
-
-def _oauth_parse_authorization_header_value_l(header_value):
-    """
-    Parses the OAuth Authorization header.
+    See Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
 
     :param header_value:
         Header value.
     :returns:
-        List of parameter name value pairs::
+        Dictionary of parameter name value pairs as follows::
 
+            Authorization Header (http://tools.ietf.org/html/rfc5849#section-3.5.1)
+            -----------------------------------------------------------------------
             Protocol parameters can be transmitted using the HTTP "Authorization"
             header field as defined by [RFC2617] with the auth-scheme name set to
             "OAuth" (case insensitive).
@@ -861,6 +884,27 @@ def _oauth_parse_authorization_header_value_l(header_value):
 
             The realm parameter defines a protection realm per [RFC2617], Section
             1.2.
+    """
+    d = {}
+    for name, value in _oauth_parse_authorization_header_value_l(header_value):
+        if name in d:
+            d[name].append(value)
+        else:
+            d[name] = [value]
+    return d
+
+
+def _oauth_parse_authorization_header_value_l(header_value):
+    """
+    Parses the OAuth Authorization header preserving the order of the
+    parameters as in the header value.
+
+    See Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
+
+    :param header_value:
+        Header value.
+    :returns:
+        list of parameter name value pairs in the order in which they appeared::
     """
     # Remove the auth-scheme from the value.
     header_value = re.sub("(^OAuth[\s]+)", "", to_utf8(header_value).strip(), 1, re.IGNORECASE)
