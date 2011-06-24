@@ -836,12 +836,14 @@ def oauth_get_normalized_authorization_header_value(query_params, realm=None):
     :returns:
         A properly formatted Authorization header value.
     """
+    indentation = " " * len("Authorization: ")
     if realm:
-        s = 'OAuth realm="' + str(realm) + '",\n               '
+        s = 'OAuth realm="' + str(realm) + '",\n' + indentation
     else:
         s = 'OAuth '
     normalized_param_pairs = _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=("realm"))
-    s += ",\n               ".join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
+    delimiter = ",\n" + indentation
+    s += delimiter.join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
 
 
