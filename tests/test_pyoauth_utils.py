@@ -441,20 +441,42 @@ class Test_oauth_get_plaintext_signature(object):
 
 
 class Test_oauth_get_signature_base_string(object):
+    def setUp(self):
+        self.query_params = dict(
+            oauth_consumer_key="9djdj82h48djs9d2",
+            oauth_token="kkk9d7dh3k39sjv7",
+            oauth_signature_method="HMAC-SHA1",
+            oauth_timestamp="137131201",
+            oauth_nonce="7d8f3e4a",
+            oauth_signature="bYT5CMsGcbgUdFHObYMEfcx6bsw%3D"
+        )
+
     def test_valid_base_string(self):
         base_string = oauth_get_signature_base_string( "POST",
                 "http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q",
-                dict(
-                    oauth_consumer_key="9djdj82h48djs9d2",
-                    oauth_token="kkk9d7dh3k39sjv7",
-                    oauth_signature_method="HMAC-SHA1",
-                    oauth_timestamp="137131201",
-                    oauth_nonce="7d8f3e4a",
-                    oauth_signature="bYT5CMsGcbgUdFHObYMEfcx6bsw%3D"))
+                self.query_params)
         assert_equal(base_string, "POST&http%3A%2F%2Fexample.com%2Frequest&a2%3Dr%2520b%26a3%3D2%2520q%26a3%3Da%26b5%3D%253D%25253D%26c%2540%3D%26c2%3D%26oauth_consumer_key%3D9djdj82h48djs9d2%26oauth_nonce%3D7d8f3e4a%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131201%26oauth_token%3Dkkk9d7dh3k39sjv7")
 
     def test_ValueError_when_invalid_http_method(self):
         assert_raises(ValueError, oauth_get_signature_base_string, "TypO", "http://example.com/request", {})
+
+    def test_ValueError_when_url_blank_or_None(self):
+        assert_raises(ValueError, oauth_get_signature_base_string, "POST", "", {})
+
+    def test_ValueError_when_query_params_is_not_dict(self):
+        assert_raises(ValueError, oauth_get_signature_base_string, "POST", "http://www.google.com/", None)
+
+    def test_base_string_does_not_contain_realm_or_oauth_signature(self):
+        # Ensure both are present in the query params as well as the URL.
+        args = {
+            "realm": "http://example.com",
+        }
+        args.update(self.query_params)
+        url = "http://example.com/request?oauth_signature=foobar&realm=something"
+        base_string = oauth_get_signature_base_string("POST", url, args)
+        assert_true("realm=" not in base_string)
+        assert_true("oauth_signature=" not in base_string)
+        
 
 class Test_oauth_get_normalized_authorization_header_value(object):
     def test_equality_and_realm(self):

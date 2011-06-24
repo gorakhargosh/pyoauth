@@ -500,8 +500,14 @@ def oauth_get_signature_base_string(method, url, query_params):
     method_normalized = method.upper()
     if method_normalized not in allowed_methods:
         raise ValueError("Method must be one of the HTTP methods %s: got `%s` instead" % (allowed_methods, method))
+    if not url:
+        raise ValueError("URL must be specified.")
+    if not isinstance(query_params, dict):
+        raise ValueError("Query parameters must be specified as a dictionary.")
+
     normalized_url, url_query_params = oauth_get_normalized_url_and_query_params(url)
     url_query_params.update(query_params)
+
     query_string = oauth_get_normalized_query_string(**url_query_params)
     return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
 
