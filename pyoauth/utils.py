@@ -56,10 +56,13 @@ except ImportError:
 from pyoauth.unicode import to_utf8, is_unicode
 
 
-def oauth_generate_nonce():
+def oauth_generate_nonce(length=-1):
     """
     Calculates an OAuth nonce.
 
+    :param length:
+        Length of the nonce to be returned.
+        Default -1, which means the entire nonce is returned.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth nonce
         as follows::
@@ -72,7 +75,7 @@ def oauth_generate_nonce():
             channel.  The nonce value MUST be unique across all requests with the
             same timestamp, client credentials, and token combinations.
     """
-    return binascii.b2a_hex(uuid.uuid4().bytes)
+    return binascii.b2a_hex(uuid.uuid4().bytes)[:length]
 
 
 def oauth_generate_verification_code(length=8):
@@ -91,7 +94,7 @@ def oauth_generate_verification_code(length=8):
         A string representation of a randomly-generated hexadecimal OAuth
         verification code.
     """
-    return oauth_generate_nonce()[:length]
+    return oauth_generate_nonce(length=length)
 
 
 def oauth_generate_timestamp():
