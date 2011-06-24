@@ -210,25 +210,101 @@ class Test_oauth_unescape(object):
 
 
 class Test_oauth_get_hmac_sha1_signature(object):
+
+    _EXAMPLES = {
+        'ex1.2': dict(
+            OAUTH_CONSUMER_KEY="dpf43f3p2l4k3l03",
+            OAUTH_CONSUMER_SECRET="kd94hf93k423kf44",
+
+            OAUTH_SIGNATURE_METHOD="HMAC-SHA1",
+
+            REQUEST_TOKEN_REALM="Photos",
+            REQUEST_TOKEN_METHOD="POST",
+            REQUEST_TOKEN_URL="https://photos.example.net/initiate",
+            REQUEST_TOKEN_OAUTH_TIMESTAMP="137131200",
+            REQUEST_TOKEN_OAUTH_NONCE="wIjqoS",
+            REQUEST_TOKEN_OAUTH_SIGNATURE="74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
+            REQUEST_TOKEN_OAUTH_CALLBACK="http://printer.example.com/ready",
+        )
+    }
     def test_valid_signature(self):
         # Example 1.2 in the RFC.
-        expected_oauth_signature=oauth_unescape("74KNZJeDHnMBp0EMJ9ZHt%2FXKycU%3D")
+        ex = self._EXAMPLES['ex1.2']
+        expected_oauth_signature=ex['REQUEST_TOKEN_OAUTH_SIGNATURE']
+        query_params = dict(
+                realm=ex["REQUEST_TOKEN_REALM"],
+                oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
+                oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
+                oauth_timestamp=ex["REQUEST_TOKEN_OAUTH_TIMESTAMP"],
+                oauth_nonce=ex["REQUEST_TOKEN_OAUTH_NONCE"],
+                oauth_callback=ex["REQUEST_TOKEN_OAUTH_CALLBACK"],
+                oauth_signature=ex["REQUEST_TOKEN_OAUTH_SIGNATURE"],
+            )
         assert_equal(oauth_get_hmac_sha1_signature(
-            consumer_secret="kd94hf93k423kf44",
-            method="POST",
-            url="https://photos.example.net/initiate",
-            query_params=dict(
-                #realm="Photos",
-                oauth_consumer_key="dpf43f3p2l4k3l03",
-                oauth_signature_method="HMAC-SHA1",
-                oauth_timestamp="137131200",
-                oauth_nonce="wIjqoS",
-                oauth_callback="http://printer.example.com/ready",
-                #oauth_signature="74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
-            ),
+            consumer_secret=ex["OAUTH_CONSUMER_SECRET"],
+            method=ex["REQUEST_TOKEN_METHOD"],
+            url=ex["REQUEST_TOKEN_URL"],
+            query_params=query_params,
             token_secret=None),
             expected_oauth_signature
         )
+
+    def test_signature_and_realm_are_ignored_from_query_params(self):
+        ex = self._EXAMPLES['ex1.2']
+        query_params_without_realm_and_signature = dict(
+                oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
+                oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
+                oauth_timestamp=ex["REQUEST_TOKEN_OAUTH_TIMESTAMP"],
+                oauth_nonce=ex["REQUEST_TOKEN_OAUTH_NONCE"],
+                oauth_callback=ex["REQUEST_TOKEN_OAUTH_CALLBACK"],
+            )
+        query_params = dict(
+            realm=ex["REQUEST_TOKEN_REALM"],
+            oauth_signature=ex["REQUEST_TOKEN_OAUTH_SIGNATURE"],
+        )
+        query_params.update(query_params_without_realm_and_signature)
+
+        consumer_secret = ex["OAUTH_CONSUMER_SECRET"]
+        method = ex["REQUEST_TOKEN_METHOD"]
+        url = ex["REQUEST_TOKEN_URL"]
+        token_secret = None
+        assert_equal(oauth_get_hmac_sha1_signature(
+            consumer_secret=consumer_secret,
+            method=method,
+            url=url,
+            query_params=query_params,
+            token_secret=token_secret
+        ), oauth_get_hmac_sha1_signature(
+            consumer_secret=consumer_secret,
+            method=method,
+            url=url,
+            query_params=query_params_without_realm_and_signature,
+            token_secret=token_secret
+        ))
+
+    def test_signature_and_realm_are_ignored_from_url_query_params(self):
+        ex = self._EXAMPLES['ex1.2']
+        query_params_without_realm_and_signature = dict(
+                oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
+                oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
+                oauth_timestamp=ex["REQUEST_TOKEN_OAUTH_TIMESTAMP"],
+                oauth_nonce=ex["REQUEST_TOKEN_OAUTH_NONCE"],
+                oauth_callback=ex["REQUEST_TOKEN_OAUTH_CALLBACK"],
+            )
+
+        consumer_secret = ex["OAUTH_CONSUMER_SECRET"]
+        method = ex["REQUEST_TOKEN_METHOD"]
+        url = ex["REQUEST_TOKEN_URL"] + "?oauth_signature=something&realm=whatever"
+        token_secret = None
+        sig = oauth_get_hmac_sha1_signature(
+            consumer_secret=consumer_secret,
+            method=method,
+            url=url,
+            query_params=query_params_without_realm_and_signature,
+            token_secret=token_secret
+        )
+        assert_equal(sig, ex["REQUEST_TOKEN_OAUTH_SIGNATURE"])
+
 
 
 class Test_oauth_get_normalized_authorization_header_value(object):
