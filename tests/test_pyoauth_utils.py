@@ -2,12 +2,19 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp
+from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature
 
 class Test_oauth_generate_nonce(object):
     def test_uniqueness(self):
         assert_not_equal(oauth_generate_nonce(), oauth_generate_nonce(),
                          "Nonce is not unique.")
+
+    def test_length(self):
+        default_length = 31
+        assert_equal(len(oauth_generate_nonce()), default_length,
+                     "Nonce length does not match default expected length of %d." % default_length)
+        assert_equal(len(oauth_generate_nonce(length=10)), 10,
+                     "Nonce length does not match expected length.")
 
     def test_is_string(self):
         assert_true(isinstance(oauth_generate_nonce(), str),
@@ -16,8 +23,9 @@ class Test_oauth_generate_nonce(object):
 
 class Test_oauth_generate_verification_code(object):
     def test_length(self):
-        assert_equal(len(oauth_generate_verification_code()), 8,
-                     "Verification code length does not match expected length.")
+        default_length = 8
+        assert_equal(len(oauth_generate_verification_code()), default_length,
+                     "Verification code length does not match default expected length of %d." % default_length)
         assert_equal(len(oauth_generate_verification_code(length=10)), 10,
                      "Verification code length does not match expected length.")
 
@@ -72,6 +80,7 @@ class Test_oauth_parse_qs(object):
 
 
 class Test_oauth_escape(object):
+    # TODO:
     #def test_unicode_input_encoded_to_utf8(self):
     #    assert_equal(oauth_escape(u'åéîøü'.encode('utf16')),
     #                 "%FF%FE%E5%00%E9%00%EE%00%F8%00%FC%00")
@@ -146,6 +155,12 @@ class Test_oauth_escape(object):
         for char in self._unsafe_characters:
             assert_equal(oauth_escape(char)[0], "%", "Character not percent-encoded.")
 
+
+    # TODO:
+    #def test_bytestrings_are_not_utf_8_encoded(self):
+    #    b = b'\x01s\x95\x8e|HL\xe4\x81\x93\x155\x99@\x8b\xe3'
+
+
 class Test_oauth_unescape(object):
     _unsafe_characters = [" ",
                        ":",
@@ -188,9 +203,32 @@ class Test_oauth_unescape(object):
         assert_equal(oauth_unescape('+'), ' ', "Plus character in encoding is not treated as space character.")
 
 
-    def test_percent_encode_decode(self):
-        for char in self._unsafe_characters:
-            assert_equal(oauth_unescape(oauth_escape(char)), char, "Percent-encode-decode failed for char: %r" % char)
+    # TODO:
+    #def test_percent_encode_decode(self):
+    #    for char in self._unsafe_characters:
+    #        assert_equal(oauth_unescape(oauth_escape(char)), char, "Percent-encode-decode failed for char: %r" % char)
+
+
+class Test_oauth_get_hmac_sha1_signature(object):
+    def test_valid_signature(self):
+        # Example 1.2 in the RFC.
+        expected_oauth_signature=oauth_unescape("74KNZJeDHnMBp0EMJ9ZHt%2FXKycU%3D")
+        assert_equal(oauth_get_hmac_sha1_signature(
+            consumer_secret="kd94hf93k423kf44",
+            method="POST",
+            url="https://photos.example.net/initiate",
+            query_params=dict(
+                #realm="Photos",
+                oauth_consumer_key="dpf43f3p2l4k3l03",
+                oauth_signature_method="HMAC-SHA1",
+                oauth_timestamp="137131200",
+                oauth_nonce="wIjqoS",
+                oauth_callback="http://printer.example.com/ready",
+                #oauth_signature="74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
+            ),
+            token_secret=None),
+            expected_oauth_signature
+        )
 
 
 class Test_oauth_get_normalized_authorization_header_value(object):
