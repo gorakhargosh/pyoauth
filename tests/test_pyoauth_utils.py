@@ -212,6 +212,7 @@ class Test_oauth_unescape(object):
 class Test_oauth_get_hmac_sha1_signature(object):
 
     _EXAMPLES = {
+        # Example 1.2 in the RFC.
         'ex1.2': dict(
             OAUTH_CONSUMER_KEY="dpf43f3p2l4k3l03",
             OAUTH_CONSUMER_SECRET="kd94hf93k423kf44",
@@ -228,7 +229,6 @@ class Test_oauth_get_hmac_sha1_signature(object):
         )
     }
     def test_valid_signature(self):
-        # Example 1.2 in the RFC.
         ex = self._EXAMPLES['ex1.2']
         expected_oauth_signature=ex['REQUEST_TOKEN_OAUTH_SIGNATURE']
         query_params = dict(
