@@ -2,7 +2,7 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature
+from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature
 
 class Test_oauth_generate_nonce(object):
     def test_uniqueness(self):
@@ -249,6 +249,7 @@ class Test_oauth_get_hmac_sha1_signature(object):
             expected_oauth_signature
         )
 
+    # TODO: Move these to the query string function.
     def test_signature_and_realm_are_ignored_from_query_params(self):
         ex = self._EXAMPLES['ex1.2']
         query_params_without_realm_and_signature = dict(
@@ -282,6 +283,7 @@ class Test_oauth_get_hmac_sha1_signature(object):
             token_secret=token_secret
         ))
 
+    # TODO: Move these to the query string function.
     def test_signature_and_realm_are_ignored_from_url_query_params(self):
         ex = self._EXAMPLES['ex1.2']
         query_params_without_realm_and_signature = dict(
@@ -305,6 +307,45 @@ class Test_oauth_get_hmac_sha1_signature(object):
         )
         assert_equal(sig, ex["REQUEST_TOKEN_OAUTH_SIGNATURE"])
 
+
+class Test_oauth_get_rsa_sha1_signature(object):
+    def setUp(self):
+        self.oauth_signature_method = "RSA-SHA1"
+        self.oauth_token_key = "tok-test-key"
+        self.oauth_token_secret = "tok-test-secret"
+        self.oauth_consumer_key = "con-test-key"
+        self.oauth_consumer_secret = '''-----BEGIN RSA PRIVATE KEY-----
+MIIBOgIBAAJBAM7B+5TJsc93ymBSFtC5DE1qDlqvwio0xDfS6bZQTfFiHLm8pHXg
+Atkm7QB6gvyRKm+a/G3qEbmBdz21Fw0RLJsCAwEAAQJAS68qnr5uPlnFVRj3jRQP
+8s6dzoiD9Ns38I9eSgR/Y5ozl8r/cClLeGWvDKfXvrxlsaMuqWLZ5KMtamaRS9Fl
+sQIhAPmOY+s5ZxsYtem+Uc2IUGexNoP/Ng7MPS3C+Q3L6K4nAiEA1Biv6i7TqAbx
+oHulPIXb2Z9JmO46aT81n9WnD1qyim0CIF9eN/cLf8iOH+7MqYxHHJsT0QaOgEUV
+bgfP68eG9kufAiEAtUSAHGp29HUyzxC9sNNKiVysnuqDu22NXBRSmjnOu6UCIEFZ
+nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
+-----END RSA PRIVATE KEY-----'''
+        self.http_method = "GET"
+        self.url = "http://sp.example.com/"
+        self.query_params = dict(
+            oauth_version='1.0',
+            oauth_nonce="4572616e48616d6d65724c61686176",
+            oauth_timestamp="137131200",
+            oauth_token=self.oauth_token_key,
+            oauth_consumer_key=self.oauth_consumer_key,
+            oauth_signature_method=self.oauth_signature_method,
+            bar="blerg",
+            multi=["FOO", "BAR"],
+            foo=59
+        )
+        self.oauth_signature = "D2rdx9TiFajZbXChqMca6eaal8FxZhLMU1bdNX0glIN+BT4nrYGJqmIW92kWZYEYKHsVz7e67oDBEYlIIQMKWg=="
+
+    def test_valid_signature(self):
+        assert_equal(oauth_get_rsa_sha1_signature(
+            consumer_secret=self.oauth_consumer_secret,
+            method=self.http_method,
+            url=self.url,
+            query_params=self.query_params,
+            token_secret=self.oauth_token_secret
+        ), self.oauth_signature)
 
 
 class Test_oauth_get_normalized_authorization_header_value(object):
