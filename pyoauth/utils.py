@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # OAuth utility functions.
 #
-# Copyright (C) 2007-2010 Leah Culver, Joe Stump, Mark Paschal, Vic Fryzel
 # Copyright (C) 2010 Rick Copeland <rcopeland@geek.net>
 # Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
 
@@ -690,7 +689,6 @@ def _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=None):
                     else:
                         encoded_pairs.append((k, oauth_escape(str(i)), ))
     return sorted(encoded_pairs)
-
 
 
 def oauth_get_normalized_url_and_query_params(url):
