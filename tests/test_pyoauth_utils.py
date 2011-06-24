@@ -75,6 +75,38 @@ class Test_oauth_escape(object):
     #def test_unicode_input_encoded_to_utf8(self):
     #    assert_equal(oauth_escape(u'åéîøü'.encode('utf16')),
     #                 "%FF%FE%E5%00%E9%00%EE%00%F8%00%FC%00")
+    _unsafe_characters = [" ",
+                       ":",
+                       "!",
+                       "@",
+                       "#",
+                       "$",
+                       "%",
+                       "^",
+                       "&",
+                       "*",
+                       "(",
+                       ")",
+                       "+",
+                       "{",
+                       "}",
+                       "[",
+                       "]",
+                       "|",
+                       "\\",
+                       ":",
+                       ";",
+                       '"',
+                       "'",
+                       ",",
+                       "<",
+                       ">",
+                       "?",
+                       "/",
+                       "`",
+                       "´",
+                       u"å",
+                       ]
 
     def test_safe_symbols_are_not_encoded(self):
         safe_symbols = ["-", ".", "_", "~"]
@@ -100,42 +132,19 @@ class Test_oauth_escape(object):
         assert_not_equal(oauth_escape(" "), "+")
         assert_equal(oauth_escape(" "), "%20")
 
-    def test_non_safe_characters_are_encoded(self):
-        test_characters = [" ",
-                           ":",
-                           "!",
-                           "@",
-                           "#",
-                           "$",
-                           "%",
-                           "^",
-                           "&",
-                           "*",
-                           "(",
-                           ")",
-                           "+",
-                           "{",
-                           "}",
-                           "[",
-                           "]",
-                           "|",
-                           "\\",
-                           ":",
-                           ";",
-                           '"',
-                           "'",
-                           ",",
-                           "<",
-                           ">",
-                           "?",
-                           "/",
-                           "`",
-                           "´",
-                           "å",
-                           ]
-        for char in test_characters:
+    def test_unsafe_characters_are_encoded(self):
+        for char in self._unsafe_characters:
             assert_not_equal(oauth_escape(char), char)
 
+    def test_character_encoding_is_uppercase(self):
+        for char in self._unsafe_characters:
+            for c in oauth_escape(char):
+                if c.isalpha():
+                    assert_true(c.isupper(), "Percent-encoding is not uppercase: %r for char: %r" % (c, char))
+
+    def test_percent_encoded(self):
+        for char in self._unsafe_characters:
+            assert_equal(oauth_escape(char)[0], "%", "Character not percent-encoded.")
 
 class Test_oauth_unescape(object):
     #def test_unicode_input_encoded_to_utf8(self):
