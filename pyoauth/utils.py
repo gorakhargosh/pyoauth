@@ -71,10 +71,6 @@ def oauth_generate_nonce():
             helps prevent replay attacks when requests are made over a non-secure
             channel.  The nonce value MUST be unique across all requests with the
             same timestamp, client credentials, and token combinations.
-
-    Usage::
-
-        >>> assert oauth_generate_nonce() != oauth_generate_nonce()
     """
     return binascii.b2a_hex(uuid.uuid4().bytes)
 
@@ -94,10 +90,6 @@ def oauth_generate_verification_code(length=8):
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth
         verification code.
-
-    Usage::
-        >>> assert oauth_generate_verification_code() != oauth_generate_verification_code()
-        >>> assert len(oauth_generate_verification_code(10)) == 10
     """
     return oauth_generate_nonce()[:length]
 
@@ -114,10 +106,6 @@ def oauth_generate_timestamp():
             The timestamp value MUST be a positive integer.  Unless otherwise
             specified by the server's documentation, the timestamp is expressed
             in the number of seconds since January 1, 1970 00:00:00 GMT.
-
-    Usage::
-
-        >>> assert int(oauth_generate_timestamp()) > 0
     """
     return str(int(time.time()))
 
@@ -129,19 +117,13 @@ def oauth_parse_qs(qs):
     Use only with OAuth query strings.
 
     See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
-
-    Usage::
-
-        >>> qs = 'b5=%3D%253D&a3=a&c%40=&a2=r%20b' + '&' + 'c2&a3=2+q'
-        >>> q = oauth_parse_qs(qs)
-        >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
     """
     return parse_qs(qs.encode("utf-8"), keep_blank_values=True)
 
 
 def oauth_escape(val):
     """
-    Escapes the value of a query string parameter according to the OAuth spec.
+    Percent-encodes according to the OAuth spec.
 
     Used ONLY in constructing the signature base string and the "Authorization"
     header field.
@@ -196,7 +178,7 @@ def oauth_escape(val):
 
 def oauth_unescape(val):
     """
-    Used to percent-decode OAuth parameters.
+    Percent-decodes according to the OAuth spec.
 
     See Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
 
