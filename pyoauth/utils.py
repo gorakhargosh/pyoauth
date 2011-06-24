@@ -205,8 +205,8 @@ def oauth_unescape(val):
     :returns:
         Percent-decoded value.
     """
-    #if is_unicode(val):
-    #    val = val.encode("utf-8")
+    if is_unicode(val):
+        val = val.encode("utf-8")
     return urllib.unquote(val.replace('+', ' '))
 
 
