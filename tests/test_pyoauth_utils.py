@@ -311,6 +311,9 @@ class Test_oauth_get_hmac_sha1_signature(object):
 class Test_oauth_get_and_check_rsa_sha1_signature(object):
     # Taken from https://github.com/rick446/python-oauth2/commit/a8bee2ad1a993faa1e13a04f14f1754489ad35bd
     def setUp(self):
+        from Crypto.PublicKey import RSA
+
+        self.RSA = RSA
         self.oauth_signature_method = "RSA-SHA1"
         self.oauth_token_key = "tok-test-key"
         self.oauth_token_secret = "tok-test-secret"
@@ -340,6 +343,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         self.oauth_signature = "D2rdx9TiFajZbXChqMca6eaal8FxZhLMU1bdNX0glIN+BT4nrYGJqmIW92kWZYEYKHsVz7e67oDBEYlIIQMKWg=="
 
     def test_get_signature(self):
+        # consumer_secret is a string.
         assert_equal(oauth_get_rsa_sha1_signature(
             consumer_secret=self.oauth_consumer_secret,
             method=self.http_method,
@@ -348,10 +352,31 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
             token_secret=self.oauth_token_secret
         ), self.oauth_signature)
 
+        # consumer_secret is an RSA instance.
+        assert_equal(oauth_get_rsa_sha1_signature(
+            consumer_secret=self.RSA.importKey(self.oauth_consumer_secret),
+            method=self.http_method,
+            url=self.url,
+            query_params=self.query_params,
+            token_secret=self.oauth_token_secret
+        ), self.oauth_signature)
+
+
     def test_check_signature(self):
+        # consumer_secret is a string.
         assert_true(oauth_check_rsa_sha1_signature(
             signature=self.oauth_signature,
             consumer_secret=self.oauth_consumer_secret,
+            method=self.http_method,
+            url=self.url,
+            query_params=self.query_params,
+            token_secret=self.oauth_token_secret
+        ))
+
+        # consumer_secret is an RSA instance.
+        assert_true(oauth_check_rsa_sha1_signature(
+            signature=self.oauth_signature,
+            consumer_secret=self.RSA.importKey(self.oauth_consumer_secret),
             method=self.http_method,
             url=self.url,
             query_params=self.query_params,
