@@ -79,23 +79,62 @@ class Test_oauth_escape(object):
     def test_safe_symbols_are_not_encoded(self):
         safe_symbols = ["-", ".", "_", "~"]
         for symbol in safe_symbols:
-            assert_equal(oauth_escape(symbol), symbol, "Symbol %s should not be encoded." % (symbol,))
+            assert_equal(oauth_escape(symbol), symbol,
+                         "Symbol %s should not be encoded." % (symbol,))
 
     def test_digits_are_not_encoded(self):
         digits = [str(x) for x in range(10)]
         for digit in digits:
-            assert_equal(oauth_escape(digit), digit, "Digits should not be encoded.")
+            assert_equal(oauth_escape(digit), digit,
+                         "Digits should not be encoded.")
 
     def test_alphabets_are_not_encoded(self):
-        lowercase_alphabets = [chr(x) for x in range(ord('a'), ord('z')+1)]
-        uppercase_alphabers = [chr(x) for x in range(ord('A'), ord('Z')+1)]
+        lowercase_alphabets = [chr(x) for x in range(ord('a'), ord('z') + 1)]
+        uppercase_alphabers = [chr(x) for x in range(ord('A'), ord('Z') + 1)]
         alphabets = lowercase_alphabets + uppercase_alphabers
         for alphabet in alphabets:
-            assert_equal(oauth_escape(alphabet), alphabet, "Alphabets should not be encoded.")
+            assert_equal(oauth_escape(alphabet), alphabet,
+                         "Alphabets should not be encoded.")
 
     def test_space_is_not_encoded_as_plus(self):
         assert_not_equal(oauth_escape(" "), "+")
         assert_equal(oauth_escape(" "), "%20")
+
+    def test_non_safe_characters_are_encoded(self):
+        test_characters = [" ",
+                           ":",
+                           "!",
+                           "@",
+                           "#",
+                           "$",
+                           "%",
+                           "^",
+                           "&",
+                           "*",
+                           "(",
+                           ")",
+                           "+",
+                           "{",
+                           "}",
+                           "[",
+                           "]",
+                           "|",
+                           "\\",
+                           ":",
+                           ";",
+                           '"',
+                           "'",
+                           ",",
+                           "<",
+                           ">",
+                           "?",
+                           "/",
+                           "`",
+                           "´",
+                           "å",
+                           ]
+        for char in test_characters:
+            assert_not_equal(oauth_escape(char), char)
 
 
 class Test_oauth_unescape(object):
