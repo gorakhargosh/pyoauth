@@ -476,7 +476,7 @@ class Test_oauth_get_signature_base_string(object):
         base_string = oauth_get_signature_base_string("POST", url, args)
         assert_true("realm=" not in base_string)
         assert_true("oauth_signature=" not in base_string)
-        
+
 
 class Test_oauth_get_normalized_authorization_header_value(object):
     def test_equality_and_realm(self):
