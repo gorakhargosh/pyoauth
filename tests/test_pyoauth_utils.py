@@ -2,7 +2,7 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature
+from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature, oauth_get_signature_base_string
 
 class Test_oauth_generate_nonce(object):
     def test_uniqueness(self):
@@ -439,6 +439,22 @@ class Test_oauth_get_plaintext_signature(object):
             token_secret=None
         ), "&")
 
+
+class Test_oauth_get_signature_base_string(object):
+    def test_valid_base_string(self):
+        base_string = oauth_get_signature_base_string( "POST",
+                "http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q",
+                dict(
+                    oauth_consumer_key="9djdj82h48djs9d2",
+                    oauth_token="kkk9d7dh3k39sjv7",
+                    oauth_signature_method="HMAC-SHA1",
+                    oauth_timestamp="137131201",
+                    oauth_nonce="7d8f3e4a",
+                    oauth_signature="bYT5CMsGcbgUdFHObYMEfcx6bsw%3D"))
+        assert_equal(base_string, "POST&http%3A%2F%2Fexample.com%2Frequest&a2%3Dr%2520b%26a3%3D2%2520q%26a3%3Da%26b5%3D%253D%25253D%26c%2540%3D%26c2%3D%26oauth_consumer_key%3D9djdj82h48djs9d2%26oauth_nonce%3D7d8f3e4a%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131201%26oauth_token%3Dkkk9d7dh3k39sjv7")
+
+    def test_ValueError_when_invalid_http_method(self):
+        assert_raises(ValueError, oauth_get_signature_base_string, "TypO", "http://example.com/request", {})
 
 class Test_oauth_get_normalized_authorization_header_value(object):
     def test_equality_and_realm(self):
