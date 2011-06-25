@@ -2,7 +2,7 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_query_string, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature, oauth_get_signature_base_string
+from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_query_string, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature, oauth_get_signature_base_string, _oauth_get_plaintext_signature
 
 class Test_oauth_generate_nonce(object):
     def test_uniqueness(self):
@@ -438,6 +438,27 @@ class Test_oauth_get_plaintext_signature(object):
             oauth_params=self.oauth_params,
             token_secret=None
         ), "&")
+
+
+class Test__oauth_get_plaintext_signature(object):
+    def test_both_secrets_present(self):
+        assert_equal(_oauth_get_plaintext_signature("ab cd", "47fba"), "ab%20cd&47fba")
+
+    def test_consumer_secret_absent(self):
+        assert_equal(_oauth_get_plaintext_signature(None, "47fba"), "&47fba")
+        assert_equal(_oauth_get_plaintext_signature("", "47fba"), "&47fba")
+
+
+    def test_token_secret_absent(self):
+        assert_equal(_oauth_get_plaintext_signature("ab cd", None), "ab%20cd&")
+        assert_equal(_oauth_get_plaintext_signature("ab cd", ""), "ab%20cd&")
+
+    def test_both_secrets_absent(self):
+        assert_equal(_oauth_get_plaintext_signature(None, None), "&")
+        assert_equal(_oauth_get_plaintext_signature("", ""), "&")
+
+    def test_both_secrets_are_encoded(self):
+        assert_equal(_oauth_get_plaintext_signature("ab cd", "47 f$a"), "ab%20cd&47%20f%24a")
 
 
 class Test_oauth_get_signature_base_string(object):

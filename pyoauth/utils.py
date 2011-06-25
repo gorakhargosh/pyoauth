@@ -424,19 +424,6 @@ def _oauth_get_plaintext_signature(consumer_secret, token_secret=None):
         Token secret if available.
     :returns:
         PLAINTEXT signature.
-
-    Usage::
-
-        >>> a = _oauth_get_plaintext_signature("ab cd", None)
-        >>> assert a == "ab%20cd&"
-        >>> a = _oauth_get_plaintext_signature("ab cd", "47fba")
-        >>> assert a == "ab%20cd&47fba"
-        >>> a = _oauth_get_plaintext_signature("", None)
-        >>> assert a == "&"
-        >>> a = _oauth_get_plaintext_signature(None, None)
-        >>> assert a == "&"
-        >>> a = _oauth_get_plaintext_signature("", "47 fba")
-        >>> assert a == "&47%20fba"
     """
     sig_elems = [oauth_escape(consumer_secret) if consumer_secret else ""]
     sig_elems.append(oauth_escape(token_secret) if token_secret else "")
