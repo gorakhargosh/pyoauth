@@ -277,16 +277,17 @@ class Test_oauth_get_signature_base_string(object):
         assert_raises(ValueError, oauth_get_signature_base_string, "POST",
                       "http://www.google.com/", None)
 
-    def test_base_string_does_not_contain_realm_or_oauth_signature(self):
+    def test_base_string_does_not_contain_oauth_signature(self):
         # Ensure both are present in the query params as well as the URL.
-        args = {
-            "realm": "http://example.com",
-            }
-        args.update(self.oauth_params)
+        oauth_params = {
+            "realm": "example.com",
+        }
+        oauth_params.update(self.oauth_params)
         url = "http://example.com/request?oauth_signature=foobar&realm=something"
-        base_string = oauth_get_signature_base_string("POST", url, args)
-        assert_true("realm=" not in base_string)
-        assert_true("oauth_signature=" not in base_string)
+        base_string = oauth_get_signature_base_string("POST", url, oauth_params)
+        assert_true("oauth_signature%3D" not in base_string)
+        assert_true("realm%3Dexample.com" not in base_string)
+        assert_true("realm%3Dsomething" in base_string)
 
 
 class Test_oauth_get_normalized_authorization_header_value(object):
