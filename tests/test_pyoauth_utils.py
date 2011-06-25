@@ -84,7 +84,9 @@ class Test_oauth_escape(object):
     #def test_unicode_input_encoded_to_utf8(self):
     #    assert_equal(oauth_escape(u'åéîøü'.encode('utf16')),
     #                 "%FF%FE%E5%00%E9%00%EE%00%F8%00%FC%00")
-    _unsafe_characters = [" ",
+
+    def setUp(self):
+        self._unsafe_characters = [" ",
                        ":",
                        "!",
                        "@",
@@ -114,8 +116,16 @@ class Test_oauth_escape(object):
                        "/",
                        "`",
                        "´",
-                       u"å",
+                       "å",
                        ]
+        self.uni_utf8_bytes = '\xc2\xae'
+        self.uni_unicode_object = u'\u00ae'
+
+    def test_utf8_bytestring_left_as_is(self):
+        assert_equal(oauth_escape(self.uni_utf8_bytes), "%C2%AE")
+
+    def test_unicode_utf8_encoded(self):
+        assert_equal(oauth_escape(self.uni_unicode_object), "%C2%AE")
 
     def test_safe_symbols_are_not_encoded(self):
         safe_symbols = ["-", ".", "_", "~"]
@@ -523,7 +533,7 @@ class Test_oauth_get_normalized_authorization_header_value(object):
 
 class Test_oauth_get_normalized_query_string(object):
     def setUp(self):
-        self.example_oauth_params = {
+        self.specification_example_params = {
                 'b5': ['=%3D'],
                 'a3': ['a', '2 q'],
                 'c@': [''],
@@ -537,10 +547,26 @@ class Test_oauth_get_normalized_query_string(object):
                 'oauth_nonce': '7d8f3e4a',
                 'c2': [''],
             }
-        self.example_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
+        self.specification_example_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
+        self.simplegeo_example_params = {
+            'oauth_version': "1.0",
+            'oauth_nonce': "4572616e48616d6d65724c61686176",
+            'oauth_timestamp': "137131200",
+            'oauth_consumer_key': "0685bd9184jfhq22",
+            'oauth_signature_method': "HMAC-SHA1",
+            'oauth_token': "ad180jjd733klru7",
+            'multi': ['FOO','BAR', u'\u00ae', '\xc2\xae'],
+            'multi_same': ['FOO','FOO'],
+            'uni_utf8_bytes': '\xc2\xae',
+            'uni_unicode_object': u'\u00ae'
+        }
+        self.simplegeo_example_query_string = 'multi=BAR&multi=FOO&multi=%C2%AE&multi=%C2%AE&multi_same=FOO&multi_same=FOO&oauth_consumer_key=0685bd9184jfhq22&oauth_nonce=4572616e48616d6d65724c61686176&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131200&oauth_token=ad180jjd733klru7&oauth_version=1.0&uni_unicode_object=%C2%AE&uni_utf8_bytes=%C2%AE'
 
     def test_oauth_specification_example(self):
-        assert_equal(oauth_get_normalized_query_string(self.example_oauth_params), self.example_query_string)
+        assert_equal(oauth_get_normalized_query_string(self.specification_example_params), self.specification_example_query_string)
+
+    def test_simplegeo_example(self):
+        assert_equal(oauth_get_normalized_query_string(self.simplegeo_example_params), self.simplegeo_example_query_string)
 
     def test_query_params_sorted_order(self):
         assert_equal("a=1&b=2&b=4&b=8", oauth_get_normalized_query_string(dict(b=[8, 2, 4], a=1)))
@@ -557,7 +583,7 @@ class Test_oauth_get_normalized_query_string(object):
         assert_equal("", oauth_get_normalized_query_string(None))
 
     def test_oauth_signature_and_realm_are_excluded_by_default(self):
-        qs = oauth_get_normalized_query_string(self.example_oauth_params)
+        qs = oauth_get_normalized_query_string(self.specification_example_params)
         assert_true("oauth_signature=" not in qs)
         assert_true("realm=" not in qs)
 
