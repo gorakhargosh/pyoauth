@@ -622,8 +622,7 @@ def oauth_get_normalized_query_string(url_query_params, oauth_params):
                  &oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7
     """
     url_query_params = url_query_params or {}
-    if not oauth_params:
-        return []
+    oauth_params = oauth_params or {}
 
     # Clean up oauth params.
     # OAuth param names must begin with "oauth_".

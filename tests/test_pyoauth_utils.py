@@ -53,9 +53,7 @@ class Test_oauth_generate_timestamp(object):
                     "Timestamp is an empty string.")
 
 
-
 class Test_oauth_get_hmac_sha1_signature(object):
-
     _EXAMPLES = {
         # Example 1.2 in the RFC.
         'ex1.2': dict(
@@ -71,19 +69,20 @@ class Test_oauth_get_hmac_sha1_signature(object):
             REQUEST_TOKEN_OAUTH_NONCE="wIjqoS",
             REQUEST_TOKEN_OAUTH_SIGNATURE="74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
             REQUEST_TOKEN_OAUTH_CALLBACK="http://printer.example.com/ready",
-        )
+            )
     }
+
     def test_valid_signature(self):
         ex = self._EXAMPLES['ex1.2']
-        expected_oauth_signature=ex['REQUEST_TOKEN_OAUTH_SIGNATURE']
+        expected_oauth_signature = ex['REQUEST_TOKEN_OAUTH_SIGNATURE']
         oauth_params = dict(
-                realm=ex["REQUEST_TOKEN_REALM"],
-                oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
-                oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
-                oauth_timestamp=ex["REQUEST_TOKEN_OAUTH_TIMESTAMP"],
-                oauth_nonce=ex["REQUEST_TOKEN_OAUTH_NONCE"],
-                oauth_callback=ex["REQUEST_TOKEN_OAUTH_CALLBACK"],
-                oauth_signature=ex["REQUEST_TOKEN_OAUTH_SIGNATURE"],
+            realm=ex["REQUEST_TOKEN_REALM"],
+            oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
+            oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
+            oauth_timestamp=ex["REQUEST_TOKEN_OAUTH_TIMESTAMP"],
+            oauth_nonce=ex["REQUEST_TOKEN_OAUTH_NONCE"],
+            oauth_callback=ex["REQUEST_TOKEN_OAUTH_CALLBACK"],
+            oauth_signature=ex["REQUEST_TOKEN_OAUTH_SIGNATURE"],
             )
         assert_equal(oauth_get_hmac_sha1_signature(
             consumer_secret=ex["OAUTH_CONSUMER_SECRET"],
@@ -91,66 +90,8 @@ class Test_oauth_get_hmac_sha1_signature(object):
             url=ex["REQUEST_TOKEN_URL"],
             oauth_params=oauth_params,
             token_secret=None),
-            expected_oauth_signature
+                     expected_oauth_signature
         )
-
-    # TODO: Move these to the query string function.
-    def test_signature_and_realm_are_ignored_from_query_params(self):
-        ex = self._EXAMPLES['ex1.2']
-        oauth_params_without_realm_and_signature = dict(
-                oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
-                oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
-                oauth_timestamp=ex["REQUEST_TOKEN_OAUTH_TIMESTAMP"],
-                oauth_nonce=ex["REQUEST_TOKEN_OAUTH_NONCE"],
-                oauth_callback=ex["REQUEST_TOKEN_OAUTH_CALLBACK"],
-            )
-        oauth_params = dict(
-            realm=ex["REQUEST_TOKEN_REALM"],
-            oauth_signature=ex["REQUEST_TOKEN_OAUTH_SIGNATURE"],
-        )
-        oauth_params.update(oauth_params_without_realm_and_signature)
-
-        consumer_secret = ex["OAUTH_CONSUMER_SECRET"]
-        method = ex["REQUEST_TOKEN_METHOD"]
-        url = ex["REQUEST_TOKEN_URL"]
-        token_secret = None
-        assert_equal(oauth_get_hmac_sha1_signature(
-            consumer_secret=consumer_secret,
-            method=method,
-            url=url,
-            oauth_params=oauth_params,
-            token_secret=token_secret
-        ), oauth_get_hmac_sha1_signature(
-            consumer_secret=consumer_secret,
-            method=method,
-            url=url,
-            oauth_params=oauth_params_without_realm_and_signature,
-            token_secret=token_secret
-        ))
-
-    # TODO: Move these to the query string function.
-    def test_signature_and_realm_are_ignored_from_url_query_params(self):
-        ex = self._EXAMPLES['ex1.2']
-        oauth_params_without_realm_and_signature = dict(
-                oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
-                oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
-                oauth_timestamp=ex["REQUEST_TOKEN_OAUTH_TIMESTAMP"],
-                oauth_nonce=ex["REQUEST_TOKEN_OAUTH_NONCE"],
-                oauth_callback=ex["REQUEST_TOKEN_OAUTH_CALLBACK"],
-            )
-
-        consumer_secret = ex["OAUTH_CONSUMER_SECRET"]
-        method = ex["REQUEST_TOKEN_METHOD"]
-        url = ex["REQUEST_TOKEN_URL"] + "?oauth_signature=something&realm=whatever"
-        token_secret = None
-        sig = oauth_get_hmac_sha1_signature(
-            consumer_secret=consumer_secret,
-            method=method,
-            url=url,
-            oauth_params=oauth_params_without_realm_and_signature,
-            token_secret=token_secret
-        )
-        assert_equal(sig, ex["REQUEST_TOKEN_OAUTH_SIGNATURE"])
 
 
 class Test_oauth_get_and_check_rsa_sha1_signature(object):
@@ -173,7 +114,7 @@ bgfP68eG9kufAiEAtUSAHGp29HUyzxC9sNNKiVysnuqDu22NXBRSmjnOu6UCIEFZ
 nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
 -----END RSA PRIVATE KEY-----'''
         self.http_method = "GET"
-        self.url = "http://sp.example.com/"
+        self.url = "http://sp.example.com/?bar=blerg&multi=FOO&multi=BAR&foo=59"
         self.oauth_params = dict(
             oauth_version='1.0',
             oauth_nonce="4572616e48616d6d65724c61686176",
@@ -181,9 +122,6 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
             oauth_token=self.oauth_token_key,
             oauth_consumer_key=self.oauth_consumer_key,
             oauth_signature_method=self.oauth_signature_method,
-            bar="blerg",
-            multi=["FOO", "BAR"],
-            foo=59
         )
         self.oauth_signature = "D2rdx9TiFajZbXChqMca6eaal8FxZhLMU1bdNX0glIN+BT4nrYGJqmIW92kWZYEYKHsVz7e67oDBEYlIIQMKWg=="
 
@@ -255,7 +193,7 @@ class Test_oauth_get_plaintext_signature(object):
             url="http://example.com/",
             oauth_params=self.oauth_params,
             token_secret=self.oauth_token_secret,
-        ), "consumer%20test%20secret&token%20test%20secret")
+            ), "consumer%20test%20secret&token%20test%20secret")
 
     def test_when_consumer_secret_present(self):
         assert_equal(oauth_get_plaintext_signature(
@@ -287,7 +225,8 @@ class Test_oauth_get_plaintext_signature(object):
 
 class Test__oauth_get_plaintext_signature(object):
     def test_both_secrets_present(self):
-        assert_equal(_oauth_get_plaintext_signature("ab cd", "47fba"), "ab%20cd&47fba")
+        assert_equal(_oauth_get_plaintext_signature("ab cd", "47fba"),
+                     "ab%20cd&47fba")
 
     def test_consumer_secret_absent(self):
         assert_equal(_oauth_get_plaintext_signature(None, "47fba"), "&47fba")
@@ -303,7 +242,8 @@ class Test__oauth_get_plaintext_signature(object):
         assert_equal(_oauth_get_plaintext_signature("", ""), "&")
 
     def test_both_secrets_are_encoded(self):
-        assert_equal(_oauth_get_plaintext_signature("ab cd", "47 f$a"), "ab%20cd&47%20f%24a")
+        assert_equal(_oauth_get_plaintext_signature("ab cd", "47 f$a"),
+                     "ab%20cd&47%20f%24a")
 
 
 class Test_oauth_get_signature_base_string(object):
@@ -318,25 +258,30 @@ class Test_oauth_get_signature_base_string(object):
         )
 
     def test_valid_base_string(self):
-        base_string = oauth_get_signature_base_string( "POST",
-                "http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q",
-                self.oauth_params)
-        assert_equal(base_string, "POST&http%3A%2F%2Fexample.com%2Frequest&a2%3Dr%2520b%26a3%3D2%2520q%26a3%3Da%26b5%3D%253D%25253D%26c%2540%3D%26c2%3D%26oauth_consumer_key%3D9djdj82h48djs9d2%26oauth_nonce%3D7d8f3e4a%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131201%26oauth_token%3Dkkk9d7dh3k39sjv7")
+        base_string = oauth_get_signature_base_string("POST",
+                                                      "http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q"
+                                                      ,
+                                                      self.oauth_params)
+        assert_equal(base_string,
+                     "POST&http%3A%2F%2Fexample.com%2Frequest&a2%3Dr%2520b%26a3%3D2%2520q%26a3%3Da%26b5%3D%253D%25253D%26c%2540%3D%26c2%3D%26oauth_consumer_key%3D9djdj82h48djs9d2%26oauth_nonce%3D7d8f3e4a%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131201%26oauth_token%3Dkkk9d7dh3k39sjv7")
 
     def test_ValueError_when_invalid_http_method(self):
-        assert_raises(ValueError, oauth_get_signature_base_string, "TypO", "http://example.com/request", {})
+        assert_raises(ValueError, oauth_get_signature_base_string, "TypO",
+                      "http://example.com/request", {})
 
     def test_ValueError_when_url_blank_or_None(self):
-        assert_raises(ValueError, oauth_get_signature_base_string, "POST", "", {})
+        assert_raises(ValueError, oauth_get_signature_base_string, "POST", "",
+                {})
 
     def test_ValueError_when_query_params_is_not_dict(self):
-        assert_raises(ValueError, oauth_get_signature_base_string, "POST", "http://www.google.com/", None)
+        assert_raises(ValueError, oauth_get_signature_base_string, "POST",
+                      "http://www.google.com/", None)
 
     def test_base_string_does_not_contain_realm_or_oauth_signature(self):
         # Ensure both are present in the query params as well as the URL.
         args = {
             "realm": "http://example.com",
-        }
+            }
         args.update(self.oauth_params)
         url = "http://example.com/request?oauth_signature=foobar&realm=something"
         base_string = oauth_get_signature_base_string("POST", url, args)
@@ -366,67 +311,95 @@ class Test_oauth_get_normalized_authorization_header_value(object):
                                                                      realm="http://example.com/")
                      , expected_value)
 
+
 class Test_oauth_get_normalized_query_string(object):
     def setUp(self):
-        self.specification_example_params = {
-                'b5': ['=%3D'],
-                'a3': ['a', '2 q'],
-                'c@': [''],
-                'a2': ['r b'],
-                'oauth_signature': 'ja87asdkhasd',
-                'realm': 'http://example.com',
-                'oauth_consumer_key': '9djdj82h48djs9d2',
-                'oauth_token': 'kkk9d7dh3k39sjv7',
-                'oauth_signature_method': 'HMAC-SHA1',
-                'oauth_timestamp': '137131201',
-                'oauth_nonce': '7d8f3e4a',
-                'c2': [''],
+        self.specification_url_query_params = {
+            'b5': ['=%3D'],
+            'a3': ['a', '2 q'],
+            'c@': [''],
+            'a2': ['r b'],
+            'c2': [''],
+            }
+        self.specification_example_oauth_params = {
+            'oauth_signature': 'ja87asdkhasd',
+            'realm': 'http://example.com',
+            'oauth_consumer_key': '9djdj82h48djs9d2',
+            'oauth_token': 'kkk9d7dh3k39sjv7',
+            'oauth_signature_method': 'HMAC-SHA1',
+            'oauth_timestamp': '137131201',
+            'oauth_nonce': '7d8f3e4a',
             }
         self.specification_example_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
-        self.simplegeo_example_params = {
+        self.simplegeo_example_url_query_params = {
+            'multi': ['FOO', 'BAR', u'\u00ae', '\xc2\xae'],
+            'multi_same': ['FOO', 'FOO'],
+            'uni_utf8_bytes': '\xc2\xae',
+            'uni_unicode_object': u'\u00ae',
+        }
+        self.simplegeo_example_oauth_params = {
             'oauth_version': "1.0",
             'oauth_nonce': "4572616e48616d6d65724c61686176",
             'oauth_timestamp': "137131200",
             'oauth_consumer_key': "0685bd9184jfhq22",
             'oauth_signature_method': "HMAC-SHA1",
             'oauth_token': "ad180jjd733klru7",
-            'multi': ['FOO','BAR', u'\u00ae', '\xc2\xae'],
-            'multi_same': ['FOO','FOO'],
-            'uni_utf8_bytes': '\xc2\xae',
-            'uni_unicode_object': u'\u00ae'
         }
         # They've got this wrong. The spec specifies sorting AFTER encoding.
         # The following string is generated by sortging BEFORE encoding.
-        self.simplegeo_example_query_string = 'multi=BAR&multi=FOO&multi=%C2%AE&multi=%C2%AE&multi_same=FOO&multi_same=FOO&oauth_consumer_key=0685bd9184jfhq22&oauth_nonce=4572616e48616d6d65724c61686176&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131200&oauth_token=ad180jjd733klru7&oauth_version=1.0&uni_unicode_object=%C2%AE&uni_utf8_bytes=%C2%AE'
+        self.simplegeo_example_wrong_order_query_string = 'multi=BAR&multi=FOO&multi=%C2%AE&multi=%C2%AE&multi_same=FOO&multi_same=FOO&oauth_consumer_key=0685bd9184jfhq22&oauth_nonce=4572616e48616d6d65724c61686176&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131200&oauth_token=ad180jjd733klru7&oauth_version=1.0&uni_unicode_object=%C2%AE&uni_utf8_bytes=%C2%AE'
+        self.simplegeo_example_correct_query_string = 'multi=%C2%AE&multi=%C2%AE&multi=BAR&multi=FOO&multi_same=FOO&multi_same=FOO&oauth_consumer_key=0685bd9184jfhq22&oauth_nonce=4572616e48616d6d65724c61686176&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131200&oauth_token=ad180jjd733klru7&oauth_version=1.0&uni_unicode_object=%C2%AE&uni_utf8_bytes=%C2%AE'
 
     def test_oauth_specification_example(self):
-        assert_equal(oauth_get_normalized_query_string(self.specification_example_params), self.specification_example_query_string)
+        assert_equal(oauth_get_normalized_query_string(
+            self.specification_url_query_params,
+            self.specification_example_oauth_params),
+                     self.specification_example_query_string)
 
     def test_simplegeo_example(self):
-        assert_not_equal(oauth_get_normalized_query_string(self.simplegeo_example_params), self.simplegeo_example_query_string)
+        assert_not_equal(
+            oauth_get_normalized_query_string(self.simplegeo_example_url_query_params,
+                                              self.simplegeo_example_oauth_params),
+            self.simplegeo_example_wrong_order_query_string)
+        assert_equal(
+            oauth_get_normalized_query_string(self.simplegeo_example_url_query_params,
+                                              self.simplegeo_example_oauth_params),
+            self.simplegeo_example_correct_query_string)
 
     def test_query_params_sorted_order(self):
-        assert_equal("a=1&b=2&b=4&b=8", oauth_get_normalized_query_string(dict(b=[8, 2, 4], a=1)))
+        assert_equal("a=1&b=2&b=4&b=8",
+                     oauth_get_normalized_query_string(dict(b=[8, 2, 4], a=1), {}))
+        qs = oauth_get_normalized_query_string(
+            dict(a=5, b=6, c=["w", "a", "t", "e", "r"]), {})
+        assert_equal("a=5&b=6&c=a&c=e&c=r&c=t&c=w", qs)
 
     def test_multiple_values(self):
-        assert_equal("a=5&a=8", oauth_get_normalized_query_string(dict(a=[5, 8])))
+        assert_equal("a=5&a=8",
+                     oauth_get_normalized_query_string(dict(a=[5, 8]), {}))
 
     def test_non_string_single_value(self):
-        assert_equal("a=5", oauth_get_normalized_query_string(dict(a=5)))
-        assert_equal("aFlag=True&bFlag=False", oauth_get_normalized_query_string(dict(aFlag=True, bFlag=False)))
+        assert_equal("a=5", oauth_get_normalized_query_string(dict(a=5), None))
+        assert_equal("aFlag=True&bFlag=False",
+                     oauth_get_normalized_query_string(
+                         dict(aFlag=True, bFlag=False), None))
 
     def test_no_query_params_returns_empty_string(self):
-        assert_equal("", oauth_get_normalized_query_string({}))
-        assert_equal("", oauth_get_normalized_query_string(None))
+        assert_equal("", oauth_get_normalized_query_string({}, {}))
+        assert_equal("", oauth_get_normalized_query_string(None, None))
 
-    def test_oauth_signature_and_realm_are_excluded_by_default(self):
-        qs = oauth_get_normalized_query_string(self.specification_example_params)
+    def test_oauth_signature_and_realm_are_excluded_properly(self):
+        qs = oauth_get_normalized_query_string({
+            "oauth_signature": "something"
+            },
+            self.specification_example_oauth_params
+        )
         assert_true("oauth_signature=" not in qs)
         assert_true("realm=" not in qs)
 
-    def test_named_ignores_are_excluded_and_sorted_order(self):
-        qs = oauth_get_normalized_query_string(dict(a=5, b=6, c=["w", "a", "t", "e", "r"]), ignored_names=("a", "b"))
-        assert_equal("c=a&c=e&c=r&c=t&c=w", qs)
+        assert_true(
+            oauth_get_normalized_query_string(dict(realm="something"), dict()),
+            "realm=something")
+
 
 
 class Test_oauth_parse_authorization_header(object):
