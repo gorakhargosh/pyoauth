@@ -449,7 +449,7 @@ def _oauth_get_plaintext_signature(consumer_secret, token_secret=None):
     return "&".join(sig_elems)
 
 
-def oauth_get_signature_base_string(method, url, query_params):
+def oauth_get_signature_base_string(method, url, oauth_params):
     """
     Calculates a signature base string based on the URL, method, and
     query_parameters.
@@ -464,8 +464,8 @@ def oauth_get_signature_base_string(method, url, query_params):
         extracted and encoded as well. Query parameters in the URL are
         overridden by those found in the ``query_params`` argument to this
         function.
-    :param query_params:
-        Query string parameters.
+    :param oauth_params:
+        Protocol-specific parameters.
     :returns:
         Base string as per rfc5849#section-3.4.1 as follows::
 
@@ -506,11 +506,11 @@ def oauth_get_signature_base_string(method, url, query_params):
         raise ValueError("Method must be one of the HTTP methods %s: got `%s` instead" % (allowed_methods, method))
     if not url:
         raise ValueError("URL must be specified.")
-    if not isinstance(query_params, dict):
+    if not isinstance(oauth_params, dict):
         raise ValueError("Query parameters must be specified as a dictionary.")
 
     normalized_url, url_query_params = oauth_get_normalized_url_and_query_params(url)
-    url_query_params.update(query_params)
+    url_query_params.update(oauth_params)
 
     query_string = oauth_get_normalized_query_string(**url_query_params)
     return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
@@ -521,9 +521,9 @@ def oauth_get_normalized_query_string(**query_params):
     Normalizes a dictionary of query parameters according to OAuth spec.
 
     :param query_params:
-        Query string parameters. A query parameter by the name
-        "oauth_signature" or "OAuth realm", if present, will be excluded
-        from the query string.
+        Query string parameters and protocol-specific perameters.
+        Any parameter having the name "oauth_signature" or "realm", if present,
+        will be excluded from the generated query string.
     :returns:
         Normalized string of query parameters as follows::
 
@@ -637,18 +637,18 @@ def oauth_get_normalized_query_string(**query_params):
         # Order
         >>> assert "a=1&b=2&b=4&b=8" == oauth_get_normalized_query_string(b=[8, 2, 4], a=1)
     """
-    encoded_pairs = _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=("oauth_signature", "realm"))
+    encoded_pairs = _oauth_get_normalized_query_params_l(query_params, ignored_names=("oauth_signature", "realm"))
     query_string = "&".join([k+"="+v for k, v in encoded_pairs])
     return query_string
 
 
-def _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=None):
+def _oauth_get_normalized_query_params_l(query_params, ignored_names=None):
     """
     Returns a sorted list of query parameters normalized according to
     http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
 
     :param query_params:
-        Query parameters.
+        Query parameters to be normalized.
     :param ignored_names:
         Names included in this list will be excluded from the parameter list.
     :returns:
@@ -656,7 +656,7 @@ def _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=None):
         http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
     """
     if not query_params:
-        return ""
+        return []
     encoded_pairs = []
     for k, v in query_params.iteritems():
         # Keys are also percent-encoded according to OAuth spec.
@@ -792,15 +792,14 @@ def oauth_get_normalized_url_and_query_params(url):
     return normalized_url, query_params
 
 
-def oauth_get_normalized_authorization_header_value(query_params, realm=None):
+def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
     """
     Builds the Authorization header value.
 
     See Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
 
-    :param query_params:
-        The OAuth query parameters that will be correctly encoded according
-        to the OAuth spec.
+    :param oauth_params:
+        Protocol-specific parameters excluding the ``realm`` parameter.
     :param realm:
         If specified, the realm is included into the Authorization header.
         The realm is never percent-encoded according to the OAuth spec.
@@ -812,7 +811,7 @@ def oauth_get_normalized_authorization_header_value(query_params, realm=None):
         s = 'OAuth realm="' + str(realm) + '",\n' + indentation
     else:
         s = 'OAuth '
-    normalized_param_pairs = _oauth_get_normalized_query_param_pairs_l(query_params, ignored_names=("realm"))
+    normalized_param_pairs = _oauth_get_normalized_query_params_l(oauth_params, ignored_names=("realm"))
     delimiter = ",\n" + indentation
     s += delimiter.join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
