@@ -479,7 +479,6 @@ def oauth_get_signature_base_string(method, url, oauth_params):
             TLS or other methods.
 
             ...
-
     """
     allowed_methods = ("POST", "PUT", "GET", "DELETE", "OPTIONS", "TRACE", "HEAD", "CONNECT", "PATCH")
     method_normalized = method.upper()
@@ -593,32 +592,6 @@ def oauth_get_normalized_query_string(query_params, ignored_names=("oauth_signat
                  a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9dj
                  dj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1
                  &oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7
-
-    Usage::
-
-        >>> qs = oauth_get_normalized_query_string({ \
-                'b5': ['=%3D'], \
-                'a3': ['a', '2 q'], \
-                'c@': [''], \
-                'a2': ['r b'], \
-                'oauth_signature': 'ja87asdkhasd', \
-                'realm': 'http://example.com', \
-                'oauth_consumer_key': '9djdj82h48djs9d2', \
-                'oauth_token': 'kkk9d7dh3k39sjv7', \
-                'oauth_signature_method': 'HMAC-SHA1', \
-                'oauth_timestamp': '137131201', \
-                'oauth_nonce': '7d8f3e4a', \
-                'c2': [''], \
-            })
-        >>> assert qs == "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
-
-        >>> assert "" == oauth_get_normalized_query_string(None)
-        >>> assert "a=5" == oauth_get_normalized_query_string(dict(a=5))
-        >>> assert "a=5&a=8" == oauth_get_normalized_query_string(dict(a=[5, 8]))
-        >>> assert "aFlag=True&bFlag=False" == oauth_get_normalized_query_string(dict(aFlag=True, bFlag=False))
-
-        # Order
-        >>> assert "a=1&b=2&b=4&b=8" == oauth_get_normalized_query_string(dict(b=[8, 2, 4], a=1))
     """
     encoded_pairs = _oauth_get_normalized_query_params_l(query_params, ignored_names=ignored_names, sorted_params=True)
     query_string = "&".join([k+"="+v for k, v in encoded_pairs])

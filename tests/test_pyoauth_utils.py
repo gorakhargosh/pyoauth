@@ -521,6 +521,50 @@ class Test_oauth_get_normalized_authorization_header_value(object):
                                                                      realm="http://example.com/")
                      , expected_value)
 
+class Test_oauth_get_normalized_query_string(object):
+    def setUp(self):
+        self.example_oauth_params = {
+                'b5': ['=%3D'],
+                'a3': ['a', '2 q'],
+                'c@': [''],
+                'a2': ['r b'],
+                'oauth_signature': 'ja87asdkhasd',
+                'realm': 'http://example.com',
+                'oauth_consumer_key': '9djdj82h48djs9d2',
+                'oauth_token': 'kkk9d7dh3k39sjv7',
+                'oauth_signature_method': 'HMAC-SHA1',
+                'oauth_timestamp': '137131201',
+                'oauth_nonce': '7d8f3e4a',
+                'c2': [''],
+            }
+        self.example_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
+
+    def test_oauth_specification_example(self):
+        assert_equal(oauth_get_normalized_query_string(self.example_oauth_params), self.example_query_string)
+
+    def test_query_params_sorted_order(self):
+        assert_equal("a=1&b=2&b=4&b=8", oauth_get_normalized_query_string(dict(b=[8, 2, 4], a=1)))
+
+    def test_multiple_values(self):
+        assert_equal("a=5&a=8", oauth_get_normalized_query_string(dict(a=[5, 8])))
+
+    def test_non_string_single_value(self):
+        assert_equal("a=5", oauth_get_normalized_query_string(dict(a=5)))
+        assert_equal("aFlag=True&bFlag=False", oauth_get_normalized_query_string(dict(aFlag=True, bFlag=False)))
+
+    def test_no_query_params_returns_empty_string(self):
+        assert_equal("", oauth_get_normalized_query_string({}))
+        assert_equal("", oauth_get_normalized_query_string(None))
+
+    def test_oauth_signature_and_realm_are_excluded_by_default(self):
+        qs = oauth_get_normalized_query_string(self.example_oauth_params)
+        assert_true("oauth_signature=" not in qs)
+        assert_true("realm=" not in qs)
+
+    def test_named_ignores_are_excluded_and_sorted_order(self):
+        qs = oauth_get_normalized_query_string(dict(a=5, b=6, c=["w", "a", "t", "e", "r"]), ignored_names=("a", "b"))
+        assert_equal("c=a&c=e&c=r&c=t&c=w", qs)
+
 
 class Test_oauth_parse_authorization_header(object):
     def test_equality_encoding_realm_emptyValues_and_multipleValues(self):
