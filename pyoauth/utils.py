@@ -638,6 +638,8 @@ def _oauth_get_normalized_query_params_l(query_params, ignored_names=None, sorte
                         encoded_pairs.append((k, oauth_escape(i), ))
                     else:
                         encoded_pairs.append((k, oauth_escape(str(i)), ))
+    # After encoding the pairs, sort them according to the spec and if
+    # told to do so by ``sorted_params``.
     sort_func = sorted if sorted_params else (lambda w: w)
     return sort_func(encoded_pairs)
 
