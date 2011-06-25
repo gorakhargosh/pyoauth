@@ -2,7 +2,7 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature, oauth_get_signature_base_string
+from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_query_string, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature, oauth_get_signature_base_string
 
 class Test_oauth_generate_nonce(object):
     def test_uniqueness(self):
@@ -55,28 +55,28 @@ class Test_oauth_generate_timestamp(object):
 
 class Test_oauth_parse_qs(object):
     def test_are_blank_values_preserved(self):
-        assert_dict_equal(oauth_parse_qs("a="), {"a": [""]})
-        assert_dict_equal(oauth_parse_qs("a"), {"a": [""]})
+        assert_dict_equal(oauth_parse_query_string("a="), {"a": [""]})
+        assert_dict_equal(oauth_parse_query_string("a"), {"a": [""]})
 
     def test_are_multiple_values_obtained(self):
-        assert_dict_equal(oauth_parse_qs("a=1&a=2&a=3&b=c"),
+        assert_dict_equal(oauth_parse_query_string("a=1&a=2&a=3&b=c"),
                 {"a": ["1", "2", "3"], "b": ["c"]})
 
     def test_single_value_lists_are_not_flattened(self):
-        d = oauth_parse_qs("a=1&a=2&a=3&b=c")
+        d = oauth_parse_query_string("a=1&a=2&a=3&b=c")
         for n, v in d.iteritems():
             assert_true(isinstance(n, str), "Dictionary key is not a string.")
             assert_true(isinstance(v, list), "Dictionary value is not a list.")
 
     def test_names_and_values_are_percent_decoded(self):
         qs = 'b5=%3D%253D&a3=a&c%40=&a2=r%20b' + '&' + 'c2&a3=2+q'
-        q = oauth_parse_qs(qs)
+        q = oauth_parse_query_string(qs)
         assert_dict_equal(q,
                 {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''],
                  'c2': ['']})
 
     def test_percent_decoding_treats_plus_as_space(self):
-        assert_dict_equal(oauth_parse_qs('a=2+q'), {'a': ['2 q']})
+        assert_dict_equal(oauth_parse_query_string('a=2+q'), {'a': ['2 q']})
 
 
 class Test_oauth_escape(object):
@@ -231,7 +231,7 @@ class Test_oauth_get_hmac_sha1_signature(object):
     def test_valid_signature(self):
         ex = self._EXAMPLES['ex1.2']
         expected_oauth_signature=ex['REQUEST_TOKEN_OAUTH_SIGNATURE']
-        query_params = dict(
+        oauth_params = dict(
                 realm=ex["REQUEST_TOKEN_REALM"],
                 oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
                 oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
@@ -244,7 +244,7 @@ class Test_oauth_get_hmac_sha1_signature(object):
             consumer_secret=ex["OAUTH_CONSUMER_SECRET"],
             method=ex["REQUEST_TOKEN_METHOD"],
             url=ex["REQUEST_TOKEN_URL"],
-            query_params=query_params,
+            oauth_params=oauth_params,
             token_secret=None),
             expected_oauth_signature
         )
@@ -252,18 +252,18 @@ class Test_oauth_get_hmac_sha1_signature(object):
     # TODO: Move these to the query string function.
     def test_signature_and_realm_are_ignored_from_query_params(self):
         ex = self._EXAMPLES['ex1.2']
-        query_params_without_realm_and_signature = dict(
+        oauth_params_without_realm_and_signature = dict(
                 oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
                 oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
                 oauth_timestamp=ex["REQUEST_TOKEN_OAUTH_TIMESTAMP"],
                 oauth_nonce=ex["REQUEST_TOKEN_OAUTH_NONCE"],
                 oauth_callback=ex["REQUEST_TOKEN_OAUTH_CALLBACK"],
             )
-        query_params = dict(
+        oauth_params = dict(
             realm=ex["REQUEST_TOKEN_REALM"],
             oauth_signature=ex["REQUEST_TOKEN_OAUTH_SIGNATURE"],
         )
-        query_params.update(query_params_without_realm_and_signature)
+        oauth_params.update(oauth_params_without_realm_and_signature)
 
         consumer_secret = ex["OAUTH_CONSUMER_SECRET"]
         method = ex["REQUEST_TOKEN_METHOD"]
@@ -273,20 +273,20 @@ class Test_oauth_get_hmac_sha1_signature(object):
             consumer_secret=consumer_secret,
             method=method,
             url=url,
-            query_params=query_params,
+            oauth_params=oauth_params,
             token_secret=token_secret
         ), oauth_get_hmac_sha1_signature(
             consumer_secret=consumer_secret,
             method=method,
             url=url,
-            query_params=query_params_without_realm_and_signature,
+            oauth_params=oauth_params_without_realm_and_signature,
             token_secret=token_secret
         ))
 
     # TODO: Move these to the query string function.
     def test_signature_and_realm_are_ignored_from_url_query_params(self):
         ex = self._EXAMPLES['ex1.2']
-        query_params_without_realm_and_signature = dict(
+        oauth_params_without_realm_and_signature = dict(
                 oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
                 oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
                 oauth_timestamp=ex["REQUEST_TOKEN_OAUTH_TIMESTAMP"],
@@ -302,7 +302,7 @@ class Test_oauth_get_hmac_sha1_signature(object):
             consumer_secret=consumer_secret,
             method=method,
             url=url,
-            query_params=query_params_without_realm_and_signature,
+            oauth_params=oauth_params_without_realm_and_signature,
             token_secret=token_secret
         )
         assert_equal(sig, ex["REQUEST_TOKEN_OAUTH_SIGNATURE"])
@@ -329,7 +329,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
 -----END RSA PRIVATE KEY-----'''
         self.http_method = "GET"
         self.url = "http://sp.example.com/"
-        self.query_params = dict(
+        self.oauth_params = dict(
             oauth_version='1.0',
             oauth_nonce="4572616e48616d6d65724c61686176",
             oauth_timestamp="137131200",
@@ -348,7 +348,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
             consumer_secret=self.oauth_consumer_secret,
             method=self.http_method,
             url=self.url,
-            query_params=self.query_params,
+            oauth_params=self.oauth_params,
             token_secret=self.oauth_token_secret
         ), self.oauth_signature)
 
@@ -357,7 +357,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
             consumer_secret=self.RSA.importKey(self.oauth_consumer_secret),
             method=self.http_method,
             url=self.url,
-            query_params=self.query_params,
+            oauth_params=self.oauth_params,
             token_secret=self.oauth_token_secret
         ), self.oauth_signature)
 
@@ -369,7 +369,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
             consumer_secret=self.oauth_consumer_secret,
             method=self.http_method,
             url=self.url,
-            query_params=self.query_params,
+            oauth_params=self.oauth_params,
             token_secret=self.oauth_token_secret
         ))
 
@@ -379,7 +379,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
             consumer_secret=self.RSA.importKey(self.oauth_consumer_secret),
             method=self.http_method,
             url=self.url,
-            query_params=self.query_params,
+            oauth_params=self.oauth_params,
             token_secret=self.oauth_token_secret
         ))
 
@@ -391,7 +391,7 @@ class Test_oauth_get_plaintext_signature(object):
         self.oauth_token_secret = "token test secret"
         self.oauth_consumer_key = "consumer test key"
         self.oauth_consumer_secret = "consumer test secret"
-        self.query_params = dict(
+        self.oauth_params = dict(
             oauth_version='1.0',
             oauth_nonce="4572616e48616d6d65724c61686176",
             oauth_timestamp="137131200",
@@ -408,7 +408,7 @@ class Test_oauth_get_plaintext_signature(object):
             consumer_secret=self.oauth_consumer_secret,
             method="POST",
             url="http://example.com/",
-            query_params=self.query_params,
+            oauth_params=self.oauth_params,
             token_secret=self.oauth_token_secret,
         ), "consumer%20test%20secret&token%20test%20secret")
 
@@ -417,7 +417,7 @@ class Test_oauth_get_plaintext_signature(object):
             consumer_secret=self.oauth_consumer_secret,
             method="POST",
             url="http://example.com/",
-            query_params=self.query_params,
+            oauth_params=self.oauth_params,
             token_secret=None
         ), "consumer%20test%20secret&")
 
@@ -426,7 +426,7 @@ class Test_oauth_get_plaintext_signature(object):
             consumer_secret="",
             method="POST",
             url="http://example.com/",
-            query_params=self.query_params,
+            oauth_params=self.oauth_params,
             token_secret=self.oauth_token_secret
         ), "&token%20test%20secret")
 
@@ -435,14 +435,14 @@ class Test_oauth_get_plaintext_signature(object):
             consumer_secret="",
             method="POST",
             url="http://example.com/",
-            query_params=self.query_params,
+            oauth_params=self.oauth_params,
             token_secret=None
         ), "&")
 
 
 class Test_oauth_get_signature_base_string(object):
     def setUp(self):
-        self.query_params = dict(
+        self.oauth_params = dict(
             oauth_consumer_key="9djdj82h48djs9d2",
             oauth_token="kkk9d7dh3k39sjv7",
             oauth_signature_method="HMAC-SHA1",
@@ -454,7 +454,7 @@ class Test_oauth_get_signature_base_string(object):
     def test_valid_base_string(self):
         base_string = oauth_get_signature_base_string( "POST",
                 "http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q",
-                self.query_params)
+                self.oauth_params)
         assert_equal(base_string, "POST&http%3A%2F%2Fexample.com%2Frequest&a2%3Dr%2520b%26a3%3D2%2520q%26a3%3Da%26b5%3D%253D%25253D%26c%2540%3D%26c2%3D%26oauth_consumer_key%3D9djdj82h48djs9d2%26oauth_nonce%3D7d8f3e4a%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131201%26oauth_token%3Dkkk9d7dh3k39sjv7")
 
     def test_ValueError_when_invalid_http_method(self):
@@ -471,7 +471,7 @@ class Test_oauth_get_signature_base_string(object):
         args = {
             "realm": "http://example.com",
         }
-        args.update(self.query_params)
+        args.update(self.oauth_params)
         url = "http://example.com/request?oauth_signature=foobar&realm=something"
         base_string = oauth_get_signature_base_string("POST", url, args)
         assert_true("realm=" not in base_string)
