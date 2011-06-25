@@ -54,6 +54,7 @@ except ImportError:
     import sha as sha1  # Deprecated
 
 from pyoauth.unicode import to_utf8, is_unicode
+from pyoauth.url import oauth_escape, oauth_parse_qs, oauth_unescape, oauth_urlencode_sl
 
 
 def oauth_generate_nonce(length=-1):
@@ -103,88 +104,6 @@ def oauth_generate_timestamp():
         A string containing a positive integer representing time as follows::
     """
     return str(int(time.time()))
-
-
-def oauth_parse_query_string(query_string):
-    """
-    Parses a query parameter string according to the OAuth spec.
-
-    Use only with OAuth query strings.
-
-    See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
-    """
-    return parse_qs(query_string.encode("utf-8"), keep_blank_values=True)
-
-
-def oauth_escape(oauth_value):
-    """
-    Percent-encodes according to the OAuth spec.
-
-    Used ONLY in constructing the signature base string and the "Authorization"
-    header field.
-
-    :param oauth_value:
-        Query string parameter value to escape. If the value is a Unicode
-        string, it will be encoded to UTF-8. A byte string is considered
-        exactly that, a byte string and will not be UTF-8 encoded—however, it
-        will be percent-encoded.
-    :returns:
-        String representing escaped value as follows::
-
-            Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
-            -----------------------------------------------------------------
-            Existing percent-encoding methods do not guarantee a consistent
-            construction of the signature base string.  The following percent-
-            encoding method is not defined to replace the existing encoding
-            methods defined by [RFC3986] and [W3C.REC-html40-19980424].  It is
-            used only in the construction of the signature base string and the
-            "Authorization" header field.
-
-            This specification defines the following method for percent-encoding
-            strings:
-
-            1.  Text values are first encoded as UTF-8 octets per [RFC3629] if
-               they are not already.  This does not include binary values that
-               are not intended for human consumption.
-
-            2.  The values are then escaped using the [RFC3986] percent-encoding
-               (%XX) mechanism as follows:
-
-               *  Characters in the unreserved character set as defined by
-                  [RFC3986], Section 2.3 (ALPHA, DIGIT, "-", ".", "_", "~") MUST
-                  NOT be encoded.
-
-               *  All other characters MUST be encoded.
-
-               *  The two hexadecimal characters used to represent encoded
-                  characters MUST be uppercase.
-
-            This method is different from the encoding scheme used by the
-            "application/x-www-form-urlencoded" content-type (for example, it
-            encodes space characters as "%20" and not using the "+" character).
-            It MAY be different from the percent-encoding functions provided by
-            web-development frameworks (e.g., encode different characters, use
-            lowercase hexadecimal characters).
-    """
-    if is_unicode(oauth_value):
-        oauth_value = oauth_value.encode("utf-8")
-    return urllib.quote(oauth_value, safe="~")
-
-
-def oauth_unescape(oauth_value):
-    """
-    Percent-decodes according to the OAuth spec.
-
-    See Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
-
-    :param oauth_value:
-        Value to percent-decode. Value will be UTF-8 encoded if it is a Unicode string.
-    :returns:
-        Percent-decoded value.
-    """
-    if is_unicode(oauth_value):
-        oauth_value = oauth_value.encode("utf-8")
-    return urllib.unquote(oauth_value.replace('+', ' '))
 
 
 def oauth_get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=None, token_secret=None):
@@ -489,162 +408,12 @@ def oauth_get_signature_base_string(method, url, oauth_params):
     if not isinstance(oauth_params, dict):
         raise ValueError("Query parameters must be specified as a dictionary.")
 
-    normalized_url, url_query_params = oauth_get_normalized_url_and_query_params(url)
-    url_query_params.update(oauth_params)
-
-    query_string = oauth_get_normalized_query_string(url_query_params)
+    normalized_url, url_query_params = _oauth_get_normalized_url_and_query_params(url)
+    query_string = oauth_get_normalized_query_string(url_query_params, oauth_params)
     return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
 
 
-def oauth_get_normalized_query_string(query_params, ignored_names=("oauth_signature", "realm")):
-    """
-    Normalizes a dictionary of query parameters according to OAuth spec.
-
-    :param query_params:
-        A dictionary of URL and protocol-specific query parameters.
-    :param ignored_names:
-        Any parameter having a name in this list will be excluded from the
-        generated query string. By default, it will exclude "oauth_signature"
-        and "realm" from the generated query string.
-    :returns:
-        Normalized string of query parameters as follows::
-
-            Parameter Normalization (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)
-            ------------------------------------------------------------------------------
-            The parameters collected in Section 3.4.1.3 are normalized into a
-            single string as follows:
-
-            1.  First, the name and value of each parameter are encoded
-               (Section 3.6).
-
-            2.  The parameters are sorted by name, using ascending byte value
-               ordering.  If two or more parameters share the same name, they
-               are sorted by their value.
-
-            3.  The name of each parameter is concatenated to its corresponding
-               value using an "=" character (ASCII code 61) as a separator, even
-               if the value is empty.
-
-            4.  The sorted name/value pairs are concatenated together into a
-               single string by using an "&" character (ASCII code 38) as
-               separator.
-
-            For example, the list of parameters from the previous section would
-            be normalized as follows:
-
-                                         Encoded:
-
-                       +------------------------+------------------+
-                       |          Name          |       Value      |
-                       +------------------------+------------------+
-                       |           b5           |     %3D%253D     |
-                       |           a3           |         a        |
-                       |          c%40          |                  |
-                       |           a2           |       r%20b      |
-                       |   oauth_consumer_key   | 9djdj82h48djs9d2 |
-                       |       oauth_token      | kkk9d7dh3k39sjv7 |
-                       | oauth_signature_method |     HMAC-SHA1    |
-                       |     oauth_timestamp    |     137131201    |
-                       |       oauth_nonce      |     7d8f3e4a     |
-                       |           c2           |                  |
-                       |           a3           |       2%20q      |
-                       +------------------------+------------------+
-
-                                          Sorted:
-
-                       +------------------------+------------------+
-                       |          Name          |       Value      |
-                       +------------------------+------------------+
-                       |           a2           |       r%20b      |
-                       |           a3           |       2%20q      |
-                       |           a3           |         a        |
-                       |           b5           |     %3D%253D     |
-                       |          c%40          |                  |
-                       |           c2           |                  |
-                       |   oauth_consumer_key   | 9djdj82h48djs9d2 |
-                       |       oauth_nonce      |     7d8f3e4a     |
-                       | oauth_signature_method |     HMAC-SHA1    |
-                       |     oauth_timestamp    |     137131201    |
-                       |       oauth_token      | kkk9d7dh3k39sjv7 |
-                       +------------------------+------------------+
-
-                                    Concatenated Pairs:
-
-                          +-------------------------------------+
-                          |              Name=Value             |
-                          +-------------------------------------+
-                          |               a2=r%20b              |
-                          |               a3=2%20q              |
-                          |                 a3=a                |
-                          |             b5=%3D%253D             |
-                          |                c%40=                |
-                          |                 c2=                 |
-                          | oauth_consumer_key=9djdj82h48djs9d2 |
-                          |         oauth_nonce=7d8f3e4a        |
-                          |   oauth_signature_method=HMAC-SHA1  |
-                          |      oauth_timestamp=137131201      |
-                          |     oauth_token=kkk9d7dh3k39sjv7    |
-                          +-------------------------------------+
-
-            and concatenated together into a single string (line breaks are for
-            display purposes only)::
-
-                 a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9dj
-                 dj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1
-                 &oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7
-    """
-    encoded_pairs = _oauth_get_normalized_query_params_l(query_params, ignored_names=ignored_names, sorted_params=True)
-    query_string = "&".join([k+"="+v for k, v in encoded_pairs])
-    return query_string
-
-
-def _oauth_get_normalized_query_params_l(query_params, ignored_names=None, sorted_params=True):
-    """
-    Returns a sorted list of query parameters normalized according to
-    http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
-
-    :param query_params:
-        A dictionary of URL and protocol-specific query parameters to be
-        normalized.
-    :param ignored_names:
-        Names included in this list will be excluded from the parameter list.
-    :param sorted_params:
-        If ``True``, the parameters will be sorted according to the OAuth spec;
-        not if ``False``.
-    :returns:
-        Returns a sorted list of normalized query parameters according to
-        http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
-    """
-    if not query_params:
-        return []
-    encoded_pairs = []
-    for k, v in query_params.iteritems():
-        # Keys are also percent-encoded according to OAuth spec.
-        k = oauth_escape(to_utf8(k))
-        if ignored_names and k in ignored_names:
-            continue
-        elif isinstance(v, basestring):
-            encoded_pairs.append((k, oauth_escape(v),))
-        else:
-            try:
-                v = list(v)
-            except TypeError, e:
-                assert "is not iterable" in str(e)
-                encoded_pairs.append((k, oauth_escape(str(v)), ))
-            else:
-                # Loop over the sequence.
-                for i in v:
-                    if isinstance(i, basestring):
-                        encoded_pairs.append((k, oauth_escape(i), ))
-                    else:
-                        encoded_pairs.append((k, oauth_escape(str(i)), ))
-    # After encoding the pairs, sort them according to the spec and if
-    # told to do so by ``sorted_params``.
-    sort_func = sorted if sorted_params else (lambda w: w)
-    return sort_func(encoded_pairs)
-
-
-def oauth_get_normalized_url_and_query_params(url):
+def _oauth_get_normalized_url_and_query_params(url):
     """
     Normalizes a URL that will be used in the oauth signature and parses
     query parameters as well.
@@ -737,13 +506,13 @@ def oauth_get_normalized_url_and_query_params(url):
 
     Usage::
 
-        >>> u, q = oauth_get_normalized_url_and_query_params("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b")
+        >>> u, q = _oauth_get_normalized_url_and_query_params("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b")
         >>> assert u == "http://example.com/request"
         >>> assert q == {'a2': ['r b'], 'a3': ['a'], 'b5': ['=%3D'], 'c@': ['']}
-        >>> u, q = oauth_get_normalized_url_and_query_params("http://example.com/request?c2&a3=2+q")
+        >>> u, q = _oauth_get_normalized_url_and_query_params("http://example.com/request?c2&a3=2+q")
         >>> assert u == "http://example.com/request"
         >>> assert q == {'a3': ['2 q'], 'c2': ['']}
-        >>> u, q = oauth_get_normalized_url_and_query_params("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q")
+        >>> u, q = _oauth_get_normalized_url_and_query_params("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q")
         >>> assert u == "http://example.com/request"
         >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
 
@@ -751,8 +520,128 @@ def oauth_get_normalized_url_and_query_params(url):
     parts = urlparse.urlparse(url)
     scheme, netloc, path, _, query_string = parts[:5]
     normalized_url = scheme.lower() + "://" + netloc.lower() + path
-    query_params = oauth_parse_query_string(query_string)
+    query_params = oauth_parse_qs(query_string)
     return normalized_url, query_params
+
+
+def oauth_get_normalized_query_string(url_query_params, oauth_params):
+    """
+    Normalizes a dictionary of query parameters according to OAuth spec.
+
+    :param url_query_params:
+        A dictionary of URL query parameters.
+    :param oauth_params:
+        A dictionary of protocol-specific query parameters. Any parameter
+        names that do not begin with "oauth_" will be excluded from the
+        normalized query string. 'oauth_signature' is also specially excluded.
+    :returns:
+        Normalized string of query parameters as follows::
+
+            Parameter Normalization (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)
+            ------------------------------------------------------------------------------
+            The parameters collected in Section 3.4.1.3 are normalized into a
+            single string as follows:
+
+            1.  First, the name and value of each parameter are encoded
+               (Section 3.6).
+
+            2.  The parameters are sorted by name, using ascending byte value
+               ordering.  If two or more parameters share the same name, they
+               are sorted by their value.
+
+            3.  The name of each parameter is concatenated to its corresponding
+               value using an "=" character (ASCII code 61) as a separator, even
+               if the value is empty.
+
+            4.  The sorted name/value pairs are concatenated together into a
+               single string by using an "&" character (ASCII code 38) as
+               separator.
+
+            For example, the list of parameters from the previous section would
+            be normalized as follows:
+
+                                         Encoded:
+
+                       +------------------------+------------------+
+                       |          Name          |       Value      |
+                       +------------------------+------------------+
+                       |           b5           |     %3D%253D     |
+                       |           a3           |         a        |
+                       |          c%40          |                  |
+                       |           a2           |       r%20b      |
+                       |   oauth_consumer_key   | 9djdj82h48djs9d2 |
+                       |       oauth_token      | kkk9d7dh3k39sjv7 |
+                       | oauth_signature_method |     HMAC-SHA1    |
+                       |     oauth_timestamp    |     137131201    |
+                       |       oauth_nonce      |     7d8f3e4a     |
+                       |           c2           |                  |
+                       |           a3           |       2%20q      |
+                       +------------------------+------------------+
+
+                                          Sorted:
+
+                       +------------------------+------------------+
+                       |          Name          |       Value      |
+                       +------------------------+------------------+
+                       |           a2           |       r%20b      |
+                       |           a3           |       2%20q      |
+                       |           a3           |         a        |
+                       |           b5           |     %3D%253D     |
+                       |          c%40          |                  |
+                       |           c2           |                  |
+                       |   oauth_consumer_key   | 9djdj82h48djs9d2 |
+                       |       oauth_nonce      |     7d8f3e4a     |
+                       | oauth_signature_method |     HMAC-SHA1    |
+                       |     oauth_timestamp    |     137131201    |
+                       |       oauth_token      | kkk9d7dh3k39sjv7 |
+                       +------------------------+------------------+
+
+                                    Concatenated Pairs:
+
+                          +-------------------------------------+
+                          |              Name=Value             |
+                          +-------------------------------------+
+                          |               a2=r%20b              |
+                          |               a3=2%20q              |
+                          |                 a3=a                |
+                          |             b5=%3D%253D             |
+                          |                c%40=                |
+                          |                 c2=                 |
+                          | oauth_consumer_key=9djdj82h48djs9d2 |
+                          |         oauth_nonce=7d8f3e4a        |
+                          |   oauth_signature_method=HMAC-SHA1  |
+                          |      oauth_timestamp=137131201      |
+                          |     oauth_token=kkk9d7dh3k39sjv7    |
+                          +-------------------------------------+
+
+            and concatenated together into a single string (line breaks are for
+            display purposes only)::
+
+                 a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9dj
+                 dj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1
+                 &oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7
+    """
+    url_query_params = url_query_params or {}
+    if not oauth_params:
+        return []
+
+    # Clean up oauth params.
+    # OAuth param names must begin with "oauth_".
+    _oauth_params = {}
+    for k, v in oauth_params.iteritems():
+        if k.startswith("oauth_"):
+            # This gets rid of "realm" or any non-OAuth param.
+            _oauth_params[k] = v
+
+    query_params = {}
+    query_params.update(url_query_params)
+    query_params.update(_oauth_params)
+
+    # Now encode the parameters, while ignoring 'oauth_signature' from
+    # the entire list of parameters.
+    sorted_encoded_pairs = oauth_urlencode_sl(query_params, ignored_names=('oauth_signature', ))
+    query_string = "&".join([k+"="+v for k, v in sorted_encoded_pairs])
+    return query_string
 
 
 def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
@@ -774,7 +663,7 @@ def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
         s = 'OAuth realm="' + str(realm) + '",\n' + indentation
     else:
         s = 'OAuth '
-    normalized_param_pairs = _oauth_get_normalized_query_params_l(oauth_params, ignored_names=("realm"), sorted_params=True)
+    normalized_param_pairs = oauth_urlencode_sl(oauth_params, ignored_names=("realm",))
     delimiter = ",\n" + indentation
     s += delimiter.join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
