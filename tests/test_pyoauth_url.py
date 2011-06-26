@@ -207,6 +207,7 @@ class Test_oauth_urlencode_sl(object):
             "a3": ["a", "2 q"],
             "c@": [""],
             "c2": "",
+            "blank_list_value_not_preserved": [],
             "oauth_consumer_key": "9djdj82h48djs9d2",
             "oauth_token": "kkk9d7dh3k39sjv7",
             "oauth_signature_method": "HMAC-SHA1",
@@ -227,6 +228,25 @@ class Test_oauth_urlencode_sl(object):
             ("oauth_token", "kkk9d7dh3k39sjv7"),
         ]
         assert_equal(oauth_urlencode_sl(params), valid_params_list)
+
+    def test_blank_list_value_not_preserved(self):
+        params = {
+            "blank_list_value_not_preserved": [],
+            "oauth_consumer_key": "9djdj82h48djs9d2",
+            "oauth_token": "kkk9d7dh3k39sjv7",
+            "oauth_signature_method": "HMAC-SHA1",
+            "oauth_timestamp": ["137131201"],
+            "oauth_nonce": "7d8f3e4a",
+        }
+        valid_params_list = [
+            ("oauth_consumer_key", "9djdj82h48djs9d2"),
+            ("oauth_nonce", "7d8f3e4a"),
+            ("oauth_signature_method", "HMAC-SHA1"),
+            ("oauth_timestamp", "137131201"),
+            ("oauth_token", "kkk9d7dh3k39sjv7"),
+        ]
+        assert_equal(oauth_urlencode_sl(params), valid_params_list)
+
 
 
 class Test_oauth_url_query_params_add(object):
