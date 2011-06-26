@@ -189,6 +189,7 @@ def oauth_urlencode_sl(query_params, allow_func=None):
                 if len(v) > 0:
                     for i in v:
                         encoded_pairs.append((k, oauth_escape(i), ))
+                # TODO: Not sure yet what to do with blank lists.
                 #else:
                 #    # Preserve blank list values.
                 #    encoded_pairs.append((k, "", ))
@@ -278,6 +279,7 @@ def oauth_url_query_params_sanitize(query_params):
         #return oauth_parse_qs(oauth_urlencode(query_params))
     else:
         raise ValueError("Query parameters must be passed as a dictionary or a query string.")
+
 
 def urlsplit_normalized(url):
     """
