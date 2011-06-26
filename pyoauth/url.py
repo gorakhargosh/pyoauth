@@ -193,7 +193,8 @@ def oauth_urlencode_sl(query_params, allow_func=None):
                 if len(v) > 0:
                     for i in v:
                         encoded_pairs.append((k, oauth_escape(i), ))
-                # TODO: Not sure yet what to do with blank lists.
+                # ``urllib.urlencode()`` doesn't preserve blank lists.
+                # Therefore, we're discarding them.
                 #else:
                 #    # Preserve blank list values.
                 #    encoded_pairs.append((k, "", ))
