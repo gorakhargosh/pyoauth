@@ -279,6 +279,8 @@ def oauth_url_query_params_sanitize(query_params):
 def urlparse_normalized(url):
     """
     Like urlparse.urlparse but also normalizes parts and returns a tuple.
+    You can essentially take everything after ``base_url`` in the returned
+    tuple and concatenate them directly to form a functional URL.
 
     :param url:
         The URL to split and normalize.

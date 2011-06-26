@@ -3,7 +3,7 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, oauth_urlencode, oauth_urlencode_sl, oauth_url_query_params_sanitize
+from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, oauth_urlencode, oauth_urlencode_sl, oauth_url_query_params_sanitize, oauth_url_query_params_merge
 
 class Test_oauth_parse_qs(object):
     def test_are_blank_values_preserved(self):
@@ -225,6 +225,29 @@ class Test_oauth_urlencode_sl(object):
 class Test_oauth_url_query_params_add(object):
     def test_adds_query_params_properly(self):
         pass
+
+class Test_oauth_url_query_params_merge(object):
+    def test_adds_query_params_properly(self):
+        params1 = {
+            "a2": "r b",
+            "b5": "=%3D",
+            "a3": ["a"],
+            "c2": [""],
+        }
+        params2 = {
+            "a3": ["2 q"],
+            "c@": "",
+        }
+        params3 = """oauth_nonce=7d8f3e4a\
+&oauth_timestamp=137131201\
+&oauth_signature_method=HMAC-SHA1\
+&oauth_consumer_key=9djdj82h48djs9d2\
+&oauth_token=kkk9d7dh3k39sjv7\
+"""
+        resulting_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
+
+        assert_equal(oauth_urlencode(oauth_url_query_params_merge(params1, params2, params3)), resulting_query_string)
+
 
 class Test_oauth_url_query_params_sanitize(object):
     def test_unflattens_dict(self):
