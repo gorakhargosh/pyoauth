@@ -128,10 +128,6 @@ class Test_oauth_escape(object):
         assert_equal(oauth_escape(True), "True")
         assert_equal(oauth_escape(5), "5")
 
-    # TODO:
-    #def test_bytestrings_are_not_utf_8_encoded(self):
-    #    b = b'\x01s\x95\x8e|HL\xe4\x81\x93\x155\x99@\x8b\xe3'
-
 
 class Test_oauth_unescape(object):
     _unsafe_characters = [" ",
@@ -173,12 +169,6 @@ class Test_oauth_unescape(object):
 
     def test_plus_is_treated_as_space_character(self):
         assert_equal(oauth_unescape('+'), ' ', "Plus character in encoding is not treated as space character.")
-
-
-    # TODO:
-    #def test_percent_encode_decode(self):
-    #    for char in self._unsafe_characters:
-    #        assert_equal(oauth_unescape(oauth_escape(char)), char, "Percent-encode-decode failed for char: %r" % char)
 
 
 class Test_oauth_urlencode(object):
