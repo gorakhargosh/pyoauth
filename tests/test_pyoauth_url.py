@@ -268,4 +268,5 @@ class Test_oauth_url_query_params_sanitize(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_dict_equal(oauth_url_query_params_sanitize(query_string), expected_params)
+
+        assert_equal(oauth_urlencode(oauth_url_query_params_sanitize(query_string)), oauth_urlencode(expected_params))
