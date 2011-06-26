@@ -662,7 +662,14 @@ def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
         s = 'OAuth realm="' + str(realm) + '",\n' + indentation
     else:
         s = 'OAuth '
-    normalized_param_pairs = oauth_urlencode_sl(oauth_params, ignored_names=("realm",))
+    # Clean up oauth params.
+    # OAuth param names must begin with "oauth_".
+    _oauth_params = {}
+    for k, v in oauth_params.iteritems():
+        if k.startswith("oauth_"):
+            # This gets rid of "realm" or any non-OAuth param.
+            _oauth_params[k] = v
+    normalized_param_pairs = oauth_urlencode_sl(_oauth_params, ignored_names=None)
     delimiter = ",\n" + indentation
     s += delimiter.join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
@@ -767,7 +774,8 @@ def _oauth_parse_authorization_header_value_l(header_value):
         # We need to be able to detect problems with the values too.
         value = value[1:-1]
         name = oauth_unescape(name)
-        if name != "realm":
+        if name.lower() != "realm":
+            # "realm" is case-insensitive.
             # The realm parameter value is a simple quoted string.
             # It is neither percent-encoded nor percent-decoded in OAuth.
             value = oauth_unescape(value)
