@@ -275,12 +275,29 @@ def oauth_url_query_params_sanitize(query_params):
     else:
         raise ValueError("Query parameters must be passed as a dictionary or a query string.")
 
-
-def urlparse_normalized(url):
+def urlsplit_normalized(url):
     """
     Like urlparse.urlparse but also normalizes parts and returns a tuple.
     You can essentially take everything after ``base_url`` in the returned
     tuple and concatenate them directly to form a functional URL.
+
+    :param url:
+        The URL to split and normalize.
+    :returns:
+        Tuple that contains these elements:
+        (base_url, scheme, netloc, path, params, query, fragment)
+    """
+    base_url, scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
+    params      = (";" + params) if params else ""
+    fragment    = ("#" + fragment) if fragment else ""
+    query       = ("?" + query) if query else ""
+    return base_url, scheme, netloc, path, params, query, fragment
+
+
+def urlparse_normalized(url):
+    """
+    Like urlparse.urlparse but also normalizes URL and the path,
+    and returns a tuple.
 
     :param url:
         The URL to split and normalize.
@@ -299,14 +316,14 @@ def urlparse_normalized(url):
     password    = (":" + parts.password) if parts.password else ""
     credentials = username + password
     credentials = (credentials + "@") if credentials else ""
-    port        = (":" + parts.port) if parts.port else ""
+    port        = (":" + str(parts.port)) if parts.port else ""
     netloc      = credentials + parts.hostname + port
     # http://tools.ietf.org/html/rfc3986#section-3
     # and http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.2.2
     path        = parts.path or "/"
-    params      = (";" + parts.params) if parts.params else ""
-    fragment    = ("#" + parts.fragment) if parts.fragment else ""
-    query       = parts.query if parts.query else ""
+    params      = parts.params or ""
+    fragment    = parts.fragment or ""
+    query       = parts.query or ""
 
     base_url = "".join([scheme, "://", netloc])
     return base_url, scheme, netloc, path, params, query, fragment

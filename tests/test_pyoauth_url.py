@@ -3,7 +3,7 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, oauth_urlencode, oauth_urlencode_sl, oauth_url_query_params_sanitize, oauth_url_query_params_merge
+from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, oauth_urlencode, oauth_urlencode_sl, oauth_url_query_params_sanitize, oauth_url_query_params_merge, urlparse_normalized, urlsplit_normalized
 
 class Test_oauth_parse_qs(object):
     def test_are_blank_values_preserved(self):
@@ -245,8 +245,76 @@ class Test_oauth_url_query_params_merge(object):
 &oauth_token=kkk9d7dh3k39sjv7\
 """
         resulting_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
-
         assert_equal(oauth_urlencode(oauth_url_query_params_merge(params1, params2, params3)), resulting_query_string)
+
+
+class Test_urlsplit_normalized(object):
+    def test_valid_parts_and_normalization(self):
+        url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/result;param1?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2#fragment"
+        result = (
+            "http://UserName:PassWORdX@www.example.com:8000",
+            "http",
+            "UserName:PassWORdX@www.example.com:8000",
+            "/result",
+            ";param1",
+            "?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2",
+            "#fragment",
+        )
+        assert_equal(urlsplit_normalized(url), result)
+
+    def test_path_is_never_empty(self):
+        url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2#fragment"
+        result = (
+            "http://UserName:PassWORdX@www.example.com:8000",
+            "http",
+            "UserName:PassWORdX@www.example.com:8000",
+            "/",
+            "",
+            "?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2",
+            "#fragment",
+        )
+        assert_equal(urlsplit_normalized(url), result)
+
+    def test_path_is_never_empty(self):
+        url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/"
+        result = (
+            "http://UserName:PassWORdX@www.example.com:8000",
+            "http",
+            "UserName:PassWORdX@www.example.com:8000",
+            "/",
+            "",
+            "",
+            "",
+        )
+        assert_equal(urlsplit_normalized(url), result)
+
+
+class Test_urlparse_normalized(object):
+    def test_valid_parts_and_normalization(self):
+        url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/result;param1?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2#fragment"
+        result = (
+            "http://UserName:PassWORdX@www.example.com:8000",
+            "http",
+            "UserName:PassWORdX@www.example.com:8000",
+            "/result",
+            "param1",
+            "a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2",
+            "fragment",
+        )
+        assert_equal(urlparse_normalized(url), result)
+
+    def test_path_is_never_empty(self):
+        url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2#fragment"
+        result = (
+            "http://UserName:PassWORdX@www.example.com:8000",
+            "http",
+            "UserName:PassWORdX@www.example.com:8000",
+            "/",
+            "",
+            "a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2",
+            "fragment",
+        )
+        assert_equal(urlparse_normalized(url), result)
 
 
 class Test_oauth_url_query_params_sanitize(object):
@@ -291,7 +359,6 @@ class Test_oauth_url_query_params_sanitize(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-
         assert_equal(oauth_urlencode(oauth_url_query_params_sanitize(query_string)), oauth_urlencode(expected_params))
 
     def test_ValueError_when_invalid_query_params_value(self):

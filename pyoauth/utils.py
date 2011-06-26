@@ -411,7 +411,7 @@ def oauth_get_signature_base_string(method, url, oauth_params):
     if not isinstance(oauth_params, dict):
         raise ValueError("Query parameters must be specified as a dictionary.")
 
-    base_url, scheme, netloc, path, param, query, fragment = urlparse_normalized(url)
+    base_url, _, _, path, _, query, _ = urlparse_normalized(url)
     query_string = oauth_get_normalized_query_string(oauth_parse_qs(query), oauth_params)
     normalized_url = base_url + path
     return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
