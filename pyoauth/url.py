@@ -129,6 +129,8 @@ def oauth_urlencode(query_params, allow_func=None):
     parameters, "name=value" pairs, sorted first by name then by value based on
     the OAuth percent-encoding rules and specification.
 
+    Behaves like urlencode(query_params, doseq=1).
+
     :param query_params:
         Dictionary of query parameters.
     :param allow_func:
@@ -153,6 +155,8 @@ def oauth_urlencode_sl(query_params, allow_func=None):
     URL encodes a dictionary of query parameters into a list of query
     parameters, (name, value) pairs, sorted first by name then by value based on
     the OAuth percent-encoding rules and specification.
+
+    Behaves like urlencode(query_params, doseq=1).
 
     :param query_params:
         Dictionary of query parameters.
