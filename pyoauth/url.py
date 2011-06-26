@@ -335,7 +335,7 @@ def urlparse_normalized(url):
     return base_url, scheme, netloc, path, params, query, fragment
 
 
-def url_equals(url1, url2):
+def _url_equals(url1, url2):
     """
     Compares two URLs and determines whether they are the equal.
 
@@ -348,21 +348,21 @@ def url_equals(url1, url2):
 
     Usage::
 
-        >>> url_equals("http://www.google.com/a", "http://www.google.com/a")
+        >>> _url_equals("http://www.google.com/a", "http://www.google.com/a")
         True
-        >>> url_equals("https://www.google.com/a", "http://www.google.com/a")
+        >>> _url_equals("https://www.google.com/a", "http://www.google.com/a")
         False
-        >>> url_equals("http://www.google.com/", "http://www.example.com/")
+        >>> _url_equals("http://www.google.com/", "http://www.example.com/")
         False
-        >>> url_equals("http://example.com:80/", "http://example.com:8000/")
+        >>> _url_equals("http://example.com:80/", "http://example.com:8000/")
         False
-        >>> url_equals("http://user@example.com/", "http://user2@example.com.com/")
+        >>> _url_equals("http://user@example.com/", "http://user2@example.com.com/")
         False
-        >>> url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment")
+        >>> _url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment")
         True
-        >>> url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment2")
+        >>> _url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment2")
         False
-        >>> url_equals("http://www.google.com/request?a=b", "http://www.google.com/request?b=c")
+        >>> _url_equals("http://www.google.com/request?a=b", "http://www.google.com/request?b=c")
         False
     """
     u1 = urlparse.urlparse(url1)
@@ -373,42 +373,3 @@ def url_equals(url1, url2):
         u1.netloc == u2.netloc and \
         u1.fragment == u2.fragment and \
         parse_qs(u1.query, keep_blank_values=True) == parse_qs(u2.query, keep_blank_values=True)
-
-
-def url_concat(url, **query_params):
-    """
-    Concatenate URL and query parameters regardless of whether
-    the URL has existing query parameters.
-
-    DO NOT use this to construct OAuth URLs.
-
-    :param url:
-        The URL to add the query parameters to.
-    :param query_params:
-        Query parameter dictionary.
-
-    >>> url = url_concat("http://www.example.com/foo?a=b", c="d")
-    >>> url_equals("http://www.example.com/foo?a=b&c=d", url)
-    True
-
-    >>> url = url_concat("http://www.example.com/", c="d")
-    >>> url_equals("http://www.example.com/?c=d", url)
-    True
-
-    >>> url = url_concat("http://www.example.com/", c="d")
-    >>> url_equals("http://www.example.com/?c=d", url)
-    True
-
-    >>> url = url_concat("http://www.example.com/foo?a=b", a="d")
-    >>> url_equals("http://www.example.com/foo?a=b&a=d", url)
-    True
-
-    >>> url = url_concat("http://www.example.com/")
-    >>> url_equals("http://www.example.com/", url)
-    True
-    """
-    if not query_params:
-        return url
-    if url[-1] not in ("?", "&"):
-        url += "&" if ("?" in url) else "?"
-    return url + urllib.urlencode(query_params)
