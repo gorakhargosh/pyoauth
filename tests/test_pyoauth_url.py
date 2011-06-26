@@ -270,3 +270,8 @@ class Test_oauth_url_query_params_sanitize(object):
         }
 
         assert_equal(oauth_urlencode(oauth_url_query_params_sanitize(query_string)), oauth_urlencode(expected_params))
+
+    def test_ValueError_when_invalid_query_params_value(self):
+        assert_raises(ValueError, oauth_url_query_params_sanitize, None)
+        assert_raises(ValueError, oauth_url_query_params_sanitize, True)
+        assert_raises(ValueError, oauth_url_query_params_sanitize, 5)
