@@ -267,14 +267,7 @@ def oauth_url_query_params_sanitize(query_params):
         d = {}
         for n, v in query_params.iteritems():
             if not isinstance(v, list) and not isinstance(v, tuple):
-                if isinstance(v, basestring):
-                    # Blank values are stored as empty lists.
-                    if v == "":
-                        d[n] = []
-                    else:
-                        d[n] = [v]
-                else:
-                    d[n] = [v]
+                d[n] = [v]
             else:
                 d[n] = v
         return d
