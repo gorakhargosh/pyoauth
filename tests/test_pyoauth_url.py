@@ -3,7 +3,7 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, oauth_urlencode
+from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, oauth_urlencode, oauth_urlencode_sl
 
 class Test_oauth_parse_qs(object):
     def test_are_blank_values_preserved(self):
@@ -190,3 +190,32 @@ class Test_oauth_urlencode(object):
         }
         valid_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
         assert_equal(oauth_urlencode(params), valid_query_string)
+
+class Test_oauth_urlencode_sl(object):
+    def test_valid_query_params_list(self):
+        params = {
+            "a2": "r b",
+            "b5": "=%3D",
+            "a3": ["a", "2 q"],
+            "c@": [],
+            "c2": [],
+            "oauth_consumer_key": "9djdj82h48djs9d2",
+            "oauth_token": "kkk9d7dh3k39sjv7",
+            "oauth_signature_method": "HMAC-SHA1",
+            "oauth_timestamp": ["137131201"],
+            "oauth_nonce": "7d8f3e4a",
+        }
+        valid_params_list = [
+            ("a2", "r%20b"),
+            ("a3", "2%20q"),
+            ("a3", "a"),
+            ("b5", "%3D%253D"),
+            ("c%40", ""),
+            ("c2", ""),
+            ("oauth_consumer_key", "9djdj82h48djs9d2"),
+            ("oauth_nonce", "7d8f3e4a"),
+            ("oauth_signature_method", "HMAC-SHA1"),
+            ("oauth_timestamp", "137131201"),
+            ("oauth_token", "kkk9d7dh3k39sjv7"),
+        ]
+        assert_equal(oauth_urlencode_sl(params), valid_params_list)
