@@ -269,7 +269,7 @@ def oauth_url_query_params_sanitize(query_params):
             if not isinstance(v, list) and not isinstance(v, tuple):
                 d[n] = [v]
             else:
-                d[n] = v
+                d[n] = list(v)
         return d
         #return oauth_parse_qs(oauth_urlencode(query_params))
     else:
