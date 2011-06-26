@@ -184,8 +184,12 @@ def oauth_urlencode_sl(query_params, allow_func=None):
                 encoded_pairs.append((k, oauth_escape(v),))
             else:
                 # Loop over the sequence.
-                for i in v:
-                    encoded_pairs.append((k, oauth_escape(i), ))
+                if len(v) > 0:
+                    for i in v:
+                        encoded_pairs.append((k, oauth_escape(i), ))
+                else:
+                    # Preserve blank values.
+                    encoded_pairs.append((k, "", ))
     # Sort after encoding according to the OAuth spec.
     return sorted(encoded_pairs)
 
@@ -281,18 +285,6 @@ def urlparse_normalized(url):
     :returns:
         Tuple that contains these elements:
         (base_url, scheme, netloc, path, params, query, fragment)
-
-    Usage::
-
-        >>> u, q = oauth_split_and_normalize_url("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b")
-        >>> assert u == "http://example.com/request"
-        >>> assert q == {'a2': ['r b'], 'a3': ['a'], 'b5': ['=%3D'], 'c@': ['']}
-        >>> u, q = oauth_split_and_normalize_url("http://example.com/request?c2&a3=2+q")
-        >>> assert u == "http://example.com/request"
-        >>> assert q == {'a3': ['2 q'], 'c2': ['']}
-        >>> u, q = oauth_split_and_normalize_url("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q")
-        >>> assert u == "http://example.com/request"
-        >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
     """
     if not url:
         raise ValueError("URL not specified.")
@@ -314,7 +306,7 @@ def urlparse_normalized(url):
     fragment    = ("#" + parts.fragment) if parts.fragment else ""
     query       = parts.query if parts.query else ""
 
-    base_url = "".join([scheme, "://", netloc, path])
+    base_url = "".join([scheme, "://", netloc])
     return base_url, scheme, netloc, path, params, query, fragment
 
 
