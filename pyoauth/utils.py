@@ -53,8 +53,9 @@ try:
 except ImportError:
     import sha as sha1  # Deprecated
 
-from pyoauth.unicode import to_utf8, is_unicode_string
-from pyoauth.url import oauth_escape, oauth_parse_qs, oauth_unescape, oauth_urlencode_sl, oauth_url_split_and_normalize, oauth_urlencode
+from pyoauth.unicode import to_utf8
+from pyoauth.url import oauth_escape, oauth_parse_qs, oauth_unescape, \
+    oauth_urlencode_sl, oauth_urlencode, urlparse_normalized
 
 
 def oauth_generate_nonce(length=-1):
@@ -399,7 +400,9 @@ def oauth_get_signature_base_string(method, url, oauth_params):
 
             ...
     """
-    allowed_methods = ("POST", "PUT", "GET", "DELETE", "OPTIONS", "TRACE", "HEAD", "CONNECT", "PATCH")
+    allowed_methods = ("POST", "PUT", "GET", "DELETE",
+                       "OPTIONS", "TRACE", "HEAD", "CONNECT",
+                       "PATCH")
     method_normalized = method.upper()
     if method_normalized not in allowed_methods:
         raise ValueError("Method must be one of the HTTP methods %s: got `%s` instead" % (allowed_methods, method))
@@ -408,9 +411,9 @@ def oauth_get_signature_base_string(method, url, oauth_params):
     if not isinstance(oauth_params, dict):
         raise ValueError("Query parameters must be specified as a dictionary.")
 
-    normalized_url, url_query_string, _ = oauth_url_split_and_normalize(url)
-    url_query_params = oauth_parse_qs(url_query_string)
-    query_string = oauth_get_normalized_query_string(url_query_params, oauth_params)
+    base_url, scheme, netloc, path, param, query, fragment = urlparse_normalized(url)
+    query_string = oauth_get_normalized_query_string(oauth_parse_qs(query), oauth_params)
+    normalized_url = base_url + path
     return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
 
 

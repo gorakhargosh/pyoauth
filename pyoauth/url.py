@@ -190,49 +190,97 @@ def oauth_urlencode_sl(query_params, allow_func=None):
     return sorted(encoded_pairs)
 
 
-def oauth_url_add_query_params(url, extra_query_params):
+def oauth_url_query_params_add(url, extra_query_params, allow_func=None):
     """
-    Adds additional query parameters to a URL while preserving the existing
-    parameters. Also normalizes the URL according to the OAuth specification.
+    Adds additional query parameters to a URL while preserving existing ones.
+
+    The URL will be normalized according to the OAuth specification with the
+    exception that the URL fragment is preserved.
+
+    :param url:
+        The URL to add the additional query parameters to.
+    :param extra_query_params:
+        The additional query parameters as a dictionary object or a query
+        string.
+    :param allow_func:
+        A callback that will be called for each query parameter and should
+        return ``False`` or a falsy value if that parameter should not be
+        included. By default, all query parameters are included. The function
+        takes the following method signature::
+
+            def allow_func(name, value):
+                return is_name_allowed(name) and is_value_allowed(value):
+    :returns:
+        A normalized URL with the fragment and existing query parameters
+        preserved and with the extra query parameters added.
     """
-    if extra_query_params:
-        if not isinstance(extra_query_params, dict)
-            raise ValueError("Query parameters must be passed as a dictionary.")
+    base_url, scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
 
-    normalized_url, url_query_string, url_fragment = oauth_url_split_and_normalize(url)
-
-    # Now work on the query string.
-    d = {}
-    d.update(oauth_parse_qs(url_query_string))
-    for name, value in extra_query_params.iteritems():
-        if name in d:
-            d[name].append(value)
-        else:
-            d[name] = [value]
-
-    qs = oauth_urlencode(d)
+    d = oauth_url_query_params_merge(query, extra_query_params)
+    qs = oauth_urlencode(d, allow_func=allow_func)
     qs = ("?" + qs) if qs else ""
+    return base_url + path + params + qs + fragment
 
-    return normalized_url + qs + url_fragment
 
-
-def oauth_url_split_and_normalize(url):
+def oauth_url_query_params_merge(query_params, *extra_query_params):
     """
-    Splits a URL into a normalized URL, query string, and a
-    formatted URL fragment.
+    Merges multiple query parameter dictionaries or strings.
 
-    :see: Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
+    :param query_params:
+        Query string or a dictionary of query parameters.
+    :param extra_query_params:
+        One or more query string or a dictionary of query parameters.
+    :returns:
+        A dictionary of merged query parameters.
+    """
+    query_params = oauth_url_query_params_sanitize(query_params)
+    d = {}
+    d.update(query_params)
+    for qp in extra_query_params:
+        qp = oauth_url_query_params_sanitize(qp)
+        for name, value in qp.iteritems():
+            if name in d:
+                d[name].extend(value)
+            else:
+                d[name] = value
+    return d
+
+
+def oauth_url_query_params_sanitize(query_params):
+    """
+    Sanitizes a query parameter dictionary or query string to return a
+    properly unflattened query parameter dictionary.
+
+    :param query_params:
+        A query parameter dictionary or a query string.
+    :returns:
+        An unflattened query parameter dictionary.
+    """
+    if isinstance(query_params, basestring):
+        return oauth_parse_qs(query_params)
+    elif isinstance(query_params, dict):
+        # Unflatten the dictionary.
+        d = {}
+        for n, v in query_params.iteritems():
+            if not isinstance(v, list) and not isinstance(v, tuple):
+                d[n] = [v]
+            else:
+                d[n] = v
+        return d
+        #return oauth_parse_qs(oauth_urlencode(query_params))
+    else:
+        raise ValueError("Query parameters must be passed as a dictionary or a query string.")
+
+
+def urlparse_normalized(url):
+    """
+    Like urlparse.urlparse but also normalizes parts and returns a tuple.
+
     :param url:
         The URL to split and normalize.
     :returns:
         Tuple that contains these elements:
-
-        1. Normalized URL devoid of the query string and the fragment.
-        2. Query string.
-        3. A preformatted fragment—it begins with a '#' character if a fragment
-           was found in the URL; otherwise, it is an empty string.
-
-        as (normalized defragged URL, query parameters dictionary, formatted fragment) as follows::
+        (base_url, scheme, netloc, path, params, query, fragment)
 
     Usage::
 
@@ -245,29 +293,29 @@ def oauth_url_split_and_normalize(url):
         >>> u, q = oauth_split_and_normalize_url("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q")
         >>> assert u == "http://example.com/request"
         >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
-
     """
     if not url:
         raise ValueError("URL not specified.")
 
-    url_parts = urlparse.urlparse(url)
+    parts = urlparse.urlparse(url)
 
+    scheme      = parts.scheme
     # Netloc.
-    username = url_parts.username or ""
-    password = (":" + url_parts.password) if url_parts.password else ""
+    username    = parts.username or ""
+    password    = (":" + parts.password) if parts.password else ""
     credentials = username + password
     credentials = (credentials + "@") if credentials else ""
-    port = (":" + url_parts.port) if url_parts.port else ""
-    netloc = credentials + url_parts.hostname + port
-
+    port        = (":" + parts.port) if parts.port else ""
+    netloc      = credentials + parts.hostname + port
     # http://tools.ietf.org/html/rfc3986#section-3
     # and http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.2.2
-    path        = url_parts.path or "/"
-    params      = (";" + url_parts.params) if url_parts.params else ""
-    fragment    = ("#" + url_parts.fragment) if url_parts.fragment else ""
+    path        = parts.path or "/"
+    params      = (";" + parts.params) if parts.params else ""
+    fragment    = ("#" + parts.fragment) if parts.fragment else ""
+    query       = parts.query if parts.query else ""
 
-    normalized_url = url_parts.scheme + "://" + netloc + path + params
-    return normalized_url, url_parts.query, fragment
+    base_url = "".join([scheme, "://", netloc, path])
+    return base_url, scheme, netloc, path, params, query, fragment
 
 
 def url_equals(url1, url2):
@@ -304,6 +352,7 @@ def url_equals(url1, url2):
     u2 = urlparse.urlparse(url2)
     return u1.scheme == u2.scheme and \
         u1.path == u2.path and \
+        u1.params == u2.params and \
         u1.netloc == u2.netloc and \
         u1.fragment == u2.fragment and \
         parse_qs(u1.query, keep_blank_values=True) == parse_qs(u2.query, keep_blank_values=True)
