@@ -51,6 +51,9 @@ def to_utf8_if_string(s):
         return s
 
 
-def is_unicode(s):
+def is_unicode_string(s):
     return isinstance(s, unicode)
 
+
+def is_byte_string(s):
+    return isinstance(s, str)

@@ -26,7 +26,7 @@
 
 import urlparse
 import urllib
-from pyoauth.unicode import is_unicode, to_utf8
+from pyoauth.unicode import is_unicode_string, to_utf8, is_byte_string
 
 try:
     from urlparse import parse_qs
@@ -41,6 +41,7 @@ def oauth_parse_qs(query_string):
 
     See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
     """
+    query_string = query_string or ""
     return parse_qs(query_string.encode("utf-8"), keep_blank_values=True)
 
 
@@ -94,8 +95,12 @@ def oauth_escape(oauth_value):
             web-development frameworks (e.g., encode different characters, use
             lowercase hexadecimal characters).
     """
-    if is_unicode(oauth_value):
+    if is_unicode_string(oauth_value):
         oauth_value = oauth_value.encode("utf-8")
+    elif is_byte_string(oauth_value):
+        pass
+    else:
+        oauth_value = str(oauth_value)
     return urllib.quote(oauth_value, safe="~")
 
 
@@ -110,22 +115,63 @@ def oauth_unescape(oauth_value):
     :returns:
         Percent-decoded value.
     """
-    if is_unicode(oauth_value):
+    if is_unicode_string(oauth_value):
         oauth_value = oauth_value.encode("utf-8")
     return urllib.unquote(oauth_value.replace('+', ' '))
 
 
-def oauth_urlencode(query_params, ignored_names=None):
-    return "&".join([k+"="+v for k, v in oauth_urlencode_sl(query_params, ignored_names=ignored_names)])
+def oauth_urlencode(query_params, allow_func=None):
+    """
+    URL encodes a dictionary of query parameters into a string of query
+    parameters, "name=value" pairs, sorted first by name then by value based on
+    the OAuth percent-encoding rules and specification.
+
+    :param query_params:
+        Dictionary of query parameters.
+    :param allow_func:
+        A callback that will be called for each query parameter and should
+        return ``False`` or a falsy value if that parameter should not be
+        included. By default, all query parameters are included. The function
+        takes the following method signature::
+
+            def allow_func(name, value):
+                return is_name_allowed(name) and is_value_allowed(value):
+    :returns:
+        A string of query parameters, "name=value" pairs, sorted first by name
+        and then by value based on the OAuth percent-encoding rules and
+        specification.
+    """
+    return "&".join([k + "=" + v for k, v in
+                     oauth_urlencode_sl(query_params, allow_func=allow_func)])
 
 
-def oauth_urlencode_sl(query_params, ignored_names=None):
+def oauth_urlencode_sl(query_params, allow_func=None):
+    """
+    URL encodes a dictionary of query parameters into a list of query
+    parameters, (name, value) pairs, sorted first by name then by value based on
+    the OAuth percent-encoding rules and specification.
+
+    :param query_params:
+        Dictionary of query parameters.
+    :param allow_func:
+        A callback that will be called for each query parameter and should
+        return ``False`` or a falsy value if that parameter should not be
+        included. By default, all query parameters are included. The function
+        takes the following method signature::
+
+            def allow_func(name, value):
+                return is_name_allowed(name) and is_value_allowed(value):
+    :returns:
+        A list of query parameters, (name, value) pairs, sorted first by name
+        and then by value based on the OAuth percent-encoding rules and
+        specification.
+    """
     query_params = query_params or {}
     encoded_pairs = []
     for k, v in query_params.iteritems():
         # Keys are also percent-encoded according to OAuth spec.
         k = oauth_escape(to_utf8(k))
-        if ignored_names and k in ignored_names:
+        if allow_func and not allow_func(k, v):
             continue
         elif isinstance(v, basestring):
             encoded_pairs.append((k, oauth_escape(v),))
@@ -134,24 +180,38 @@ def oauth_urlencode_sl(query_params, ignored_names=None):
                 v = list(v)
             except TypeError, e:
                 assert "is not iterable" in str(e)
-                encoded_pairs.append((k, oauth_escape(str(v)), ))
+                encoded_pairs.append((k, oauth_escape(v),))
             else:
                 # Loop over the sequence.
                 for i in v:
-                    if isinstance(i, basestring):
-                        encoded_pairs.append((k, oauth_escape(i), ))
-                    else:
-                        encoded_pairs.append((k, oauth_escape(str(i)), ))
+                    encoded_pairs.append((k, oauth_escape(i), ))
     # Sort after encoding according to the OAuth spec.
     return sorted(encoded_pairs)
 
 
-def oauth_url_concat(url, **query_params):
-    if not query_params:
-        return url
-    if url[-1] not in ("?", "&"):
-        url += "&" if ("?" in url) else "?"
-    return url + oauth_urlencode(query_params, ignored_names=None)
+def oauth_url_add_query_params(url, query_params):
+    if not url:
+        raise ValueError("URL not specified.")
+
+    scheme, netloc, path, params, query_string, fragment = urlparse.urlparse(url)[:6]
+    fragment = ("#" + fragment) if fragment else ""
+    params = ";" + params if params else ""
+
+    normalized_url = scheme.lower() + "://" + netloc + path + params
+
+    url_query_params = oauth_parse_qs(query_string)
+    d = {}
+    d.update(url_query_params)
+    for name, value in query_params.iteritems():
+        if name in d:
+            d[name].append(value)
+        else:
+            d[name] = [value]
+
+    qs = oauth_urlencode(d)
+    qs = ("?" + qs) if qs else ""
+
+    return normalized_url + qs + fragment
 
 
 def url_equals(url1, url2):

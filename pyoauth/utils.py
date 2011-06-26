@@ -53,7 +53,7 @@ try:
 except ImportError:
     import sha as sha1  # Deprecated
 
-from pyoauth.unicode import to_utf8, is_unicode
+from pyoauth.unicode import to_utf8, is_unicode_string
 from pyoauth.url import oauth_escape, oauth_parse_qs, oauth_unescape, oauth_urlencode_sl
 
 
@@ -638,7 +638,9 @@ def oauth_get_normalized_query_string(url_query_params, oauth_params):
 
     # Now encode the parameters, while ignoring 'oauth_signature' from
     # the entire list of parameters.
-    sorted_encoded_pairs = oauth_urlencode_sl(query_params, ignored_names=('oauth_signature', ))
+    def allow_func(name, value):
+        return name not in ('oauth_signature', )
+    sorted_encoded_pairs = oauth_urlencode_sl(query_params, allow_func=allow_func)
     query_string = "&".join([k+"="+v for k, v in sorted_encoded_pairs])
     return query_string
 
@@ -669,7 +671,7 @@ def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
         if k.startswith("oauth_"):
             # This gets rid of "realm" or any non-OAuth param.
             _oauth_params[k] = v
-    normalized_param_pairs = oauth_urlencode_sl(_oauth_params, ignored_names=None)
+    normalized_param_pairs = oauth_urlencode_sl(_oauth_params)
     delimiter = ",\n" + indentation
     s += delimiter.join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
