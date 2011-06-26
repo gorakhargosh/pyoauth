@@ -33,6 +33,7 @@ try:
 except ImportError:
     from cgi import parse_qs
 
+
 def oauth_parse_qs(query_string):
     """
     Parses a query parameter string according to the OAuth spec.
@@ -189,20 +190,21 @@ def oauth_urlencode_sl(query_params, allow_func=None):
     return sorted(encoded_pairs)
 
 
-def oauth_url_add_query_params(url, query_params):
-    if not url:
-        raise ValueError("URL not specified.")
+def oauth_url_add_query_params(url, extra_query_params):
+    """
+    Adds additional query parameters to a URL while preserving the existing
+    parameters. Also normalizes the URL according to the OAuth specification.
+    """
+    if extra_query_params:
+        if not isinstance(extra_query_params, dict)
+            raise ValueError("Query parameters must be passed as a dictionary.")
 
-    scheme, netloc, path, params, query_string, fragment = urlparse.urlparse(url)[:6]
-    fragment = ("#" + fragment) if fragment else ""
-    params = ";" + params if params else ""
+    normalized_url, url_query_string, url_fragment = oauth_url_split_and_normalize(url)
 
-    normalized_url = scheme.lower() + "://" + netloc + path + params
-
-    url_query_params = oauth_parse_qs(query_string)
+    # Now work on the query string.
     d = {}
-    d.update(url_query_params)
-    for name, value in query_params.iteritems():
+    d.update(oauth_parse_qs(url_query_string))
+    for name, value in extra_query_params.iteritems():
         if name in d:
             d[name].append(value)
         else:
@@ -211,7 +213,61 @@ def oauth_url_add_query_params(url, query_params):
     qs = oauth_urlencode(d)
     qs = ("?" + qs) if qs else ""
 
-    return normalized_url + qs + fragment
+    return normalized_url + qs + url_fragment
+
+
+def oauth_url_split_and_normalize(url):
+    """
+    Splits a URL into a normalized URL, query string, and a
+    formatted URL fragment.
+
+    :see: Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
+    :param url:
+        The URL to split and normalize.
+    :returns:
+        Tuple that contains these elements:
+
+        1. Normalized URL devoid of the query string and the fragment.
+        2. Query string.
+        3. A preformatted fragment—it begins with a '#' character if a fragment
+           was found in the URL; otherwise, it is an empty string.
+
+        as (normalized defragged URL, query parameters dictionary, formatted fragment) as follows::
+
+    Usage::
+
+        >>> u, q = oauth_split_and_normalize_url("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b")
+        >>> assert u == "http://example.com/request"
+        >>> assert q == {'a2': ['r b'], 'a3': ['a'], 'b5': ['=%3D'], 'c@': ['']}
+        >>> u, q = oauth_split_and_normalize_url("http://example.com/request?c2&a3=2+q")
+        >>> assert u == "http://example.com/request"
+        >>> assert q == {'a3': ['2 q'], 'c2': ['']}
+        >>> u, q = oauth_split_and_normalize_url("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q")
+        >>> assert u == "http://example.com/request"
+        >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
+
+    """
+    if not url:
+        raise ValueError("URL not specified.")
+
+    url_parts = urlparse.urlparse(url)
+
+    # Netloc.
+    username = url_parts.username or ""
+    password = (":" + url_parts.password) if url_parts.password else ""
+    credentials = username + password
+    credentials = (credentials + "@") if credentials else ""
+    port = (":" + url_parts.port) if url_parts.port else ""
+    netloc = credentials + url_parts.hostname + port
+
+    # http://tools.ietf.org/html/rfc3986#section-3
+    # and http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.2.2
+    path        = url_parts.path or "/"
+    params      = (";" + url_parts.params) if url_parts.params else ""
+    fragment    = ("#" + url_parts.fragment) if url_parts.fragment else ""
+
+    normalized_url = url_parts.scheme + "://" + netloc + path + params
+    return normalized_url, url_parts.query, fragment
 
 
 def url_equals(url1, url2):

@@ -54,7 +54,7 @@ except ImportError:
     import sha as sha1  # Deprecated
 
 from pyoauth.unicode import to_utf8, is_unicode_string
-from pyoauth.url import oauth_escape, oauth_parse_qs, oauth_unescape, oauth_urlencode_sl
+from pyoauth.url import oauth_escape, oauth_parse_qs, oauth_unescape, oauth_urlencode_sl, oauth_url_split_and_normalize, oauth_urlencode
 
 
 def oauth_generate_nonce(length=-1):
@@ -408,120 +408,10 @@ def oauth_get_signature_base_string(method, url, oauth_params):
     if not isinstance(oauth_params, dict):
         raise ValueError("Query parameters must be specified as a dictionary.")
 
-    normalized_url, url_query_params = _oauth_get_normalized_url_and_query_params(url)
+    normalized_url, url_query_string, _ = oauth_url_split_and_normalize(url)
+    url_query_params = oauth_parse_qs(url_query_string)
     query_string = oauth_get_normalized_query_string(url_query_params, oauth_params)
     return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
-
-
-def _oauth_get_normalized_url_and_query_params(url):
-    """
-    Normalizes a URL that will be used in the oauth signature and parses
-    query parameters as well.
-
-    :param url:
-        The URL to normalize.
-    :returns:
-        Tuple as (normalized URL, query parameters dictionary) as follows::
-
-            Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
-            ------------------------------------------------------------------------
-            The parameters from the following sources are collected into a single
-            list of name/value pairs:
-
-            o  The query component of the HTTP request URI as defined by
-              [RFC3986], Section 3.4.  The query component is parsed into a list
-              of name/value pairs by treating it as an
-              "application/x-www-form-urlencoded" string, separating the names
-              and values and decoding them as defined by
-              [W3C.REC-html40-19980424], Section 17.13.4.
-
-            o  The OAuth HTTP "Authorization" header field (Section 3.5.1) if
-              present.  The header's content is parsed into a list of name/value
-              pairs excluding the "realm" parameter if present.  The parameter
-              values are decoded as defined by Section 3.5.1.
-
-            o  The HTTP request entity-body, but only if all of the following
-              conditions are met:
-
-              *  The entity-body is single-part.
-
-              *  The entity-body follows the encoding requirements of the
-                 "application/x-www-form-urlencoded" content-type as defined by
-                 [W3C.REC-html40-19980424].
-
-              *  The HTTP request entity-header includes the "Content-Type"
-                 header field set to "application/x-www-form-urlencoded".
-
-              The entity-body is parsed into a list of decoded name/value pairs
-              as described in [W3C.REC-html40-19980424], Section 17.13.4.
-
-            The "oauth_signature" parameter MUST be excluded from the signature
-            base string if present.  Parameters not explicitly included in the
-            request MUST be excluded from the signature base string (e.g., the
-            "oauth_version" parameter when omitted).
-
-            For example, the HTTP request:
-
-               POST /request?b5=%3D%253D&a3=a&c%40=&a2=r%20b HTTP/1.1
-               Host: example.com
-               Content-Type: application/x-www-form-urlencoded
-               Authorization: OAuth realm="Example",
-                              oauth_consumer_key="9djdj82h48djs9d2",
-                              oauth_token="kkk9d7dh3k39sjv7",
-                              oauth_signature_method="HMAC-SHA1",
-                              oauth_timestamp="137131201",
-                              oauth_nonce="7d8f3e4a",
-                              oauth_signature="djosJKDKJSD8743243%2Fjdk33klY%3D"
-
-               c2&a3=2+q
-
-            contains the following (fully decoded) parameters used in the
-            signature base sting:
-
-                       +------------------------+------------------+
-                       |          Name          |       Value      |
-                       +------------------------+------------------+
-                       |           b5           |       =%3D       |
-                       |           a3           |         a        |
-                       |           c@           |                  |
-                       |           a2           |        r b       |
-                       |   oauth_consumer_key   | 9djdj82h48djs9d2 |
-                       |       oauth_token      | kkk9d7dh3k39sjv7 |
-                       | oauth_signature_method |     HMAC-SHA1    |
-                       |     oauth_timestamp    |     137131201    |
-                       |       oauth_nonce      |     7d8f3e4a     |
-                       |           c2           |                  |
-                       |           a3           |        2 q       |
-                       +------------------------+------------------+
-
-            Note that the value of "b5" is "=%3D" and not "==".  Both "c@" and
-            "c2" have empty values.  While the encoding rules specified in this
-            specification for the purpose of constructing the signature base
-            string exclude the use of a "+" character (ASCII code 43) to
-            represent an encoded space character (ASCII code 32), this practice
-            is widely used in "application/x-www-form-urlencoded" encoded values,
-            and MUST be properly decoded, as demonstrated by one of the "a3"
-            parameter instances (the "a3" parameter is used twice in this
-            request).
-
-    Usage::
-
-        >>> u, q = _oauth_get_normalized_url_and_query_params("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b")
-        >>> assert u == "http://example.com/request"
-        >>> assert q == {'a2': ['r b'], 'a3': ['a'], 'b5': ['=%3D'], 'c@': ['']}
-        >>> u, q = _oauth_get_normalized_url_and_query_params("http://example.com/request?c2&a3=2+q")
-        >>> assert u == "http://example.com/request"
-        >>> assert q == {'a3': ['2 q'], 'c2': ['']}
-        >>> u, q = _oauth_get_normalized_url_and_query_params("HTTP://eXample.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q")
-        >>> assert u == "http://example.com/request"
-        >>> assert q == {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''], 'c2': ['']}
-
-    """
-    parts = urlparse.urlparse(url)
-    scheme, netloc, path, _, query_string = parts[:5]
-    normalized_url = scheme.lower() + "://" + netloc.lower() + path
-    query_params = oauth_parse_qs(query_string)
-    return normalized_url, query_params
 
 
 def oauth_get_normalized_query_string(url_query_params, oauth_params):
@@ -640,8 +530,7 @@ def oauth_get_normalized_query_string(url_query_params, oauth_params):
     # the entire list of parameters.
     def allow_func(name, value):
         return name not in ('oauth_signature', )
-    sorted_encoded_pairs = oauth_urlencode_sl(query_params, allow_func=allow_func)
-    query_string = "&".join([k+"="+v for k, v in sorted_encoded_pairs])
+    query_string = oauth_urlencode(query_params, allow_func=allow_func)
     return query_string
 
 
