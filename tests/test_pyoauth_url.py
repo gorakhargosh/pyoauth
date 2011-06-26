@@ -30,6 +30,13 @@ class Test_oauth_parse_qs(object):
     def test_percent_decoding_treats_plus_as_space(self):
         assert_dict_equal(oauth_parse_qs('a=2+q'), {'a': ['2 q']})
 
+    def test_ignores_prefixed_question_mark_character_if_included(self):
+        qs = '?b5=%3D%253D&a3=a&c%40=&a2=r%20b' + '&' + 'c2&a3=2+q'
+        q = oauth_parse_qs(qs)
+        assert_dict_equal(q,
+                {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''],
+                 'c2': ['']})
+
 
 class Test_oauth_escape(object):
     # TODO:
@@ -288,6 +295,9 @@ class Test_urlsplit_normalized(object):
         )
         assert_equal(urlsplit_normalized(url), result)
 
+    def test_ValueError_when_url_invalid(self):
+        assert_raises(ValueError, urlsplit_normalized, None)
+        assert_raises(ValueError, urlsplit_normalized, "")
 
 class Test_urlparse_normalized(object):
     def test_valid_parts_and_normalization(self):
@@ -316,6 +326,10 @@ class Test_urlparse_normalized(object):
         )
         assert_equal(urlparse_normalized(url), result)
 
+
+    def test_ValueError_when_url_invalid(self):
+        assert_raises(ValueError, urlparse_normalized, None)
+        assert_raises(ValueError, urlparse_normalized, "")
 
 class Test_oauth_url_query_params_sanitize(object):
     def test_unflattens_dict(self):
@@ -347,6 +361,22 @@ class Test_oauth_url_query_params_sanitize(object):
 
     def test_parses_query_string(self):
         query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
+        expected_params = {
+            "a2": ["r b"],
+            "b5": ["=%3D"],
+            "a3": ["a", "2 q"],
+            "c@": [""],
+            "c2": [""],
+            "oauth_consumer_key": ["9djdj82h48djs9d2"],
+            "oauth_token": ["kkk9d7dh3k39sjv7"],
+            "oauth_signature_method": ["HMAC-SHA1"],
+            "oauth_timestamp": ["137131201"],
+            "oauth_nonce": ["7d8f3e4a"],
+        }
+        assert_equal(oauth_urlencode(oauth_url_query_params_sanitize(query_string)), oauth_urlencode(expected_params))
+
+    def test_ignores_prefixed_question_mark_character_if_included(self):
+        query_string = "?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
         expected_params = {
             "a2": ["r b"],
             "b5": ["=%3D"],

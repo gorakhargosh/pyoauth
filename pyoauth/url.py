@@ -42,8 +42,10 @@ def oauth_parse_qs(query_string):
 
     See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
     """
-    query_string = query_string or ""
-    return parse_qs(query_string.encode("utf-8"), keep_blank_values=True)
+    query_string = query_string.encode("utf-8") or ""
+    if query_string.startswith("?"):
+        query_string = query_string[1:]
+    return parse_qs(query_string, keep_blank_values=True)
 
 
 def oauth_escape(oauth_value):
@@ -187,9 +189,9 @@ def oauth_urlencode_sl(query_params, allow_func=None):
                 if len(v) > 0:
                     for i in v:
                         encoded_pairs.append((k, oauth_escape(i), ))
-                else:
-                    # Preserve blank values.
-                    encoded_pairs.append((k, "", ))
+                #else:
+                #    # Preserve blank list values.
+                #    encoded_pairs.append((k, "", ))
     # Sort after encoding according to the OAuth spec.
     return sorted(encoded_pairs)
 
@@ -218,7 +220,7 @@ def oauth_url_query_params_add(url, extra_query_params, allow_func=None):
         A normalized URL with the fragment and existing query parameters
         preserved and with the extra query parameters added.
     """
-    base_url, scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
+    base_url, scheme, netloc, path, params, query, fragment = urlsplit_normalized(url)
 
     d = oauth_url_query_params_merge(query, extra_query_params)
     qs = oauth_urlencode(d, allow_func=allow_func)
@@ -261,6 +263,8 @@ def oauth_url_query_params_sanitize(query_params):
         An unflattened query parameter dictionary.
     """
     if isinstance(query_params, basestring):
+        if query_params.startswith("?"):
+            query_params = query_params[1:]
         return oauth_parse_qs(query_params)
     elif isinstance(query_params, dict):
         # Unflatten the dictionary.
@@ -306,7 +310,7 @@ def urlparse_normalized(url):
         (base_url, scheme, netloc, path, params, query, fragment)
     """
     if not url:
-        raise ValueError("URL not specified.")
+        raise ValueError("Invalid URL.")
 
     parts = urlparse.urlparse(url)
 
