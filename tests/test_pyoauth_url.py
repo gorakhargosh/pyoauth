@@ -7,6 +7,47 @@ from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, \
     oauth_urlencode, oauth_urlencode_sl, oauth_url_query_params_sanitize, \
     oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add
 
+
+def _url_equals(url1, url2):
+    """
+    Compares two URLs and determines whether they are the equal.
+
+    :param url1:
+        First URL.
+    :param url2:
+        Second URL.
+    :returns:
+        ``True`` if equal; ``False`` otherwise.
+
+    Usage::
+
+        >>> _url_equals("http://www.google.com/a", "http://www.google.com/a")
+        True
+        >>> _url_equals("https://www.google.com/a", "http://www.google.com/a")
+        False
+        >>> _url_equals("http://www.google.com/", "http://www.example.com/")
+        False
+        >>> _url_equals("http://example.com:80/", "http://example.com:8000/")
+        False
+        >>> _url_equals("http://user@example.com/", "http://user2@example.com.com/")
+        False
+        >>> _url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment")
+        True
+        >>> _url_equals("http://user@example.com/request?a=b&b=c&b=d#fragment", "http://user@example.com/request?b=c&b=d&a=b#fragment2")
+        False
+        >>> _url_equals("http://www.google.com/request?a=b", "http://www.google.com/request?b=c")
+        False
+    """
+    u1 = urlparse(url1)
+    u2 = urlparse(url2)
+    return u1.scheme == u2.scheme and \
+        u1.path == u2.path and \
+        u1.params == u2.params and \
+        u1.netloc == u2.netloc and \
+        u1.fragment == u2.fragment and \
+        parse_qs(u1.query, keep_blank_values=True) == parse_qs(u2.query, keep_blank_values=True)
+
+
 class Test_oauth_parse_qs(object):
     def test_are_blank_values_preserved(self):
         assert_dict_equal(oauth_parse_qs("a="), {"a": [""]})
