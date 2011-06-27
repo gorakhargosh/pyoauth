@@ -26,13 +26,13 @@ Functions
 
 .. autofunction:: to_unicode
 
-.. autofunction:: to_utf8_if_string
+.. autofunction:: to_utf8_if_unicode
 
-.. autofunction:: to_unicode_if_string
+.. autofunction:: to_unicode_if_bytes
 
-.. autofunction:: is_unicode_string
+.. autofunction:: is_unicode
 
-.. autofunction:: is_byte_string
+.. autofunction:: is_bytes
 
 """
 
@@ -70,21 +70,24 @@ def to_utf8(value):
 
 
 _UNICODE_TYPES = (unicode, type(None))
-def to_unicode(value):
+def to_unicode(value, encoding="utf-8"):
     """
-    Converts a string argument to a Unicode string if it is a byte string.
+    Converts bytes to a Unicode string decoding it according to the encoding
+    specified.
 
     :param value:
         If already a Unicode string or None, it is returned unchanged.
-        Otherwise it must be a byte string and is decoded as UTF-8.
+        Otherwise it must be a byte string.
+    :param encoding:
+        The encoding used to decode bytes. Defaults to UTF-8
     """
     if isinstance(value, _UNICODE_TYPES):
         return value
     assert isinstance(value, bytes)
-    return value.decode("utf-8")
+    return value.decode(encoding)
 
 
-def to_utf8_if_string(value):
+def to_utf8_if_unicode(value):
     """
     Converts an argument to a UTF-8 encoded byte string if the argument
     is a string.
@@ -95,30 +98,26 @@ def to_utf8_if_string(value):
         UTF-8 encoded byte string if the argument is a Unicode string; otherwise
         the value is returned unchanged.
     """
-    if is_bytes_or_unicode_string(value):
-        return to_utf8(value)
-    else:
-        return value
+    return to_utf8(value) if is_unicode(value) else value
 
 
-def to_unicode_if_string(value):
+def to_unicode_if_bytes(value, encoding="utf-8"):
     """
-    Converts an argument to Unicode string if the argument is a string.
-    The string will be decoded as UTF-8.
+    Converts an argument to Unicode string if the argument is a byte string
+    decoding it as specified by the encoding.
 
     :param value:
         The value that will be converted to a Unicode string.
+    :param encoding:
+        The encoding used to decode bytes. Defaults to UTF-8.
     :returns:
         Unicode string if the argument is a byte string. Otherwise the value
         is returned unchanged.
     """
-    if is_bytes_or_unicode_string(value):
-        return to_unicode(value)
-    else:
-        return value
+    return to_unicode(value, encoding) if is_bytes(value) else value
 
 
-def is_unicode_string(value):
+def is_unicode(value):
     """
     Determines whether the given value is a Unicode string.
 
@@ -130,7 +129,7 @@ def is_unicode_string(value):
     return isinstance(value, unicode)
 
 
-def is_byte_string(value):
+def is_bytes(value):
     """
     Determines whether the given value is a byte string.
 
@@ -142,7 +141,7 @@ def is_byte_string(value):
     return isinstance(value, bytes)
 
 
-def is_bytes_or_unicode_string(value):
+def is_bytes_or_unicode(value):
     """
     Determines whether the given value is an instance of a string irrespective
     of whether it is a byte string or a Unicode string.

@@ -59,7 +59,7 @@ try:
 except:
     bytes = str
 
-from pyoauth.unicode import to_utf8_if_string, to_utf8, is_bytes_or_unicode_string
+from pyoauth.unicode import to_utf8_if_unicode, to_utf8, is_bytes_or_unicode
 
 
 def oauth_parse_qs(query_string):
@@ -70,7 +70,7 @@ def oauth_parse_qs(query_string):
 
     See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
     """
-    query_string = to_utf8_if_string(query_string) or ""
+    query_string = to_utf8_if_unicode(query_string) or ""
     if query_string.startswith("?"):
         query_string = query_string[1:]
     return parse_qs(query_string, keep_blank_values=True)
@@ -92,7 +92,7 @@ def oauth_escape(oauth_value):
     :returns:
         Percent-encoded string.
    """
-    oauth_value = bytes(to_utf8_if_string(oauth_value))
+    oauth_value = bytes(to_utf8_if_unicode(oauth_value))
     return quote(oauth_value, safe="~")
 
 
@@ -168,7 +168,7 @@ def oauth_urlencode_sl(query_params, allow_func=None):
         k = oauth_escape(to_utf8(k))
         if allow_func and not allow_func(k, v):
             continue
-        elif is_bytes_or_unicode_string(v):
+        elif is_bytes_or_unicode(v):
             encoded_pairs.append((k, oauth_escape(v),))
         else:
             try:
@@ -255,7 +255,7 @@ def oauth_url_query_params_sanitize(query_params):
     :returns:
         An unflattened query parameter dictionary.
     """
-    if is_bytes_or_unicode_string(query_params):
+    if is_bytes_or_unicode(query_params):
         if query_params.startswith("?"):
             query_params = query_params[1:]
         return oauth_parse_qs(query_params)
