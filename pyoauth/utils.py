@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # OAuth utility functions.
 #
+# Copyright (C) 2009 Facebook.
 # Copyright (C) 2010 Rick Copeland <rcopeland@geek.net>
 # Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
 #
