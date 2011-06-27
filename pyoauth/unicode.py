@@ -38,17 +38,17 @@ Functions
 
 
 try:
-    # Python 2.5 doesn't define bytes
+    # Python 2.6+
     bytes
 except:
-    # Introduce the bytes alias to Python 2.5 which is already present in Python 2.6+
+    # Python 2.5
     bytes = str
 
 try:
-    # Python3 doesn't define this.
+    # Not Python3
     unicode
 except:
-    # Therefore, we define it for Python3.
+    # Python3.
     unicode = str
     basestring = (str, bytes)
 
