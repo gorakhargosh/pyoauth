@@ -218,9 +218,7 @@ def oauth_url_query_params_add(url, extra_query_params, allow_func=None):
 
     d = oauth_url_query_params_merge(query, extra_query_params)
     qs = oauth_urlencode(d, allow_func=allow_func)
-    #qs = ("?" + qs) if qs else ""
     return urlunparse((scheme, netloc, path, params, qs, fragment))
-    #return base_url + path + params + qs + fragment
 
 
 def oauth_url_query_params_merge(query_params, *extra_query_params):
