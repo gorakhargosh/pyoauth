@@ -56,7 +56,7 @@ except ImportError:
 
 try:
     bytes
-except:
+except Exception:
     bytes = str
 
 from pyoauth.unicode import to_utf8_if_unicode, to_utf8, is_bytes_or_unicode

@@ -56,7 +56,7 @@ import re
 
 try:
     bytes
-except:
+except Exception:
     bytes = str
 
 try:

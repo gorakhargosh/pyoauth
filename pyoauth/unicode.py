@@ -40,14 +40,14 @@ Functions
 try:
     # Python 2.6+
     bytes
-except:
+except Exception:
     # Python 2.5
     bytes = str
 
 try:
     # Not Python3
     unicode
-except:
+except Exception:
     # Python3.
     unicode = str
     basestring = (str, bytes)
