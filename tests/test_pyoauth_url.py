@@ -325,10 +325,10 @@ class Test_urlsplit_normalized(object):
             "social.yahooapis.com",
             "/v1/user/6677/connections",
             ";start=0;count=20",
-            "",
-            "",
+            "?format=json",
+            "#fragment",
         )
-        url = "http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20"
+        url = "http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20?format=json#fragment"
         assert_equal(urlsplit_normalized(url), result)
 
 
@@ -420,10 +420,10 @@ class Test_urlparse_normalized(object):
             "social.yahooapis.com",
             "/v1/user/6677/connections",
             "start=0;count=20",
-            "",
-            "",
+            "format=json",
+            "fragment",
         )
-        url = "http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20"
+        url = "http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20?format=json#fragment"
         assert_equal(urlparse_normalized(url), result)
 #        req = oauth.Request("GET", url, None)
 #        self.assertEquals(req.normalized_url, 'http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20')
