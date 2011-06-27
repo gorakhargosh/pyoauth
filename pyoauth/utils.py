@@ -50,6 +50,7 @@ Functions
 import binascii
 import hmac
 import time
+import urlparse
 import uuid
 import re
 
@@ -81,7 +82,7 @@ except ImportError:
 
 from pyoauth.unicode import to_utf8
 from pyoauth.url import oauth_escape, oauth_parse_qs, oauth_unescape, \
-    oauth_urlencode_sl, oauth_urlencode, urlparse_normalized
+    oauth_urlencode_sl, oauth_urlencode, oauth_urlparse_normalized
 
 
 def oauth_generate_nonce(length=-1):
@@ -335,9 +336,9 @@ def oauth_get_signature_base_string(method, url, oauth_params):
     if not isinstance(oauth_params, dict):
         raise ValueError("Query parameters must be specified as a dictionary.")
 
-    base_url, _, _, path, _, query, _ = urlparse_normalized(url)
+    scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
     query_string = oauth_get_normalized_query_string(oauth_parse_qs(query), oauth_params)
-    normalized_url = base_url + path
+    normalized_url = urlparse.urlunparse((scheme, netloc, path, params, None, None))
     return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
 
 

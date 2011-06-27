@@ -37,9 +37,7 @@ Functions
 
 .. autofunction:: oauth_url_query_params_sanitize
 
-.. autofunction:: urlsplit_normalized
-
-.. autofunction:: urlparse_normalized
+.. autofunction:: oauth_urlparse_normalized
 
 """
 
@@ -212,12 +210,13 @@ def oauth_url_query_params_add(url, extra_query_params, allow_func=None):
         A normalized URL with the fragment and existing query parameters
         preserved and with the extra query parameters added.
     """
-    base_url, scheme, netloc, path, params, query, fragment = urlsplit_normalized(url)
+    scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
 
     d = oauth_url_query_params_merge(query, extra_query_params)
     qs = oauth_urlencode(d, allow_func=allow_func)
-    qs = ("?" + qs) if qs else ""
-    return base_url + path + params + qs + fragment
+    #qs = ("?" + qs) if qs else ""
+    return urlparse.urlunparse((scheme, netloc, path, params, qs, fragment))
+    #return base_url + path + params + qs + fragment
 
 
 def oauth_url_query_params_merge(query_params, *extra_query_params):
@@ -273,35 +272,18 @@ def oauth_url_query_params_sanitize(query_params):
         raise ValueError("Query parameters must be passed as a dictionary or a query string.")
 
 
-def urlsplit_normalized(url):
+def oauth_urlparse_normalized(url):
     """
-    Like :func:`urlparse.urlparse` but also normalizes parts and returns a tuple.
-    You can essentially take everything after ``base_url`` in the returned
-    tuple and concatenate them directly to form a functional URL.
+    Like :func:`urlparse.urlparse` but also normalizes scheme, netloc, port,
+    and the path.
+
+    Use with OAuth URLs.
 
     :param url:
         The URL to split and normalize.
     :returns:
         Tuple that contains these elements:
-        ``(base_url, scheme, netloc, path, params, query, fragment)``
-    """
-    base_url, scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
-    params      = (";" + params) if params else ""
-    fragment    = ("#" + fragment) if fragment else ""
-    query       = ("?" + query) if query else ""
-    return base_url, scheme, netloc, path, params, query, fragment
-
-
-def urlparse_normalized(url):
-    """
-    Like :func:`urlparse.urlparse` but also normalizes URL and the path,
-    and returns a tuple.
-
-    :param url:
-        The URL to split and normalize.
-    :returns:
-        Tuple that contains these elements:
-        ``(base_url, scheme, netloc, path, params, query, fragment)``
+        ``(scheme, netloc, path, params, query, fragment)``
     """
     if not url:
         raise ValueError("Invalid URL.")
@@ -332,8 +314,7 @@ def urlparse_normalized(url):
     fragment    = parts.fragment or ""
     query       = parts.query or ""
 
-    base_url = "".join([scheme, "://", netloc])
-    return base_url, scheme, netloc, path, params, query, fragment
+    return (scheme, netloc, path, params, query, fragment)
 
 
 def _url_equals(url1, url2):

@@ -3,7 +3,9 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, oauth_urlencode, oauth_urlencode_sl, oauth_url_query_params_sanitize, oauth_url_query_params_merge, urlparse_normalized, urlsplit_normalized, oauth_url_query_params_add
+from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, \
+    oauth_urlencode, oauth_urlencode_sl, oauth_url_query_params_sanitize, \
+    oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add
 
 class Test_oauth_parse_qs(object):
     def test_are_blank_values_preserved(self):
@@ -274,69 +276,10 @@ class Test_oauth_url_query_params_merge(object):
         assert_equal(oauth_urlencode(oauth_url_query_params_merge(params1, params2, params3)), resulting_query_string)
 
 
-class Test_urlsplit_normalized(object):
-    def test_valid_parts_and_normalization(self):
-        url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/result;param1?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2#fragment"
-        result = (
-            "http://UserName:PassWORdX@www.example.com:8000",
-            "http",
-            "UserName:PassWORdX@www.example.com:8000",
-            "/result",
-            ";param1",
-            "?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2",
-            "#fragment",
-        )
-        assert_equal(urlsplit_normalized(url), result)
-
-    def test_path_is_never_empty(self):
-        url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2#fragment"
-        result = (
-            "http://UserName:PassWORdX@www.example.com:8000",
-            "http",
-            "UserName:PassWORdX@www.example.com:8000",
-            "/",
-            "",
-            "?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2",
-            "#fragment",
-        )
-        assert_equal(urlsplit_normalized(url), result)
-
-    def test_path_is_never_empty(self):
-        url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/"
-        result = (
-            "http://UserName:PassWORdX@www.example.com:8000",
-            "http",
-            "UserName:PassWORdX@www.example.com:8000",
-            "/",
-            "",
-            "",
-            "",
-        )
-        assert_equal(urlsplit_normalized(url), result)
-
-    def test_ValueError_when_url_invalid(self):
-        assert_raises(ValueError, urlsplit_normalized, None)
-        assert_raises(ValueError, urlsplit_normalized, "")
-
-    def test_url_with_matrix_params(self):
-        result = (
-            "http://social.yahooapis.com",
-            "http",
-            "social.yahooapis.com",
-            "/v1/user/6677/connections",
-            ";start=0;count=20",
-            "?format=json",
-            "#fragment",
-        )
-        url = "http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20?format=json#fragment"
-        assert_equal(urlsplit_normalized(url), result)
-
-
 class Test_urlparse_normalized(object):
     def test_valid_parts_and_normalization(self):
         url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/result;param1?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2#fragment"
         result = (
-            "http://UserName:PassWORdX@www.example.com:8000",
             "http",
             "UserName:PassWORdX@www.example.com:8000",
             "/result",
@@ -344,12 +287,11 @@ class Test_urlparse_normalized(object):
             "a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2",
             "fragment",
         )
-        assert_equal(urlparse_normalized(url), result)
+        assert_equal(oauth_urlparse_normalized(url), result)
 
     def test_path_is_never_empty(self):
         url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2#fragment"
         result = (
-            "http://UserName:PassWORdX@www.example.com:8000",
             "http",
             "UserName:PassWORdX@www.example.com:8000",
             "/",
@@ -357,11 +299,10 @@ class Test_urlparse_normalized(object):
             "a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2",
             "fragment",
         )
-        assert_equal(urlparse_normalized(url), result)
+        assert_equal(oauth_urlparse_normalized(url), result)
 
     def test_only_default_ports_are_dropped(self):
         result = (
-            "http://social.yahooapis.com",
             "http",
             "social.yahooapis.com",
             "/v1/user/6677/connections",
@@ -370,10 +311,9 @@ class Test_urlparse_normalized(object):
             "",
         )
         url = "http://social.yahooapis.com:80/v1/user/6677/connections;start=0;count=20"
-        assert_equal(urlparse_normalized(url), result)
+        assert_equal(oauth_urlparse_normalized(url), result)
 
         result = (
-            "https://social.yahooapis.com",
             "https",
             "social.yahooapis.com",
             "/v1/user/6677/connections",
@@ -382,10 +322,9 @@ class Test_urlparse_normalized(object):
             "",
         )
         url = "https://social.yahooapis.com:443/v1/user/6677/connections;start=0;count=20"
-        assert_equal(urlparse_normalized(url), result)
+        assert_equal(oauth_urlparse_normalized(url), result)
 
         result = (
-            "http://social.yahooapis.com:8000",
             "http",
             "social.yahooapis.com:8000",
             "/v1/user/6677/connections",
@@ -394,10 +333,9 @@ class Test_urlparse_normalized(object):
             "",
         )
         url = "http://social.yahooapis.com:8000/v1/user/6677/connections;start=0;count=20"
-        assert_equal(urlparse_normalized(url), result)
+        assert_equal(oauth_urlparse_normalized(url), result)
 
         result = (
-            "https://social.yahooapis.com:8000",
             "https",
             "social.yahooapis.com:8000",
             "/v1/user/6677/connections",
@@ -406,16 +344,15 @@ class Test_urlparse_normalized(object):
             "",
         )
         url = "https://social.yahooapis.com:8000/v1/user/6677/connections;start=0;count=20"
-        assert_equal(urlparse_normalized(url), result)
+        assert_equal(oauth_urlparse_normalized(url), result)
 
 
     def test_ValueError_when_url_invalid(self):
-        assert_raises(ValueError, urlparse_normalized, None)
-        assert_raises(ValueError, urlparse_normalized, "")
+        assert_raises(ValueError, oauth_urlparse_normalized, None)
+        assert_raises(ValueError, oauth_urlparse_normalized, "")
 
     def test_url_with_matrix_params(self):
         result = (
-            "http://social.yahooapis.com",
             "http",
             "social.yahooapis.com",
             "/v1/user/6677/connections",
@@ -424,7 +361,7 @@ class Test_urlparse_normalized(object):
             "fragment",
         )
         url = "http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20?format=json#fragment"
-        assert_equal(urlparse_normalized(url), result)
+        assert_equal(oauth_urlparse_normalized(url), result)
 
 
 class Test_oauth_url_query_params_sanitize(object):
