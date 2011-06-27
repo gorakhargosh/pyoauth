@@ -183,7 +183,7 @@ htmlhelp_basename = 'pyoauthdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'pyoauth.tex', PROJET_NAME + u' Documentation',
+  ('index', 'pyoauth.tex', PROJECT_NAME + u' Documentation',
    AUTHOR_NAME, 'manual'),
 ]
 

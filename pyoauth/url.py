@@ -15,6 +15,35 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""
+:module: pyoauth.url
+:synopsis: URL utility functions.
+
+Functions
+---------
+.. autofunction:: oauth_parse_qs
+
+.. autofunction:: oauth_escape
+
+.. autofunction:: oauth_unescape
+
+.. autofunction:: oauth_urlencode
+
+.. autofunction:: oauth_urlencode_sl
+
+.. autofunction:: oauth_url_query_params_add
+
+.. autofunction:: oauth_url_query_params_merge
+
+.. autofunction:: oauth_url_query_params_sanitize
+
+.. autofunction:: urlsplit_normalized
+
+.. autofunction:: urlparse_normalized
+
+"""
+
+
 
 import urlparse
 import urllib
@@ -69,8 +98,7 @@ def oauth_unescape(oauth_value):
     """
     Percent-decodes according to the OAuth spec.
 
-    See Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
-
+    :see: Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
     :param oauth_value:
         Value to percent-decode. Value will be UTF-8 encoded if
         it is a Unicode string. '+' is treated as a ' ' character.
@@ -83,10 +111,11 @@ def oauth_unescape(oauth_value):
 def oauth_urlencode(query_params, allow_func=None):
     """
     URL encodes a dictionary of query parameters into a string of query
-    parameters, "name=value" pairs, sorted first by name then by value based on
-    the OAuth percent-encoding rules and specification.
+    parameters, ``name=value`` pairs separated by ``&``, sorted first by
+    ``name`` then by ``value`` based on the OAuth percent-encoding
+    rules and specification.
 
-    Behaves like urlencode(query_params, doseq=1).
+    Behaves like :func:`urllib.urlencode` with ``doseq=1``.
 
     :param query_params:
         Dictionary of query parameters.
@@ -97,11 +126,11 @@ def oauth_urlencode(query_params, allow_func=None):
         takes the following method signature::
 
             def allow_func(name, value):
-                return is_name_allowed(name) and is_value_allowed(value):
+                return is_name_allowed(name) and is_value_allowed(value)
     :returns:
-        A string of query parameters, "name=value" pairs, sorted first by name
-        and then by value based on the OAuth percent-encoding rules and
-        specification.
+        A string of query parameters, ``name=value`` pairs separated by ``&``,
+        sorted first by ``name`` and then by ``value`` based on the OAuth
+        percent-encoding rules and specification.
     """
     return "&".join([k + "=" + v for k, v in
                      oauth_urlencode_sl(query_params, allow_func=allow_func)])
@@ -110,10 +139,10 @@ def oauth_urlencode(query_params, allow_func=None):
 def oauth_urlencode_sl(query_params, allow_func=None):
     """
     URL encodes a dictionary of query parameters into a list of query
-    parameters, (name, value) pairs, sorted first by name then by value based on
-    the OAuth percent-encoding rules and specification.
+    parameters, ``(name, value)`` pairs, sorted first by ``name`` then by
+    ``value`` based on the OAuth percent-encoding rules and specification.
 
-    Behaves like urlencode(query_params, doseq=1).
+    Behaves like :func:`urllib.urlencode` with ``doseq=1``.
 
     :param query_params:
         Dictionary of query parameters.
@@ -124,11 +153,11 @@ def oauth_urlencode_sl(query_params, allow_func=None):
         takes the following method signature::
 
             def allow_func(name, value):
-                return is_name_allowed(name) and is_value_allowed(value):
+                return is_name_allowed(name) and is_value_allowed(value)
     :returns:
-        A list of query parameters, (name, value) pairs, sorted first by name
-        and then by value based on the OAuth percent-encoding rules and
-        specification.
+        A list of query parameters, ``(name, value)`` pairs, sorted first by
+        ``name`` and then by ``value`` based on the OAuth percent-encoding rules
+        and specification.
     """
     query_params = query_params or {}
     encoded_pairs = []
@@ -178,7 +207,7 @@ def oauth_url_query_params_add(url, extra_query_params, allow_func=None):
         takes the following method signature::
 
             def allow_func(name, value):
-                return is_name_allowed(name) and is_value_allowed(value):
+                return is_name_allowed(name) and is_value_allowed(value)
     :returns:
         A normalized URL with the fragment and existing query parameters
         preserved and with the extra query parameters added.
@@ -246,7 +275,7 @@ def oauth_url_query_params_sanitize(query_params):
 
 def urlsplit_normalized(url):
     """
-    Like urlparse.urlparse but also normalizes parts and returns a tuple.
+    Like :func:`urlparse.urlparse` but also normalizes parts and returns a tuple.
     You can essentially take everything after ``base_url`` in the returned
     tuple and concatenate them directly to form a functional URL.
 
@@ -254,7 +283,7 @@ def urlsplit_normalized(url):
         The URL to split and normalize.
     :returns:
         Tuple that contains these elements:
-        (base_url, scheme, netloc, path, params, query, fragment)
+        ``(base_url, scheme, netloc, path, params, query, fragment)``
     """
     base_url, scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
     params      = (";" + params) if params else ""
@@ -265,14 +294,14 @@ def urlsplit_normalized(url):
 
 def urlparse_normalized(url):
     """
-    Like urlparse.urlparse but also normalizes URL and the path,
+    Like :func:`urlparse.urlparse` but also normalizes URL and the path,
     and returns a tuple.
 
     :param url:
         The URL to split and normalize.
     :returns:
         Tuple that contains these elements:
-        (base_url, scheme, netloc, path, params, query, fragment)
+        ``(base_url, scheme, netloc, path, params, query, fragment)``
     """
     if not url:
         raise ValueError("Invalid URL.")

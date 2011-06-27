@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# OAuth utility functions.
+# Protocol-specific utility functions.
 #
 # Copyright (C) 2009 Facebook.
 # Copyright (C) 2010 Rick Copeland <rcopeland@geek.net>
@@ -17,6 +17,35 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""
+:module: pyoauth.utils
+:synopsis: Protocol-specific utility functions.
+
+Functions
+---------
+.. autofunction:: oauth_generate_nonce
+
+.. autofunction:: oauth_generate_verification_code
+
+.. autofunction:: oauth_generate_timestamp
+
+.. autofunction:: oauth_get_hmac_sha1_signature
+
+.. autofunction:: oauth_get_rsa_sha1_signature
+
+.. autofunction:: oauth_check_rsa_sha1_signature
+
+.. autofunction:: oauth_get_plaintext_signature
+
+.. autofunction:: oauth_get_signature_base_string
+
+.. autofunction:: oauth_get_normalized_query_string
+
+.. autofunction:: oauth_get_normalized_authorization_header_value
+
+.. autofunction:: oauth_parse_authorization_header_value
+
+"""
 
 import binascii
 import hmac
@@ -59,8 +88,11 @@ def oauth_generate_nonce(length=-1):
     """
     Calculates an OAuth nonce.
 
-    :rfc: 5849#section-3.3
+    .. NOTE::
+        I don't get it. Why did they have to name it "nonce"? Nonce feels like
+        it's been borrowed from the Oxford Dictionary of Constipatese.
 
+    :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param length:
         Length of the nonce to be returned.
         Default -1, which means the entire nonce is returned.
@@ -80,9 +112,12 @@ def oauth_generate_verification_code(length=8):
     we limit the length of this code to 8 characters to keep it suitable
     for manual entry.
 
+    .. NOTE:
+
+
     :see:
         Resource Owner Authorization
-        http://tools.ietf.org/html/rfc5849#section-2.2
+        (http://tools.ietf.org/html/rfc5849#section-2.2)
     :param length:
         Length of the verification code. Defaults to 8.
     :returns:
@@ -109,7 +144,6 @@ def oauth_get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=Non
     Calculates an HMAC-SHA1 signature for a base string.
 
     :see: HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)
-
     :param consumer_secret:
         Client (consumer) secret
     :param method:
@@ -171,6 +205,7 @@ def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, oaut
     """
     Verifies a RSA-SHA1 OAuth signature.
 
+    :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
     :author:
         Rick Copeland <rcopeland@geek.net>
     :param signature:
@@ -347,8 +382,7 @@ def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
     """
     Builds the Authorization header value.
 
-    See Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
-
+    :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param oauth_params:
         Protocol-specific parameters excluding the ``realm`` parameter.
     :param realm:
@@ -379,8 +413,8 @@ def oauth_parse_authorization_header_value(header_value):
     """
     Parses the OAuth Authorization header.
 
-    :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
 
+    :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param header_value:
         Header value.
     :returns:
@@ -400,8 +434,7 @@ def _oauth_parse_authorization_header_value_l(header_value):
     Parses the OAuth Authorization header preserving the order of the
     parameters as in the header value.
 
-    See Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
-
+    :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param header_value:
         Header value.
     :returns:

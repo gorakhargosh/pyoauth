@@ -16,6 +16,26 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""
+:module: pyoauth.unicode
+:synopsis: Unicode encoding utility functions.
+
+Functions
+---------
+.. autofunction:: to_utf8
+
+.. autofunction:: to_unicode
+
+.. autofunction:: to_utf8_if_string
+
+.. autofunction:: to_unicode_if_string
+
+.. autofunction:: is_unicode_string
+
+.. autofunction:: is_byte_string
+
+"""
+
 
 # Python3 compatibility: On python2.5, introduce the bytes alias from 2.6
 try:
@@ -40,7 +60,7 @@ def to_utf8(value):
     return value.encode("utf-8")
 
 
-_TO_UNICODE_TYPES = (unicode, type(None))
+_UNICODE_TYPES = (unicode, type(None))
 def to_unicode(value):
     """
     Converts a string argument to a Unicode string if it is a byte string.
@@ -49,7 +69,7 @@ def to_unicode(value):
         If already a Unicode string or None, it is returned unchanged.
         Otherwise it must be a byte string and is decoded as UTF-8.
     """
-    if isinstance(value, _TO_UNICODE_TYPES):
+    if isinstance(value, _UNICODE_TYPES):
         return value
     assert isinstance(value, bytes)
     return value.decode("utf-8")
@@ -89,9 +109,25 @@ def to_unicode_if_string(value):
         return value
 
 
-def is_unicode_string(s):
-    return isinstance(s, unicode)
+def is_unicode_string(value):
+    """
+    Determines whether the given value is a Unicode string.
+
+    :param value:
+        The value to test.
+    :returns:
+        ``True`` if ``value`` is a Unicode string; ``False`` otherwise.
+    """
+    return isinstance(value, unicode)
 
 
-def is_byte_string(s):
-    return isinstance(s, bytes)
+def is_byte_string(value):
+    """
+    Determines whether the given value is a byte string.
+
+    :param value:
+        The value to test.
+    :returns:
+        ``True`` if ``value`` is a byte string; ``False`` otherwise.
+    """
+    return isinstance(value, bytes)
