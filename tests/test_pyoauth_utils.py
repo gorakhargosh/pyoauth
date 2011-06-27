@@ -97,9 +97,6 @@ class Test_oauth_get_hmac_sha1_signature(object):
 class Test_oauth_get_and_check_rsa_sha1_signature(object):
     # Taken from https://github.com/rick446/python-oauth2/commit/a8bee2ad1a993faa1e13a04f14f1754489ad35bd
     def setUp(self):
-        from Crypto.PublicKey import RSA
-
-        self.RSA = RSA
         self.oauth_signature_method = "RSA-SHA1"
         self.oauth_token_key = "tok-test-key"
         self.oauth_token_secret = "tok-test-secret"
@@ -126,6 +123,8 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         self.oauth_signature = "D2rdx9TiFajZbXChqMca6eaal8FxZhLMU1bdNX0glIN+BT4nrYGJqmIW92kWZYEYKHsVz7e67oDBEYlIIQMKWg=="
 
     def test_get_signature(self):
+        from Crypto.PublicKey import RSA
+
         # consumer_secret is a string.
         assert_equal(oauth_get_rsa_sha1_signature(
             consumer_secret=self.oauth_consumer_secret,
@@ -137,7 +136,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
 
         # consumer_secret is an RSA instance.
         assert_equal(oauth_get_rsa_sha1_signature(
-            consumer_secret=self.RSA.importKey(self.oauth_consumer_secret),
+            consumer_secret=RSA.importKey(self.oauth_consumer_secret),
             method=self.http_method,
             url=self.url,
             oauth_params=self.oauth_params,
@@ -146,6 +145,8 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
 
 
     def test_check_signature(self):
+        from Crypto.PublicKey import RSA
+
         # consumer_secret is a string.
         assert_true(oauth_check_rsa_sha1_signature(
             signature=self.oauth_signature,
@@ -159,12 +160,39 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         # consumer_secret is an RSA instance.
         assert_true(oauth_check_rsa_sha1_signature(
             signature=self.oauth_signature,
-            consumer_secret=self.RSA.importKey(self.oauth_consumer_secret),
+            consumer_secret=RSA.importKey(self.oauth_consumer_secret),
             method=self.http_method,
             url=self.url,
             oauth_params=self.oauth_params,
             token_secret=self.oauth_token_secret
         ))
+
+    def test_get_raises_NotImplementedError_when_Crypto_unavailable(self):
+        # consumer_secret is a string.
+        assert_raises(NotImplementedError,
+                      oauth_get_rsa_sha1_signature,
+                      self.oauth_consumer_secret,
+                      self.http_method,
+                      self.url,
+                      self.oauth_params,
+                      self.oauth_token_secret,
+                      None
+        )
+
+    def test_check_raises_NotImplementedError_when_Crypto_unavailable(self):
+        # consumer_secret is a string.
+        assert_raises(NotImplementedError,
+                      oauth_check_rsa_sha1_signature,
+                      self.oauth_signature,
+                      self.oauth_consumer_secret,
+                      self.http_method,
+                      self.url,
+                      self.oauth_params,
+                      self.oauth_token_secret,
+                      None
+        )
+
+
 
 
 class Test_oauth_get_plaintext_signature(object):

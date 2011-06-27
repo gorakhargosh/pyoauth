@@ -173,7 +173,7 @@ def oauth_get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=Non
     return binascii.b2a_base64(hashed.digest())[:-1]
 
 
-def oauth_get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None, token_secret=None):
+def oauth_get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None, token_secret=None, _rsa=RSA):
     """
     Calculates an RSA-SHA1 OAuth signature.
 
@@ -193,14 +193,14 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None
     """
     oauth_params = oauth_params or {}
 
-    if RSA is None:
+    if _rsa is None:
         raise NotImplementedError()
 
     try:
         getattr(consumer_secret, "sign")
         key = consumer_secret
     except AttributeError:
-        key = RSA.importKey(consumer_secret)
+        key = _rsa.importKey(consumer_secret)
 
     base_string = oauth_get_signature_base_string(method, url, oauth_params)
     digest = sha1(base_string).digest()
@@ -210,7 +210,7 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None
     return binascii.b2a_base64(signature_bytes)[:-1]
 
 
-def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, oauth_params=None, token_secret=None):
+def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, oauth_params=None, token_secret=None, _rsa=RSA):
     """
     Verifies a RSA-SHA1 OAuth signature.
 
@@ -234,14 +234,14 @@ def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, oaut
     """
     oauth_params = oauth_params or {}
 
-    if RSA is None:
+    if _rsa is None:
         raise NotImplementedError()
 
     try:
         getattr(consumer_secret, "publickey")
         key = consumer_secret
     except AttributeError:
-        key = RSA.importKey(consumer_secret)
+        key = _rsa.importKey(consumer_secret)
 
     base_string = oauth_get_signature_base_string(method, url, oauth_params)
     digest = sha1(base_string).digest()
