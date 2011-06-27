@@ -110,7 +110,7 @@ def oauth_unescape(oauth_value):
 
 def oauth_urlencode(query_params, allow_func=None):
     """
-    URL encodes a dictionary of query parameters into a string of query
+    Serializes a dictionary of query parameters into a string of query
     parameters, ``name=value`` pairs separated by ``&``, sorted first by
     ``name`` then by ``value`` based on the OAuth percent-encoding
     rules and specification.
@@ -138,7 +138,7 @@ def oauth_urlencode(query_params, allow_func=None):
 
 def oauth_urlencode_sl(query_params, allow_func=None):
     """
-    URL encodes a dictionary of query parameters into a list of query
+    Serializes a dictionary of query parameters into a list of query
     parameters, ``(name, value)`` pairs, sorted first by ``name`` then by
     ``value`` based on the OAuth percent-encoding rules and specification.
 
