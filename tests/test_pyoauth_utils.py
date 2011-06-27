@@ -111,7 +111,7 @@ bgfP68eG9kufAiEAtUSAHGp29HUyzxC9sNNKiVysnuqDu22NXBRSmjnOu6UCIEFZ
 nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
 -----END RSA PRIVATE KEY-----'''
         self.http_method = "GET"
-        self.url = "http://sp.example.com/?bar=blerg&multi=FOO&multi=BAR&foo=59"
+        self.url = u"http://sp.example.com/?bar=blerg&multi=FOO&multi=BAR&foo=59"
         self.oauth_params = dict(
             oauth_version='1.0',
             oauth_nonce="4572616e48616d6d65724c61686176",
