@@ -37,11 +37,19 @@ Functions
 """
 
 
-# Python3 compatibility: On python2.5, introduce the bytes alias from 2.6
 try:
+    # Python 2.5 doesn't define bytes
     bytes
 except:
+    # Introduce the bytes alias to Python 2.5 which is already present in Python 2.6+
     bytes = str
+
+try:
+    # Python3 doesn't define this.
+    unicode
+except:
+    # Therefore, we define it for Python3.
+    unicode = str
 
 
 _UTF8_TYPES = (bytes, type(None))
