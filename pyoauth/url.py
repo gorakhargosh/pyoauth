@@ -41,21 +41,25 @@ Functions
 
 """
 
-
-
-import urlparse
-import urllib
-from pyoauth.unicode import to_utf8_if_string, to_utf8
+try:
+    # Python 3.
+    from urllib.parse import urlparse, urlunparse, parse_qs, quote, unquote_plus
+except ImportError:
+    # Python 2.5+
+    from urlparse import urlparse, urlunparse
+    from urllib import quote, unquote_plus
+    try:
+        # Python 2.6+
+        from urlparse import parse_qs
+    except ImportError:
+        from cgi import parse_qs
 
 try:
     bytes
 except:
     bytes = str
 
-try:
-    from urlparse import parse_qs
-except ImportError:
-    from cgi import parse_qs
+from pyoauth.unicode import to_utf8_if_string, to_utf8
 
 
 def oauth_parse_qs(query_string):
@@ -89,7 +93,7 @@ def oauth_escape(oauth_value):
         Percent-encoded string.
    """
     oauth_value = bytes(to_utf8_if_string(oauth_value))
-    return urllib.quote(oauth_value, safe="~")
+    return quote(oauth_value, safe="~")
 
 
 def oauth_unescape(oauth_value):
@@ -103,7 +107,7 @@ def oauth_unescape(oauth_value):
     :returns:
         Percent-decoded value.
     """
-    return urllib.unquote_plus(to_utf8(oauth_value))
+    return unquote_plus(to_utf8(oauth_value))
 
 
 def oauth_urlencode(query_params, allow_func=None):
@@ -215,7 +219,7 @@ def oauth_url_query_params_add(url, extra_query_params, allow_func=None):
     d = oauth_url_query_params_merge(query, extra_query_params)
     qs = oauth_urlencode(d, allow_func=allow_func)
     #qs = ("?" + qs) if qs else ""
-    return urlparse.urlunparse((scheme, netloc, path, params, qs, fragment))
+    return urlunparse((scheme, netloc, path, params, qs, fragment))
     #return base_url + path + params + qs + fragment
 
 
@@ -288,7 +292,7 @@ def oauth_urlparse_normalized(url):
     if not url:
         raise ValueError("Invalid URL.")
 
-    parts = urlparse.urlparse(url)
+    parts = urlparse(url)
 
     scheme      = parts.scheme
     # Netloc.
@@ -347,8 +351,8 @@ def _url_equals(url1, url2):
         >>> _url_equals("http://www.google.com/request?a=b", "http://www.google.com/request?b=c")
         False
     """
-    u1 = urlparse.urlparse(url1)
-    u2 = urlparse.urlparse(url2)
+    u1 = urlparse(url1)
+    u2 = urlparse(url2)
     return u1.scheme == u2.scheme and \
         u1.path == u2.path and \
         u1.params == u2.params and \

@@ -50,7 +50,6 @@ Functions
 import binascii
 import hmac
 import time
-import urlparse
 import uuid
 import re
 
@@ -61,9 +60,18 @@ except:
     bytes = str
 
 try:
-    from urlparse import parse_qs
+    # Python 3.
+    from urllib.parse import urlparse, urlunparse, parse_qs, quote, unquote_plus
 except ImportError:
-    from cgi import parse_qs
+    # Python 2.5+
+    from urlparse import urlparse, urlunparse
+    from urllib import quote, unquote_plus
+    try:
+        # Python 2.6+
+        from urlparse import parse_qs
+    except ImportError:
+        from cgi import parse_qs
+
 
 try:
     from Crypto.PublicKey import RSA
@@ -338,7 +346,7 @@ def oauth_get_signature_base_string(method, url, oauth_params):
 
     scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
     query_string = oauth_get_normalized_query_string(oauth_parse_qs(query), oauth_params)
-    normalized_url = urlparse.urlunparse((scheme, netloc, path, params, None, None))
+    normalized_url = urlunparse((scheme, netloc, path, params, None, None))
     return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
 
 
