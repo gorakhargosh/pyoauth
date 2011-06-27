@@ -290,6 +290,13 @@ class Test_oauth_get_signature_base_string(object):
         assert_true("realm%3Dsomething" in base_string)
 
 
+    def test_base_string_preserves_matrix_params_and_drops_default_ports(self):
+        url = "http://social.yahooapis.com:80/v1/user/6677/connections;start=0;count=20?format=json#fragment"
+        base_string = "POST&http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20&format=json"
+        assert_equal(oauth_unescape(oauth_get_signature_base_string("POST", url, dict())), base_string)
+
+
+
 class Test_oauth_get_normalized_authorization_header_value(object):
     def test_equality_and_realm(self):
         params = {
