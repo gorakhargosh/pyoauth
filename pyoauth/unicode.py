@@ -53,70 +53,6 @@ except:
     basestring = (str, bytes)
 
 
-_UTF8_TYPES = (bytes, type(None))
-def to_utf8(value):
-    """
-    Converts a string argument to a UTF-8 encoded byte string if it is a
-    Unicode string.
-
-    :param value:
-        If already a byte string or None, it is returned unchanged.
-        Otherwise it must be a Unicode string and is encoded as UTF-8.
-    """
-    if isinstance(value, _UTF8_TYPES):
-        return value
-    assert is_unicode(value)
-    return value.encode("utf-8")
-
-
-_UNICODE_TYPES = (unicode, type(None))
-def to_unicode(value, encoding="utf-8"):
-    """
-    Converts bytes to a Unicode string decoding it according to the encoding
-    specified.
-
-    :param value:
-        If already a Unicode string or None, it is returned unchanged.
-        Otherwise it must be a byte string.
-    :param encoding:
-        The encoding used to decode bytes. Defaults to UTF-8
-    """
-    if isinstance(value, _UNICODE_TYPES):
-        return value
-    assert is_bytes(value)
-    return value.decode(encoding)
-
-
-def to_utf8_if_unicode(value):
-    """
-    Converts an argument to a UTF-8 encoded byte string if the argument
-    is a Unicode string.
-
-    :param value:
-        The value that will be UTF-8 encoded if it is a string.
-    :returns
-        UTF-8 encoded byte string if the argument is a Unicode string; otherwise
-        the value is returned unchanged.
-    """
-    return to_utf8(value) if is_unicode(value) else value
-
-
-def to_unicode_if_bytes(value, encoding="utf-8"):
-    """
-    Converts an argument to Unicode string if the argument is a byte string
-    decoding it as specified by the encoding.
-
-    :param value:
-        The value that will be converted to a Unicode string.
-    :param encoding:
-        The encoding used to decode bytes. Defaults to UTF-8.
-    :returns:
-        Unicode string if the argument is a byte string. Otherwise the value
-        is returned unchanged.
-    """
-    return to_unicode(value, encoding) if is_bytes(value) else value
-
-
 def is_unicode(value):
     """
     Determines whether the given value is a Unicode string.
@@ -152,3 +88,65 @@ def is_bytes_or_unicode(value):
         ``True`` if ``value`` is a string; ``False`` otherwise.
     """
     return isinstance(value, basestring)
+
+
+def to_utf8(value):
+    """
+    Converts a string argument to a UTF-8 encoded byte string if it is a
+    Unicode string.
+
+    :param value:
+        If already a byte string or None, it is returned unchanged.
+        Otherwise it must be a Unicode string and is encoded as UTF-8.
+    """
+    if value is None or is_bytes(value):
+        return value
+    assert is_unicode(value)
+    return value.encode("utf-8")
+
+
+def to_unicode(value, encoding="utf-8"):
+    """
+    Converts bytes to a Unicode string decoding it according to the encoding
+    specified.
+
+    :param value:
+        If already a Unicode string or None, it is returned unchanged.
+        Otherwise it must be a byte string.
+    :param encoding:
+        The encoding used to decode bytes. Defaults to UTF-8
+    """
+    if value is None or is_unicode(value):
+        return value
+    assert is_bytes(value)
+    return value.decode(encoding)
+
+
+def to_utf8_if_unicode(value):
+    """
+    Converts an argument to a UTF-8 encoded byte string if the argument
+    is a Unicode string.
+
+    :param value:
+        The value that will be UTF-8 encoded if it is a string.
+    :returns
+        UTF-8 encoded byte string if the argument is a Unicode string; otherwise
+        the value is returned unchanged.
+    """
+    return to_utf8(value) if is_unicode(value) else value
+
+
+def to_unicode_if_bytes(value, encoding="utf-8"):
+    """
+    Converts an argument to Unicode string if the argument is a byte string
+    decoding it as specified by the encoding.
+
+    :param value:
+        The value that will be converted to a Unicode string.
+    :param encoding:
+        The encoding used to decode bytes. Defaults to UTF-8.
+    :returns:
+        Unicode string if the argument is a byte string. Otherwise the value
+        is returned unchanged.
+    """
+    return to_unicode(value, encoding) if is_bytes(value) else value
