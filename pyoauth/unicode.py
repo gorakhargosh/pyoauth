@@ -65,7 +65,7 @@ def to_utf8(value):
     """
     if isinstance(value, _UTF8_TYPES):
         return value
-    assert isinstance(value, unicode)
+    assert is_unicode(value)
     return value.encode("utf-8")
 
 
@@ -83,7 +83,7 @@ def to_unicode(value, encoding="utf-8"):
     """
     if isinstance(value, _UNICODE_TYPES):
         return value
-    assert isinstance(value, bytes)
+    assert is_bytes(value)
     return value.decode(encoding)
 
 
