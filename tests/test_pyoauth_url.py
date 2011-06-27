@@ -318,6 +318,20 @@ class Test_urlsplit_normalized(object):
         assert_raises(ValueError, urlsplit_normalized, None)
         assert_raises(ValueError, urlsplit_normalized, "")
 
+    def test_url_with_matrix_params(self):
+        result = (
+            "http://social.yahooapis.com",
+            "http",
+            "social.yahooapis.com",
+            "/v1/user/6677/connections",
+            ";start=0;count=20",
+            "",
+            "",
+        )
+        url = "http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20"
+        assert_equal(urlsplit_normalized(url), result)
+
+
 class Test_urlparse_normalized(object):
     def test_valid_parts_and_normalization(self):
         url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/result;param1?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2#fragment"
@@ -349,6 +363,23 @@ class Test_urlparse_normalized(object):
     def test_ValueError_when_url_invalid(self):
         assert_raises(ValueError, urlparse_normalized, None)
         assert_raises(ValueError, urlparse_normalized, "")
+
+    def test_url_with_matrix_params(self):
+        result = (
+            "http://social.yahooapis.com",
+            "http",
+            "social.yahooapis.com",
+            "/v1/user/6677/connections",
+            "start=0;count=20",
+            "",
+            "",
+        )
+        url = "http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20"
+        assert_equal(urlparse_normalized(url), result)
+#        req = oauth.Request("GET", url, None)
+#        self.assertEquals(req.normalized_url, 'http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20')
+#        self.assertEquals(req.url, 'http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20')
+
 
 class Test_oauth_url_query_params_sanitize(object):
     def test_unflattens_dict(self):
