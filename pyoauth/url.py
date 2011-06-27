@@ -159,7 +159,7 @@ def oauth_urlencode_sl(query_params, allow_func=None):
     """
     query_params = query_params or {}
     encoded_pairs = []
-    for k, v in query_params.iteritems():
+    for k, v in query_params.items():
         # Keys are also percent-encoded according to OAuth spec.
         k = oauth_escape(to_utf8(k))
         if allow_func and not allow_func(k, v):
@@ -235,7 +235,7 @@ def oauth_url_query_params_merge(query_params, *extra_query_params):
     d.update(query_params)
     for qp in extra_query_params:
         qp = oauth_url_query_params_sanitize(qp)
-        for name, value in qp.iteritems():
+        for name, value in qp.items():
             if name in d:
                 d[name].extend(value)
             else:
@@ -260,7 +260,7 @@ def oauth_url_query_params_sanitize(query_params):
     elif isinstance(query_params, dict):
         # Unflatten the dictionary.
         d = {}
-        for n, v in query_params.iteritems():
+        for n, v in query_params.items():
             if not isinstance(v, list) and not isinstance(v, tuple):
                 d[n] = [v]
             else:

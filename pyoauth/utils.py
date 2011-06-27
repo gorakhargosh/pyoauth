@@ -362,7 +362,7 @@ def oauth_get_normalized_query_string(url_query_params, oauth_params):
     # Clean up oauth params.
     # OAuth param names must begin with "oauth_".
     _oauth_params = {}
-    for k, v in oauth_params.iteritems():
+    for k, v in oauth_params.items():
         if k.startswith("oauth_"):
             # This gets rid of "realm" or any non-OAuth param.
             _oauth_params[k] = v
@@ -400,7 +400,7 @@ def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
     # Clean up oauth params.
     # OAuth param names must begin with "oauth_".
     _oauth_params = {}
-    for k, v in oauth_params.iteritems():
+    for k, v in oauth_params.items():
         if k.startswith("oauth_"):
             # This gets rid of "realm" or any non-OAuth param.
             _oauth_params[k] = v

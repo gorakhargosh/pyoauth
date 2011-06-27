@@ -18,7 +18,7 @@ class Test_oauth_parse_qs(object):
 
     def test_single_value_lists_are_not_flattened(self):
         d = oauth_parse_qs("a=1&a=2&a=3&b=c")
-        for n, v in d.iteritems():
+        for n, v in d.items():
             assert_true(isinstance(n, str), "Dictionary key is not a string.")
             assert_true(isinstance(v, list), "Dictionary value is not a list.")
 

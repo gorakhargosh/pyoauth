@@ -454,7 +454,7 @@ class Test_oauth_parse_authorization_header(object):
             oauth_empty=""
         '''
         for name, value in oauth_parse_authorization_header_value(
-            header_value).iteritems():
+            header_value).items():
             assert_false(name == 'OAuth realm',
                          '`OAuth realm` found in header names')
 
