@@ -140,3 +140,16 @@ def is_byte_string(value):
         ``True`` if ``value`` is a byte string; ``False`` otherwise.
     """
     return isinstance(value, bytes)
+
+
+def is_basestring(value):
+    """
+    Determines whether the given value is an instance of a string irrespective
+    of whether it is a byte string or a Unicode string.
+
+    :param value:
+        The value to test.
+    :returns:
+        ``True`` if ``value`` is a string; ``False`` otherwise.
+    """
+    return isinstance(value, basestring)

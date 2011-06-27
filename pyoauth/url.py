@@ -59,7 +59,7 @@ try:
 except:
     bytes = str
 
-from pyoauth.unicode import to_utf8_if_string, to_utf8
+from pyoauth.unicode import to_utf8_if_string, to_utf8, is_basestring
 
 
 def oauth_parse_qs(query_string):
@@ -168,7 +168,7 @@ def oauth_urlencode_sl(query_params, allow_func=None):
         k = oauth_escape(to_utf8(k))
         if allow_func and not allow_func(k, v):
             continue
-        elif isinstance(v, basestring):
+        elif is_basestring(v):
             encoded_pairs.append((k, oauth_escape(v),))
         else:
             try:
@@ -255,7 +255,7 @@ def oauth_url_query_params_sanitize(query_params):
     :returns:
         An unflattened query parameter dictionary.
     """
-    if isinstance(query_params, basestring):
+    if is_basestring(query_params):
         if query_params.startswith("?"):
             query_params = query_params[1:]
         return oauth_parse_qs(query_params)
