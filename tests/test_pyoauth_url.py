@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
+from nose.tools import assert_equal, assert_not_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
+try:
+    from nose.tools import assert_dict_equal
+except ImportError:
+    assert_dict_equal = assert_equal
 from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, \
     oauth_urlencode, oauth_urlencode_sl, oauth_url_query_params_sanitize, \
     oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add
+
+from urlparse import urlparse
 
 
 def _url_equals(url1, url2):

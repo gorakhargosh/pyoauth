@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from nose.tools import assert_equal, assert_not_equal, assert_dict_equal, assert_false, assert_true, assert_raises
+from nose.tools import assert_equal, assert_not_equal, assert_false, assert_true, assert_raises
+try:
+    from nose.tools import assert_dict_equal
+except ImportError:
+    assert_dict_equal = assert_equal
 from nose import SkipTest
 from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, oauth_get_normalized_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature, oauth_get_signature_base_string, _oauth_get_plaintext_signature
 

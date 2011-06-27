@@ -450,7 +450,8 @@ def _oauth_parse_authorization_header_value_l(header_value):
         list of parameter name value pairs in the order in which they appeared::
     """
     # Remove the auth-scheme from the value.
-    header_value = re.sub(r"(^OAuth[\s]+)", "", to_utf8(header_value).strip(), 1, re.IGNORECASE)
+    pattern = re.compile(r"(^OAuth[\s]+)", re.IGNORECASE)
+    header_value = re.sub(pattern, "", to_utf8(header_value).strip(), 1)
 
     pairs = [param_pair.strip() for param_pair in header_value.split(",")]
     decoded_pairs = []
