@@ -142,7 +142,7 @@ def is_byte_string(value):
     return isinstance(value, bytes)
 
 
-def is_basestring(value):
+def is_bytes_or_unicode_string(value):
     """
     Determines whether the given value is an instance of a string irrespective
     of whether it is a byte string or a Unicode string.
