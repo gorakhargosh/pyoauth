@@ -13,6 +13,29 @@ Important URLs
 at github_. The `issue tracker`_ is where you can file bug reports and request
 features or enhancements to |project_name|.
 
+OAuth Test server information for testing clients
+-------------------------------------------------
+
+Sandbox URL: ``http://oauth-sandbox.sevengoslings.net/``
+Username: ``pyoauth``
+Password (Guard Kitten): ``Kitty-Agent "Able"``
+
+URLs
+~~~~
+Request token URL: ``http://oauth-sandbox.sevengoslings.net/request_token``
+User authorization URL: ``http://oauth-sandbox.sevengoslings.net/authorize``
+Access token URL: ``http://oauth-sandbox.sevengoslings.net/access_token``
+
+Two-legged resource URL: ``http://oauth-sandbox.sevengoslings.net/two_legged``
+Three-legged resource URL: ``http://oauth-sandbox.sevengoslings.net/three_legged``
+
+Consumer keys:
+~~~~~~~~~~~~~~
+Consumer key: ``ac19e45c6b01a767``
+Consumer secret: ``59806917a29a94ee77190ec06c50``
+
+Nonce checking is enabled.
+
 Before you start
 ----------------
 Ensure your system has the following programs and libraries installed before
