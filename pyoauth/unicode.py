@@ -1,54 +1,92 @@
 # -*- coding: utf-8 -*-
 # Unicode utilities.
 #
-# Copyright (C) 2007-2010 Leah Culver, Joe Stump, Mark Paschal, Vic Fryzel
+# Copyright (C) 2009 Facebook
 # Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
 #
-# MIT License
-# -----------
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
 #
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
 
 
-def to_unicode(s):
-    if not isinstance(s, unicode):
-        if not isinstance(s, str):
-            raise TypeError("You are required to pass either unicode or string here, not: %r (%s)" % (type(s), s))
-        try:
-            s = s.decode("utf-8")
-        except UnicodeDecodeError, e:
-            raise TypeError('Expected unicode object or UTF-8 encoded string: got Python string containing non-UTF-8: %r instead. The UnicodeDecodeError that resulted from attempting to interpret it as UTF-8 was: %s' % (s, e,))
-    return s
+# Python3 compatibility: On python2.5, introduce the bytes alias from 2.6
+try:
+    bytes
+except:
+    bytes = str
 
-def to_utf8(s):
-    return to_unicode(s).encode("utf-8")
 
-def to_unicode_if_string(s):
-    if isinstance(s, basestring):
-        return to_unicode(s)
+_UTF8_TYPES = (bytes, type(None))
+def to_utf8(value):
+    """
+    Converts a string argument to a UTF-8 encoded byte string if it is a
+    Unicode string.
+
+    :param value:
+        If already a byte string or None, it is returned unchanged.
+        Otherwise it must be a Unicode string and is encoded as UTF-8.
+    """
+    if isinstance(value, _UTF8_TYPES):
+        return value
+    assert isinstance(value, unicode)
+    return value.encode("utf-8")
+
+
+_TO_UNICODE_TYPES = (unicode, type(None))
+def to_unicode(value):
+    """
+    Converts a string argument to a Unicode string if it is a byte string.
+
+    :param value:
+        If already a Unicode string or None, it is returned unchanged.
+        Otherwise it must be a byte string and is decoded as UTF-8.
+    """
+    if isinstance(value, _TO_UNICODE_TYPES):
+        return value
+    assert isinstance(value, bytes)
+    return value.decode("utf-8")
+
+
+def to_utf8_if_string(value):
+    """
+    Converts an argument to a UTF-8 encoded byte string if the argument
+    is a string.
+
+    :param value:
+        The value that will be UTF-8 encoded if it is a string.
+    :returns
+        UTF-8 encoded byte string if the argument is a Unicode string; otherwise
+        the value is returned unchanged.
+    """
+    if isinstance(value, basestring):
+        return to_utf8(value)
     else:
-        return s
+        return value
 
-def to_utf8_if_string(s):
-    if isinstance(s, basestring):
-        return to_utf8(s)
+
+def to_unicode_if_string(value):
+    """
+    Converts an argument to Unicode string if the argument is a string.
+    The string will be decoded as UTF-8.
+
+    :param value:
+        The value that will be converted to a Unicode string.
+    :returns:
+        Unicode string if the argument is a byte string. Otherwise the value
+        is returned unchanged.
+    """
+    if isinstance(value, basestring):
+        return to_unicode(value)
     else:
-        return s
+        return value
 
 
 def is_unicode_string(s):
@@ -56,4 +94,4 @@ def is_unicode_string(s):
 
 
 def is_byte_string(s):
-    return isinstance(s, str)
+    return isinstance(s, bytes)

@@ -3,30 +3,27 @@
 #
 # Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
 #
-# MIT License
-# -----------
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
 #
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
 
 
 import urlparse
 import urllib
-from pyoauth.unicode import is_unicode_string, to_utf8, is_byte_string
+from pyoauth.unicode import to_utf8_if_string, to_utf8
+
+try:
+    bytes
+except:
+    bytes = str
 
 try:
     from urlparse import parse_qs
@@ -42,7 +39,7 @@ def oauth_parse_qs(query_string):
 
     See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
     """
-    query_string = query_string.encode("utf-8") or ""
+    query_string = to_utf8_if_string(query_string) or ""
     if query_string.startswith("?"):
         query_string = query_string[1:]
     return parse_qs(query_string, keep_blank_values=True)
@@ -98,12 +95,13 @@ def oauth_escape(oauth_value):
             web-development frameworks (e.g., encode different characters, use
             lowercase hexadecimal characters).
     """
-    if is_unicode_string(oauth_value):
-        oauth_value = oauth_value.encode("utf-8")
-    elif is_byte_string(oauth_value):
-        pass
-    else:
-        oauth_value = str(oauth_value)
+    #if is_unicode_string(oauth_value):
+    #    oauth_value = utf8(oauth_value)
+    #elif is_byte_string(oauth_value):
+    #    pass
+    #else:
+    #    oauth_value = bytes(oauth_value)
+    oauth_value = bytes(to_utf8_if_string(oauth_value))
     return urllib.quote(oauth_value, safe="~")
 
 
@@ -118,9 +116,9 @@ def oauth_unescape(oauth_value):
     :returns:
         Percent-decoded value.
     """
-    if is_unicode_string(oauth_value):
-        oauth_value = oauth_value.encode("utf-8")
-    return urllib.unquote(oauth_value.replace('+', ' '))
+    #if is_unicode_string(oauth_value):
+    #    oauth_value = oauth_value.encode("utf-8")
+    return urllib.unquote_plus(to_utf8(oauth_value))
 
 
 def oauth_urlencode(query_params, allow_func=None):
@@ -186,7 +184,7 @@ def oauth_urlencode_sl(query_params, allow_func=None):
             try:
                 v = list(v)
             except TypeError, e:
-                assert "is not iterable" in str(e)
+                assert "is not iterable" in bytes(e)
                 encoded_pairs.append((k, oauth_escape(v),))
             else:
                 # Loop over the sequence.
@@ -327,7 +325,7 @@ def urlparse_normalized(url):
     password    = (":" + parts.password) if parts.password else ""
     credentials = username + password
     credentials = (credentials + "@") if credentials else ""
-    port        = (":" + str(parts.port)) if parts.port else ""
+    port        = (":" + bytes(parts.port)) if parts.port else ""
     netloc      = credentials + parts.hostname + port
     # http://tools.ietf.org/html/rfc3986#section-3
     # and http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.2.2
