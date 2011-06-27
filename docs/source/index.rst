@@ -5,7 +5,7 @@
 
 .. include:: global.rst.inc
 
-PyOauth
+PyOAuth
 =======
 
 A Python library that implements the OAuth protocol for clients and servers
