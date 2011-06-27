@@ -359,6 +359,55 @@ class Test_urlparse_normalized(object):
         )
         assert_equal(urlparse_normalized(url), result)
 
+    def test_only_default_ports_are_dropped(self):
+        result = (
+            "http://social.yahooapis.com",
+            "http",
+            "social.yahooapis.com",
+            "/v1/user/6677/connections",
+            "start=0;count=20",
+            "",
+            "",
+        )
+        url = "http://social.yahooapis.com:80/v1/user/6677/connections;start=0;count=20"
+        assert_equal(urlparse_normalized(url), result)
+
+        result = (
+            "https://social.yahooapis.com",
+            "https",
+            "social.yahooapis.com",
+            "/v1/user/6677/connections",
+            "start=0;count=20",
+            "",
+            "",
+        )
+        url = "https://social.yahooapis.com:443/v1/user/6677/connections;start=0;count=20"
+        assert_equal(urlparse_normalized(url), result)
+
+        result = (
+            "http://social.yahooapis.com:8000",
+            "http",
+            "social.yahooapis.com:8000",
+            "/v1/user/6677/connections",
+            "start=0;count=20",
+            "",
+            "",
+        )
+        url = "http://social.yahooapis.com:8000/v1/user/6677/connections;start=0;count=20"
+        assert_equal(urlparse_normalized(url), result)
+
+        result = (
+            "https://social.yahooapis.com:8000",
+            "https",
+            "social.yahooapis.com:8000",
+            "/v1/user/6677/connections",
+            "start=0;count=20",
+            "",
+            "",
+        )
+        url = "https://social.yahooapis.com:8000/v1/user/6677/connections;start=0;count=20"
+        assert_equal(urlparse_normalized(url), result)
+
 
     def test_ValueError_when_url_invalid(self):
         assert_raises(ValueError, urlparse_normalized, None)

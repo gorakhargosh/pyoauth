@@ -314,7 +314,16 @@ def urlparse_normalized(url):
     password    = (":" + parts.password) if parts.password else ""
     credentials = username + password
     credentials = (credentials + "@") if credentials else ""
-    port        = (":" + bytes(parts.port)) if parts.port else ""
+
+    # Exclude default port numbers.
+    if parts.port:
+        if (scheme == "http" and parts.port == 80) or (scheme == "https" and parts.port == 443):
+            port = ""
+        else:
+            port = (":" + bytes(parts.port)) if parts.port else ""
+    else:
+        port = ""
+
     netloc      = credentials + parts.hostname + port
     # http://tools.ietf.org/html/rfc3986#section-3
     # and http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.2.2
