@@ -52,49 +52,15 @@ def oauth_escape(oauth_value):
     Used ONLY in constructing the signature base string and the "Authorization"
     header field.
 
+    :see: Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
     :param oauth_value:
         Query string parameter value to escape. If the value is a Unicode
         string, it will be encoded to UTF-8. A byte string is considered
         exactly that, a byte string and will not be UTF-8 encoded—however, it
         will be percent-encoded.
     :returns:
-        String representing escaped value as follows::
-
-            Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
-            -----------------------------------------------------------------
-            Existing percent-encoding methods do not guarantee a consistent
-            construction of the signature base string.  The following percent-
-            encoding method is not defined to replace the existing encoding
-            methods defined by [RFC3986] and [W3C.REC-html40-19980424].  It is
-            used only in the construction of the signature base string and the
-            "Authorization" header field.
-
-            This specification defines the following method for percent-encoding
-            strings:
-
-            1.  Text values are first encoded as UTF-8 octets per [RFC3629] if
-               they are not already.  This does not include binary values that
-               are not intended for human consumption.
-
-            2.  The values are then escaped using the [RFC3986] percent-encoding
-               (%XX) mechanism as follows:
-
-               *  Characters in the unreserved character set as defined by
-                  [RFC3986], Section 2.3 (ALPHA, DIGIT, "-", ".", "_", "~") MUST
-                  NOT be encoded.
-
-               *  All other characters MUST be encoded.
-
-               *  The two hexadecimal characters used to represent encoded
-                  characters MUST be uppercase.
-
-            This method is different from the encoding scheme used by the
-            "application/x-www-form-urlencoded" content-type (for example, it
-            encodes space characters as "%20" and not using the "+" character).
-            It MAY be different from the percent-encoding functions provided by
-            web-development frameworks (e.g., encode different characters, use
-            lowercase hexadecimal characters).
-    """
+        Percent-encoded string.
+   """
     oauth_value = bytes(to_utf8_if_string(oauth_value))
     return urllib.quote(oauth_value, safe="~")
 
@@ -106,7 +72,8 @@ def oauth_unescape(oauth_value):
     See Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
 
     :param oauth_value:
-        Value to percent-decode. Value will be UTF-8 encoded if it is a Unicode string.
+        Value to percent-decode. Value will be UTF-8 encoded if
+        it is a Unicode string. '+' is treated as a ' ' character.
     :returns:
         Percent-decoded value.
     """

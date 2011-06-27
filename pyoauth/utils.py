@@ -108,6 +108,8 @@ def oauth_get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=Non
     """
     Calculates an HMAC-SHA1 signature for a base string.
 
+    :see: HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)
+
     :param consumer_secret:
         Client (consumer) secret
     :param method:
@@ -119,34 +121,7 @@ def oauth_get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=Non
     :param token_secret:
         Token secret if available.
     :returns:
-        Signature as follows::
-
-            HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)
-            ------------------------------------------------------------
-            The "HMAC-SHA1" signature method uses the HMAC-SHA1 signature
-            algorithm as defined in [RFC2104]:
-
-             digest = HMAC-SHA1 (key, text)
-
-            The HMAC-SHA1 function variables are used in following way:
-
-            text    is set to the value of the signature base string from
-                   Section 3.4.1.1.
-
-            key     is set to the concatenated values of:
-
-                   1.  The client shared-secret, after being encoded
-                       (Section 3.6).
-
-                   2.  An "&" character (ASCII code 38), which MUST be included
-                       even when either secret is empty.
-
-                   3.  The token shared-secret, after being encoded
-                       (Section 3.6).
-
-            digest  is used to set the value of the "oauth_signature" protocol
-                   parameter, after the result octet string is base64-encoded
-                   per [RFC2045], Section 6.8.
+        HMAC-SHA1 signature.
     """
     oauth_params = oauth_params or {}
     base_string = oauth_get_signature_base_string(method, url, oauth_params)
@@ -159,6 +134,7 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None
     """
     Calculates an RSA-SHA1 OAuth signature.
 
+    :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
     :param consumer_secret:
         Client (consumer) secret
     :param method:
@@ -170,46 +146,7 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None
     :param token_secret:
         Token secret if available.
     :returns:
-        Signature as follows::
-
-            RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
-            -----------------------------------------------------------
-            The "RSA-SHA1" signature method uses the RSASSA-PKCS1-v1_5 signature
-            algorithm as defined in [RFC3447], Section 8.2 (also known as
-            PKCS#1), using SHA-1 as the hash function for EMSA-PKCS1-v1_5.  To
-            use this method, the client MUST have established client credentials
-            with the server that included its RSA public key (in a manner that is
-            beyond the scope of this specification).
-
-            The signature base string is signed using the client's RSA private
-            key per [RFC3447], Section 8.2.1:
-
-             S = RSASSA-PKCS1-V1_5-SIGN (K, M)
-
-            Where:
-
-            K     is set to the client's RSA private key,
-
-            M     is set to the value of the signature base string from
-                 Section 3.4.1.1, and
-
-            S     is the result signature used to set the value of the
-                 "oauth_signature" protocol parameter, after the result octet
-                 string is base64-encoded per [RFC2045] section 6.8.
-
-            The server verifies the signature per [RFC3447] section 8.2.2:
-
-             RSASSA-PKCS1-V1_5-VERIFY ((n, e), M, S)
-
-            Where:
-
-            (n, e) is set to the client's RSA public key,
-
-            M      is set to the value of the signature base string from
-                  Section 3.4.1.1, and
-
-            S      is set to the octet string value of the "oauth_signature"
-                  protocol parameter received from the client.
+        RSA-SHA1 signature.
     """
     oauth_params = oauth_params or {}
 
@@ -297,6 +234,7 @@ def oauth_get_plaintext_signature(consumer_secret, method, url, oauth_params=Non
     """
     Calculates a PLAINTEXT signature for a base string.
 
+    :see: PLAINTEXT (http://tools.ietf.org/html/rfc5849#section-3.4.4)
     :param consumer_secret:
         Client (consumer) shared secret
     :param method:
@@ -308,25 +246,7 @@ def oauth_get_plaintext_signature(consumer_secret, method, url, oauth_params=Non
     :param token_secret:
         Token shared secret if available.
     :returns:
-        Signature as follows::
-
-            PLAINTEXT (http://tools.ietf.org/html/rfc5849#section-3.4.4)
-            ------------------------------------------------------------
-            The "PLAINTEXT" method does not employ a signature algorithm.  It
-            MUST be used with a transport-layer mechanism such as TLS or SSL (or
-            sent over a secure channel with equivalent protections).  It does not
-            utilize the signature base string or the "oauth_timestamp" and
-            "oauth_nonce" parameters.
-
-            The "oauth_signature" protocol parameter is set to the concatenated
-            value of:
-
-            1.  The client shared-secret, after being encoded (Section 3.6).
-
-            2.  An "&" character (ASCII code 38), which MUST be included even
-               when either secret is empty.
-
-            3.  The token shared-secret, after being encoded (Section 3.6).
+        PLAINTEXT signature.
     """
     return _oauth_get_plaintext_signature(consumer_secret, token_secret=token_secret)
 
@@ -355,6 +275,8 @@ def oauth_get_signature_base_string(method, url, oauth_params):
     Any query parameter by the name "oauth_signature" will be excluded
     from the base string.
 
+    :see: Signature base string (http://tools.ietf.org/html/rfc5849#section-3.4.1)
+
     :param method:
         HTTP request method.
     :param url:
@@ -365,37 +287,7 @@ def oauth_get_signature_base_string(method, url, oauth_params):
     :param oauth_params:
         Protocol-specific parameters.
     :returns:
-        Base string as per rfc5849#section-3.4.1 as follows::
-
-            Signature base string (http://tools.ietf.org/html/rfc5849#section-3.4.1)
-            ------------------------------------------------------------------------
-            The signature base string is a consistent, reproducible concatenation
-            of several of the HTTP request elements into a single string.  The
-            string is used as an input to the "HMAC-SHA1" and "RSA-SHA1"
-            signature methods.
-
-            The signature base string includes the following components of the
-            HTTP request:
-
-            *  The HTTP request method (e.g., "GET", "POST", etc.).
-
-            *  The authority as declared by the HTTP "Host" request header field.
-
-            *  The path and query components of the request resource URI.
-
-            *  The protocol parameters excluding the "oauth_signature".
-
-            *  Parameters included in the request entity-body if they comply with
-               the strict restrictions defined in Section 3.4.1.3.
-
-            The signature base string does not cover the entire HTTP request.
-            Most notably, it does not include the entity-body in most requests,
-            nor does it include most HTTP entity-headers.  It is important to
-            note that the server cannot verify the authenticity of the excluded
-            request components without using additional protections such as SSL/
-            TLS or other methods.
-
-            ...
+        Base string.
     """
     allowed_methods = ("POST", "PUT", "GET", "DELETE",
                        "OPTIONS", "TRACE", "HEAD", "CONNECT",
@@ -418,6 +310,7 @@ def oauth_get_normalized_query_string(url_query_params, oauth_params):
     """
     Normalizes a dictionary of query parameters according to OAuth spec.
 
+    :see: Parameter Normalization (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)
     :param url_query_params:
         A dictionary of URL query parameters.
     :param oauth_params:
@@ -425,91 +318,7 @@ def oauth_get_normalized_query_string(url_query_params, oauth_params):
         names that do not begin with "oauth_" will be excluded from the
         normalized query string. 'oauth_signature' is also specially excluded.
     :returns:
-        Normalized string of query parameters as follows::
-
-            Parameter Normalization (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)
-            ------------------------------------------------------------------------------
-            The parameters collected in Section 3.4.1.3 are normalized into a
-            single string as follows:
-
-            1.  First, the name and value of each parameter are encoded
-               (Section 3.6).
-
-            2.  The parameters are sorted by name, using ascending byte value
-               ordering.  If two or more parameters share the same name, they
-               are sorted by their value.
-
-            3.  The name of each parameter is concatenated to its corresponding
-               value using an "=" character (ASCII code 61) as a separator, even
-               if the value is empty.
-
-            4.  The sorted name/value pairs are concatenated together into a
-               single string by using an "&" character (ASCII code 38) as
-               separator.
-
-            For example, the list of parameters from the previous section would
-            be normalized as follows:
-
-                                         Encoded:
-
-                       +------------------------+------------------+
-                       |          Name          |       Value      |
-                       +------------------------+------------------+
-                       |           b5           |     %3D%253D     |
-                       |           a3           |         a        |
-                       |          c%40          |                  |
-                       |           a2           |       r%20b      |
-                       |   oauth_consumer_key   | 9djdj82h48djs9d2 |
-                       |       oauth_token      | kkk9d7dh3k39sjv7 |
-                       | oauth_signature_method |     HMAC-SHA1    |
-                       |     oauth_timestamp    |     137131201    |
-                       |       oauth_nonce      |     7d8f3e4a     |
-                       |           c2           |                  |
-                       |           a3           |       2%20q      |
-                       +------------------------+------------------+
-
-                                          Sorted:
-
-                       +------------------------+------------------+
-                       |          Name          |       Value      |
-                       +------------------------+------------------+
-                       |           a2           |       r%20b      |
-                       |           a3           |       2%20q      |
-                       |           a3           |         a        |
-                       |           b5           |     %3D%253D     |
-                       |          c%40          |                  |
-                       |           c2           |                  |
-                       |   oauth_consumer_key   | 9djdj82h48djs9d2 |
-                       |       oauth_nonce      |     7d8f3e4a     |
-                       | oauth_signature_method |     HMAC-SHA1    |
-                       |     oauth_timestamp    |     137131201    |
-                       |       oauth_token      | kkk9d7dh3k39sjv7 |
-                       +------------------------+------------------+
-
-                                    Concatenated Pairs:
-
-                          +-------------------------------------+
-                          |              Name=Value             |
-                          +-------------------------------------+
-                          |               a2=r%20b              |
-                          |               a3=2%20q              |
-                          |                 a3=a                |
-                          |             b5=%3D%253D             |
-                          |                c%40=                |
-                          |                 c2=                 |
-                          | oauth_consumer_key=9djdj82h48djs9d2 |
-                          |         oauth_nonce=7d8f3e4a        |
-                          |   oauth_signature_method=HMAC-SHA1  |
-                          |      oauth_timestamp=137131201      |
-                          |     oauth_token=kkk9d7dh3k39sjv7    |
-                          +-------------------------------------+
-
-            and concatenated together into a single string (line breaks are for
-            display purposes only)::
-
-                 a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9dj
-                 dj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1
-                 &oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7
+        Normalized string of query parameters.
     """
     url_query_params = url_query_params or {}
     oauth_params = oauth_params or {}
@@ -570,58 +379,12 @@ def oauth_parse_authorization_header_value(header_value):
     """
     Parses the OAuth Authorization header.
 
-    See Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
+    :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
 
     :param header_value:
         Header value.
     :returns:
-        Dictionary of parameter name value pairs as follows::
-
-            Authorization Header (http://tools.ietf.org/html/rfc5849#section-3.5.1)
-            -----------------------------------------------------------------------
-            Protocol parameters can be transmitted using the HTTP "Authorization"
-            header field as defined by [RFC2617] with the auth-scheme name set to
-            "OAuth" (case insensitive).
-
-            For example:
-
-             Authorization: OAuth realm="Example",
-                oauth_consumer_key="0685bd9184jfhq22",
-                oauth_token="ad180jjd733klru7",
-                oauth_signature_method="HMAC-SHA1",
-                oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",
-                oauth_timestamp="137131200",
-                oauth_nonce="4572616e48616d6d65724c61686176",
-                oauth_version="1.0"
-
-            Protocol parameters SHALL be included in the "Authorization" header
-            field as follows:
-
-            1.  Parameter names and values are encoded per Parameter Encoding
-               (Section 3.6).
-
-            2.  Each parameter's name is immediately followed by an "=" character
-               (ASCII code 61), a '"' character (ASCII code 34), the parameter
-               value (MAY be empty), and another '"' character (ASCII code 34).
-
-            3.  Parameters are separated by a "," character (ASCII code 44) and
-               OPTIONAL linear whitespace per [RFC2617].
-
-            4.  The OPTIONAL "realm" parameter MAY be added and interpreted per
-               [RFC2617] section 1.2.
-
-            Servers MAY indicate their support for the "OAuth" auth-scheme by
-            returning the HTTP "WWW-Authenticate" response header field upon
-            client requests for protected resources.  As per [RFC2617], such a
-            response MAY include additional HTTP "WWW-Authenticate" header
-            fields:
-
-            For example:
-
-             WWW-Authenticate: OAuth realm="http://server.example.com/"
-
-            The realm parameter defines a protection realm per [RFC2617], Section
-            1.2.
+        Dictionary of parameter name value pairs.
     """
     d = {}
     for name, value in _oauth_parse_authorization_header_value_l(header_value):
