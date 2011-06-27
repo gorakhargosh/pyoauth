@@ -50,6 +50,7 @@ try:
 except:
     # Therefore, we define it for Python3.
     unicode = str
+    basestring = (str, bytes)
 
 
 _UTF8_TYPES = (bytes, type(None))
