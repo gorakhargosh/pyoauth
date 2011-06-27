@@ -78,7 +78,7 @@ def oauth_escape(oauth_value):
     """
     Percent-encodes according to the OAuth spec.
 
-    Used ONLY in constructing the signature base string and the "Authorization"
+    Used in constructing the signature base string and the "Authorization"
     header field.
 
     :see: Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)

@@ -95,7 +95,7 @@ def oauth_generate_nonce(length=-1):
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param length:
         Length of the nonce to be returned.
-        Default -1, which means the entire nonce is returned.
+        Default -1, which means the entire 31-character nonce is returned.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth nonce.
     """
@@ -134,7 +134,7 @@ def oauth_generate_timestamp():
     :see:
         Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :returns:
-        A string containing a positive integer representing time as follows::
+        A string containing a positive integer representing time.
     """
     return bytes(int(time.time()))
 
@@ -305,7 +305,7 @@ def _oauth_get_plaintext_signature(consumer_secret, token_secret=None):
 def oauth_get_signature_base_string(method, url, oauth_params):
     """
     Calculates a signature base string based on the URL, method, and
-    query_parameters.
+    oauth arameters.
 
     Any query parameter by the name "oauth_signature" will be excluded
     from the base string.
@@ -350,8 +350,8 @@ def oauth_get_normalized_query_string(url_query_params, oauth_params):
         A dictionary of URL query parameters.
     :param oauth_params:
         A dictionary of protocol-specific query parameters. Any parameter
-        names that do not begin with "oauth_" will be excluded from the
-        normalized query string. 'oauth_signature' is also specially excluded.
+        names that do not begin with ``oauth_`` will be excluded from the
+        normalized query string. ``oauth_signature`` is also specially excluded.
     :returns:
         Normalized string of query parameters.
     """
