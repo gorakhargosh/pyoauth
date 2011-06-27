@@ -90,7 +90,7 @@ def to_unicode(value, encoding="utf-8"):
 def to_utf8_if_unicode(value):
     """
     Converts an argument to a UTF-8 encoded byte string if the argument
-    is a string.
+    is a Unicode string.
 
     :param value:
         The value that will be UTF-8 encoded if it is a string.
