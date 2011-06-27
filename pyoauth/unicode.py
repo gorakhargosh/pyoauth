@@ -95,7 +95,7 @@ def to_utf8_if_string(value):
         UTF-8 encoded byte string if the argument is a Unicode string; otherwise
         the value is returned unchanged.
     """
-    if isinstance(value, basestring):
+    if is_bytes_or_unicode_string(value):
         return to_utf8(value)
     else:
         return value
@@ -112,7 +112,7 @@ def to_unicode_if_string(value):
         Unicode string if the argument is a byte string. Otherwise the value
         is returned unchanged.
     """
-    if isinstance(value, basestring):
+    if is_bytes_or_unicode_string(value):
         return to_unicode(value)
     else:
         return value
