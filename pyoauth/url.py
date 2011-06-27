@@ -95,12 +95,6 @@ def oauth_escape(oauth_value):
             web-development frameworks (e.g., encode different characters, use
             lowercase hexadecimal characters).
     """
-    #if is_unicode_string(oauth_value):
-    #    oauth_value = utf8(oauth_value)
-    #elif is_byte_string(oauth_value):
-    #    pass
-    #else:
-    #    oauth_value = bytes(oauth_value)
     oauth_value = bytes(to_utf8_if_string(oauth_value))
     return urllib.quote(oauth_value, safe="~")
 
@@ -116,8 +110,6 @@ def oauth_unescape(oauth_value):
     :returns:
         Percent-decoded value.
     """
-    #if is_unicode_string(oauth_value):
-    #    oauth_value = oauth_value.encode("utf-8")
     return urllib.unquote_plus(to_utf8(oauth_value))
 
 
@@ -279,6 +271,7 @@ def oauth_url_query_params_sanitize(query_params):
             else:
                 d[n] = list(v)
         return d
+        # Alternatively, but slower:
         #return oauth_parse_qs(oauth_urlencode(query_params))
     else:
         raise ValueError("Query parameters must be passed as a dictionary or a query string.")
