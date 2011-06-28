@@ -315,6 +315,8 @@ def oauth_url_query_params_dict(query_params):
         return d
         # Alternatively, but slower:
         #return oauth_parse_qs(oauth_urlencode_s(query_params))
+    elif query_params is None:
+        return {}
     else:
         raise ValueError("Query parameters must be passed as a dictionary or a query string.")
 
@@ -364,6 +366,36 @@ def oauth_urlparse_normalized(url):
     return scheme, netloc, path, params, query, fragment
 
 
+def oauth_urlparse_sanitized(url):
+    """
+    Performs clean ups from the query string in addition to behaving
+    exactly like :func:`oauth_urlparse_normalized`.
+
+    :param url:
+        The OAuth URL to normalize and sanitize.
+    :returns:
+        Tuple that contains these elements:
+        ``(scheme, netloc, path, params, query, fragment)``
+    """
+    scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
+    query = oauth_urlencode_s(oauth_url_query_params_allow_non_oauth_only(query))
+    return scheme, netloc, path, params, query, fragment
+
+
+def oauth_url_query_params_allow_oauth_only(query_params):
+    def allow_func(n, v):
+        # This gets rid of "realm" or any non-OAuth param.
+        return n.startswith("oauth_")
+    return oauth_url_query_params_filter(query_params, allow_func=allow_func)
+
+
+def oauth_url_query_params_allow_non_oauth_only(query_params):
+    def allow_func(n, v):
+        # This gets rid of any params beginning with "oauth_"
+        return not n.startswith("oauth_")
+    return oauth_url_query_params_filter(query_params, allow_func=allow_func)
+
+
 def oauth_url_sanitize(url):
     """
     Normalizes an OAuth URL and cleans up any query parameters starting with
@@ -374,8 +406,4 @@ def oauth_url_sanitize(url):
     :returns:
         Normalized sanitized URL.
     """
-    scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
-    def allow_func(n, v):
-        return not n.startswith("oauth_")
-    query = oauth_urlencode_s(oauth_url_query_params_filter(query, allow_func=allow_func))
-    return urlunparse((scheme, netloc, path, params, query, fragment))
+    return urlunparse(oauth_urlparse_sanitized(url))

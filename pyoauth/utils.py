@@ -39,8 +39,6 @@ Functions
 
 .. autofunction:: oauth_get_signature_base_string
 
-.. autofunction:: oauth_get_normalized_query_string
-
 .. autofunction:: oauth_get_normalized_authorization_header_value
 
 .. autofunction:: oauth_parse_authorization_header_value
@@ -90,7 +88,7 @@ except ImportError:
 
 from pyoauth.unicode import to_utf8
 from pyoauth.url import oauth_escape, oauth_parse_qs, oauth_unescape, \
-    oauth_urlencode_sl, oauth_urlencode_s, oauth_urlparse_normalized
+    oauth_urlencode_sl, oauth_urlencode_s, oauth_urlparse_normalized, oauth_url_query_params_dict, oauth_url_sanitize, oauth_urlparse_sanitized, oauth_url_query_params_filter, oauth_url_query_params_allow_non_oauth_only, oauth_url_query_params_allow_oauth_only
 
 
 def oauth_generate_nonce(length=-1):
@@ -325,11 +323,11 @@ def oauth_get_signature_base_string(method, url, oauth_params):
         HTTP request method.
     :param url:
         The URL. If this includes a query string, query parameters are first
-        extracted and encoded as well. Query parameters in the URL are
-        overridden by those found in the ``query_params`` argument to this
-        function.
+        extracted and encoded as well. The query string must not include
+        any parameter names starting with "oauth_"; these parameters will
+        be excluded from the base string if found.
     :param oauth_params:
-        Protocol-specific parameters.
+        Protocol-specific parameters must be specified in this dictionary.
     :returns:
         Base string.
     """
@@ -345,18 +343,19 @@ def oauth_get_signature_base_string(method, url, oauth_params):
         raise ValueError("Query parameters must be specified as a dictionary.")
 
     scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
-    query_string = oauth_get_normalized_query_string(oauth_parse_qs(query), oauth_params)
+    query_string = _oauth_get_signature_base_query_string(query, oauth_params)
     normalized_url = urlunparse((scheme, netloc, path, params, None, None))
     return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
 
 
-def oauth_get_normalized_query_string(url_query_params, oauth_params):
+def _oauth_get_signature_base_query_string(url_query_params, oauth_params):
     """
     Normalizes a dictionary of query parameters according to OAuth spec.
 
     :see: Parameter Normalization (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)
     :param url_query_params:
-        A dictionary of URL query parameters.
+        A dictionary of URL query parameters. Any parameters starting
+        with "oauth_" will be ignored.
     :param oauth_params:
         A dictionary of protocol-specific query parameters. Any parameter
         names that do not begin with ``oauth_`` will be excluded from the
@@ -364,20 +363,12 @@ def oauth_get_normalized_query_string(url_query_params, oauth_params):
     :returns:
         Normalized string of query parameters.
     """
-    url_query_params = url_query_params or {}
-    oauth_params = oauth_params or {}
-
-    # Clean up oauth params.
-    # OAuth param names must begin with "oauth_".
-    _oauth_params = {}
-    for k, v in oauth_params.items():
-        if k.startswith("oauth_"):
-            # This gets rid of "realm" or any non-OAuth param.
-            _oauth_params[k] = v
+    url_query_params = oauth_url_query_params_allow_non_oauth_only(url_query_params)
+    oauth_params = oauth_url_query_params_allow_oauth_only(oauth_params)
 
     query_params = {}
     query_params.update(url_query_params)
-    query_params.update(_oauth_params)
+    query_params.update(oauth_params)
 
     # Now encode the parameters, while ignoring 'oauth_signature' from
     # the entire list of parameters.

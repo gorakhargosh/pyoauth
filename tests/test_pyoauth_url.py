@@ -471,7 +471,9 @@ class Test_oauth_url_query_params_sanitize(object):
         }
         assert_equal(oauth_urlencode_s(oauth_url_query_params_dict(query_string)), oauth_urlencode_s(expected_params))
 
+    def test_returns_empty_dict_when_argument_None(self):
+        assert_equal(oauth_url_query_params_dict(None), {})
+
     def test_ValueError_when_invalid_query_params_value(self):
-        assert_raises(ValueError, oauth_url_query_params_dict, None)
         assert_raises(ValueError, oauth_url_query_params_dict, True)
         assert_raises(ValueError, oauth_url_query_params_dict, 5)
