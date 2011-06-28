@@ -199,6 +199,7 @@ def oauth_urlencode_sl(query_params, allow_func=None):
     return sorted(encoded_pairs)
 
 
+#TODO: Add test for oauth_url_query_params_add uses OAuth param sort order.
 def oauth_url_query_params_add(url, extra_query_params, allow_func=None):
     """
     Adds additional query parameters to a URL while preserving existing ones.
@@ -431,3 +432,18 @@ def oauth_url_sanitize(url):
     scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
     query = oauth_urlencode_s(oauth_url_query_params_sanitize(query))
     return urlunparse((scheme, netloc, path, params, query, fragment))
+
+
+
+def oauth_url_concat(url, query_params):
+    """Concatenate url and argument dictionary regardless of whether
+    url has existing query parameters.
+
+    >>> oauth_url_concat("http://example.com/foo?a=b", dict(c="d"))
+    'http://example.com/foo?a=b&c=d'
+    """
+    if not query_params:
+        return url
+    if url[-1] not in ('?', '&'):
+        url += '&' if ('?' in url) else '?'
+    return url + oauth_urlencode_s(query_params)
