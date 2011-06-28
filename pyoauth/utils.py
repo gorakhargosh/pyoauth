@@ -158,8 +158,10 @@ def oauth_get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=Non
         Base string HTTP method.
     :param url:
         Base string URL that may include a query string.
+        All protocol-specific parameters will be ignored from the query string.
     :param oauth_params:
         Base string protocol-specific query parameters.
+        All non-protocol parameters will be ignored.
     :param token_secret:
         Token secret if available.
     :returns:
@@ -183,8 +185,10 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None
         Base string HTTP method.
     :param url:
         Base string URL that may include a query string.
+        All protocol-specific paramters will be ignored from the query string.
     :param oauth_params:
         Base string protocol-specific query parameters.
+        All non-protocol parameters will be ignored.
     :param token_secret:
         Token secret if available.
     :returns:
@@ -224,8 +228,10 @@ def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, oaut
         Base string HTTP method.
     :param url:
         Base string URL that may include a query string.
+        All protocol-specific parameters will be ignored from the query string.
     :param oauth_params:
         Base string protocol-specific query parameters.
+        All non-protocol parameters will be ignored.
     :param token_secret:
         Token secret if available.
     :returns:
@@ -284,8 +290,10 @@ def oauth_get_plaintext_signature(consumer_secret, method, url, oauth_params=Non
         Base string HTTP method.
     :param url:
         Base string URL that may include query string.
+        All protocol-specific parameters will be ignored from the query string.
     :param oauth_params:
         Base string protocol-specific query parameters.
+        All non-protocol parameters will be ignored.
     :param token_secret:
         Token shared secret if available.
     :returns:
@@ -324,11 +332,11 @@ def oauth_get_signature_base_string(method, url, oauth_params):
         HTTP request method.
     :param url:
         The URL. If this includes a query string, query parameters are first
-        extracted and encoded as well. The query string must not include
-        any parameter names starting with "oauth_"; these parameters will
-        be excluded from the base string if found.
+        extracted and encoded as well. All protocol-specific parameters
+        will be ignored from the query string.
     :param oauth_params:
         Protocol-specific parameters must be specified in this dictionary.
+        All non-protocol parameters will be ignored.
     :returns:
         Base string.
     """
@@ -398,14 +406,8 @@ def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
         s = 'OAuth realm="' + to_utf8(realm) + '",\n' + indentation
     else:
         s = 'OAuth '
-    # Clean up oauth params.
-    # OAuth param names must begin with "oauth_".
-    _oauth_params = {}
-    for k, v in oauth_params.items():
-        if k.startswith("oauth_"):
-            # This gets rid of "realm" or any non-OAuth param.
-            _oauth_params[k] = v
-    normalized_param_pairs = oauth_urlencode_sl(_oauth_params)
+    oauth_params = oauth_protocol_params_sanitize(oauth_params)
+    normalized_param_pairs = oauth_urlencode_sl(oauth_params)
     delimiter = ",\n" + indentation
     s += delimiter.join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
@@ -423,11 +425,13 @@ def oauth_parse_authorization_header_value(header_value):
         Dictionary of parameter name value pairs.
     """
     d = {}
-    for name, value in _oauth_parse_authorization_header_value_l(header_value):
+    realm, param_list = _oauth_parse_authorization_header_value_l(header_value)
+    for name, value in param_list:
         if name in d:
             d[name].append(value)
         else:
             d[name] = [value]
+    d = oauth_protocol_params_sanitize(d)
     return d
 
 
@@ -438,13 +442,18 @@ def _oauth_parse_authorization_header_value_l(header_value):
 
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param header_value:
-        Header value.
+        Header value. Non protocol parameters will be ignored.
     :returns:
-        list of parameter name value pairs in the order in which they appeared::
+        Tuple:
+        (realm, list of parameter name value pairs in order or appearance)
+
+        realm will be ``None`` if the authorization header does not have
+        a realm parameter.
     """
     # Remove the auth-scheme from the value.
     pattern = re.compile(r"(^OAuth[\s]+)", re.IGNORECASE)
     header_value = re.sub(pattern, "", to_utf8(header_value).strip(), 1)
+    realm = None
 
     pairs = [param_pair.strip() for param_pair in header_value.split(",")]
     decoded_pairs = []
@@ -464,10 +473,13 @@ def _oauth_parse_authorization_header_value_l(header_value):
         # We need to be able to detect problems with the values too.
         value = value[1:-1]
         name = oauth_unescape(name)
-        if name.lower() != "realm":
+        if name.lower() == "realm":
             # "realm" is case-insensitive.
             # The realm parameter value is a simple quoted string.
             # It is neither percent-encoded nor percent-decoded in OAuth.
+            # realm is ignored from the protocol parameters list.
+            realm = value
+        else:
             value = oauth_unescape(value)
         decoded_pairs.append((name, value))
-    return decoded_pairs
+    return realm, decoded_pairs
