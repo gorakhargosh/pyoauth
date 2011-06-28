@@ -129,7 +129,7 @@ def to_utf8_if_unicode(value):
 
     :param value:
         The value that will be UTF-8 encoded if it is a string.
-    :returns
+    :returns:
         UTF-8 encoded byte string if the argument is a Unicode string; otherwise
         the value is returned unchanged.
     """
