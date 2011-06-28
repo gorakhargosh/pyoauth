@@ -33,6 +33,8 @@ Functions
 
 .. autofunction:: oauth_url_sanitize
 
+.. autofunction:: oauth_url_append_query_params
+
 .. autofunction:: oauth_urlparse_normalized
 
 .. autofunction:: oauth_url_query_params_add
@@ -256,6 +258,25 @@ def oauth_url_query_params_merge(query_params, *extra_query_params):
 
 
 def _oauth_url_query_params_update(query_params, *extra_query_params):
+    """
+    Updates a dictionary of query parameters or a query string with
+    replacement parameter values from the specified additional
+    query parameter dictionaries or query strings.
+
+    The parameters specified toward the end of the arguments to this function
+    take precedence over all previous parameters.
+
+    .. WARNING:
+        This is a dangerous routine. Be careful with this routine.
+        It may bite.
+
+    :param query_params:
+        Initial query parameter dictionary or query string.
+    :param extra_query_params:
+        A list query parameter dictionaries or query strings.
+    :returns:
+        A dictionary of updated query parameters.
+    """
     query_params = _oauth_url_query_params_dict(query_params)
     d = {}
     d.update(query_params)
@@ -269,6 +290,14 @@ def oauth_url_query_params_filter(query_params, allow_func=None):
     """
     Filters query parameters out of a query parameter dictionary or
     query string.
+
+    Example::
+
+        def allow_only_parameter_names_starting_with_oauth(name, value):
+            return name.startswith("oauth")
+
+        oauth_url_query_params_filter(query_params,
+            allow_func=allow_only_parameter_names_starting_with_oauth)
 
     :param query_params:
         Query parameter dictionary or query string.
@@ -295,18 +324,25 @@ def oauth_url_query_params_filter(query_params, allow_func=None):
 
 def _oauth_url_query_params_dict(query_params):
     """
-    Sanitizes a query parameter dictionary or query string to return a
-    properly unflattened query parameter dictionary.
+    Given a query string parses it into an un-flattened query parameter
+    dictionary or given a parameter dictionary, un-flattens it.
+
+    Example::
+
+        dict(a=1, b=[1, 2], c="")   ->   dict(a[1], b=[1, 2], c=[""])
+        a=1&b=1&b=2&c=              ->   dict(a[1], b=[1, 2], c=[""])
 
     :param query_params:
         A query parameter dictionary or a query string.
+        If this argument is ``None`` an empty dictionary will be returned.
+        Any other value will raise a ``ValueError`` exception.
     :returns:
-        An unflattened query parameter dictionary.
+        An un-flattened query parameter dictionary.
     """
     if is_bytes_or_unicode(query_params):
         return oauth_parse_qs(query_params)
     elif isinstance(query_params, dict):
-        # Unflatten the dictionary.
+        # Un-flatten the dictionary.
         d = {}
         for n, v in query_params.items():
             if not isinstance(v, list) and not isinstance(v, tuple):
@@ -314,7 +350,7 @@ def _oauth_url_query_params_dict(query_params):
             else:
                 d[n] = list(v)
         return d
-        # Alternatively, but slower:
+        # Alternative, but slower:
         #return oauth_parse_qs(oauth_urlencode_s(query_params))
     elif query_params is None:
         return {}
@@ -404,7 +440,7 @@ def oauth_url_query_params_sanitize(query_params):
     :param query_params:
         Query string or query parameter dictionary.
     :returns:
-        Filtered URl query parameter dictionary.
+        Filtered URL query parameter dictionary.
     """
     def allow_func(n, v):
         # This gets rid of any params beginning with "oauth_"
@@ -435,15 +471,29 @@ def oauth_url_sanitize(url):
 
 
 
-def oauth_url_concat(url, query_params):
-    """Concatenate url and argument dictionary regardless of whether
-    url has existing query parameters.
-
-    >>> oauth_url_concat("http://example.com/foo?a=b", dict(c="d"))
-    'http://example.com/foo?a=b&c=d'
+def oauth_url_append_query_params(url, query_params):
     """
-    if not query_params:
-        return url
-    if url[-1] not in ('?', '&'):
-        url += '&' if ('?' in url) else '?'
-    return url + oauth_urlencode_s(query_params)
+    Appends query params to any existing query string in the URL
+    and returns a properly formatted URL. URL fragments are preserved.
+
+    This is the equivalent of doing::
+
+        sorted(URL query parameters) + "&" + sorted(query_params)
+
+    :param url:
+        The URL into which the query parameters will be concatenated.
+    :param query_params:
+        A dictionary of query parameters or a query string.
+    :returns:
+        A URL with the query parameters concatenated.
+
+    Usage::
+
+        >>> oauth_url_append_query_params("http://example.com/foo?a=b", dict(c="d"))
+        'http://example.com/foo?a=b&c=d'
+    """
+    scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
+    query_params = oauth_urlencode_s(_oauth_url_query_params_dict(query_params))
+    query_string = "&".join([query, query_params])
+    return urlunparse((scheme, netloc, path, params, query_string, fragment))
+
