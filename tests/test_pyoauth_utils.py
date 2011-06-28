@@ -6,7 +6,7 @@ try:
 except ImportError:
     assert_dict_equal = assert_equal
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_authorization_header_value, oauth_parse_qs, _oauth_get_signature_base_query_string, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature, oauth_get_signature_base_string, _oauth_get_plaintext_signature
+from pyoauth.utils import oauth_parse_authorization_header_value, _oauth_get_signature_base_string_query, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature, oauth_get_signature_base_string, _oauth_get_plaintext_signature
 
 class Test_oauth_generate_nonce(object):
     def test_uniqueness(self):
@@ -391,44 +391,44 @@ class Test_oauth_get_normalized_query_string(object):
         self.simplegeo_example_correct_query_string = 'multi=%C2%AE&multi=%C2%AE&multi=BAR&multi=FOO&multi_same=FOO&multi_same=FOO&oauth_consumer_key=0685bd9184jfhq22&oauth_nonce=4572616e48616d6d65724c61686176&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131200&oauth_token=ad180jjd733klru7&oauth_version=1.0&uni_unicode_object=%C2%AE&uni_utf8_bytes=%C2%AE'
 
     def test_oauth_specification_example(self):
-        assert_equal(_oauth_get_signature_base_query_string(
+        assert_equal(_oauth_get_signature_base_string_query(
             self.specification_url_query_params,
             self.specification_example_oauth_params),
                      self.specification_example_query_string)
 
     def test_simplegeo_example(self):
         assert_not_equal(
-            _oauth_get_signature_base_query_string(self.simplegeo_example_url_query_params,
+            _oauth_get_signature_base_string_query(self.simplegeo_example_url_query_params,
                                               self.simplegeo_example_oauth_params),
             self.simplegeo_example_wrong_order_query_string)
         assert_equal(
-            _oauth_get_signature_base_query_string(self.simplegeo_example_url_query_params,
+            _oauth_get_signature_base_string_query(self.simplegeo_example_url_query_params,
                                               self.simplegeo_example_oauth_params),
             self.simplegeo_example_correct_query_string)
 
     def test_query_params_sorted_order(self):
         assert_equal("a=1&b=2&b=4&b=8",
-                     _oauth_get_signature_base_query_string(dict(b=[8, 2, 4], a=1), {}))
-        qs = _oauth_get_signature_base_query_string(
+                     _oauth_get_signature_base_string_query(dict(b=[8, 2, 4], a=1), {}))
+        qs = _oauth_get_signature_base_string_query(
             dict(a=5, b=6, c=["w", "a", "t", "e", "r"]), {})
         assert_equal("a=5&b=6&c=a&c=e&c=r&c=t&c=w", qs)
 
     def test_multiple_values(self):
         assert_equal("a=5&a=8",
-                     _oauth_get_signature_base_query_string(dict(a=[5, 8]), {}))
+                     _oauth_get_signature_base_string_query(dict(a=[5, 8]), {}))
 
     def test_non_string_single_value(self):
-        assert_equal("a=5", _oauth_get_signature_base_query_string(dict(a=5), None))
+        assert_equal("a=5", _oauth_get_signature_base_string_query(dict(a=5), None))
         assert_equal("aFlag=True&bFlag=False",
-                     _oauth_get_signature_base_query_string(
+                     _oauth_get_signature_base_string_query(
                          dict(aFlag=True, bFlag=False), None))
 
     def test_no_query_params_returns_empty_string(self):
-        assert_equal("", _oauth_get_signature_base_query_string({}, {}))
-        assert_equal("", _oauth_get_signature_base_query_string(None, None))
+        assert_equal("", _oauth_get_signature_base_string_query({}, {}))
+        assert_equal("", _oauth_get_signature_base_string_query(None, None))
 
     def test_oauth_signature_and_realm_are_excluded_properly(self):
-        qs = _oauth_get_signature_base_query_string({
+        qs = _oauth_get_signature_base_string_query({
             "oauth_signature": "something"
             },
             self.specification_example_oauth_params
@@ -437,7 +437,7 @@ class Test_oauth_get_normalized_query_string(object):
         assert_true("realm=" not in qs)
 
         assert_true(
-            _oauth_get_signature_base_query_string(dict(realm="something"), dict()),
+            _oauth_get_signature_base_string_query(dict(realm="something"), dict()),
             "realm=something")
 
 

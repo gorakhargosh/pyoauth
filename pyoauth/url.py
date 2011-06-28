@@ -43,10 +43,9 @@ Functions
 
 .. autofunction:: oauth_url_query_params_filter
 
-.. autofunction:: oauth_url_query_params_dict
-
 
 """
+import logging
 
 try:
     # Python 3.
@@ -239,11 +238,11 @@ def oauth_url_query_params_merge(query_params, *extra_query_params):
     :returns:
         A dictionary of merged query parameters.
     """
-    query_params = oauth_url_query_params_dict(query_params)
+    query_params = _oauth_url_query_params_dict(query_params)
     d = {}
     d.update(query_params)
     for qp in extra_query_params:
-        qp = oauth_url_query_params_dict(qp)
+        qp = _oauth_url_query_params_dict(qp)
         for name, value in qp.items():
             if name in d:
                 d[name].extend(value)
@@ -253,11 +252,11 @@ def oauth_url_query_params_merge(query_params, *extra_query_params):
 
 
 def _oauth_url_query_params_update(query_params, *extra_query_params):
-    query_params = oauth_url_query_params_dict(query_params)
+    query_params = _oauth_url_query_params_dict(query_params)
     d = {}
     d.update(query_params)
     for qp in extra_query_params.items():
-        qp = oauth_url_query_params_dict(qp)
+        qp = _oauth_url_query_params_dict(qp)
         d.update(qp)
     return d
 
@@ -280,7 +279,7 @@ def oauth_url_query_params_filter(query_params, allow_func=None):
     :returns:
         A filtered dictionary of query parameters.
     """
-    query_params = oauth_url_query_params_dict(query_params)
+    query_params = _oauth_url_query_params_dict(query_params)
     d = {}
     for n, v in query_params.items():
         if allow_func and not allow_func(n, v):
@@ -290,7 +289,7 @@ def oauth_url_query_params_filter(query_params, allow_func=None):
     return d
 
 
-def oauth_url_query_params_dict(query_params):
+def _oauth_url_query_params_dict(query_params):
     """
     Sanitizes a query parameter dictionary or query string to return a
     properly unflattened query parameter dictionary.
@@ -328,6 +327,7 @@ def oauth_urlparse_normalized(url):
 
     Use with OAuth URLs.
 
+    :see: Base String URI (http://tools.ietf.org/html/rfc5849#section-3.4.1.2)
     :param url:
         The URL to split and normalize.
     :returns:
@@ -339,7 +339,7 @@ def oauth_urlparse_normalized(url):
 
     parts = urlparse(url)
 
-    scheme      = parts.scheme
+    scheme      = parts.scheme.lower()
     # Netloc.
     username    = parts.username or ""
     password    = (":" + parts.password) if parts.password else ""
@@ -347,6 +347,7 @@ def oauth_urlparse_normalized(url):
     credentials = (credentials + "@") if credentials else ""
 
     # Exclude default port numbers.
+    # See:
     if parts.port:
         if (scheme == "http" and parts.port == 80) or (scheme == "https" and parts.port == 443):
             port = ""
@@ -355,44 +356,55 @@ def oauth_urlparse_normalized(url):
     else:
         port = ""
 
-    netloc      = credentials + parts.hostname + port
+    netloc        = credentials + parts.hostname.lower() + port
     # http://tools.ietf.org/html/rfc3986#section-3
     # and http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.2.2
-    path        = parts.path or "/"
-    params      = parts.params or ""
-    fragment    = parts.fragment or ""
-    query       = parts.query or ""
+    path          = parts.path or "/"
+    matrix_params = parts.params or ""
+    fragment      = parts.fragment or ""
+    query         = parts.query or ""
 
-    return scheme, netloc, path, params, query, fragment
+    return scheme, netloc, path, matrix_params, query, fragment
 
 
-def oauth_urlparse_sanitized(url):
+def oauth_protocol_params_sanitize(query_params):
     """
-    Performs clean ups from the query string in addition to behaving
-    exactly like :func:`oauth_urlparse_normalized`.
+    Removes non-oauth parameters from the query parameters.
 
-    :param url:
-        The OAuth URL to normalize and sanitize.
+    :param query_params:
+        Query string or query parameter dictionary.
     :returns:
-        Tuple that contains these elements:
-        ``(scheme, netloc, path, params, query, fragment)``
+        Filtered protocol parameters dictionary.
     """
-    scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
-    query = oauth_urlencode_s(oauth_url_query_params_allow_non_oauth_only(query))
-    return scheme, netloc, path, params, query, fragment
-
-
-def oauth_url_query_params_allow_oauth_only(query_params):
     def allow_func(n, v):
-        # This gets rid of "realm" or any non-OAuth param.
-        return n.startswith("oauth_")
+        if n.startswith("oauth_"):
+            # This gets rid of "realm" or any non-OAuth param.
+            if len(v) > 1:
+                raise ValueError("Duplicate OAuth parameters found %r: %r" % (n, v))
+            else:
+                return True
+        else:
+            logging.warning("Query parameter ignored: `%r` -- invalid OAuth-protocol parameter.", n)
+            return False
     return oauth_url_query_params_filter(query_params, allow_func=allow_func)
 
 
-def oauth_url_query_params_allow_non_oauth_only(query_params):
+def oauth_url_query_params_sanitize(query_params):
+    """
+    Removes protocol parameters from the query parameters.
+
+    :param query_params:
+        Query string or query parameter dictionary.
+    :returns:
+        Filtered URl query parameter dictionary.
+    """
     def allow_func(n, v):
         # This gets rid of any params beginning with "oauth_"
-        return not n.startswith("oauth_")
+        if not n.startswith("oauth_"):
+            return True
+        else:
+            logging.warning("Query parameter ignored: `%r` -- invalid non-OAuth-protocol parameter.", n)
+            return False
     return oauth_url_query_params_filter(query_params, allow_func=allow_func)
 
 
@@ -406,4 +418,6 @@ def oauth_url_sanitize(url):
     :returns:
         Normalized sanitized URL.
     """
-    return urlunparse(oauth_urlparse_sanitized(url))
+    scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
+    query = oauth_urlencode_s(oauth_url_query_params_sanitize(query))
+    return urlunparse((scheme, netloc, path, params, query, fragment))
