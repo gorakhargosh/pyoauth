@@ -8,7 +8,7 @@ try:
 except ImportError:
     assert_dict_equal = assert_equal
 from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, \
-    oauth_urlencode_s, oauth_urlencode_sl, _oauth_url_query_params_dict, \
+    oauth_urlencode_s, oauth_urlencode_sl, oauth_url_query_params_dict, \
     oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add
 
 from urlparse import urlparse
@@ -437,7 +437,7 @@ class Test_oauth_url_query_params_sanitize(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_dict_equal(_oauth_url_query_params_dict(params), expected_params)
+        assert_dict_equal(oauth_url_query_params_dict(params), expected_params)
 
     def test_parses_query_string(self):
         query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
@@ -453,7 +453,7 @@ class Test_oauth_url_query_params_sanitize(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_equal(oauth_urlencode_s(_oauth_url_query_params_dict(query_string)), oauth_urlencode_s(expected_params))
+        assert_equal(oauth_urlencode_s(oauth_url_query_params_dict(query_string)), oauth_urlencode_s(expected_params))
 
     def test_ignores_prefixed_question_mark_character_if_included(self):
         query_string = "?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
@@ -469,11 +469,11 @@ class Test_oauth_url_query_params_sanitize(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_equal(oauth_urlencode_s(_oauth_url_query_params_dict(query_string)), oauth_urlencode_s(expected_params))
+        assert_equal(oauth_urlencode_s(oauth_url_query_params_dict(query_string)), oauth_urlencode_s(expected_params))
 
     def test_returns_empty_dict_when_argument_None(self):
-        assert_equal(_oauth_url_query_params_dict(None), {})
+        assert_equal(oauth_url_query_params_dict(None), {})
 
     def test_ValueError_when_invalid_query_params_value(self):
-        assert_raises(ValueError, _oauth_url_query_params_dict, True)
-        assert_raises(ValueError, _oauth_url_query_params_dict, 5)
+        assert_raises(ValueError, oauth_url_query_params_dict, True)
+        assert_raises(ValueError, oauth_url_query_params_dict, 5)

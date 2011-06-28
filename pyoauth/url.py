@@ -44,7 +44,12 @@ Query parameters
 .. autofunction:: oauth_url_query_params_merge
 .. autofunction:: oauth_url_query_params_update
 .. autofunction:: oauth_url_query_params_filter
+.. autofunction:: oauth_url_query_params_dict
 
+Parameter sanitization
+~~~~~~~~~~~~~~~~~~~~~~
+.. autofunction:: oauth_protocol_params_sanitize
+.. autofunction:: oauth_url_query_params_sanitize
 
 """
 import logging
@@ -244,11 +249,11 @@ def oauth_url_query_params_merge(query_params, *extra_query_params):
     :returns:
         A dictionary of merged query parameters.
     """
-    query_params = _oauth_url_query_params_dict(query_params)
+    query_params = oauth_url_query_params_dict(query_params)
     d = {}
     d.update(query_params)
     for qp in extra_query_params:
-        qp = _oauth_url_query_params_dict(qp)
+        qp = oauth_url_query_params_dict(qp)
         for name, value in qp.items():
             if name in d:
                 d[name].extend(value)
@@ -277,11 +282,11 @@ def oauth_url_query_params_update(query_params, *extra_query_params):
     :returns:
         A dictionary of updated query parameters.
     """
-    query_params = _oauth_url_query_params_dict(query_params)
+    query_params = oauth_url_query_params_dict(query_params)
     d = {}
     d.update(query_params)
     for qp in extra_query_params.items():
-        qp = _oauth_url_query_params_dict(qp)
+        qp = oauth_url_query_params_dict(qp)
         d.update(qp)
     return d
 
@@ -312,7 +317,7 @@ def oauth_url_query_params_filter(query_params, allow_func=None):
     :returns:
         A filtered dictionary of query parameters.
     """
-    query_params = _oauth_url_query_params_dict(query_params)
+    query_params = oauth_url_query_params_dict(query_params)
     d = {}
     for n, v in query_params.items():
         if allow_func and not allow_func(n, v):
@@ -322,7 +327,7 @@ def oauth_url_query_params_filter(query_params, allow_func=None):
     return d
 
 
-def _oauth_url_query_params_dict(query_params):
+def oauth_url_query_params_dict(query_params):
     """
     Given a query string parses it into an un-flattened query parameter
     dictionary or given a parameter dictionary, un-flattens it.
@@ -493,7 +498,7 @@ def oauth_url_append_query_params(url, query_params):
         'http://example.com/foo?a=b&c=d'
     """
     scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
-    query_params = oauth_urlencode_s(_oauth_url_query_params_dict(query_params))
+    query_params = oauth_urlencode_s(oauth_url_query_params_dict(query_params))
     query_string = "&".join([query, query_params])
     return urlunparse((scheme, netloc, path, params, query_string, fragment))
 
