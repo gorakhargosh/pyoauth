@@ -74,7 +74,10 @@ def oauth_parse_qs(query_string):
 
     Use only with OAuth query strings.
 
-    See Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
+    :see: Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
+    :param query_string:
+        Query string to parse. If ``query_string`` starts with a ``?`` character
+        it will be ignored for convenience.
     """
     query_string = to_utf8_if_unicode(query_string) or ""
     if query_string.startswith("?"):
@@ -300,8 +303,6 @@ def _oauth_url_query_params_dict(query_params):
         An unflattened query parameter dictionary.
     """
     if is_bytes_or_unicode(query_params):
-        if query_params.startswith("?"):
-            query_params = query_params[1:]
         return oauth_parse_qs(query_params)
     elif isinstance(query_params, dict):
         # Unflatten the dictionary.
