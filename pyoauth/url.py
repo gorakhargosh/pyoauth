@@ -245,6 +245,44 @@ def oauth_url_query_params_merge(query_params, *extra_query_params):
     return d
 
 
+def _oauth_url_query_params_update(query_params, *extra_query_params):
+    query_params = oauth_url_query_params_sanitize(query_params)
+    d = {}
+    d.update(query_params)
+    for qp in extra_query_params:
+        qp = oauth_url_query_params_sanitize(qp)
+        d.update(qp)
+    return d
+
+
+def oauth_url_query_params_filter(query_params, allow_func=None):
+    """
+    Filters query parameters out of a query parameter dictionary or
+    query string.
+
+    :param query_params:
+        Query parameter dictionary or query string.
+    :param allow_func:
+        A callback that will be called for each query parameter and should
+        return ``False`` or a falsy value if that parameter should not be
+        included. By default, all query parameters are included. The function
+        takes the following method signature::
+
+            def allow_func(name, value):
+                return is_name_allowed(name) and is_value_allowed(value)
+    :returns:
+        A filtered dictionary of query parameters.
+    """
+    query_params = oauth_url_query_params_sanitize(query_params)
+    d = {}
+    for n, v in query_params.items():
+        if allow_func and not allow_func(n, v):
+            continue
+        else:
+            d[n] = v
+    return d
+
+
 def oauth_url_query_params_sanitize(query_params):
     """
     Sanitizes a query parameter dictionary or query string to return a
