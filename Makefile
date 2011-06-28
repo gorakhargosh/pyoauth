@@ -1,13 +1,13 @@
 RM = rm -rf
 
-.PHONY: all clean distclean develop test upload-doc view-doc doc build dist release auto submodules
+.PHONY: all clean distclean develop test upload-doc view-doc doc docs build dist release auto submodules
 
 all: build
 
 help:
 	@echo "Possible targets:"
 	@echo "	   test        - run testsuite"
-	@echo "    doc         - builds the documentation"
+	@echo "    doc(s)      - builds the documentation"
 	@echo "	   view-doc    - opens documentation in the browser"
 	@echo "	   upload-doc  - uploads the documentation to PyPI"
 	@echo "	   develop	   - set up development environment"
@@ -23,6 +23,8 @@ dist: clean
 
 build: doc
 	@bin/python setup.py build
+
+docs: doc
 
 doc: # develop
 	@make SPHINXBUILD=../bin/sphinx-build -C docs/ html
