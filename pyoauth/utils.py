@@ -24,23 +24,20 @@
 Functions
 ---------
 .. autofunction:: oauth_generate_nonce
-
 .. autofunction:: oauth_generate_verification_code
-
 .. autofunction:: oauth_generate_timestamp
 
+OAuth Signature and Base String
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autofunction:: oauth_get_hmac_sha1_signature
-
 .. autofunction:: oauth_get_rsa_sha1_signature
-
 .. autofunction:: oauth_check_rsa_sha1_signature
-
 .. autofunction:: oauth_get_plaintext_signature
-
 .. autofunction:: oauth_get_signature_base_string
 
+Authorization Header
+~~~~~~~~~~~~~~~~~~~~
 .. autofunction:: oauth_get_normalized_authorization_header_value
-
 .. autofunction:: oauth_parse_authorization_header_value
 
 """
