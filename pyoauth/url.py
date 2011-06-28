@@ -431,7 +431,7 @@ def oauth_url_sanitize(url):
     """
     scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
     query = oauth_urlencode_s(oauth_url_query_params_sanitize(query))
-    return urlunparse((scheme, netloc, path, params, query, fragment))
+    return urlunparse((scheme, netloc, path, params, query, None))
 
 
 
