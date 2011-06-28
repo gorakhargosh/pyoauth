@@ -372,6 +372,8 @@ def oauth_protocol_params_sanitize(query_params):
     """
     Removes non-oauth parameters from the query parameters.
 
+    Used only in base string construction and OAuth requests.
+
     :param query_params:
         Query string or query parameter dictionary.
     :returns:
@@ -394,6 +396,8 @@ def oauth_url_query_params_sanitize(query_params):
     """
     Removes protocol parameters from the query parameters.
 
+    Used only in base string construction and OAuth requests.
+
     :param query_params:
         Query string or query parameter dictionary.
     :returns:
@@ -411,8 +415,10 @@ def oauth_url_query_params_sanitize(query_params):
 
 def oauth_url_sanitize(url):
     """
-    Normalizes an OAuth URL and cleans up any query parameters starting with
-    "oauth_" from the URL.
+    Normalizes an OAuth URL and cleans up protocol-specific parameters
+    from the query string.
+
+    Used only in base string construction and OAuth requests.
 
     :param url:
         The OAuth URL to sanitize.
