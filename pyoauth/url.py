@@ -494,8 +494,8 @@ def oauth_url_append_query_params(url, query_params):
 
     Usage::
 
-        >>> oauth_url_append_query_params("http://example.com/foo?a=b", dict(c="d"))
-        'http://example.com/foo?a=b&c=d'
+        >>> oauth_url_append_query_params("http://example.com/foo?a=b#fragment", dict(c="d"))
+        'http://example.com/foo?a=b&c=d#fragment'
     """
     scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
     query_params = oauth_urlencode_s(oauth_url_query_params_dict(query_params))
