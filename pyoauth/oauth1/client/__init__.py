@@ -200,19 +200,18 @@ class Client(object):
         # Filter and add additional OAuth parameters.
         extra_oauth_params = oauth_protocol_params_sanitize(extra_oauth_params)
         for k, v in extra_oauth_params.items():
-            if k.startswith("oauth_"):
-                if k in ("oauth_signature",):
-                    logging.warning("Extra protocol parameter `%r` will be ignored.", k)
-                    continue
-                elif k == "oauth_callback" and v:
-                    oauth_params["oauth_callback"] = v
-                else:
-                    if oauth_params.has_key(k):
-                        # Warn when an existing protocol parameter is being
-                        # overridden.
-                        logging.warning("Overriding existing protocol parameter `%r`=`%r` with `%r`=`%r`",
-                                        k, oauth_params[k], k, v)
-                    oauth_params[k] = v
+            if k in ("oauth_signature",):
+                logging.warning("Specified additional protocol parameter `%r` will be ignored.", k)
+                continue
+            elif k == "oauth_callback" and v:
+                oauth_params["oauth_callback"] = v
+            else:
+                if oauth_params.has_key(k):
+                    # Warn when an existing protocol parameter is being
+                    # overridden.
+                    logging.warning("Overriding existing protocol parameter `%r`=`%r` with `%r`=`%r`",
+                                    k, oauth_params[k], k, v)
+                oauth_params[k] = v
 
         # Filter payload parameters for the request.
         payload_params = oauth_url_query_params_sanitize(payload_params)
