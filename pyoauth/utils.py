@@ -47,6 +47,7 @@ Functions
 
 import binascii
 import hmac
+import logging
 import time
 import uuid
 import re
@@ -459,6 +460,8 @@ def _oauth_parse_authorization_header_value_l(header_value):
     decoded_pairs = []
     for param in pairs:
         if not param:
+            if header_value.endswith(","):
+                logging.warning("Malformed `Authorization` header value -- ignoring trailing comma")
             continue
         nv = param.split("=", 1)
         if len(nv) != 2:
