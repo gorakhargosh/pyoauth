@@ -90,7 +90,7 @@ except ImportError:
 
 from pyoauth.unicode import to_utf8
 from pyoauth.url import oauth_escape, oauth_parse_qs, oauth_unescape, \
-    oauth_urlencode_sl, oauth_urlencode, oauth_urlparse_normalized
+    oauth_urlencode_sl, oauth_urlencode_s, oauth_urlparse_normalized
 
 
 def oauth_generate_nonce(length=-1):
@@ -383,7 +383,7 @@ def oauth_get_normalized_query_string(url_query_params, oauth_params):
     # the entire list of parameters.
     def allow_func(name, value):
         return name not in ('oauth_signature', )
-    query_string = oauth_urlencode(query_params, allow_func=allow_func)
+    query_string = oauth_urlencode_s(query_params, allow_func=allow_func)
     return query_string
 
 

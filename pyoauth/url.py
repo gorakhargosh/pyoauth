@@ -27,17 +27,24 @@ Functions
 
 .. autofunction:: oauth_unescape
 
-.. autofunction:: oauth_urlencode
+.. autofunction:: oauth_urlencode_s
 
 .. autofunction:: oauth_urlencode_sl
+
+.. autofunction:: oauth_url_sanitize
+
+.. autofunction:: oauth_urlparse_normalized
 
 .. autofunction:: oauth_url_query_params_add
 
 .. autofunction:: oauth_url_query_params_merge
 
-.. autofunction:: oauth_url_query_params_sanitize
+.. autofunction:: oauth_url_query_params_update
 
-.. autofunction:: oauth_urlparse_normalized
+.. autofunction:: oauth_url_query_params_filter
+
+.. autofunction:: oauth_url_query_params_dict
+
 
 """
 
@@ -110,7 +117,7 @@ def oauth_unescape(oauth_value):
     return unquote_plus(to_utf8(oauth_value))
 
 
-def oauth_urlencode(query_params, allow_func=None):
+def oauth_urlencode_s(query_params, allow_func=None):
     """
     Serializes a dictionary of query parameters into a string of query
     parameters, ``name=value`` pairs separated by ``&``, sorted first by
@@ -217,7 +224,7 @@ def oauth_url_query_params_add(url, extra_query_params, allow_func=None):
     scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
 
     d = oauth_url_query_params_merge(query, extra_query_params)
-    qs = oauth_urlencode(d, allow_func=allow_func)
+    qs = oauth_urlencode_s(d, allow_func=allow_func)
     return urlunparse((scheme, netloc, path, params, qs, fragment))
 
 
@@ -232,11 +239,11 @@ def oauth_url_query_params_merge(query_params, *extra_query_params):
     :returns:
         A dictionary of merged query parameters.
     """
-    query_params = oauth_url_query_params_sanitize(query_params)
+    query_params = oauth_url_query_params_dict(query_params)
     d = {}
     d.update(query_params)
     for qp in extra_query_params:
-        qp = oauth_url_query_params_sanitize(qp)
+        qp = oauth_url_query_params_dict(qp)
         for name, value in qp.items():
             if name in d:
                 d[name].extend(value)
@@ -246,11 +253,11 @@ def oauth_url_query_params_merge(query_params, *extra_query_params):
 
 
 def _oauth_url_query_params_update(query_params, *extra_query_params):
-    query_params = oauth_url_query_params_sanitize(query_params)
+    query_params = oauth_url_query_params_dict(query_params)
     d = {}
     d.update(query_params)
-    for qp in extra_query_params:
-        qp = oauth_url_query_params_sanitize(qp)
+    for qp in extra_query_params.items():
+        qp = oauth_url_query_params_dict(qp)
         d.update(qp)
     return d
 
@@ -273,7 +280,7 @@ def oauth_url_query_params_filter(query_params, allow_func=None):
     :returns:
         A filtered dictionary of query parameters.
     """
-    query_params = oauth_url_query_params_sanitize(query_params)
+    query_params = oauth_url_query_params_dict(query_params)
     d = {}
     for n, v in query_params.items():
         if allow_func and not allow_func(n, v):
@@ -283,7 +290,7 @@ def oauth_url_query_params_filter(query_params, allow_func=None):
     return d
 
 
-def oauth_url_query_params_sanitize(query_params):
+def oauth_url_query_params_dict(query_params):
     """
     Sanitizes a query parameter dictionary or query string to return a
     properly unflattened query parameter dictionary.
@@ -307,7 +314,7 @@ def oauth_url_query_params_sanitize(query_params):
                 d[n] = list(v)
         return d
         # Alternatively, but slower:
-        #return oauth_parse_qs(oauth_urlencode(query_params))
+        #return oauth_parse_qs(oauth_urlencode_s(query_params))
     else:
         raise ValueError("Query parameters must be passed as a dictionary or a query string.")
 
@@ -354,4 +361,21 @@ def oauth_urlparse_normalized(url):
     fragment    = parts.fragment or ""
     query       = parts.query or ""
 
-    return (scheme, netloc, path, params, query, fragment)
+    return scheme, netloc, path, params, query, fragment
+
+
+def oauth_url_sanitize(url):
+    """
+    Normalizes an OAuth URL and cleans up any query parameters starting with
+    "oauth_" from the URL.
+
+    :param url:
+        The OAuth URL to sanitize.
+    :returns:
+        Normalized sanitized URL.
+    """
+    scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
+    def allow_func(n, v):
+        return not n.startswith("oauth_")
+    query = oauth_urlencode_s(oauth_url_query_params_filter(query, allow_func=allow_func))
+    return urlunparse((scheme, netloc, path, params, query, fragment))
