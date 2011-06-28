@@ -21,28 +21,28 @@
 
 Functions
 ---------
-.. autofunction:: oauth_parse_qs
-
+Percent-encoding
+~~~~~~~~~~~~~~~~
 .. autofunction:: oauth_escape
-
 .. autofunction:: oauth_unescape
 
+Query string parsing and construction
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autofunction:: oauth_parse_qs
 .. autofunction:: oauth_urlencode_s
-
 .. autofunction:: oauth_urlencode_sl
 
+URL parsing and convenience utilities
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autofunction:: oauth_urlparse_normalized
+.. autofunction:: oauth_url_append_query_params
 .. autofunction:: oauth_url_sanitize
 
-.. autofunction:: oauth_url_append_query_params
-
-.. autofunction:: oauth_urlparse_normalized
-
+Query parameters
+~~~~~~~~~~~~~~~~
 .. autofunction:: oauth_url_query_params_add
-
 .. autofunction:: oauth_url_query_params_merge
-
 .. autofunction:: oauth_url_query_params_update
-
 .. autofunction:: oauth_url_query_params_filter
 
 
@@ -257,7 +257,7 @@ def oauth_url_query_params_merge(query_params, *extra_query_params):
     return d
 
 
-def _oauth_url_query_params_update(query_params, *extra_query_params):
+def oauth_url_query_params_update(query_params, *extra_query_params):
     """
     Updates a dictionary of query parameters or a query string with
     replacement parameter values from the specified additional
