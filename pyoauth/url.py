@@ -385,7 +385,7 @@ def oauth_protocol_params_sanitize(query_params):
             else:
                 return True
         else:
-            logging.warning("Query parameter ignored: `%r` -- invalid OAuth-protocol parameter.", n)
+            logging.warning("Invalid protocol parameter ignored: `%r`", n)
             return False
     return oauth_url_query_params_filter(query_params, allow_func=allow_func)
 
@@ -404,7 +404,7 @@ def oauth_url_query_params_sanitize(query_params):
         if not n.startswith("oauth_"):
             return True
         else:
-            logging.warning("Query parameter ignored: `%r` -- invalid non-OAuth-protocol parameter.", n)
+            logging.warning("Protocol parameter ignored from URL query parameters: `%r`", n)
             return False
     return oauth_url_query_params_filter(query_params, allow_func=allow_func)
 
