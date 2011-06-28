@@ -26,11 +26,7 @@
 
 
 import httplib2
-from pyoauth import OAuthToken, \
-    SIGNATURE_METHODS, \
-    SIGNATURE_METHOD_PLAINTEXT, \
-    SIGNATURE_METHOD_RSA_SHA1, \
-    SIGNATURE_METHOD_HMAC_SHA1
+from pyoauth import OAuthToken
 from pyoauth.utils import \
     oauth_get_rsa_sha1_signature, \
     oauth_get_hmac_sha1_signature, \
@@ -39,11 +35,16 @@ from pyoauth.utils import \
     oauth_generate_verification_code, \
     oauth_generate_timestamp
 
-signature_method_map = {
-    SIGNATURE_METHOD_HMAC_SHA1: oauth_get_hmac_sha1_signature,
-    SIGNATURE_METHOD_RSA_SHA1: oauth_get_rsa_sha1_signature,
-    SIGNATURE_METHOD_PLAINTEXT: oauth_get_plaintext_signature,
-}
+# Signature methods.
+SIGNATURE_METHOD_HMAC_SHA1 = "HMAC-SHA1"
+SIGNATURE_METHOD_RSA_SHA1 = "RSA-SHA1"
+SIGNATURE_METHOD_PLAINTEXT = "PLAINTEXT"
+SIGNATURE_METHODS = [
+    SIGNATURE_METHOD_HMAC_SHA1,
+    SIGNATURE_METHOD_RSA_SHA1,
+    SIGNATURE_METHOD_PLAINTEXT,
+]
+
 
 
 class Consumer(object):
