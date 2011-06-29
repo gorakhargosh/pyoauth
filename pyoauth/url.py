@@ -89,6 +89,7 @@ def oauth_parse_qs(query_string):
     """
     query_string = to_utf8_if_unicode(query_string) or ""
     if query_string.startswith("?"):
+        logging.warning("Ignoring `?` query string prefix -- `%r`" % query_string)
         query_string = query_string[1:]
     return parse_qs(query_string, keep_blank_values=True)
 
