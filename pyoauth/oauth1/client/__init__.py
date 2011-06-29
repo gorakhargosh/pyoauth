@@ -5,7 +5,7 @@ from pyoauth.decorators import deprecated
 from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, \
     SIGNATURE_METHOD_RSA_SHA1, \
     SIGNATURE_METHOD_PLAINTEXT
-from pyoauth.url import oauth_url_sanitize, oauth_protocol_params_sanitize, oauth_url_query_params_sanitize, oauth_url_query_params_add, oauth_urlencode_s, oauth_url_concat
+from pyoauth.url import oauth_url_sanitize, oauth_protocol_params_sanitize, oauth_url_query_params_sanitize, oauth_url_query_params_add, oauth_urlencode_s, oauth_url_append_query_params, oauth_parse_qs
 from pyoauth.utils import oauth_generate_nonce, \
     oauth_generate_timestamp, \
     oauth_get_hmac_sha1_signature, \
@@ -56,7 +56,7 @@ SIGNATURE_METHOD_MAP = {
     SIGNATURE_METHOD_RSA_SHA1: oauth_get_rsa_sha1_signature,
     SIGNATURE_METHOD_PLAINTEXT: oauth_get_plaintext_signature,
 }
-
+CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded"
 
 class Request(object):
     def __init__(self, method, url, payload=None, headers=None):
@@ -84,6 +84,47 @@ class Request(object):
     @property
     def headers(self):
         return self._headers
+
+class Response(object):
+    def __init__(self, content, status_code, headers=None):
+        self._content = content
+        self._status_code = status_code
+        self._headers = headers or {}
+
+    @property
+    def content(self):
+        return self._content
+
+    @property
+    def body(self):
+        return self.content
+
+    @property
+    def error(self):
+        return self.status_code < 200 or self.status_code >= 300
+
+    @property
+    def status_code(self):
+        return self._status_code
+
+    @property
+    def headers(self):
+        return self._headers
+
+    def get_header_value(self, header):
+        if header in self.headers:
+            return self.headers[header]
+        elif header.lower() in self.headers:
+            return self.headers[header.lower()]
+        else:
+            header_lowercased = header.lower()
+            for k, v in self.headers.items():
+                if k.lower() == header_lowercased:
+                    return v
+            return None
+
+    def get_content_type(self):
+        return self.get_header_value("Content-Type")
 
 
 class Client(object):
@@ -196,6 +237,7 @@ class Client(object):
             oauth_nonce=oauth_generate_nonce(),
             oauth_version=self.oauth_version,
         )
+        method = method.upper()
 
         # Filter and add additional OAuth parameters.
         extra_oauth_params = oauth_protocol_params_sanitize(extra_oauth_params)
@@ -204,6 +246,7 @@ class Client(object):
                 logging.warning("Specified additional protocol parameter `%r` will be ignored.", k)
                 continue
             elif k == "oauth_callback" and v:
+                # Set a callback URL only if it is available.
                 oauth_params["oauth_callback"] = v
             else:
                 if oauth_params.has_key(k):
@@ -228,17 +271,34 @@ class Client(object):
             request_headers["Authorization"] = auth_header_value
 
         if method == "GET":
-            request_url = oauth_url_concat(signature_url, oauth_params)
+            request_url = oauth_url_append_query_params(signature_url, oauth_params)
             request_payload = ""
         elif method == "POST":
             request_url = oauth_request_url
-            request_headers["Content-Type"] = "application/x-www-form-urlencoded"
+            request_headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
             request_payload = oauth_urlencode_s(payload_params)
         else:
             raise NotImplementedError("Not implemented any other HTTP methods yet.")
 
         return Request(method, url=request_url, payload=request_payload, headers=request_headers)
 
+    def parse_temporary_credentials_response(self, response):
+        if response.error:
+            raise ValueError("Could not fetch temporary credentials -- HTTP status code: %d" % response.status_code)
+        if not response.body:
+            raise ValueError("OAuth server did not return a valid response")
+        if response.get_content_type() != CONTENT_TYPE_FORM_URLENCODED:
+            raise ValueError("OAuth server must return Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
+
+        params = oauth_parse_qs(response.body)
+        return params, Credentials(identifier=params["oauth_token"], shared_secret=params["oauth_token_secret"])
+
+    def get_authorization_url(self, temporary_credentials, **query_params):
+        url = self._resource_owner_authorization_uri
+        if query_params:
+            query_params = oauth_url_query_params_sanitize(query_params)
+            url = oauth_url_append_query_params(url, query_params)
+        return oauth_url_append_query_params(url, dict(oauth_token=temporary_credentials.identifier))
 
 
 """

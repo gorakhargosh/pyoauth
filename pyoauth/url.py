@@ -319,11 +319,11 @@ def oauth_url_query_params_filter(query_params, allow_func=None):
     """
     query_params = oauth_url_query_params_dict(query_params)
     d = {}
-    for n, v in query_params.items():
-        if allow_func and not allow_func(n, v):
+    for name, value in query_params.items():
+        if allow_func and not allow_func(name, value):
             continue
         else:
-            d[n] = v
+            d[name] = value
     return d
 
 
@@ -475,7 +475,6 @@ def oauth_url_sanitize(url):
     return urlunparse((scheme, netloc, path, params, query, None))
 
 
-
 def oauth_url_append_query_params(url, query_params):
     """
     Appends query params to any existing query string in the URL
@@ -498,7 +497,9 @@ def oauth_url_append_query_params(url, query_params):
         'http://example.com/foo?a=b&c=d#fragment'
     """
     scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
-    query_params = oauth_urlencode_s(oauth_url_query_params_dict(query_params))
-    query_string = "&".join([query, query_params])
+    query_string = "&".join([
+        query,
+        oauth_urlencode_s(oauth_url_query_params_dict(query_params)),
+    ])
     return urlunparse((scheme, netloc, path, params, query_string, fragment))
 
