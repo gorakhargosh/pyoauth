@@ -287,7 +287,7 @@ def oauth_url_query_params_update(query_params, *extra_query_params):
     query_params = oauth_url_query_params_dict(query_params)
     d = {}
     d.update(query_params)
-    for qp in extra_query_params.items():
+    for qp in extra_query_params:
         qp = oauth_url_query_params_dict(qp)
         d.update(qp)
     return d
