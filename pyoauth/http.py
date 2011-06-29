@@ -69,18 +69,14 @@ class Response(object):
     Framework implementers can subclass this class and must use it with
     the client methods for them to work.
     """
-    def __init__(self, content, status_code, headers=None):
-        self._content = content
+    def __init__(self, status_code, body, headers=None):
+        self._body = body
         self._status_code = status_code
         self._headers = headers or {}
 
     @property
-    def content(self):
-        return self._content
-
-    @property
     def body(self):
-        return self.content
+        return self._body
 
     @property
     def error(self):

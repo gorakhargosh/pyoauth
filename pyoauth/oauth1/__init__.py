@@ -16,6 +16,17 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""
+:module: pyoauth.oauth1
+:synopsis: Implements OAuth 1.0.
+
+Classes
+-------
+.. autoclass:: Credentials
+   :members:
+   :show-inheritance:
+"""
+
 from pyoauth.decorators import deprecated
 
 
@@ -63,7 +74,3 @@ class Credentials(object):
     @deprecated
     def secret(self):
         return self._shared_secret
-
-    def to_oauth_dict(self):
-        """Overriden by each credential type."""
-        raise NotImplementedError()

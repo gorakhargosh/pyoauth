@@ -6,6 +6,17 @@
 API Reference
 =============
 
+`pyoauth.oauth1`
+=======================
+
+.. automodule: pyoauth.oauth1
+
+
+`pyoauth.oauth1.client`
+=======================
+
+.. automodule: pyoauth.oauth1.client
+
 `pyoauth.utils`
 ===============
 
