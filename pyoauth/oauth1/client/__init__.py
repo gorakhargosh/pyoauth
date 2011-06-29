@@ -1,54 +1,43 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# OAuth 1.0 Client.
+#
+# Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
 import logging
 
-from pyoauth.decorators import deprecated
-from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, \
+from pyoauth.http import Request, Response
+from pyoauth.oauth1 import \
+    Credentials, \
+    SIGNATURE_METHOD_HMAC_SHA1, \
     SIGNATURE_METHOD_RSA_SHA1, \
     SIGNATURE_METHOD_PLAINTEXT
-from pyoauth.url import oauth_url_sanitize, oauth_protocol_params_sanitize, oauth_url_query_params_sanitize, oauth_url_query_params_add, oauth_urlencode_s, oauth_url_append_query_params, oauth_parse_qs
+from pyoauth.url import \
+    oauth_url_sanitize, \
+    oauth_protocol_params_sanitize, \
+    oauth_url_query_params_sanitize, \
+    oauth_url_query_params_add, \
+    oauth_urlencode_s, \
+    oauth_url_append_query_params, \
+    oauth_parse_qs
 from pyoauth.utils import oauth_generate_nonce, \
     oauth_generate_timestamp, \
     oauth_get_hmac_sha1_signature, \
     oauth_get_rsa_sha1_signature, \
     oauth_get_plaintext_signature, \
     oauth_get_normalized_authorization_header_value
-
-
-class Credentials(object):
-    def __init__(self, identifier, shared_secret):
-        """
-        OAuth Credentials.
-
-        :param identifier:
-            Identifier (old: key)
-        :param shared_secret:
-            Shared secret (old: secret)
-        """
-        self._identifier = identifier
-        self._shared_secret = shared_secret
-
-    @property
-    def identifier(self):
-        return self._identifier
-
-    @property
-    def shared_secret(self):
-        return self._shared_secret
-
-    @property
-    @deprecated
-    def key(self):
-        return self._identifier
-
-    @property
-    @deprecated
-    def secret(self):
-        return self._shared_secret
-
-
-    def to_oauth_dict(self):
-        """Overriden by each credential type."""
-        raise NotImplementedError()
 
 
 SIGNATURE_METHOD_MAP = {
@@ -58,76 +47,11 @@ SIGNATURE_METHOD_MAP = {
 }
 CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded"
 
-class Request(object):
-    def __init__(self, method, url, payload=None, headers=None):
-        self._method = method
-        self._url = url
-        self._payload = payload
-        self._headers = headers
-
-    @property
-    def method(self):
-        return self._method
-
-    @property
-    def url(self):
-        return self._url
-
-    @property
-    def payload(self):
-        return self._payload
-
-    @property
-    def body(self):
-        return self.payload
-
-    @property
-    def headers(self):
-        return self._headers
-
-class Response(object):
-    def __init__(self, content, status_code, headers=None):
-        self._content = content
-        self._status_code = status_code
-        self._headers = headers or {}
-
-    @property
-    def content(self):
-        return self._content
-
-    @property
-    def body(self):
-        return self.content
-
-    @property
-    def error(self):
-        return self.status_code < 200 or self.status_code >= 300
-
-    @property
-    def status_code(self):
-        return self._status_code
-
-    @property
-    def headers(self):
-        return self._headers
-
-    def get_header_value(self, header):
-        if header in self.headers:
-            return self.headers[header]
-        elif header.lower() in self.headers:
-            return self.headers[header.lower()]
-        else:
-            header_lowercased = header.lower()
-            for k, v in self.headers.items():
-                if k.lower() == header_lowercased:
-                    return v
-            return None
-
-    def get_content_type(self):
-        return self.get_header_value("Content-Type")
-
 
 class Client(object):
+    """
+    OAuth 1.0 Client.
+    """
     def __init__(self,
                  client_credentials,
                  temporary_credentials_request_uri,
@@ -135,7 +59,7 @@ class Client(object):
                  token_request_uri,
                  use_authorization_header=True):
         """
-        Creates an instance of an OAuth client.
+        Creates an instance of an OAuth 1.0 client.
 
         :param client_credentials:
             Client (consumer) credentials.
@@ -170,18 +94,9 @@ class Client(object):
 
     @property
     def oauth_version(self):
-        """Must return ``1.0`` (unless for compatibility, in which case,
+        """Must return ``"1.0"`` (unless for compatibility, in which case,
         you are all by yourself.)"""
         return "1.0"
-
-    def _sign_request_data(self, signature_method,
-             method, url, oauth_params,
-             credentials=None):
-        sign_func = SIGNATURE_METHOD_MAP[signature_method]
-        credentials_shared_secret = credentials.shared_secret if credentials else None
-        return sign_func(self._client_credentials.shared_secret,
-                         method, url, oauth_params,
-                         credentials_shared_secret)
 
     def build_temporary_credentials_request(self,
                                             method,
@@ -191,7 +106,7 @@ class Client(object):
                                             oauth_callback=None,
                                             **extra_oauth_params):
         oauth_request_url = self._temporary_credentials_request_uri
-        return self.build_request(method=method,
+        return self._build_request(method=method,
                                        oauth_request_url=oauth_request_url,
                                        payload_params=payload_params,
                                        realm=realm,
@@ -199,7 +114,29 @@ class Client(object):
                                        oauth_callback=oauth_callback,
                                        **extra_oauth_params)
 
-    def build_request(self,
+    def parse_temporary_credentials_response(self, response):
+        if not isinstance(response, Response):
+            raise ValueError("``response`` must be of type pyoauth.http.Response")
+        if response.error:
+            raise ValueError("Could not fetch temporary credentials -- HTTP status code: %d" % response.status_code)
+        if not response.body:
+            raise ValueError("OAuth server did not return a valid response")
+        if response.get_content_type() != CONTENT_TYPE_FORM_URLENCODED:
+            raise ValueError("OAuth server must return Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
+
+        # The response body must be URL encoded.
+        params = oauth_parse_qs(response.body)
+        return params, Credentials(identifier=params["oauth_token"],
+                                   shared_secret=params["oauth_token_secret"])
+
+    def get_authorization_url(self, temporary_credentials, **query_params):
+        url = self._resource_owner_authorization_uri
+        if query_params:
+            query_params = oauth_url_query_params_sanitize(query_params)
+            url = oauth_url_append_query_params(url, query_params)
+        return oauth_url_append_query_params(url, dict(oauth_token=temporary_credentials.identifier))
+
+    def _build_request(self,
                       method,
                       oauth_request_url,
                       payload_params=None,
@@ -207,7 +144,7 @@ class Client(object):
                       oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
                       **extra_oauth_params):
         """
-        Builds request data.
+        Builds an OAuth request.
 
         :param method:
             HTTP request method.
@@ -282,23 +219,15 @@ class Client(object):
 
         return Request(method, url=request_url, payload=request_payload, headers=request_headers)
 
-    def parse_temporary_credentials_response(self, response):
-        if response.error:
-            raise ValueError("Could not fetch temporary credentials -- HTTP status code: %d" % response.status_code)
-        if not response.body:
-            raise ValueError("OAuth server did not return a valid response")
-        if response.get_content_type() != CONTENT_TYPE_FORM_URLENCODED:
-            raise ValueError("OAuth server must return Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
+    def _sign_request_data(self, signature_method,
+             method, url, oauth_params,
+             credentials=None):
+        sign_func = SIGNATURE_METHOD_MAP[signature_method]
+        credentials_shared_secret = credentials.shared_secret if credentials else None
+        return sign_func(self._client_credentials.shared_secret,
+                         method, url, oauth_params,
+                         credentials_shared_secret)
 
-        params = oauth_parse_qs(response.body)
-        return params, Credentials(identifier=params["oauth_token"], shared_secret=params["oauth_token_secret"])
-
-    def get_authorization_url(self, temporary_credentials, **query_params):
-        url = self._resource_owner_authorization_uri
-        if query_params:
-            query_params = oauth_url_query_params_sanitize(query_params)
-            url = oauth_url_append_query_params(url, query_params)
-        return oauth_url_append_query_params(url, dict(oauth_token=temporary_credentials.identifier))
 
 
 """

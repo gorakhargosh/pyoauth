@@ -22,5 +22,10 @@ API Reference
 .. automodule:: pyoauth.unicode
 
 
+`pyoauth.http`
+==============
+
+.. automodule:: pyoauth.http
+
 .. toctree::
    :maxdepth: 2
