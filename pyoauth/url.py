@@ -427,7 +427,16 @@ def oauth_protocol_params_sanitize(query_params):
         if n.startswith("oauth_"):
             # This gets rid of "realm" or any non-OAuth param.
             if len(v) > 1:
-                raise ValueError("Duplicate OAuth parameters found %r: %r" % (n, v))
+                # Multiple values for a protocol parameter are not allowed.
+                # We don't silently discard values because failing fast
+                # is better than simply logging and waiting for the user
+                # to figure it out all by herself.
+                #
+                # See Making Requests (http://tools.ietf.org/html/rfc5849#section-3.1)
+                # Point 2. Each parameter MUST NOT appear more than once per
+                # request, so we disallow multiple values for a protocol
+                # parameter.
+                raise ValueError("Multiple protocol parameter values found %r=%r" % (n, v))
             else:
                 return True
         else:
@@ -497,6 +506,8 @@ def oauth_url_append_query_params(url, query_params):
         >>> oauth_url_append_query_params("http://example.com/foo?a=b#fragment", dict(c="d"))
         'http://example.com/foo?a=b&c=d#fragment'
     """
+    if not query_params:
+        return url
     scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
     query_string = "&".join([
         query,
