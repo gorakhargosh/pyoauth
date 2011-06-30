@@ -510,9 +510,7 @@ def oauth_url_append_query_params(url, query_params):
     if not query_params:
         return url
     scheme, netloc, path, params, query, fragment = oauth_urlparse_normalized(url)
-    query_string = "&".join([
-        query,
-        oauth_urlencode_s(oauth_url_query_params_dict(query_params)),
-    ])
+    query = (query + "&") if query else query
+    query_string = query + oauth_urlencode_s(oauth_url_query_params_dict(query_params))
     return urlunparse((scheme, netloc, path, params, query_string, fragment))
 

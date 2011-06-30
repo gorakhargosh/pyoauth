@@ -562,6 +562,11 @@ class Test_oauth_protocol_params_sanitize(object):
 
 
 class Test_oauth_url_append_query_params(object):
+    def test_does_not_prefix_with_ampersand_when_url_has_no_query_params(self):
+        url = "https://www.example.com/authorize"
+        assert_equal(oauth_url_append_query_params(url, dict(a=1)), "https://www.example.com/authorize?a=1")
+        assert_not_equal(oauth_url_append_query_params(url, dict(a=1)), "https://www.example.com/authorize?&a=1")
+
     def test_returns_url_unchanged_if_no_query_params(self):
         url = "http://www.example.com/request?a=b"
         assert_equal(oauth_url_append_query_params(url, None), url)
