@@ -34,6 +34,24 @@ class TestClient_OAuth_1_0_Example:
         url = self.client.get_authorization_url(self.temporary_credentials, a="something here", b=["another thing", 5], oauth_ignored="ignored")
         assert_equal(url, "https://photos.example.net/authorize?a=something%20here&b=5&b=another%20thing&oauth_token=" + self.temporary_credentials.identifier)
 
+    def test_parse_credentials_response(self):
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        params, credentials = self.client.parse_credentials_response(200, "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=true", headers=headers)
+        assert_dict_equal(params, {
+            "oauth_token": ["hh5s93j4hdidpola"],
+            "oauth_token_secret": ["hdhd0244k9j7ao03"],
+            "oauth_callback_confirmed": ["true"],
+        })
+        assert_equal(credentials, self.temporary_credentials)
+
+        params, credentials = self.client.parse_credentials_response(200, "oauth_token=nnch734d00sl2jdk&oauth_token_secret=pfkkdhi9sl3r4s00", headers=headers)
+        assert_dict_equal(params, {
+            "oauth_token": ["nnch734d00sl2jdk"],
+            "oauth_token_secret": ["pfkkdhi9sl3r4s00"],
+        })
+        assert_equal(credentials, self.token_credentials)
 
     def test_build_resource_request(self):
         # client = Client(client_credentials, temporary_credentials_request_uri, resource_owner_authorization_uri, token_request_uri, use_authorization_header)
@@ -45,10 +63,6 @@ class TestClient_OAuth_1_0_Example:
         # assert_equal(expected, client.build_temporary_credentials_request(method, query_params, headers, realm, oauth_signature_method, oauth_callback, **extra_oauth_params))
         raise SkipTest # TODO: implement your test here
 
-    def test_build_token_credentials_request(self):
-        # client = Client(client_credentials, temporary_credentials_request_uri, resource_owner_authorization_uri, token_request_uri, use_authorization_header)
-        # assert_equal(expected, client.build_token_credentials_request(temporary_credentials, oauth_verifier, method, query_params, headers, realm, oauth_signature_method, **extra_oauth_params))
-        raise SkipTest # TODO: implement your test here
 
 
     def test_parse_credentials_response(self):

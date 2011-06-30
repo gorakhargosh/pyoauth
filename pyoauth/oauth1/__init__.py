@@ -74,3 +74,18 @@ class Credentials(object):
     @deprecated
     def secret(self):
         return self._shared_secret
+
+    # Used for comparison of credentials.
+    @property
+    def key(self):
+        return (self._identifier,
+                self._shared_secret)
+
+    def __eq__(self, credentials):
+        return self.key == credentials.key
+
+    def __ne__(self, credentials):
+        return self.key != credentials.key
+
+    def __hash__(self):
+        return hash(self.key)
