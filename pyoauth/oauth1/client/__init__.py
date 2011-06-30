@@ -42,7 +42,7 @@ from pyoauth.url import \
     oauth_url_query_params_add, \
     oauth_urlencode_s, \
     oauth_url_append_query_params, \
-    oauth_parse_qs
+    oauth_parse_qs, oauth_url_query_params_append
 from pyoauth.utils import oauth_generate_nonce, \
     oauth_generate_timestamp, \
     oauth_get_hmac_sha1_signature, \
@@ -493,9 +493,9 @@ class Client(object):
         payload_params = oauth_url_query_params_sanitize(payload_params)
 
         # Determine the request's OAuth signature.
-        url_with_query_params = oauth_url_query_params_add(url, payload_params)
+        url_with_payload_params_added = oauth_url_query_params_add(url, payload_params)
         oauth_params["oauth_signature"] = self._sign_request_data(oauth_signature_method,
-                                                                  method, url_with_query_params, oauth_params)
+                                                                  method, url_with_payload_params_added, oauth_params)
 
         # Build request data now.
         # OAuth parameters and any parameters starting with the "oauth_"
@@ -513,17 +513,17 @@ class Client(object):
             # included multiple times in a request below.
             oauth_params = None
 
-        if method == "GET":
-            request_url = oauth_url_append_query_params(url_with_query_params, oauth_params)
-            payload = ""
-        elif method == "POST":
-            # The query params are not appended to the OAuth request URL in this
-            # case but added to the payload instead. Keeps stuff clean.
+        if method in ("POST", "PUT"):
+            # The payload params are not appended to the OAuth request URL
+            # in this case but added to the payload instead.
             request_url = url
             headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
-            payload = oauth_urlencode_s(payload_params)
-        else:
-            raise NotImplementedError("Not implemented any other HTTP methods yet.")
+            payload = oauth_url_query_params_append(payload_params, oauth_params)
+        else: #if method == "GET":
+            request_url = oauth_url_append_query_params(url_with_payload_params_added, oauth_params)
+            payload = ""
+        #else:
+        #    raise NotImplementedError("Not implemented any other HTTP methods yet.")
 
         return RequestProxy(method, url=request_url, payload=payload, headers=headers)
 
