@@ -459,7 +459,8 @@ def _oauth_parse_authorization_header_value_l(header_value):
         if not param:
             if header_value.endswith(","):
                 raise ValueError("Malformed `Authorization` header value -- found trailing comma")
-            continue
+            #else:
+            #    continue
         nv = param.split("=", 1)
         if len(nv) != 2:
             raise ValueError("bad parameter field: %r" % (param, ))
