@@ -425,10 +425,11 @@ def oauth_parse_authorization_header_value(header_value):
     d = {}
     param_list, realm = _oauth_parse_authorization_header_value_l(header_value)
     for name, value in param_list:
-        if name in d:
-            d[name].append(value)
-        else:
-            d[name] = [value]
+        d[name] = [value]
+        #if name in d:
+        #    d[name].append(value)
+        #else:
+        #    d[name] = [value]
     d = oauth_protocol_params_sanitize(d)
     return d, realm
 
