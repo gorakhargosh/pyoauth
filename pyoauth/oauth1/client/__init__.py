@@ -163,7 +163,7 @@ class Client(object):
 
     def build_temporary_credentials_request(self,
                                             method,
-                                            query_params=None,
+                                            payload_params=None,
                                             headers=None,
                                             realm=None,
                                             oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
@@ -174,7 +174,7 @@ class Client(object):
 
         :param method:
             HTTP request method.
-        :param query_params:
+        :param payload_params:
             A dictionary of payload parameters. These will be serialized
             into the URL or the entity-body depending on the HTTP request method.
             These must not include any parameters starting with "oauth_". Any
@@ -209,7 +209,7 @@ class Client(object):
         """
         return self._build_request(method=method,
                                    url=self._temporary_credentials_request_uri,
-                                   query_params=query_params,
+                                   payload_pparams=payload_params,
                                    headers=headers,
                                    realm=realm,
                                    oauth_signature_method=oauth_signature_method,
@@ -240,7 +240,7 @@ class Client(object):
                                         temporary_credentials,
                                         oauth_verifier,
                                         method,
-                                        query_params=None,
+                                        payload_params=None,
                                         headers=None,
                                         realm=None,
                                         oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
@@ -256,7 +256,7 @@ class Client(object):
         :param oauth_verifier:
             OAuth verification string sent by the server to your callback URI
             or input by the user into your application.
-        :param query_params:
+        :param payload_params:
             A dictionary of payload parameters. These will be serialized
             into the URL or the entity-body depending on the HTTP request method.
             These must not include any parameters starting with "oauth_". Any
@@ -288,7 +288,7 @@ class Client(object):
         """
         return self._build_request(method=method,
                                    url=self._token_request_uri,
-                                   query_params=query_params,
+                                   payload_params=payload_params,
                                    headers=headers,
                                    realm=realm,
                                    oauth_signature_method=oauth_signature_method,
@@ -300,7 +300,7 @@ class Client(object):
                                token_credentials,
                                method,
                                url,
-                               query_params=None,
+                               payload_params=None,
                                headers=None,
                                realm=None,
                                oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
@@ -317,7 +317,7 @@ class Client(object):
             The HTTP method to use.
         :param url:
             The HTTP URL to which the resource request must be sent.
-        :param query_params:
+        :param payload_params:
             A dictionary of payload parameters. These will be serialized
             into the URL or the entity-body depending on the HTTP request method.
             These must not include any parameters starting with "oauth_". Any
@@ -349,7 +349,7 @@ class Client(object):
         """
         return self._build_request(method=method,
                                    url=url,
-                                   query_params=query_params,
+                                   payload_params=payload_params,
                                    headers=headers,
                                    realm=realm,
                                    oauth_signature_method=oauth_signature_method,
@@ -403,7 +403,7 @@ class Client(object):
     def _build_request(self,
                       method,
                       url,
-                      query_params=None,
+                      payload_params=None,
                       headers=None,
                       realm=None,
                       oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
@@ -415,7 +415,7 @@ class Client(object):
             HTTP request method.
         :param url:
             The OAuth request URI.
-        :param query_params:
+        :param payload_params:
             A dictionary of payload parameters. These will be serialized
             into the URL or the entity-body depending on the HTTP request method.
             These must not include any parameters starting with "oauth_". Any
@@ -490,10 +490,10 @@ class Client(object):
                 oauth_params[k] = v
 
         # Filter payload parameters for the request.
-        query_params = oauth_url_query_params_sanitize(query_params)
+        payload_params = oauth_url_query_params_sanitize(payload_params)
 
         # Determine the request's OAuth signature.
-        url_with_query_params = oauth_url_query_params_add(url, query_params)
+        url_with_query_params = oauth_url_query_params_add(url, payload_params)
         oauth_params["oauth_signature"] = self._sign_request_data(oauth_signature_method,
                                                                   method, url_with_query_params, oauth_params)
 
@@ -521,7 +521,7 @@ class Client(object):
             # case but added to the payload instead. Keeps stuff clean.
             request_url = url
             headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
-            payload = oauth_urlencode_s(query_params)
+            payload = oauth_urlencode_s(payload_params)
         else:
             raise NotImplementedError("Not implemented any other HTTP methods yet.")
 
