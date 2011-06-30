@@ -9,7 +9,7 @@ except ImportError:
     assert_dict_equal = assert_equal
 from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, \
     oauth_urlencode_s, oauth_urlencode_sl, oauth_url_query_params_dict, \
-    oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add
+    oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add, oauth_url_query_params_sanitize, oauth_protocol_params_sanitize
 
 from urlparse import urlparse
 
@@ -411,7 +411,7 @@ class Test_urlparse_normalized(object):
         assert_equal(oauth_urlparse_normalized(url), result)
 
 
-class Test_oauth_url_query_params_sanitize(object):
+class Test_oauth_url_query_params_dict(object):
     def test_unflattens_dict(self):
         params = {
             "a2": "r b",
@@ -477,3 +477,69 @@ class Test_oauth_url_query_params_sanitize(object):
     def test_ValueError_when_invalid_query_params_value(self):
         assert_raises(ValueError, oauth_url_query_params_dict, True)
         assert_raises(ValueError, oauth_url_query_params_dict, 5)
+
+
+class Test_oauth_url_query_params_sanitize(object):
+    def test_filter(self):
+        params = {
+            "a2": ["r b"],
+            "b5": ["=%3D"],
+            "a3": ["a", "2 q"],
+            "c@": [""],
+            "c2": [""],
+            "oauth_consumer_key": ["9djdj82h48djs9d2"],
+            "oauth_token": ["kkk9d7dh3k39sjv7"],
+            "oauth_signature_method": ["HMAC-SHA1"],
+            "oauth_timestamp": ["137131201"],
+            "oauth_nonce": ["7d8f3e4a"],
+        }
+        query_string = "?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
+        expected_params = {
+            "a2": ["r b"],
+            "b5": ["=%3D"],
+            "a3": ["a", "2 q"],
+            "c@": [""],
+            "c2": [""],
+        }
+        expected_result = oauth_urlencode_s(expected_params)
+
+        assert_equal(oauth_urlencode_s(oauth_url_query_params_sanitize(params)), expected_result)
+        assert_equal(oauth_urlencode_s(oauth_url_query_params_sanitize(query_string)), expected_result)
+
+class Test_oauth_protocol_params_sanitize(object):
+    def test_filter(self):
+        params = {
+            "a2": ["r b"],
+            "b5": ["=%3D"],
+            "a3": ["a", "2 q"],
+            "c@": [""],
+            "c2": [""],
+            "oauth_consumer_key": ["9djdj82h48djs9d2"],
+            "oauth_token": ["kkk9d7dh3k39sjv7"],
+            "oauth_signature_method": ["HMAC-SHA1"],
+            "oauth_timestamp": ["137131201"],
+            "oauth_nonce": ["7d8f3e4a"],
+        }
+        query_string = "?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
+        expected_params = {
+            "oauth_consumer_key": ["9djdj82h48djs9d2"],
+            "oauth_token": ["kkk9d7dh3k39sjv7"],
+            "oauth_signature_method": ["HMAC-SHA1"],
+            "oauth_timestamp": ["137131201"],
+            "oauth_nonce": ["7d8f3e4a"],
+        }
+        expected_result = oauth_urlencode_s(expected_params)
+
+        assert_equal(oauth_urlencode_s(oauth_protocol_params_sanitize(params)), expected_result)
+        assert_equal(oauth_urlencode_s(oauth_protocol_params_sanitize(query_string)), expected_result)
+
+    def test_raises_ValueError_when_multiple_protocol_param_values_found(self):
+        params = {
+            "a2": ["r b"],
+            "b5": ["=%3D"],
+            "a3": ["a", "2 q"],
+            "c@": [""],
+            "c2": [""],
+            "oauth_token": ["kkk9d7dh3k39sjv7", "ahdsa7hd3uhadasd"],
+        }
+        assert_raises(ValueError, oauth_protocol_params_sanitize, params)
