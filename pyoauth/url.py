@@ -43,7 +43,6 @@ Query parameters
 ~~~~~~~~~~~~~~~~
 .. autofunction:: oauth_url_query_params_add
 .. autofunction:: oauth_url_query_params_merge
-.. autofunction:: oauth_url_query_params_update
 .. autofunction:: oauth_url_query_params_filter
 .. autofunction:: oauth_url_query_params_dict
 
