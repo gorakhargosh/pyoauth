@@ -22,12 +22,12 @@
 
 Classes
 -------
-.. autoclass:: Request
-.. autoclass:: Response
+.. autoclass:: RequestProxy
+.. autoclass:: ResponseProxy
 
 """
 
-class Request(object):
+class RequestProxy(object):
     """Adaptor HTTP Request class.
 
     Framework implementers can subclass this class and must use it with
@@ -63,7 +63,7 @@ class Request(object):
         return self._headers
 
 
-class Response(object):
+class ResponseProxy(object):
     """Adaptor HTTP Response class.
 
     Framework implementers can subclass this class and must use it with

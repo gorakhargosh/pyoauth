@@ -29,7 +29,7 @@ Classes
 
 import logging
 
-from pyoauth.http import Request, Response
+from pyoauth.http import RequestProxy, ResponseProxy
 from pyoauth.oauth1 import \
     Credentials, \
     SIGNATURE_METHOD_HMAC_SHA1, \
@@ -376,7 +376,7 @@ class Client(object):
         if not (status_code and body and headers):
             raise ValueError("You must specify the HTTP status code, the response body, and the response headers.")
 
-        response = Response(status_code=status_code, body=body, headers=headers)
+        response = ResponseProxy(status_code=status_code, body=body, headers=headers)
         self._validate_oauth_response(response)
         params = oauth_parse_qs(response.body)
         return params, Credentials(identifier=params["oauth_token"][0],
@@ -525,7 +525,7 @@ class Client(object):
         else:
             raise NotImplementedError("Not implemented any other HTTP methods yet.")
 
-        return Request(method, url=request_url, payload=payload, headers=headers)
+        return RequestProxy(method, url=request_url, payload=payload, headers=headers)
 
     def _sign_request_data(self, signature_method,
                            method, url, oauth_params,
