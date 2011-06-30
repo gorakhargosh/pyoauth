@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from nose import SkipTest
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_raises
 try:
     from nose.tools import assert_dict_equal
 except ImportError:
@@ -57,6 +57,24 @@ class TestClient_OAuth_1_0_Example:
             "oauth_token_secret": ["pfkkdhi9sl3r4s00"],
         })
         assert_equal(credentials, self.token_credentials)
+
+
+    def test_parse_credentials_response_validation(self):
+        status_code = 200
+        body = "oauth_token=nnch734d00sl2jdk&oauth_token_secret=pfkkdhi9sl3r4s00"
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+
+        assert_raises(ValueError, self.client.parse_credentials_response, None, body, headers)
+        assert_raises(ValueError, self.client.parse_credentials_response, status_code, None, headers)
+        assert_raises(ValueError, self.client.parse_credentials_response, status_code, body, None)
+
+        assert_raises(ValueError, self.client.parse_credentials_response, 300, body, headers)
+        assert_raises(ValueError, self.client.parse_credentials_response, 199, body, headers)
+
+        assert_raises(ValueError, self.client.parse_credentials_response, 200, body, {"Content-Type": "invalid"})
+
 
     def test_build_resource_request(self):
         # client = Client(client_credentials, temporary_credentials_request_uri, resource_owner_authorization_uri, token_request_uri, use_authorization_header)

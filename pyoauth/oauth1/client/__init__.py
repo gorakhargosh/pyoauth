@@ -357,7 +357,7 @@ class Client(object):
                                    oauth_token=token_credentials.identifier
                                    **extra_oauth_params)
 
-    def parse_credentials_response(self, status_code, body, headers=None):
+    def parse_credentials_response(self, status_code, body, headers):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         credential request.
@@ -373,21 +373,10 @@ class Client(object):
 
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
+        if not (status_code and body and headers):
+            raise ValueError("You must specify the HTTP status code, the response body, and the response headers.")
+
         response = Response(status_code=status_code, body=body, headers=headers)
-        return self._parse_credentials_response(response)
-
-    def _parse_credentials_response(self, response):
-        """
-        Parses the entity-body of the OAuth server response to an OAuth
-        credential request.
-
-        :param response:
-            An instance of type :class:`pyoauth.http.Response` or a subclass.
-        :returns:
-            A tuple of the form::
-
-                (parameter dictionary, pyoauth.oauth1.Credentials instance)
-        """
         self._validate_oauth_response(response)
         params = oauth_parse_qs(response.body)
         return params, Credentials(identifier=params["oauth_token"][0],
@@ -401,12 +390,12 @@ class Client(object):
             The response of the OAuth server wrapped into a
             :class:`pyoauth.http.Response` object.
         """
-        if not isinstance(response, Response):
-            raise ValueError("``response`` must be of type pyoauth.http.Response")
+        #if not isinstance(response, Response):
+        #    raise ValueError("``response`` must be of type pyoauth.http.Response")
         if response.error:
             raise ValueError("Could not fetch temporary credentials -- HTTP status code: %d" % response.status_code)
-        if not response.body:
-            raise ValueError("OAuth server did not return a valid response")
+        #if not response.body:
+        #    raise ValueError("OAuth server did not return a valid response")
         # The response body must be URL encoded.
         if response.get_content_type() != CONTENT_TYPE_FORM_URLENCODED:
             raise ValueError("OAuth server must return Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
