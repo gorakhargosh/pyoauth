@@ -393,11 +393,12 @@ class Client(object):
         #    raise ValueError("``response`` must be of type pyoauth.http.Response")
         if response.error:
             raise ValueError("Could not fetch temporary credentials -- HTTP status code: %d" % response.status_code)
-        #if not response.body:
-        #    raise ValueError("OAuth server did not return a valid response")
+        if not response.body:
+            # For empty bodies.
+            raise ValueError("OAuth server did not return a valid response")
         # The response body must be URL encoded.
         if not response.is_body_form_urlencoded():
-            raise ValueError("OAuth server must return Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
+            raise ValueError("OAuth server response must have Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
 
     def _build_request(self,
                       method,

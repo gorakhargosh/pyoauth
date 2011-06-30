@@ -73,6 +73,7 @@ class TestClient_OAuth_1_0_Example:
         assert_raises(ValueError, self.client.parse_credentials_response, 300, body, headers)
         assert_raises(ValueError, self.client.parse_credentials_response, 199, body, headers)
 
+        assert_raises(ValueError, self.client.parse_credentials_response, 200, "", headers)
         assert_raises(ValueError, self.client.parse_credentials_response, 200, body, {"Content-Type": "invalid"})
 
 
