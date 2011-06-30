@@ -26,6 +26,7 @@ Classes
 .. autoclass:: ResponseProxy
 
 """
+CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded"
 
 class RequestProxy(object):
     """Adaptor HTTP Request class.
@@ -102,5 +103,9 @@ class ResponseProxy(object):
                     return v
             return None
 
-    def get_content_type(self):
+    @property
+    def content_type(self):
         return self.get_header("Content-Type")
+
+    def is_body_form_urlencoded(self):
+        return self.content_type == CONTENT_TYPE_FORM_URLENCODED

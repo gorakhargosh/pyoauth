@@ -29,7 +29,7 @@ Classes
 
 import logging
 
-from pyoauth.http import RequestProxy, ResponseProxy
+from pyoauth.http import RequestProxy, ResponseProxy, CONTENT_TYPE_FORM_URLENCODED
 from pyoauth.oauth1 import \
     Credentials, \
     SIGNATURE_METHOD_HMAC_SHA1, \
@@ -56,7 +56,6 @@ SIGNATURE_METHOD_MAP = {
     SIGNATURE_METHOD_RSA_SHA1: oauth_get_rsa_sha1_signature,
     SIGNATURE_METHOD_PLAINTEXT: oauth_get_plaintext_signature,
 }
-CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded"
 
 
 class Client(object):
@@ -397,7 +396,7 @@ class Client(object):
         #if not response.body:
         #    raise ValueError("OAuth server did not return a valid response")
         # The response body must be URL encoded.
-        if response.get_content_type() != CONTENT_TYPE_FORM_URLENCODED:
+        if not response.is_body_form_urlencoded():
             raise ValueError("OAuth server must return Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
 
     def _build_request(self,
