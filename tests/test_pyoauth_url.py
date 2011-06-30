@@ -9,7 +9,7 @@ except ImportError:
     assert_dict_equal = assert_equal
 from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, \
     oauth_urlencode_s, oauth_urlencode_sl, oauth_url_query_params_dict, \
-    oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add, oauth_url_query_params_sanitize, oauth_protocol_params_sanitize, oauth_url_sanitize
+    oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add, oauth_url_query_params_sanitize, oauth_protocol_params_sanitize, oauth_url_sanitize, oauth_url_append_query_params
 
 from urlparse import urlparse
 
@@ -557,3 +557,15 @@ class Test_oauth_protocol_params_sanitize(object):
             "oauth_token": ["kkk9d7dh3k39sjv7", "ahdsa7hd3uhadasd"],
         }
         assert_raises(ValueError, oauth_protocol_params_sanitize, params)
+
+
+class Test_oauth_url_append_query_params(object):
+    def test_returns_url_unchanged_if_no_query_params(self):
+        url = "http://www.example.com/request?a=b"
+        assert_equal(oauth_url_append_query_params(url, None), url)
+
+    def test_appends_to_url_preserving_fragments_and_does_not_change_order(self):
+        url = "http://www.example.com/request?b=1#fragment"
+        expected_url = "http://www.example.com/request?b=1&a=1#fragment"
+        assert_equal(oauth_url_append_query_params(url, {"a": 1}), expected_url)
+        assert_equal(oauth_url_append_query_params(url, "a=1"), expected_url)
