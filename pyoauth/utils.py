@@ -416,7 +416,6 @@ def oauth_parse_authorization_header_value(header_value):
     """
     Parses the OAuth Authorization header.
 
-
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param header_value:
         Header value.
@@ -459,7 +458,7 @@ def _oauth_parse_authorization_header_value_l(header_value):
     for param in pairs:
         if not param:
             if header_value.endswith(","):
-                logging.warning("Malformed `Authorization` header value -- ignoring trailing comma")
+                raise ValueError("Malformed `Authorization` header value -- found trailing comma")
             continue
         nv = param.split("=", 1)
         if len(nv) != 2:

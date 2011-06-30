@@ -483,7 +483,7 @@ class Test_oauth_parse_authorization_header(object):
             oauth_nonce="4572616e48616d6d65724c61686176",
             oauth_version="1.0",
             oauth_something="%20Some+Example",
-            oauth_empty="",
+            oauth_empty=""
         '''), "parsing failed.")
 
     def test_dict_does_not_contain_string_OAuth_realm(self):
@@ -505,13 +505,10 @@ class Test_oauth_parse_authorization_header(object):
                          '`OAuth realm` found in header names')
             assert_false(name.lower() == "realm", '`realm` found in header names')
 
-    def test_trailing_comma_is_ignored(self):
+    def test_ValueError_when_trailing_comma_is_found(self):
         header_value = '''OAuth oauth_consumer_key="0685bd9184jfhq22",
             oauth_token="ad180jjd733klru7",'''
-        assert_equal(oauth_parse_authorization_header_value(header_value), ({
-            'oauth_consumer_key': ['0685bd9184jfhq22'],
-            'oauth_token': ['ad180jjd733klru7'],
-            }, None), "trailing comma was not ignored.")
+        assert_raises(ValueError, oauth_parse_authorization_header_value, header_value)
 
     def test_ValueError_when_bad_parameter_field(self):
         header_value = '''OAuth realm="http://www.google.com/",something'''
