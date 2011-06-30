@@ -9,7 +9,7 @@ except ImportError:
     assert_dict_equal = assert_equal
 from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, \
     oauth_urlencode_s, oauth_urlencode_sl, oauth_url_query_params_dict, \
-    oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add, oauth_url_query_params_sanitize, oauth_protocol_params_sanitize
+    oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add, oauth_url_query_params_sanitize, oauth_protocol_params_sanitize, oauth_url_sanitize
 
 from urlparse import urlparse
 
@@ -505,6 +505,20 @@ class Test_oauth_url_query_params_sanitize(object):
 
         assert_equal(oauth_urlencode_s(oauth_url_query_params_sanitize(params)), expected_result)
         assert_equal(oauth_urlencode_s(oauth_url_query_params_sanitize(query_string)), expected_result)
+
+
+class Test_oauth_url_sanitize(object):
+    def test_sanitization_and_removes_fragment(self):
+        query_string = "http://www.EXAMPLE.com/request?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7#fragment"
+        expected_params = {
+            "a2": ["r b"],
+            "b5": ["=%3D"],
+            "a3": ["a", "2 q"],
+            "c@": [""],
+            "c2": [""],
+        }
+        expected_result = "http://www.example.com/request?" + oauth_urlencode_s(expected_params)  # Fragment ignored.
+        assert_equal(oauth_url_sanitize(query_string), expected_result)
 
 class Test_oauth_protocol_params_sanitize(object):
     def test_filter(self):
