@@ -36,13 +36,13 @@ from pyoauth.oauth1 import \
     SIGNATURE_METHOD_RSA_SHA1, \
     SIGNATURE_METHOD_PLAINTEXT
 from pyoauth.url import \
-    oauth_url_sanitize, \
-    oauth_protocol_params_sanitize, \
-    oauth_url_query_params_sanitize, \
-    oauth_url_query_params_add, \
-    oauth_urlencode_s, \
-    oauth_url_append_query_params, \
-    oauth_parse_qs, oauth_url_query_params_append
+    url_sanitize, \
+    protocol_params_sanitize, \
+    query_params_sanitize, \
+    query_params_add, \
+    urlencode_sorted, \
+    url_append_query, \
+    parse_query_string, query_params_append
 from pyoauth.utils import oauth_generate_nonce, \
     oauth_generate_timestamp, \
     oauth_get_hmac_sha1_signature, \
@@ -150,9 +150,9 @@ class Client(object):
             you can set this to ``False`` for use with such services.
         """
         self._client_credentials = client_credentials
-        self._temporary_credentials_request_uri = oauth_url_sanitize(temporary_credentials_request_uri)
-        self._resource_owner_authorization_uri = oauth_url_sanitize(resource_owner_authorization_uri)
-        self._token_request_uri = oauth_url_sanitize(token_request_uri)
+        self._temporary_credentials_request_uri = url_sanitize(temporary_credentials_request_uri)
+        self._resource_owner_authorization_uri = url_sanitize(resource_owner_authorization_uri)
+        self._token_request_uri = url_sanitize(token_request_uri)
         self._use_authorization_header = use_authorization_header
 
     @property
@@ -230,9 +230,9 @@ class Client(object):
         """
         url = self._resource_owner_authorization_uri
         if query_params:
-            query_params = oauth_url_query_params_sanitize(query_params)
-            url = oauth_url_append_query_params(url, query_params)
-        return oauth_url_append_query_params(url, {
+            query_params = query_params_sanitize(query_params)
+            url = url_append_query(url, query_params)
+        return url_append_query(url, {
             "oauth_token": temporary_credentials.identifier,
         })
 
@@ -377,7 +377,7 @@ class Client(object):
 
         response = ResponseProxy(status_code=status_code, body=body, headers=headers)
         self._validate_oauth_response(response)
-        params = oauth_parse_qs(response.body)
+        params = parse_query_string(response.body)
         return params, Credentials(identifier=params["oauth_token"][0],
                                    shared_secret=params["oauth_token_secret"][0])
 
@@ -463,7 +463,7 @@ class Client(object):
         )
 
         # Filter and add additional OAuth parameters.
-        extra_oauth_params = oauth_protocol_params_sanitize(extra_oauth_params)
+        extra_oauth_params = protocol_params_sanitize(extra_oauth_params)
         preserved_oauth_params = (
             "oauth_signature",     # Calculated from given parameters.
             "oauth_nonce",         # System-generated.
@@ -490,10 +490,10 @@ class Client(object):
                 oauth_params[k] = v
 
         # Filter payload parameters for the request.
-        payload_params = oauth_url_query_params_sanitize(payload_params)
+        payload_params = query_params_sanitize(payload_params)
 
         # Determine the request's OAuth signature.
-        url_with_payload_params_added = oauth_url_query_params_add(url, payload_params)
+        url_with_payload_params_added = query_params_add(url, payload_params)
         oauth_params["oauth_signature"] = self._sign_request_data(oauth_signature_method,
                                                                   method, url_with_payload_params_added, oauth_params)
 
@@ -518,9 +518,9 @@ class Client(object):
             # in this case but added to the payload instead.
             request_url = url
             headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
-            payload = oauth_url_query_params_append(payload_params, oauth_params)
+            payload = query_params_append(payload_params, oauth_params)
         else: #if method == "GET":
-            request_url = oauth_url_append_query_params(url_with_payload_params_added, oauth_params)
+            request_url = url_append_query(url_with_payload_params_added, oauth_params)
             payload = ""
         #else:
         #    raise NotImplementedError("Not implemented any other HTTP methods yet.")

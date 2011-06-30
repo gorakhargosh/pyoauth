@@ -7,9 +7,9 @@ try:
     from nose.tools import assert_dict_equal
 except ImportError:
     assert_dict_equal = assert_equal
-from pyoauth.url import oauth_unescape, oauth_escape, oauth_parse_qs, \
-    oauth_urlencode_s, oauth_urlencode_sl, oauth_url_query_params_dict, \
-    oauth_url_query_params_merge, oauth_urlparse_normalized, oauth_url_query_params_add, oauth_url_query_params_sanitize, oauth_protocol_params_sanitize, oauth_url_sanitize, oauth_url_append_query_params
+from pyoauth.url import percent_decode, percent_encode, parse_query_string, \
+    urlencode_sorted, urlencode_sorted_list, query_params_dict, \
+    query_params_merge, urlparse_normalized, query_params_add, query_params_sanitize, protocol_params_sanitize, url_sanitize, url_append_query
 
 from urlparse import urlparse
 
@@ -56,32 +56,32 @@ def _url_equals(url1, url2):
 
 class Test_oauth_parse_qs(object):
     def test_are_blank_values_preserved(self):
-        assert_dict_equal(oauth_parse_qs("a="), {"a": [""]})
-        assert_dict_equal(oauth_parse_qs("a"), {"a": [""]})
+        assert_dict_equal(parse_query_string("a="), {"a": [""]})
+        assert_dict_equal(parse_query_string("a"), {"a": [""]})
 
     def test_are_multiple_values_obtained(self):
-        assert_dict_equal(oauth_parse_qs("a=1&a=2&a=3&b=c"),
+        assert_dict_equal(parse_query_string("a=1&a=2&a=3&b=c"),
                 {"a": ["1", "2", "3"], "b": ["c"]})
 
     def test_single_value_lists_are_not_flattened(self):
-        d = oauth_parse_qs("a=1&a=2&a=3&b=c")
+        d = parse_query_string("a=1&a=2&a=3&b=c")
         for n, v in d.items():
             assert_true(isinstance(n, str), "Dictionary key is not a string.")
             assert_true(isinstance(v, list), "Dictionary value is not a list.")
 
     def test_names_and_values_are_percent_decoded(self):
         qs = 'b5=%3D%253D&a3=a&c%40=&a2=r%20b' + '&' + 'c2&a3=2+q'
-        q = oauth_parse_qs(qs)
+        q = parse_query_string(qs)
         assert_dict_equal(q,
                 {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''],
                  'c2': ['']})
 
     def test_percent_decoding_treats_plus_as_space(self):
-        assert_dict_equal(oauth_parse_qs('a=2+q'), {'a': ['2 q']})
+        assert_dict_equal(parse_query_string('a=2+q'), {'a': ['2 q']})
 
     def test_ignores_prefixed_question_mark_character_if_included(self):
         qs = '?b5=%3D%253D&a3=a&c%40=&a2=r%20b' + '&' + 'c2&a3=2+q'
-        q = oauth_parse_qs(qs)
+        q = parse_query_string(qs)
         assert_dict_equal(q,
                 {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''],
                  'c2': ['']})
@@ -90,7 +90,7 @@ class Test_oauth_parse_qs(object):
 class Test_oauth_escape(object):
     # TODO:
     #def test_unicode_input_encoded_to_utf8(self):
-    #    assert_equal(oauth_escape(u'åéîøü'.encode('utf16')),
+    #    assert_equal(percent_encode(u'åéîøü'.encode('utf16')),
     #                 "%FF%FE%E5%00%E9%00%EE%00%F8%00%FC%00")
 
     def setUp(self):
@@ -130,21 +130,21 @@ class Test_oauth_escape(object):
         self.uni_unicode_object = u'\u00ae'
 
     def test_utf8_bytestring_left_as_is(self):
-        assert_equal(oauth_escape(self.uni_utf8_bytes), "%C2%AE")
+        assert_equal(percent_encode(self.uni_utf8_bytes), "%C2%AE")
 
     def test_unicode_utf8_encoded(self):
-        assert_equal(oauth_escape(self.uni_unicode_object), "%C2%AE")
+        assert_equal(percent_encode(self.uni_unicode_object), "%C2%AE")
 
     def test_safe_symbols_are_not_encoded(self):
         safe_symbols = ["-", ".", "_", "~"]
         for symbol in safe_symbols:
-            assert_equal(oauth_escape(symbol), symbol,
+            assert_equal(percent_encode(symbol), symbol,
                          "Symbol %s should not be encoded." % (symbol,))
 
     def test_digits_are_not_encoded(self):
         digits = [str(x) for x in range(10)]
         for digit in digits:
-            assert_equal(oauth_escape(digit), digit,
+            assert_equal(percent_encode(digit), digit,
                          "Digits should not be encoded.")
 
     def test_alphabets_are_not_encoded(self):
@@ -152,30 +152,30 @@ class Test_oauth_escape(object):
         uppercase_alphabers = [chr(x) for x in range(ord('A'), ord('Z') + 1)]
         alphabets = lowercase_alphabets + uppercase_alphabers
         for alphabet in alphabets:
-            assert_equal(oauth_escape(alphabet), alphabet,
+            assert_equal(percent_encode(alphabet), alphabet,
                          "Alphabets should not be encoded.")
 
     def test_space_is_not_encoded_as_plus(self):
-        assert_not_equal(oauth_escape(" "), "+")
-        assert_equal(oauth_escape(" "), "%20")
+        assert_not_equal(percent_encode(" "), "+")
+        assert_equal(percent_encode(" "), "%20")
 
     def test_unsafe_characters_are_encoded(self):
         for char in self._unsafe_characters:
-            assert_not_equal(oauth_escape(char), char)
+            assert_not_equal(percent_encode(char), char)
 
     def test_character_encoding_is_uppercase(self):
         for char in self._unsafe_characters:
-            for c in oauth_escape(char):
+            for c in percent_encode(char):
                 if c.isalpha():
                     assert_true(c.isupper(), "Percent-encoding is not uppercase: %r for char: %r" % (c, char))
 
     def test_percent_encoded(self):
         for char in self._unsafe_characters:
-            assert_equal(oauth_escape(char)[0], "%", "Character not percent-encoded.")
+            assert_equal(percent_encode(char)[0], "%", "Character not percent-encoded.")
 
     def test_non_string_values_are_stringified(self):
-        assert_equal(oauth_escape(True), "True")
-        assert_equal(oauth_escape(5), "5")
+        assert_equal(percent_encode(True), "True")
+        assert_equal(percent_encode(5), "5")
 
 
 class Test_oauth_unescape(object):
@@ -213,11 +213,11 @@ class Test_oauth_unescape(object):
                        ]
 
     def test_percent_encoded_unicode_input(self):
-        assert_equal(oauth_unescape("%FF%FE%E5%00%E9%00%EE%00%F8%00%FC%00"),
+        assert_equal(percent_decode("%FF%FE%E5%00%E9%00%EE%00%F8%00%FC%00"),
                      u'åéîøü'.encode("utf-16"))
 
     def test_plus_is_treated_as_space_character(self):
-        assert_equal(oauth_unescape('+'), ' ', "Plus character in encoding is not treated as space character.")
+        assert_equal(percent_decode('+'), ' ', "Plus character in encoding is not treated as space character.")
 
 
 class Test_oauth_urlencode(object):
@@ -235,7 +235,7 @@ class Test_oauth_urlencode(object):
             "oauth_nonce": "7d8f3e4a",
         }
         valid_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
-        assert_equal(oauth_urlencode_s(params), valid_query_string)
+        assert_equal(urlencode_sorted(params), valid_query_string)
 
 
 class Test_oauth_urlencode_sl(object):
@@ -268,7 +268,7 @@ class Test_oauth_urlencode_sl(object):
             ("oauth_timestamp", "137131201"),
             ("oauth_token", "kkk9d7dh3k39sjv7"),
         ]
-        assert_equal(oauth_urlencode_sl(params), valid_params_list)
+        assert_equal(urlencode_sorted_list(params), valid_params_list)
 
     def test_blank_list_value_not_preserved(self):
         params = {
@@ -286,7 +286,7 @@ class Test_oauth_urlencode_sl(object):
             ("oauth_timestamp", "137131201"),
             ("oauth_token", "kkk9d7dh3k39sjv7"),
         ]
-        assert_equal(oauth_urlencode_sl(params), valid_params_list)
+        assert_equal(urlencode_sorted_list(params), valid_params_list)
 
 
 
@@ -301,7 +301,7 @@ class Test_oauth_url_query_params_add(object):
         }
         url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/result;param1?oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7&oauth_consumer_key=9djdj82h48djs9d2#fragment"
         resulting_url = "http://UserName:PassWORdX@www.example.com:8000/result;param1?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7#fragment"
-        assert_equal(oauth_url_query_params_add(url, params1), resulting_url)
+        assert_equal(query_params_add(url, params1), resulting_url)
 
 class Test_oauth_url_query_params_merge(object):
     def test_adds_query_params_properly(self):
@@ -322,7 +322,7 @@ class Test_oauth_url_query_params_merge(object):
 &oauth_token=kkk9d7dh3k39sjv7\
 """
         resulting_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
-        assert_equal(oauth_urlencode_s(oauth_url_query_params_merge(params1, params2, params3)), resulting_query_string)
+        assert_equal(urlencode_sorted(query_params_merge(params1, params2, params3)), resulting_query_string)
 
 
 class Test_urlparse_normalized(object):
@@ -336,7 +336,7 @@ class Test_urlparse_normalized(object):
             "a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2",
             "fragment",
         )
-        assert_equal(oauth_urlparse_normalized(url), result)
+        assert_equal(urlparse_normalized(url), result)
 
     def test_path_is_never_empty(self):
         url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/?a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2#fragment"
@@ -348,7 +348,7 @@ class Test_urlparse_normalized(object):
             "a=&a=1&a=2&oauth_consumer_key=9djdj82h48djs9d2",
             "fragment",
         )
-        assert_equal(oauth_urlparse_normalized(url), result)
+        assert_equal(urlparse_normalized(url), result)
 
     def test_only_default_ports_are_dropped(self):
         result = (
@@ -360,7 +360,7 @@ class Test_urlparse_normalized(object):
             "",
         )
         url = "http://social.yahooapis.com:80/v1/user/6677/connections;start=0;count=20"
-        assert_equal(oauth_urlparse_normalized(url), result)
+        assert_equal(urlparse_normalized(url), result)
 
         result = (
             "https",
@@ -371,7 +371,7 @@ class Test_urlparse_normalized(object):
             "",
         )
         url = "https://social.yahooapis.com:443/v1/user/6677/connections;start=0;count=20"
-        assert_equal(oauth_urlparse_normalized(url), result)
+        assert_equal(urlparse_normalized(url), result)
 
         result = (
             "http",
@@ -382,7 +382,7 @@ class Test_urlparse_normalized(object):
             "",
         )
         url = "http://social.yahooapis.com:8000/v1/user/6677/connections;start=0;count=20"
-        assert_equal(oauth_urlparse_normalized(url), result)
+        assert_equal(urlparse_normalized(url), result)
 
         result = (
             "https",
@@ -393,12 +393,12 @@ class Test_urlparse_normalized(object):
             "",
         )
         url = "https://social.yahooapis.com:8000/v1/user/6677/connections;start=0;count=20"
-        assert_equal(oauth_urlparse_normalized(url), result)
+        assert_equal(urlparse_normalized(url), result)
 
 
     def test_ValueError_when_url_invalid(self):
-        assert_raises(ValueError, oauth_urlparse_normalized, None)
-        assert_raises(ValueError, oauth_urlparse_normalized, "")
+        assert_raises(ValueError, urlparse_normalized, None)
+        assert_raises(ValueError, urlparse_normalized, "")
 
     def test_url_with_matrix_params(self):
         result = (
@@ -410,7 +410,7 @@ class Test_urlparse_normalized(object):
             "fragment",
         )
         url = "http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20?format=json#fragment"
-        assert_equal(oauth_urlparse_normalized(url), result)
+        assert_equal(urlparse_normalized(url), result)
 
 
 class Test_oauth_url_query_params_dict(object):
@@ -439,7 +439,7 @@ class Test_oauth_url_query_params_dict(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_dict_equal(oauth_url_query_params_dict(params), expected_params)
+        assert_dict_equal(query_params_dict(params), expected_params)
 
     def test_parses_query_string(self):
         query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
@@ -455,7 +455,7 @@ class Test_oauth_url_query_params_dict(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_equal(oauth_urlencode_s(oauth_url_query_params_dict(query_string)), oauth_urlencode_s(expected_params))
+        assert_equal(urlencode_sorted(query_params_dict(query_string)), urlencode_sorted(expected_params))
 
     def test_ignores_prefixed_question_mark_character_if_included(self):
         query_string = "?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
@@ -471,14 +471,14 @@ class Test_oauth_url_query_params_dict(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_equal(oauth_urlencode_s(oauth_url_query_params_dict(query_string)), oauth_urlencode_s(expected_params))
+        assert_equal(urlencode_sorted(query_params_dict(query_string)), urlencode_sorted(expected_params))
 
     def test_returns_empty_dict_when_argument_None(self):
-        assert_equal(oauth_url_query_params_dict(None), {})
+        assert_equal(query_params_dict(None), {})
 
     def test_ValueError_when_invalid_query_params_value(self):
-        assert_raises(ValueError, oauth_url_query_params_dict, True)
-        assert_raises(ValueError, oauth_url_query_params_dict, 5)
+        assert_raises(ValueError, query_params_dict, True)
+        assert_raises(ValueError, query_params_dict, 5)
 
 
 class Test_oauth_url_query_params_sanitize(object):
@@ -503,10 +503,10 @@ class Test_oauth_url_query_params_sanitize(object):
             "c@": [""],
             "c2": [""],
         }
-        expected_result = oauth_urlencode_s(expected_params)
+        expected_result = urlencode_sorted(expected_params)
 
-        assert_equal(oauth_urlencode_s(oauth_url_query_params_sanitize(params)), expected_result)
-        assert_equal(oauth_urlencode_s(oauth_url_query_params_sanitize(query_string)), expected_result)
+        assert_equal(urlencode_sorted(query_params_sanitize(params)), expected_result)
+        assert_equal(urlencode_sorted(query_params_sanitize(query_string)), expected_result)
 
 
 class Test_oauth_url_sanitize(object):
@@ -519,8 +519,8 @@ class Test_oauth_url_sanitize(object):
             "c@": [""],
             "c2": [""],
         }
-        expected_result = "http://www.example.com/request?" + oauth_urlencode_s(expected_params)  # Fragment ignored.
-        assert_equal(oauth_url_sanitize(query_string), expected_result)
+        expected_result = "http://www.example.com/request?" + urlencode_sorted(expected_params)  # Fragment ignored.
+        assert_equal(url_sanitize(query_string), expected_result)
 
 class Test_oauth_protocol_params_sanitize(object):
     def test_filter(self):
@@ -544,10 +544,10 @@ class Test_oauth_protocol_params_sanitize(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        expected_result = oauth_urlencode_s(expected_params)
+        expected_result = urlencode_sorted(expected_params)
 
-        assert_equal(oauth_urlencode_s(oauth_protocol_params_sanitize(params)), expected_result)
-        assert_equal(oauth_urlencode_s(oauth_protocol_params_sanitize(query_string)), expected_result)
+        assert_equal(urlencode_sorted(protocol_params_sanitize(params)), expected_result)
+        assert_equal(urlencode_sorted(protocol_params_sanitize(query_string)), expected_result)
 
     def test_raises_ValueError_when_multiple_protocol_param_values_found(self):
         params = {
@@ -558,21 +558,21 @@ class Test_oauth_protocol_params_sanitize(object):
             "c2": [""],
             "oauth_token": ["kkk9d7dh3k39sjv7", "ahdsa7hd3uhadasd"],
         }
-        assert_raises(ValueError, oauth_protocol_params_sanitize, params)
+        assert_raises(ValueError, protocol_params_sanitize, params)
 
 
 class Test_oauth_url_append_query_params(object):
     def test_does_not_prefix_with_ampersand_when_url_has_no_query_params(self):
         url = "https://www.example.com/authorize"
-        assert_equal(oauth_url_append_query_params(url, dict(a=1)), "https://www.example.com/authorize?a=1")
-        assert_not_equal(oauth_url_append_query_params(url, dict(a=1)), "https://www.example.com/authorize?&a=1")
+        assert_equal(url_append_query(url, dict(a=1)), "https://www.example.com/authorize?a=1")
+        assert_not_equal(url_append_query(url, dict(a=1)), "https://www.example.com/authorize?&a=1")
 
     def test_returns_url_unchanged_if_no_query_params(self):
         url = "http://www.example.com/request?a=b"
-        assert_equal(oauth_url_append_query_params(url, None), url)
+        assert_equal(url_append_query(url, None), url)
 
     def test_appends_to_url_preserving_fragments_and_does_not_change_append_order(self):
         url = "http://www.example.com/request?b=1#fragment"
         expected_url = "http://www.example.com/request?b=1&a=1#fragment"
-        assert_equal(oauth_url_append_query_params(url, {"a": 1}), expected_url)
-        assert_equal(oauth_url_append_query_params(url, "a=1"), expected_url)
+        assert_equal(url_append_query(url, {"a": 1}), expected_url)
+        assert_equal(url_append_query(url, "a=1"), expected_url)

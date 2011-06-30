@@ -6,7 +6,7 @@ try:
 except ImportError:
     assert_dict_equal = assert_equal
 from nose import SkipTest
-from pyoauth.utils import oauth_parse_authorization_header_value, _oauth_get_signature_base_string_query, oauth_get_normalized_authorization_header_value, oauth_escape, oauth_unescape, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature, oauth_get_signature_base_string, _oauth_get_plaintext_signature
+from pyoauth.utils import oauth_parse_authorization_header_value, _oauth_get_signature_base_string_query, oauth_get_normalized_authorization_header_value, percent_encode, percent_decode, oauth_generate_nonce, oauth_generate_verification_code, oauth_generate_timestamp, oauth_get_hmac_sha1_signature, oauth_get_rsa_sha1_signature, oauth_check_rsa_sha1_signature, oauth_get_plaintext_signature, oauth_get_signature_base_string, _oauth_get_plaintext_signature
 
 class Test_oauth_generate_nonce(object):
     def test_uniqueness(self):
@@ -325,7 +325,7 @@ class Test_oauth_get_signature_base_string(object):
     def test_base_string_preserves_matrix_params_and_drops_default_ports(self):
         url = "http://social.yahooapis.com:80/v1/user/6677/connections;start=0;count=20?format=json#fragment"
         base_string = "POST&http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20&format=json"
-        assert_equal(oauth_unescape(oauth_get_signature_base_string("POST", url, dict())), base_string)
+        assert_equal(percent_decode(oauth_get_signature_base_string("POST", url, dict())), base_string)
 
 
 

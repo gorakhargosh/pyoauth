@@ -86,9 +86,9 @@ except ImportError:
     import sha as sha1  # Deprecated
 
 from pyoauth.unicode import to_utf8
-from pyoauth.url import oauth_escape, oauth_unescape, \
-    oauth_urlencode_sl, oauth_urlencode_s, oauth_urlparse_normalized, \
-    oauth_protocol_params_sanitize, oauth_url_query_params_sanitize
+from pyoauth.url import percent_encode, percent_decode, \
+    urlencode_sorted_list, urlencode_sorted, urlparse_normalized, \
+    protocol_params_sanitize, query_params_sanitize
 
 
 def oauth_generate_nonce(length=-1):
@@ -312,8 +312,8 @@ def _oauth_get_plaintext_signature(consumer_secret, token_secret=None):
     :returns:
         PLAINTEXT signature.
     """
-    sig_elems = [oauth_escape(consumer_secret) if consumer_secret else ""]
-    sig_elems.append(oauth_escape(token_secret) if token_secret else "")
+    sig_elems = [percent_encode(consumer_secret) if consumer_secret else ""]
+    sig_elems.append(percent_encode(token_secret) if token_secret else "")
     return "&".join(sig_elems)
 
 
@@ -350,10 +350,10 @@ def oauth_get_signature_base_string(method, url, oauth_params):
     if not isinstance(oauth_params, dict):
         raise ValueError("Query parameters must be specified as a dictionary.")
 
-    scheme, netloc, path, matrix_params, query, fragment = oauth_urlparse_normalized(url)
+    scheme, netloc, path, matrix_params, query, fragment = urlparse_normalized(url)
     query_string = _oauth_get_signature_base_string_query(query, oauth_params)
     normalized_url = urlunparse((scheme, netloc, path, matrix_params, None, None))
-    return "&".join(oauth_escape(e) for e in [method_normalized, normalized_url, query_string])
+    return "&".join(percent_encode(e) for e in [method_normalized, normalized_url, query_string])
 
 
 def _oauth_get_signature_base_string_query(url_query_params, oauth_params):
@@ -372,8 +372,8 @@ def _oauth_get_signature_base_string_query(url_query_params, oauth_params):
     :returns:
         Normalized string of query parameters.
     """
-    url_query_params = oauth_url_query_params_sanitize(url_query_params)
-    oauth_params = oauth_protocol_params_sanitize(oauth_params)
+    url_query_params = query_params_sanitize(url_query_params)
+    oauth_params = protocol_params_sanitize(oauth_params)
 
     query_params = {}
     query_params.update(url_query_params)
@@ -383,7 +383,7 @@ def _oauth_get_signature_base_string_query(url_query_params, oauth_params):
     # the entire list of parameters.
     def allow_func(name, value):
         return name not in ('oauth_signature', )
-    query = oauth_urlencode_s(query_params, allow_func=allow_func)
+    query = urlencode_sorted(query_params, allow_func=allow_func)
     return query
 
 
@@ -405,8 +405,8 @@ def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
         s = 'OAuth realm="' + to_utf8(realm) + '",\n' + indentation
     else:
         s = 'OAuth '
-    oauth_params = oauth_protocol_params_sanitize(oauth_params)
-    normalized_param_pairs = oauth_urlencode_sl(oauth_params)
+    oauth_params = protocol_params_sanitize(oauth_params)
+    normalized_param_pairs = urlencode_sorted_list(oauth_params)
     delimiter = ",\n" + indentation
     s += delimiter.join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
@@ -430,7 +430,7 @@ def oauth_parse_authorization_header_value(header_value):
         #    d[name].append(value)
         #else:
         #    d[name] = [value]
-    d = oauth_protocol_params_sanitize(d)
+    d = protocol_params_sanitize(d)
     return d, realm
 
 
@@ -474,7 +474,7 @@ def _oauth_parse_authorization_header_value_l(header_value):
         # We only need to remove a single pair of quotes. Do not use str.strip('"').
         # We need to be able to detect problems with the values too.
         value = value[1:-1]
-        name = oauth_unescape(name)
+        name = percent_decode(name)
         if name.lower() == "realm":
             # "realm" is case-insensitive.
             # The realm parameter value is a simple quoted string.
@@ -482,6 +482,6 @@ def _oauth_parse_authorization_header_value_l(header_value):
             # realm is ignored from the protocol parameters list.
             realm = value
         else:
-            value = oauth_unescape(value)
+            value = percent_decode(value)
         decoded_pairs.append((name, value))
     return decoded_pairs, realm
