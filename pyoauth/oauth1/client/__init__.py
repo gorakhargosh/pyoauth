@@ -68,11 +68,12 @@ class Client(object):
     1. Construct a client with its client credentials.
 
     2. Send an HTTP request for temporary credentials with a callback URL
-       which the server will call with an OAuth verification code.
+       which the server will call with an OAuth verification code after
+       authorizing the resource owner (end-user).
 
-    3. Parse out temporary credentials from a successful server response.
+    3. Obtain temporary credentials from a successful server response.
 
-    4. Using the temporary credentials build an authorization URL and
+    4. Use the temporary credentials to build an authorization URL and
        redirect the resource owner (end-user) to the generated URL.
 
     5. If a callback URL is not provided when requesting temporary credentials,
@@ -89,7 +90,7 @@ class Client(object):
        temporary credentials obtained in step 3, send an HTTP request for
        token credentials.
 
-    7. Parse out the token credentials from a successful server response.
+    7. Obtain token credentials from a successful server response.
 
     8. Save the token credentials for future use (say, in a database).
 
