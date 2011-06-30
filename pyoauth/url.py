@@ -264,33 +264,33 @@ def oauth_url_query_params_merge(query_params, *extra_query_params):
     return d
 
 
-def oauth_url_query_params_update(query_params, *extra_query_params):
-    """
-    Updates a dictionary of query parameters or a query string with
-    replacement parameter values from the specified additional
-    query parameter dictionaries or query strings.
-
-    The parameters specified toward the end of the arguments to this function
-    take precedence over all previous parameters.
-
-    .. WARNING:
-        This is a dangerous routine. Be careful with this routine.
-        It may bite.
-
-    :param query_params:
-        Initial query parameter dictionary or query string.
-    :param extra_query_params:
-        A list query parameter dictionaries or query strings.
-    :returns:
-        A dictionary of updated query parameters.
-    """
-    query_params = oauth_url_query_params_dict(query_params)
-    d = {}
-    d.update(query_params)
-    for qp in extra_query_params:
-        qp = oauth_url_query_params_dict(qp)
-        d.update(qp)
-    return d
+#def oauth_url_query_params_update(query_params, *extra_query_params):
+#    """
+#    Updates a dictionary of query parameters or a query string with
+#    replacement parameter values from the specified additional
+#    query parameter dictionaries or query strings.
+#
+#    The parameters specified toward the end of the arguments to this function
+#    take precedence over all previous parameters.
+#
+#    .. WARNING:
+#        This is a dangerous routine. Be careful with this routine.
+#        It may bite.
+#
+#    :param query_params:
+#        Initial query parameter dictionary or query string.
+#    :param extra_query_params:
+#        A list query parameter dictionaries or query strings.
+#    :returns:
+#        A dictionary of updated query parameters.
+#    """
+#    query_params = oauth_url_query_params_dict(query_params)
+#    d = {}
+#    d.update(query_params)
+#    for qp in extra_query_params:
+#        qp = oauth_url_query_params_dict(qp)
+#        d.update(qp)
+#    return d
 
 
 def oauth_url_query_params_filter(query_params, allow_func=None):
