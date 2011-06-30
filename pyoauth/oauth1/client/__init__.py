@@ -390,8 +390,8 @@ class Client(object):
         """
         self._validate_oauth_response(response)
         params = oauth_parse_qs(response.body)
-        return params, Credentials(identifier=params["oauth_token"],
-                                   shared_secret=params["oauth_token_secret"])
+        return params, Credentials(identifier=params["oauth_token"][0],
+                                   shared_secret=params["oauth_token_secret"][0])
 
     def _validate_oauth_response(self, response):
         """

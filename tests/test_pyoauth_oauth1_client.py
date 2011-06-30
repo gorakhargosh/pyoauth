@@ -3,6 +3,11 @@
 
 from nose import SkipTest
 from nose.tools import assert_equal
+try:
+    from nose.tools import assert_dict_equal
+except ImportError:
+    assert_dict_equal = assert_equal
+
 from pyoauth.oauth1 import Credentials
 from pyoauth.oauth1.client import Client
 
@@ -61,13 +66,6 @@ class TestClient_OAuth_1_0_Example:
     def test_build_temporary_credentials_request(self):
         # client = Client(client_credentials, temporary_credentials_request_uri, resource_owner_authorization_uri, token_request_uri, use_authorization_header)
         # assert_equal(expected, client.build_temporary_credentials_request(method, query_params, headers, realm, oauth_signature_method, oauth_callback, **extra_oauth_params))
-        raise SkipTest # TODO: implement your test here
-
-
-
-    def test_parse_credentials_response(self):
-        # client = Client(client_credentials, temporary_credentials_request_uri, resource_owner_authorization_uri, token_request_uri, use_authorization_header)
-        # assert_equal(expected, client.parse_credentials_response(status_code, body, headers))
         raise SkipTest # TODO: implement your test here
 
     def test__build_request(self):

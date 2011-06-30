@@ -89,3 +89,13 @@ class Credentials(object):
 
     def __hash__(self):
         return hash(self.key)
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "<%(class_name)s: identifier=%(identifier)s, shared_secret=%(shared_secret)s>" % \
+               dict(class_name=self.__class__.__name__,
+                    identifier=self.identifier,
+                    shared_secret=self.shared_secret)
+
