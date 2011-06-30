@@ -35,7 +35,7 @@ upload-doc: doc
 view-doc: doc
 	@bin/python -c "import webbrowser; webbrowser.open('docs/build/html/index.html')"
 
-test:
+test: docs
 	@bin/coverage erase
 	@bin/python-tests tests/run_tests.py
 	@bin/coverage html
