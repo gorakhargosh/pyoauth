@@ -42,7 +42,7 @@ from pyoauth.url import \
     query_params_add, \
     urlencode_sorted, \
     url_append_query, \
-    parse_query_string, query_params_append
+    parse_qs, query_params_append
 from pyoauth.utils import oauth_generate_nonce, \
     oauth_generate_timestamp, \
     oauth_get_hmac_sha1_signature, \
@@ -377,7 +377,7 @@ class Client(object):
 
         response = ResponseProxy(status_code=status_code, body=body, headers=headers)
         self._validate_oauth_response(response)
-        params = parse_query_string(response.body)
+        params = parse_qs(response.body)
         return params, Credentials(identifier=params["oauth_token"][0],
                                    shared_secret=params["oauth_token_secret"][0])
 

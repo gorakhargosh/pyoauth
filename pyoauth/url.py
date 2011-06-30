@@ -29,7 +29,7 @@ Percent-encoding
 
 Query string parsing and construction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: parse_query_string
+.. autofunction:: parse_qs
 .. autofunction:: urlencode_sorted
 .. autofunction:: urlencode_sorted_list
 
@@ -56,16 +56,16 @@ import logging
 
 try:
     # Python 3.
-    from urllib.parse import urlparse, urlunparse, parse_qs, quote, unquote_plus
+    from urllib.parse import urlparse, urlunparse, parse_qs as _parse_qs, quote, unquote_plus
 except ImportError:
     # Python 2.5+
     from urlparse import urlparse, urlunparse
     from urllib import quote, unquote_plus
     try:
         # Python 2.6+
-        from urlparse import parse_qs
+        from urlparse import parse_qs as _parse_qs
     except ImportError:
-        from cgi import parse_qs
+        from cgi import parse_qs as _parse_qs
 
 try:
     bytes
@@ -75,7 +75,7 @@ except Exception:
 from pyoauth.unicode import to_utf8_if_unicode, to_utf8, is_bytes_or_unicode
 
 
-def parse_query_string(query_string):
+def parse_qs(query_string):
     """
     Parses a query parameter string according to the OAuth spec.
 
@@ -90,7 +90,7 @@ def parse_query_string(query_string):
     if query_string.startswith("?"):
         logging.warning("Ignoring `?` query string prefix -- `%r`" % query_string)
         query_string = query_string[1:]
-    return parse_qs(query_string, keep_blank_values=True)
+    return _parse_qs(query_string, keep_blank_values=True)
 
 
 def percent_encode(value):
@@ -412,7 +412,7 @@ def query_params_dict(query_params):
         An un-flattened query parameter dictionary.
     """
     if is_bytes_or_unicode(query_params):
-        return parse_query_string(query_params)
+        return parse_qs(query_params)
     elif isinstance(query_params, dict):
         # Un-flatten the dictionary.
         d = {}
@@ -423,7 +423,7 @@ def query_params_dict(query_params):
                 d[n] = list(v)
         return d
         # Alternative, but slower:
-        #return parse_query_string(urlencode_sorted(query_params))
+        #return parse_qs(urlencode_sorted(query_params))
     elif query_params is None:
         return {}
     else:

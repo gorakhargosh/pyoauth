@@ -58,16 +58,10 @@ except Exception:
 
 try:
     # Python 3.
-    from urllib.parse import urlparse, urlunparse, parse_qs, quote, unquote_plus
+    from urllib.parse import urlunparse
 except ImportError:
     # Python 2.5+
-    from urlparse import urlparse, urlunparse
-    from urllib import quote, unquote_plus
-    try:
-        # Python 2.6+
-        from urlparse import parse_qs
-    except ImportError:
-        from cgi import parse_qs
+    from urlparse import urlunparse
 
 
 try:

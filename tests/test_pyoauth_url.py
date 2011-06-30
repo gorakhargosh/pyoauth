@@ -7,9 +7,11 @@ try:
     from nose.tools import assert_dict_equal
 except ImportError:
     assert_dict_equal = assert_equal
-from pyoauth.url import percent_decode, percent_encode, parse_query_string, \
+from pyoauth.url import percent_decode, percent_encode, parse_qs, \
     urlencode_sorted, urlencode_sorted_list, query_params_dict, \
-    query_params_merge, urlparse_normalized, query_params_add, query_params_sanitize, protocol_params_sanitize, url_sanitize, url_append_query
+    query_params_merge, urlparse_normalized, query_params_add, \
+    query_params_sanitize, protocol_params_sanitize, url_sanitize, \
+    url_append_query
 
 from urlparse import urlparse
 
@@ -56,32 +58,32 @@ def _url_equals(url1, url2):
 
 class Test_oauth_parse_qs(object):
     def test_are_blank_values_preserved(self):
-        assert_dict_equal(parse_query_string("a="), {"a": [""]})
-        assert_dict_equal(parse_query_string("a"), {"a": [""]})
+        assert_dict_equal(parse_qs("a="), {"a": [""]})
+        assert_dict_equal(parse_qs("a"), {"a": [""]})
 
     def test_are_multiple_values_obtained(self):
-        assert_dict_equal(parse_query_string("a=1&a=2&a=3&b=c"),
+        assert_dict_equal(parse_qs("a=1&a=2&a=3&b=c"),
                 {"a": ["1", "2", "3"], "b": ["c"]})
 
     def test_single_value_lists_are_not_flattened(self):
-        d = parse_query_string("a=1&a=2&a=3&b=c")
+        d = parse_qs("a=1&a=2&a=3&b=c")
         for n, v in d.items():
             assert_true(isinstance(n, str), "Dictionary key is not a string.")
             assert_true(isinstance(v, list), "Dictionary value is not a list.")
 
     def test_names_and_values_are_percent_decoded(self):
         qs = 'b5=%3D%253D&a3=a&c%40=&a2=r%20b' + '&' + 'c2&a3=2+q'
-        q = parse_query_string(qs)
+        q = parse_qs(qs)
         assert_dict_equal(q,
                 {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''],
                  'c2': ['']})
 
     def test_percent_decoding_treats_plus_as_space(self):
-        assert_dict_equal(parse_query_string('a=2+q'), {'a': ['2 q']})
+        assert_dict_equal(parse_qs('a=2+q'), {'a': ['2 q']})
 
     def test_ignores_prefixed_question_mark_character_if_included(self):
         qs = '?b5=%3D%253D&a3=a&c%40=&a2=r%20b' + '&' + 'c2&a3=2+q'
-        q = parse_query_string(qs)
+        q = parse_qs(qs)
         assert_dict_equal(q,
                 {'a2': ['r b'], 'a3': ['a', '2 q'], 'b5': ['=%3D'], 'c@': [''],
                  'c2': ['']})
