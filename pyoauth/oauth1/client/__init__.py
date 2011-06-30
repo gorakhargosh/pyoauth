@@ -57,7 +57,7 @@ SIGNATURE_METHOD_MAP = {
     SIGNATURE_METHOD_PLAINTEXT: oauth_get_plaintext_signature,
 }
 CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded"
-DEFAULT_SIGNATURE_METHOD = SIGNATURE_METHOD_HMAC_SHA1
+
 
 class Client(object):
     """
@@ -140,8 +140,10 @@ class Client(object):
             including:
 
             1. Keeps your server request logs clean and readable.
+
             2. Separates any protocol-specific parameters from server or
                application-specific parameters.
+
             3. Debugging OAuth problems is easier.
 
             However, not all OAuth servers may support this feature. Therefore,
@@ -164,7 +166,7 @@ class Client(object):
                                             query_params=None,
                                             headers=None,
                                             realm=None,
-                                            oauth_signature_method=DEFAULT_SIGNATURE_METHOD,
+                                            oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
                                             oauth_callback=None,
                                             **extra_oauth_params):
         """
@@ -241,7 +243,7 @@ class Client(object):
                                         query_params=None,
                                         headers=None,
                                         realm=None,
-                                        oauth_signature_method=DEFAULT_SIGNATURE_METHOD,
+                                        oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
                                         **extra_oauth_params):
         """
         Builds an OAuth request instance for token credentials from the OAuth
@@ -301,7 +303,7 @@ class Client(object):
                                query_params=None,
                                headers=None,
                                realm=None,
-                               oauth_signature_method=DEFAULT_SIGNATURE_METHOD,
+                               oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
                                **extra_oauth_params):
         """
         Builds an OAuth request instance for token credentials from the OAuth
@@ -547,51 +549,3 @@ class Client(object):
         return sign_func(self._client_credentials.shared_secret,
                          method, url, oauth_params,
                          credentials_shared_secret)
-
-
-
-"""
-def request_temporary_credentials(http_client,
-                                  client_credentials,
-                                  method,
-                                  temporary_credentials_request_uri,
-                                  oauth_params,
-                                  realm=None,
-                                  use_authorization_header=True):
-
-
-# Response contains temporary credentials
-
-def get_authorization_url(temporary_credentials,
-                          resource_owner_authorization_uri):
-    pass
-
-# Send the user to the authorization URL.
-
-# User signs in at that URL.
-
-# Got verifier from server redirect if callback set when
-# requesting temporary credentials or user is shown the verifier which
-# is input into the client.
-
-def request_token_credentials(http_client,
-                              client_credentials,
-                              temporary_credentials,
-                              method,
-                              token_request_uri,
-                              realm=None,
-                              use_authorization_header=True):
-    pass
-
-# Response contains token credentials
-# Save these credentials.
-
-def request_api(http_client,
-                client_credentials,
-                token_credentials,
-                method,
-                api_uri,
-                realm=None,
-                use_authorization_header=True):
-    pass
-"""
