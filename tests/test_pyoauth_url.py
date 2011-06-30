@@ -571,7 +571,7 @@ class Test_oauth_url_append_query_params(object):
         url = "http://www.example.com/request?a=b"
         assert_equal(oauth_url_append_query_params(url, None), url)
 
-    def test_appends_to_url_preserving_fragments_and_does_not_change_order(self):
+    def test_appends_to_url_preserving_fragments_and_does_not_change_append_order(self):
         url = "http://www.example.com/request?b=1#fragment"
         expected_url = "http://www.example.com/request?b=1&a=1#fragment"
         assert_equal(oauth_url_append_query_params(url, {"a": 1}), expected_url)
