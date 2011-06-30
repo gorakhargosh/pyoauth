@@ -424,14 +424,14 @@ def oauth_parse_authorization_header_value(header_value):
         Dictionary of parameter name value pairs.
     """
     d = {}
-    realm, param_list = _oauth_parse_authorization_header_value_l(header_value)
+    param_list, realm = _oauth_parse_authorization_header_value_l(header_value)
     for name, value in param_list:
         if name in d:
             d[name].append(value)
         else:
             d[name] = [value]
     d = oauth_protocol_params_sanitize(d)
-    return d
+    return d, realm
 
 
 def _oauth_parse_authorization_header_value_l(header_value):
@@ -444,7 +444,7 @@ def _oauth_parse_authorization_header_value_l(header_value):
         Header value. Non protocol parameters will be ignored.
     :returns:
         Tuple:
-        (realm, list of parameter name value pairs in order or appearance)
+        (list of parameter name value pairs in order or appearance, realm)
 
         realm will be ``None`` if the authorization header does not have
         a realm parameter.
@@ -483,4 +483,4 @@ def _oauth_parse_authorization_header_value_l(header_value):
         else:
             value = oauth_unescape(value)
         decoded_pairs.append((name, value))
-    return realm, decoded_pairs
+    return decoded_pairs, realm

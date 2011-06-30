@@ -329,29 +329,6 @@ class Test_oauth_get_signature_base_string(object):
 
 
 
-class Test_oauth_get_normalized_authorization_header_value(object):
-    def test_equality_and_realm(self):
-        params = {
-            'realm': ['Examp%20le'],
-            'oauth_nonce': ['4572616e48616d6d65724c61686176'],
-            'oauth_timestamp': ['137131200'],
-            'oauth_consumer_key': ['0685bd9184jfhq22'],
-            'oauth_something': [' Some Example', 'another entry'],
-            'oauth_signature_method': ['HMAC-SHA1'],
-            'oauth_version': ['1.0'],
-            'oauth_token': ['ad180jjd733klru7'], 'oauth_empty': [''],
-            'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
-            }
-        expected_value = 'OAuth oauth_consumer_key="0685bd9184jfhq22",\n               oauth_empty="",\n               oauth_nonce="4572616e48616d6d65724c61686176",\n               oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",\n               oauth_signature_method="HMAC-SHA1",\n               oauth_something="%20Some%20Example",\n               oauth_something="another%20entry",\n               oauth_timestamp="137131200",\n               oauth_token="ad180jjd733klru7",\n               oauth_version="1.0"'
-        assert_equal(oauth_get_normalized_authorization_header_value(params),
-                     expected_value)
-
-        expected_value = 'OAuth realm="http://example.com/",\n               oauth_consumer_key="0685bd9184jfhq22",\n               oauth_empty="",\n               oauth_nonce="4572616e48616d6d65724c61686176",\n               oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",\n               oauth_signature_method="HMAC-SHA1",\n               oauth_something="%20Some%20Example",\n               oauth_something="another%20entry",\n               oauth_timestamp="137131200",\n               oauth_token="ad180jjd733klru7",\n               oauth_version="1.0"'
-        assert_equal(oauth_get_normalized_authorization_header_value(params,
-                                                                     realm="http://example.com/")
-                     , expected_value)
-
-
 class Test_oauth_get_normalized_query_string(object):
     def setUp(self):
         self.specification_url_query_params = {
@@ -441,22 +418,59 @@ class Test_oauth_get_normalized_query_string(object):
             "realm=something")
 
 
-
-class Test_oauth_parse_authorization_header(object):
-    def test_equality_encoding_realm_emptyValues_and_multipleValues(self):
-        # assert_equal(expected, oauth_parse_authorization_header_value(header_value))
-        expected_value = {
+class Test_oauth_get_normalized_authorization_header_value(object):
+    def test_equality_and_realm(self):
+        params = {
             'realm': ['Examp%20le'],
             'oauth_nonce': ['4572616e48616d6d65724c61686176'],
             'oauth_timestamp': ['137131200'],
             'oauth_consumer_key': ['0685bd9184jfhq22'],
-            'oauth_something': [' Some Example', 'another entry'],
+            'oauth_something': [' Some Example'],
             'oauth_signature_method': ['HMAC-SHA1'],
             'oauth_version': ['1.0'],
             'oauth_token': ['ad180jjd733klru7'],
             'oauth_empty': [''],
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }
+        expected_value = 'OAuth oauth_consumer_key="0685bd9184jfhq22",\n               oauth_empty="",\n               oauth_nonce="4572616e48616d6d65724c61686176",\n               oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",\n               oauth_signature_method="HMAC-SHA1",\n               oauth_something="%20Some%20Example",\n               oauth_timestamp="137131200",\n               oauth_token="ad180jjd733klru7",\n               oauth_version="1.0"'
+        assert_equal(oauth_get_normalized_authorization_header_value(params),
+                     expected_value)
+
+        expected_value = 'OAuth realm="http://example.com/",\n               oauth_consumer_key="0685bd9184jfhq22",\n               oauth_empty="",\n               oauth_nonce="4572616e48616d6d65724c61686176",\n               oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",\n               oauth_signature_method="HMAC-SHA1",\n               oauth_something="%20Some%20Example",\n               oauth_timestamp="137131200",\n               oauth_token="ad180jjd733klru7",\n               oauth_version="1.0"'
+        assert_equal(oauth_get_normalized_authorization_header_value(params,
+                                                                     realm="http://example.com/")
+                     , expected_value)
+
+    def test_ValueError_when_multiple_values(self):
+        params = {
+            'realm': ['Examp%20le'],
+            'oauth_something': [' Some Example', "another thing"],
+            }
+        assert_raises(ValueError, oauth_get_normalized_authorization_header_value, params)
+
+
+class Test_oauth_parse_authorization_header(object):
+    def test_ValueError_when_multiple_values(self):
+        test_value = '''OAuth realm="Examp%20le",
+            oauth_something="%20Some+Example",
+            oauth_something="another%20thing",
+        '''
+        assert_raises(ValueError, oauth_parse_authorization_header_value, test_value)
+
+    def test_equality_encoding_realm_emptyValues(self):
+        # assert_equal(expected, oauth_parse_authorization_header_value(header_value))
+        expected_value = ({
+            'oauth_nonce': ['4572616e48616d6d65724c61686176'],
+            'oauth_timestamp': ['137131200'],
+            'oauth_consumer_key': ['0685bd9184jfhq22'],
+            'oauth_something': [' Some Example'],
+            'oauth_signature_method': ['HMAC-SHA1'],
+            'oauth_version': ['1.0'],
+            'oauth_token': ['ad180jjd733klru7'],
+            'oauth_empty': [''],
+            'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
+            }, 'Examp%20le'
+        )
         assert_equal(expected_value, oauth_parse_authorization_header_value('''
             OAuth
 
@@ -469,7 +483,6 @@ class Test_oauth_parse_authorization_header(object):
             oauth_nonce="4572616e48616d6d65724c61686176",
             oauth_version="1.0",
             oauth_something="%20Some+Example",
-            oauth_something="another%20entry",
             oauth_empty="",
         '''), "parsing failed.")
 
@@ -485,18 +498,20 @@ class Test_oauth_parse_authorization_header(object):
             oauth_something="%20Some+Example",
             oauth_empty=""
         '''
-        for name, value in oauth_parse_authorization_header_value(
-            header_value).items():
-            assert_false(name == 'OAuth realm',
+        params, realm = oauth_parse_authorization_header_value(
+            header_value)
+        for name, value in params.items():
+            assert_false(name.lower() == 'oauth realm',
                          '`OAuth realm` found in header names')
+            assert_false(name.lower() == "realm", '`realm` found in header names')
 
     def test_trailing_comma_is_ignored(self):
         header_value = '''OAuth oauth_consumer_key="0685bd9184jfhq22",
             oauth_token="ad180jjd733klru7",'''
-        assert_equal(oauth_parse_authorization_header_value(header_value), {
+        assert_equal(oauth_parse_authorization_header_value(header_value), ({
             'oauth_consumer_key': ['0685bd9184jfhq22'],
             'oauth_token': ['ad180jjd733klru7'],
-            }, "trailing comma was not ignored.")
+            }, None), "trailing comma was not ignored.")
 
     def test_ValueError_when_bad_parameter_field(self):
         header_value = '''OAuth realm="http://www.google.com/",something'''
