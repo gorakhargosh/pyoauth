@@ -307,6 +307,7 @@ class Client(object):
                                    url=self._token_request_uri,
                                    payload_params=payload_params,
                                    headers=headers,
+                                   token_or_temporary_credentials=temporary_credentials,
                                    realm=realm,
                                    oauth_signature_method=oauth_signature_method,
                                    oauth_verifier=oauth_verifier,
@@ -366,6 +367,7 @@ class Client(object):
                                    payload_params=payload_params,
                                    headers=headers,
                                    realm=realm,
+                                   token_or_temporary_credentials=token_credentials,
                                    oauth_signature_method=oauth_signature_method,
                                    oauth_token=token_credentials.identifier
                                    **extra_oauth_params)
@@ -458,6 +460,7 @@ class Client(object):
                       url,
                       payload_params=None,
                       headers=None,
+                      token_or_temporary_credentials=None,
                       realm=None,
                       oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
                       **extra_oauth_params):
@@ -509,8 +512,11 @@ class Client(object):
             oauth_version=self.oauth_version,
         )
 
+        if "_test_force_exclude_oauth_version" in extra_oauth_params:
+            del oauth_params["oauth_version"]
+
         # Filter and add additional OAuth parameters.
-        _force_override_reserved_oauth_params_for_tests = "__test_force_override_reserved_oauth_params" in extra_oauth_params
+        _force_override_reserved_oauth_params_for_tests = "_test_force_override_reserved_oauth_params" in extra_oauth_params
         extra_oauth_params = protocol_params_sanitize(extra_oauth_params)
         reserved_oauth_params = (
             "oauth_signature",     # Calculated from given parameters.
@@ -528,8 +534,8 @@ class Client(object):
                     # Warn when an existing protocol parameter is being
                     # overridden.
                     logging.warning("Overriding existing protocol parameter `%r`=`%r` with `%r`=`%r`",
-                                    k, oauth_params[k], k, v)
-                oauth_params[k] = v
+                                    k, oauth_params[k], k, v[0])
+                oauth_params[k] = v[0]
 
         # Filter payload parameters for the request.
         payload_params = query_params_sanitize(payload_params)
@@ -550,7 +556,8 @@ class Client(object):
 
         # Determine the request's OAuth signature.
         oauth_params["oauth_signature"] = self._sign_request_data(oauth_signature_method,
-                                                                  method, signature_url, oauth_params)
+                                                                  method, signature_url, oauth_params,
+                                                                  token_or_temporary_credentials)
 
         # Build request data now.
         # OAuth parameters and any parameters starting with the ``oauth_``
@@ -577,20 +584,22 @@ class Client(object):
             headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
             payload = query_append(payload_params, oauth_params)
         else:
-            request_url = url_append_query(signature_url, oauth_params)
+            request_url = url_add_query(url, payload_params)
+            request_url = url_append_query(request_url, oauth_params)
             payload = ""
 
         return RequestProxy(method, url=request_url, payload=payload, headers=headers)
 
     def _sign_request_data(self, signature_method,
                            method, url, oauth_params,
-                           credentials=None):
+                           credentials):
         """
         Generates a signature for the given OAuth request using the credentials
         and the signature method specified.
         """
         sign_func = SIGNATURE_METHOD_MAP[signature_method]
         credentials_shared_secret = credentials.shared_secret if credentials else None
+        print(credentials_shared_secret)
         return sign_func(self._client_credentials.shared_secret,
                          method, url, oauth_params,
                          credentials_shared_secret)

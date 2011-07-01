@@ -142,11 +142,34 @@ class Test_Client_build_request(object):
                                      "https://photos.example.net/photos?file=vacation.jpg&size=original",
                                      payload="",
                                      headers={
-                                         "Authorization": '''OAuth realm="Photos",
-               oauth_consumer_key="dpf43f3p2l4k3l03",
-               oauth_token="nnch734d00sl2jdk",
-               oauth_signature_method="HMAC-SHA1",
-               oauth_timestamp="137131202",
-               oauth_nonce="chapoH",
-               oauth_signature="MdpQcU8iPSUjWoN%2FUDMsK2sui9I%3D"'''
-                                     })
+                                         "Authorization": '''\
+OAuth realm="Photos",
+    oauth_consumer_key="dpf43f3p2l4k3l03",
+    oauth_nonce="chapoH",
+    oauth_signature="MdpQcU8iPSUjWoN%2FUDMsK2sui9I%3D",
+    oauth_signature_method="HMAC-SHA1",
+    oauth_timestamp="137131202",
+    oauth_token="nnch734d00sl2jdk"
+    '''})
+
+        method = "GET"
+        url = "https://photos.example.net/photos"
+        params = dict(file="vacation.jpg", size="original")
+        request = self.client._build_request(method,
+                                             url,
+                                             params,
+                                             token_or_temporary_credentials=self.token_credentials,
+                                             realm="Photos",
+                                             oauth_signature_method="HMAC-SHA1",
+                                             oauth_timestamp="137131202",
+                                             oauth_consumer_key="dpf43f3p2l4k3l03",
+                                             oauth_token="nnch734d00sl2jdk",
+                                             oauth_nonce="chapoH",
+                                             _test_force_override_reserved_oauth_params=True,
+                                             _test_force_exclude_oauth_version=True)
+        assert_equal(request.method, valid_request.method)
+        assert_equal(request.payload, valid_request.payload)
+        assert_equal(request.url, valid_request.url)
+        print(request.headers["Authorization"])
+        assert_dict_equal(request.headers, valid_request.headers)
+
