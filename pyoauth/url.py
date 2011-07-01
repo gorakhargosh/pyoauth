@@ -37,11 +37,11 @@ URL parsing and convenience utilities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autofunction:: urlparse_normalized
 .. autofunction:: url_append_query
+.. autofunction:: url_add_query
 .. autofunction:: url_sanitize
 
 Query parameters
 ~~~~~~~~~~~~~~~~
-.. autofunction:: url_add_query
 .. autofunction:: query_params_add
 .. autofunction:: query_params_filter
 .. autofunction:: query_params_dict
