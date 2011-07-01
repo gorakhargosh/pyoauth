@@ -447,13 +447,8 @@ class Client(object):
             The response of the OAuth server wrapped into a
             :class:`pyoauth.http.ResponseProxy` object.
         """
-        #if not isinstance(response, ResponseProxy):
-        #    raise ValueError("``response`` must be of type pyoauth.http.ResponseProxy")
         if response.error:
             raise ValueError("Could not fetch credentials -- HTTP status code: %d" % (response.status_code, ))
-        if not response.body:
-            # For empty bodies.
-            raise ValueError("OAuth server did not return a valid response: `%r`" % (response.body, ))
         # The response body must be URL encoded.
         if not response.is_body_form_urlencoded():
             raise ValueError("OAuth server response must have Content-Type: `%s`" % (CONTENT_TYPE_FORM_URLENCODED, ))
@@ -486,8 +481,10 @@ class Client(object):
             The value to use for the realm parameter in the Authorization HTTP
             header. It will be excluded from the base string, however.
         :param oauth_signature_method:
-            One of ``SIGNATURE_METHOD_HMAC_SHA1``,
-            ``SIGNATURE_METHOD_RSA_SHA1``, or ``SIGNATURE_METHOD_PLAINTEXT``.
+            One of:
+            1. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_HMAC_SHA1`
+            2. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_RSA_SHA1`
+            3. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_PLAINTEXT`
         :param extra_oauth_params:
             Any additional oauth parameters you would like to include.
             The parameter names must begin with ``oauth_``. Any other parameters
@@ -514,7 +511,7 @@ class Client(object):
 
         # Filter and add additional OAuth parameters.
         extra_oauth_params = protocol_params_sanitize(extra_oauth_params)
-        preserved_oauth_params = (
+        reserved_oauth_params = (
             "oauth_signature",     # Calculated from given parameters.
             "oauth_nonce",         # System-generated.
             "oauth_timestamp",     # System-generated.
@@ -522,7 +519,7 @@ class Client(object):
             "oauth_version",       # Optional but MUST be set to "1.0" according to spec.
         )
         for k, v in extra_oauth_params.items():
-            if k in preserved_oauth_params:
+            if k in reserved_oauth_params:
                 # Don't override these required system-generated protocol parameters.
                 raise ValueError("Cannot override system-generated protocol parameter `%r`." % k)
             else:

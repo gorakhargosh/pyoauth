@@ -422,7 +422,7 @@ def get_normalized_authorization_header_value(oauth_params,
     :returns:
         A properly formatted Authorization header value.
     """
-    indentation = " " * len("Authorization: ")
+    indentation = " " * 4 #len("Authorization: ")
     if realm:
         s = "".join([
             'OAuth realm="',
