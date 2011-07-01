@@ -459,6 +459,8 @@ class Client(object):
             elif k == "oauth_callback":
                 if is_bytes_or_unicode(v) and v:
                     # Set a callback URL only if it is available.
+                    # TODO: Either "oob" or absolute URI according to the spec.
+                    # TODO: Add validation.
                     oauth_params["oauth_callback"] = v
                 else:
                     raise ValueError("`oauth_callback` parameter value is invalid: `%r`" % (v, ))
