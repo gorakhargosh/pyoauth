@@ -43,7 +43,7 @@ class TestClient_OAuth_1_0_Example:
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params, credentials = self.client.parse_credentials_response(200, "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=true", headers=headers)
+        params, credentials = self.client._parse_credentials_response(200, "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=true", headers=headers)
         assert_dict_equal(params, {
             "oauth_token": ["hh5s93j4hdidpola"],
             "oauth_token_secret": ["hdhd0244k9j7ao03"],
@@ -51,7 +51,7 @@ class TestClient_OAuth_1_0_Example:
         })
         assert_equal(credentials, self.temporary_credentials)
 
-        params, credentials = self.client.parse_credentials_response(200, "oauth_token=nnch734d00sl2jdk&oauth_token_secret=pfkkdhi9sl3r4s00", headers=headers)
+        params, credentials = self.client._parse_credentials_response(200, "oauth_token=nnch734d00sl2jdk&oauth_token_secret=pfkkdhi9sl3r4s00", headers=headers)
         assert_dict_equal(params, {
             "oauth_token": ["nnch734d00sl2jdk"],
             "oauth_token_secret": ["pfkkdhi9sl3r4s00"],
@@ -66,15 +66,15 @@ class TestClient_OAuth_1_0_Example:
             "Content-Type": "application/x-www-form-urlencoded",
         }
 
-        assert_raises(ValueError, self.client.parse_credentials_response, None, body, headers)
-        assert_raises(ValueError, self.client.parse_credentials_response, status_code, None, headers)
-        assert_raises(ValueError, self.client.parse_credentials_response, status_code, body, None)
+        assert_raises(ValueError, self.client._parse_credentials_response, None, body, headers)
+        assert_raises(ValueError, self.client._parse_credentials_response, status_code, None, headers)
+        assert_raises(ValueError, self.client._parse_credentials_response, status_code, body, None)
 
-        assert_raises(ValueError, self.client.parse_credentials_response, 300, body, headers)
-        assert_raises(ValueError, self.client.parse_credentials_response, 199, body, headers)
+        assert_raises(ValueError, self.client._parse_credentials_response, 300, body, headers)
+        assert_raises(ValueError, self.client._parse_credentials_response, 199, body, headers)
 
-        assert_raises(ValueError, self.client.parse_credentials_response, 200, "", headers)
-        assert_raises(ValueError, self.client.parse_credentials_response, 200, body, {"Content-Type": "invalid"})
+        assert_raises(ValueError, self.client._parse_credentials_response, 200, "", headers)
+        assert_raises(ValueError, self.client._parse_credentials_response, 200, body, {"Content-Type": "invalid"})
 
 
     def test_build_resource_request(self):

@@ -350,7 +350,31 @@ class Client(object):
                                    oauth_token=token_credentials.identifier
                                    **extra_oauth_params)
 
-    def parse_credentials_response(self, status_code, body, headers):
+    def parse_temporary_credentials_response(self, status_code, body, headers):
+        """
+        Parses the entity-body of the OAuth server response to an OAuth
+        temporary credentials request.
+
+        :param status_code:
+            HTTP response status code.
+        :param body:
+            HTTP response body.
+        :param headers:
+            HTTP response headers.
+        :returns:
+            A tuple of the form::
+
+                (parameter dictionary, pyoauth.oauth1.Credentials instance)
+        """
+        params, credentials = self._parse_credentials_response(status_code, body, headers)
+        callback_confirmed = params.get("oauth_callback_confirmed", "").lower()
+        if callback_confirmed != "true":
+            raise ValueError("Invalid OAuth server response -- `oauth_callback_confirmed` MUST be set to `true`.")
+        return params, credentials
+
+
+
+    def _parse_credentials_response(self, status_code, body, headers):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         credential request.
