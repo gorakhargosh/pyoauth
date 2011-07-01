@@ -9,7 +9,7 @@ except ImportError:
     assert_dict_equal = assert_equal
 from pyoauth.url import percent_decode, percent_encode, parse_qs, \
     urlencode_s, urlencode_sl, query_params_dict, \
-    query_params_merge, urlparse_normalized, query_params_add, \
+    query_params_merge, urlparse_normalized, url_add_query, \
     query_params_sanitize, protocol_params_sanitize, url_sanitize, \
     url_append_query
 
@@ -303,7 +303,7 @@ class Test_oauth_url_query_params_add(object):
         }
         url = "HTTP://UserName:PassWORdX@WWW.EXAMPLE.COM:8000/result;param1?oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7&oauth_consumer_key=9djdj82h48djs9d2#fragment"
         resulting_url = "http://UserName:PassWORdX@www.example.com:8000/result;param1?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7#fragment"
-        assert_equal(query_params_add(url, params1), resulting_url)
+        assert_equal(url_add_query(url, params1), resulting_url)
 
 class Test_oauth_url_query_params_merge(object):
     def test_adds_query_params_properly(self):

@@ -41,7 +41,7 @@ URL parsing and convenience utilities
 
 Query parameters
 ~~~~~~~~~~~~~~~~
-.. autofunction:: query_params_add
+.. autofunction:: url_add_query
 .. autofunction:: query_params_merge
 .. autofunction:: query_params_filter
 .. autofunction:: query_params_dict
@@ -253,8 +253,8 @@ def urlparse_normalized(url):
     return scheme, netloc, path, matrix_params, query, fragment
 
 
-#TODO: Add test for query_params_add uses OAuth param sort order.
-def query_params_add(url, extra_query_params, allow_func=None):
+#TODO: Add test for url_add_query uses OAuth param sort order.
+def url_add_query(url, extra_query_params, allow_func=None):
     """
     Adds additional query parameters to a URL while preserving existing ones.
 
@@ -283,6 +283,36 @@ def query_params_add(url, extra_query_params, allow_func=None):
     d = query_params_merge(query, extra_query_params)
     qs = urlencode_s(d, allow_func=allow_func)
     return urlunparse((scheme, netloc, path, params, qs, fragment))
+
+
+def url_append_query(url, query_params):
+    """
+    Appends query params to any existing query string in the URL
+    and returns a properly formatted URL. URL fragments are preserved.
+
+    This is the equivalent of doing::
+
+        sorted(URL query parameters) + "&" + sorted(query_params)
+
+    :param url:
+        The URL into which the query parameters will be concatenated.
+    :param query_params:
+        A dictionary of query parameters or a query string.
+    :returns:
+        A URL with the query parameters concatenated.
+
+    Usage::
+
+        >>> url_append_query("http://example.com/foo?a=b#fragment", dict(c="d"))
+        'http://example.com/foo?a=b&c=d#fragment'
+    """
+    if not query_params:
+        return url
+    scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
+    query = (query + "&") if query else query
+    query_string = query + urlencode_s(query_params_dict(query_params))
+    return urlunparse((scheme, netloc, path, params, query_string, fragment))
+
 
 
 def query_params_merge(query_params, *extra_query_params):
@@ -504,32 +534,4 @@ def url_sanitize(url):
     query = urlencode_s(query_params_sanitize(query))
     return urlunparse((scheme, netloc, path, params, query, None))
 
-
-def url_append_query(url, query_params):
-    """
-    Appends query params to any existing query string in the URL
-    and returns a properly formatted URL. URL fragments are preserved.
-
-    This is the equivalent of doing::
-
-        sorted(URL query parameters) + "&" + sorted(query_params)
-
-    :param url:
-        The URL into which the query parameters will be concatenated.
-    :param query_params:
-        A dictionary of query parameters or a query string.
-    :returns:
-        A URL with the query parameters concatenated.
-
-    Usage::
-
-        >>> url_append_query("http://example.com/foo?a=b#fragment", dict(c="d"))
-        'http://example.com/foo?a=b&c=d#fragment'
-    """
-    if not query_params:
-        return url
-    scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
-    query = (query + "&") if query else query
-    query_string = query + urlencode_s(query_params_dict(query_params))
-    return urlunparse((scheme, netloc, path, params, query_string, fragment))
 

@@ -39,7 +39,7 @@ from pyoauth.url import \
     url_sanitize, \
     protocol_params_sanitize, \
     query_params_sanitize, \
-    query_params_add, \
+    url_add_query, \
     urlencode_s, \
     url_append_query, \
     parse_qs, query_params_append
@@ -493,7 +493,7 @@ class Client(object):
         payload_params = query_params_sanitize(payload_params)
 
         # Determine the request's OAuth signature.
-        url_with_payload_params_added = query_params_add(url, payload_params)
+        url_with_payload_params_added = url_add_query(url, payload_params)
         oauth_params["oauth_signature"] = self._sign_request_data(oauth_signature_method,
                                                                   method, url_with_payload_params_added, oauth_params)
 
