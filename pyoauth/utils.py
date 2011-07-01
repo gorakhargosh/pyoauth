@@ -117,9 +117,6 @@ def generate_verification_code(length=8):
     we limit the length of this code to 8 characters to keep it suitable
     for manual entry.
 
-    .. NOTE:
-
-
     :see:
         Resource Owner Authorization
         (http://tools.ietf.org/html/rfc5849#section-2.2)
