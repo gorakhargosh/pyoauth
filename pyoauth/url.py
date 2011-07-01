@@ -540,12 +540,12 @@ def is_valid_callback_url(url):
     :returns:
         ``True`` if valid; ``False`` otherwise.
     """
-    if not is_bytes_or_unicode(oauth_callback):
+    if not is_bytes_or_unicode(url):
         return False
     if url == "oob":
         return True
     else:
-        scheme, netloc, _, _, _, _, _ = urlparse(url)
+        scheme, netloc, _, _, _, _ = urlparse(url)
         if scheme.lower() in ("http", "https") and netloc:
             return True
         else:

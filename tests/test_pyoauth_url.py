@@ -11,7 +11,7 @@ from pyoauth.url import percent_decode, percent_encode, parse_qs, \
     urlencode_s, urlencode_sl, query_unflatten, \
     query_add, urlparse_normalized, url_add_query, \
     query_params_sanitize, protocol_params_sanitize, url_sanitize, \
-    url_append_query, query_append
+    url_append_query, query_append, is_valid_callback_url
 
 from urlparse import urlparse
 
@@ -595,3 +595,25 @@ class Test_url_append_query(object):
         expected_url = "http://www.example.com/request?b=1&a=1#fragment"
         assert_equal(url_append_query(url, {"a": 1}), expected_url)
         assert_equal(url_append_query(url, "a=1"), expected_url)
+
+
+class Test_is_valid_callback_url(object):
+    def test_oob_case_sensitive_is_valid(self):
+        assert_true(is_valid_callback_url("oob"))
+        assert_false(is_valid_callback_url("OOb"))
+
+    def test_non_string_is_invalid(self):
+        assert_false(is_valid_callback_url(5))
+        assert_false(is_valid_callback_url(None))
+        assert_false(is_valid_callback_url(False))
+        assert_false(is_valid_callback_url({}))
+        assert_false(is_valid_callback_url([]))
+        assert_false(is_valid_callback_url(()))
+
+
+    def test_url_must_be_absolute(self):
+        assert_true(is_valid_callback_url("http://example.com/"))
+        assert_false(is_valid_callback_url("mailto:someone@somewhere.com"))
+        assert_false(is_valid_callback_url("hxp://example.com/"))
+        assert_false(is_valid_callback_url("http://"))
+
