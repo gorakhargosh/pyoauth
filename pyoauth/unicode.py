@@ -35,6 +35,8 @@ Functions
 
 .. autofunction:: is_bytes
 
+.. autofunction:: is_bytes_or_unicode
+
 """
 
 
