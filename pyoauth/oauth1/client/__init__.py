@@ -500,10 +500,7 @@ class Client(object):
         # Filter payload parameters for the request.
         payload_params = query_params_sanitize(payload_params)
 
-        #if not method == "PUT":
-        #
-        # TODO:
-        #    I'm not entirely certain yet about whether PUT payload
+        # TODO: I'm not entirely certain yet about whether PUT payload
         #    params should be included in the signature or not.
         #    Here is why:
         #    http://groups.google.com/group/oauth/browse_thread/thread/fdc0b11f2c4a8dc3/
@@ -511,6 +508,7 @@ class Client(object):
         #    However, until I'm certain that PUT parameters encoded with
         #    application/x-www-form-urlencoded must not be signed,
         #    I'm not handling PUT explicitly in this method.
+        #if not method == "PUT":
         url_with_payload_params_added = url_add_query(url, payload_params)
 
         # Determine the request's OAuth signature.
