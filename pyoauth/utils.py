@@ -147,7 +147,7 @@ def get_hmac_sha1_signature(client_shared_secret,
 
     :see: HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)
     :param client_shared_secret:
-        Client (consumer) secret
+        Client (consumer) shared secret.
     :param method:
         Base string HTTP method.
     :param url:
@@ -177,7 +177,7 @@ def get_rsa_sha1_signature(client_shared_secret,
 
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
     :param client_shared_secret:
-        Client (consumer) secret
+        Client (consumer) shared secret.
     :param method:
         Base string HTTP method.
     :param url:
@@ -223,7 +223,7 @@ def check_rsa_sha1_signature(signature, client_shared_secret,
     :param signature:
         RSA-SHA1 OAuth signature.
     :param client_shared_secret:
-        Client (consumer) secret
+        Client (consumer) shared secret.
     :param method:
         Base string HTTP method.
     :param url:
@@ -287,7 +287,7 @@ def get_plaintext_signature(client_shared_secret,
 
     :see: PLAINTEXT (http://tools.ietf.org/html/rfc5849#section-3.4.4)
     :param client_shared_secret:
-        Client (consumer) shared secret
+        Client (consumer) shared secret.
     :param method:
         (Not used). Base string HTTP method.
     :param url:
@@ -311,7 +311,7 @@ def _get_plaintext_signature(client_shared_secret,
     Calculates the PLAINTEXT signature.
 
     :param client_shared_secret:
-        Client (consumer) shared secret
+        Client (consumer) shared secret.
     :param token_or_temporary_shared_secret:
         Token/temporary credentials shared secret if available.
     :returns:
