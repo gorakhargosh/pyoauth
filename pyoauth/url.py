@@ -38,7 +38,7 @@ URL parsing and convenience utilities
 .. autofunction:: urlparse_normalized
 .. autofunction:: url_append_query
 .. autofunction:: url_add_query
-.. autofunction:: url_sanitize
+.. autofunction:: oauth_url_sanitize
 
 Query parameters
 ~~~~~~~~~~~~~~~~
@@ -511,7 +511,7 @@ def query_params_sanitize(query_params):
     return query_filter(query_params, allow_func=allow_func)
 
 
-def url_sanitize(url):
+def oauth_url_sanitize(url, force_secure=True):
     """
     Normalizes an OAuth URL and cleans up protocol-specific parameters
     from the query string.
@@ -526,6 +526,9 @@ def url_sanitize(url):
     """
     scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
     query = urlencode_s(query_params_sanitize(query))
+    if force_secure and scheme != "https":
+        #logging.warning("RFC specification requires the use of SSL/TLS for inter-server communication.")
+        raise ValueError("OAuth 1.0 specification requires the use of SSL/TLS for inter-server communication.")
     return urlunparse((scheme, netloc, path, params, query, None))
 
 

@@ -46,6 +46,13 @@ class TestClient_OAuth_1_0_Example:
         assert_raises(ValueError, self.client.parse_temporary_credentials_response, 200, "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=", headers)
         assert_raises(ValueError, self.client.parse_temporary_credentials_response, 200, "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=false", headers)
 
+        params, credentials = self.client.parse_temporary_credentials_response(200, "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=true", headers=headers)
+        assert_dict_equal(params, {
+            "oauth_token": ["hh5s93j4hdidpola"],
+            "oauth_token_secret": ["hdhd0244k9j7ao03"],
+            "oauth_callback_confirmed": ["true"],
+        })
+        assert_equal(credentials, self.temporary_credentials)
 
     def test__parse_credentials_response(self):
         headers = {

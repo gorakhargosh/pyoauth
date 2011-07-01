@@ -10,7 +10,7 @@ except ImportError:
 from pyoauth.url import percent_decode, percent_encode, parse_qs, \
     urlencode_s, urlencode_sl, query_unflatten, \
     query_add, urlparse_normalized, url_add_query, \
-    query_params_sanitize, protocol_params_sanitize, url_sanitize, \
+    query_params_sanitize, protocol_params_sanitize, oauth_url_sanitize, \
     url_append_query, query_append, is_valid_callback_url
 
 from urlparse import urlparse
@@ -529,8 +529,8 @@ class Test_query_params_sanitize(object):
 
 
 class Test_url_sanitize(object):
-    def test_sanitization_and_removes_fragment(self):
-        query_string = "http://www.EXAMPLE.com/request?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7#fragment"
+    def test_sanitization_force_secure_default_and_removes_fragment(self):
+        url = "https://www.EXAMPLE.com/request?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7#fragment"
         expected_params = {
             "a2": ["r b"],
             "b5": ["=%3D"],
@@ -538,8 +538,19 @@ class Test_url_sanitize(object):
             "c@": [""],
             "c2": [""],
         }
-        expected_result = "http://www.example.com/request?" + urlencode_s(expected_params)  # Fragment ignored.
-        assert_equal(url_sanitize(query_string), expected_result)
+        expected_result = "https://www.example.com/request?" + urlencode_s(expected_params)  # Fragment ignored.
+        assert_equal(oauth_url_sanitize(url), expected_result)
+
+    def test_sanitization_force_secure(self):
+        insecure_url = "http://www.EXAMPLE.com/request"
+        secure_url = "https://www.EXAMPLE.com/request"
+
+        assert_raises(ValueError, oauth_url_sanitize, insecure_url)
+        assert_raises(ValueError, oauth_url_sanitize, insecure_url, True)
+        assert_equal(oauth_url_sanitize(insecure_url, force_secure=False), "http://www.example.com/request")
+        assert_equal(oauth_url_sanitize(secure_url, force_secure=False), "https://www.example.com/request")
+        assert_equal(oauth_url_sanitize(secure_url, force_secure=True), "https://www.example.com/request")
+
 
 class Test_protocol_params_sanitize(object):
     def test_filter(self):

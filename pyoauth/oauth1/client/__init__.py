@@ -37,7 +37,7 @@ from pyoauth.oauth1 import \
     SIGNATURE_METHOD_PLAINTEXT
 from pyoauth.unicode import is_bytes_or_unicode
 from pyoauth.url import \
-    url_sanitize, \
+    oauth_url_sanitize, \
     protocol_params_sanitize, \
     query_params_sanitize, \
     url_add_query, \
@@ -67,7 +67,7 @@ class Client(object):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     1. Construct a client with its client credentials.
 
-    2. Send an HTTP request for temporary credentials with a callback URL
+    2. Send an HTTPS request for temporary credentials with a callback URL
        which the server will call with an OAuth verification code after
        authorizing the resource owner (end-user).
 
@@ -87,7 +87,7 @@ class Client(object):
        OAuth verification code as a query parameter.
 
     6. Using the obtained OAuth verification code from step 5 and the
-       temporary credentials obtained in step 3, send an HTTP request for
+       temporary credentials obtained in step 3, send an HTTPS request for
        token credentials.
 
     7. Obtain token credentials from a successful server response.
@@ -121,6 +121,10 @@ class Client(object):
             Any query parameters starting with "oauth_" will be excluded from
             the URL. All OAuth parameters must be specified in their respective
             requests.
+            .. NOTE::
+                Must use SSL/TLS.
+
+                See http://tools.ietf.org/html/rfc5849#section-2.1
         :param resource_owner_authorization_uri:
             OAuth authorization URI.
 
@@ -133,6 +137,11 @@ class Client(object):
             Any query parameters starting with "oauth_" will be excluded from
             the URL. All OAuth parameters must be specified in their respective
             requests.
+
+            .. NOTE::
+                Must use SSL/TLS.
+
+                See http://tools.ietf.org/html/rfc5849#section-2.3
         :param use_authorization_header:
             ``True`` to use the HTTP Authorization header to pass OAuth
             parameters; ``False`` will force using the URL query string or
@@ -158,9 +167,9 @@ class Client(object):
             See https://github.com/oauth/oauth-ruby/pull/12
         """
         self._client_credentials = client_credentials
-        self._temporary_credentials_request_uri = url_sanitize(temporary_credentials_request_uri)
-        self._resource_owner_authorization_uri = url_sanitize(resource_owner_authorization_uri)
-        self._token_request_uri = url_sanitize(token_request_uri)
+        self._temporary_credentials_request_uri = oauth_url_sanitize(temporary_credentials_request_uri, force_secure=True)
+        self._resource_owner_authorization_uri = oauth_url_sanitize(resource_owner_authorization_uri, force_secure=False)
+        self._token_request_uri = oauth_url_sanitize(token_request_uri, force_secure=True)
         self._use_authorization_header = use_authorization_header
         self._authorization_header_param_delimiter = authorization_header_param_delimiter
 
@@ -171,7 +180,7 @@ class Client(object):
         return "1.0"
 
     def build_temporary_credentials_request(self,
-                                            method,
+                                            method="POST",
                                             payload_params=None,
                                             headers=None,
                                             realm=None,
@@ -182,7 +191,7 @@ class Client(object):
         Builds an OAuth request for temporary credentials.
 
         :param method:
-            HTTP request method.
+            HTTP request method. Default POST.
         :param payload_params:
             A dictionary of payload parameters. These will be serialized
             into the URL or the entity-body depending on the HTTP request method.
@@ -243,7 +252,7 @@ class Client(object):
     def build_token_credentials_request(self,
                                         temporary_credentials,
                                         oauth_verifier,
-                                        method,
+                                        method="POST",
                                         payload_params=None,
                                         headers=None,
                                         realm=None,
@@ -260,6 +269,8 @@ class Client(object):
         :param oauth_verifier:
             OAuth verification string sent by the server to your callback URI
             or input by the user into your application.
+        :param method:
+            The HTTP method to use. Default POST.
         :param payload_params:
             A dictionary of payload parameters. These will be serialized
             into the URL or the entity-body depending on the HTTP request method.
@@ -372,7 +383,23 @@ class Client(object):
             raise ValueError("Invalid OAuth server response -- `oauth_callback_confirmed` MUST be set to `true`.")
         return params, credentials
 
+    def parse_token_credentials_response(self, status_code, body, headers):
+        """
+        Parses the entity-body of the OAuth server response to an OAuth
+        token credentials request.
 
+        :param status_code:
+            HTTP response status code.
+        :param body:
+            HTTP response body.
+        :param headers:
+            HTTP response headers.
+        :returns:
+            A tuple of the form::
+
+                (parameter dictionary, pyoauth.oauth1.Credentials instance)
+        """
+        return self._parse_credentials_response(status_code, body, headers)
 
     def _parse_credentials_response(self, status_code, body, headers):
         """
@@ -508,12 +535,15 @@ class Client(object):
         #    However, until I'm certain that PUT parameters encoded with
         #    application/x-www-form-urlencoded must not be signed,
         #    I'm not handling PUT explicitly in this method.
-        #if not method == "PUT":
-        url_with_payload_params_added = url_add_query(url, payload_params)
+        #
+        #if method == "PUT":
+        #     signature_url = url
+        #else:
+        signature_url = url_add_query(url, payload_params)
 
         # Determine the request's OAuth signature.
         oauth_params["oauth_signature"] = self._sign_request_data(oauth_signature_method,
-                                                                  method, url_with_payload_params_added, oauth_params)
+                                                                  method, signature_url, oauth_params)
 
         # Build request data now.
         # OAuth parameters and any parameters starting with the "oauth_"
@@ -539,11 +569,9 @@ class Client(object):
             request_url = url
             headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
             payload = query_append(payload_params, oauth_params)
-        else: #if method == "GET":
-            request_url = url_append_query(url_with_payload_params_added, oauth_params)
+        else:
+            request_url = url_append_query(signature_url, oauth_params)
             payload = ""
-        #else:
-        #    raise NotImplementedError("Not implemented any other HTTP methods yet.")
 
         return RequestProxy(method, url=request_url, payload=payload, headers=headers)
 
