@@ -139,12 +139,14 @@ def generate_timestamp():
     return bytes(int(time.time()))
 
 
-def get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=None, token_secret=None):
+def get_hmac_sha1_signature(client_shared_secret,
+                            method, url, oauth_params=None,
+                            token_or_temporary_shared_secret=None):
     """
     Calculates an HMAC-SHA1 signature for a base string.
 
     :see: HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)
-    :param consumer_secret:
+    :param client_shared_secret:
         Client (consumer) secret
     :param method:
         Base string HTTP method.
@@ -154,24 +156,27 @@ def get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=None, tok
     :param oauth_params:
         Base string protocol-specific query parameters.
         All non-protocol parameters will be ignored.
-    :param token_secret:
-        Token secret if available.
+    :param token_or_temporary_shared_secret:
+        Token/temporary credentials shared secret if available.
     :returns:
         HMAC-SHA1 signature.
     """
     oauth_params = oauth_params or {}
     base_string = get_signature_base_string(method, url, oauth_params)
-    key = _get_plaintext_signature(consumer_secret, token_secret=token_secret)
+    key = _get_plaintext_signature(client_shared_secret, token_or_temporary_shared_secret)
     hashed = hmac.new(key, base_string, sha1)
     return binascii.b2a_base64(hashed.digest())[:-1]
 
 
-def get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None, token_secret=None, _rsa=RSA):
+def get_rsa_sha1_signature(client_shared_secret,
+                           method, url, oauth_params=None,
+                           token_or_temporary_shared_secret=None,
+                           _rsa=RSA):
     """
     Calculates an RSA-SHA1 OAuth signature.
 
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
-    :param consumer_secret:
+    :param client_shared_secret:
         Client (consumer) secret
     :param method:
         Base string HTTP method.
@@ -181,8 +186,8 @@ def get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None, toke
     :param oauth_params:
         Base string protocol-specific query parameters.
         All non-protocol parameters will be ignored.
-    :param token_secret:
-        Token secret if available.
+    :param token_or_temporary_shared_secret:
+        Token/temporary credentials shared secret if available.
     :returns:
         RSA-SHA1 signature.
     """
@@ -192,10 +197,10 @@ def get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None, toke
         raise NotImplementedError()
 
     try:
-        getattr(consumer_secret, "sign")
-        key = consumer_secret
+        getattr(client_shared_secret, "sign")
+        key = client_shared_secret
     except AttributeError:
-        key = _rsa.importKey(consumer_secret)
+        key = _rsa.importKey(client_shared_secret)
 
     base_string = get_signature_base_string(method, url, oauth_params)
     digest = sha1(base_string).digest()
@@ -205,7 +210,10 @@ def get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None, toke
     return binascii.b2a_base64(signature_bytes)[:-1]
 
 
-def check_rsa_sha1_signature(signature, consumer_secret, method, url, oauth_params=None, token_secret=None, _rsa=RSA):
+def check_rsa_sha1_signature(signature, client_shared_secret,
+                             method, url, oauth_params=None,
+                             token_or_temporary_shared_secret=None,
+                             _rsa=RSA):
     """
     Verifies a RSA-SHA1 OAuth signature.
 
@@ -214,7 +222,7 @@ def check_rsa_sha1_signature(signature, consumer_secret, method, url, oauth_para
         Rick Copeland <rcopeland@geek.net>
     :param signature:
         RSA-SHA1 OAuth signature.
-    :param consumer_secret:
+    :param client_shared_secret:
         Client (consumer) secret
     :param method:
         Base string HTTP method.
@@ -224,8 +232,8 @@ def check_rsa_sha1_signature(signature, consumer_secret, method, url, oauth_para
     :param oauth_params:
         Base string protocol-specific query parameters.
         All non-protocol parameters will be ignored.
-    :param token_secret:
-        Token secret if available.
+    :param token_or_temporary_shared_secret:
+        Token/temporary credentials shared secret if available.
     :returns:
         ``True`` if verified to be correct; ``False`` otherwise.
     """
@@ -235,10 +243,10 @@ def check_rsa_sha1_signature(signature, consumer_secret, method, url, oauth_para
         raise NotImplementedError()
 
     try:
-        getattr(consumer_secret, "publickey")
-        key = consumer_secret
+        getattr(client_shared_secret, "publickey")
+        key = client_shared_secret
     except AttributeError:
-        key = _rsa.importKey(consumer_secret)
+        key = _rsa.importKey(client_shared_secret)
 
     base_string = get_signature_base_string(method, url, oauth_params)
     digest = sha1(base_string).digest()
@@ -271,49 +279,55 @@ def _pkcs1_v1_5_encode(rsa_key, sha1_digest):
     return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + sha1_digest
 
 
-def get_plaintext_signature(consumer_secret, method, url, oauth_params=None, token_secret=None):
+def get_plaintext_signature(client_shared_secret,
+                            method, url, oauth_params=None,
+                            token_or_temporary_shared_secret=None):
     """
     Calculates a PLAINTEXT signature for a base string.
 
     :see: PLAINTEXT (http://tools.ietf.org/html/rfc5849#section-3.4.4)
-    :param consumer_secret:
+    :param client_shared_secret:
         Client (consumer) shared secret
     :param method:
-        Base string HTTP method.
+        (Not used). Base string HTTP method.
     :param url:
-        Base string URL that may include query string.
+        (Not used). Base string URL that may include query string.
         All protocol-specific parameters will be ignored from the query string.
     :param oauth_params:
-        Base string protocol-specific query parameters.
+        (Not used). Base string protocol-specific query parameters.
         All non-protocol parameters will be ignored.
-    :param token_secret:
-        Token shared secret if available.
+    :param token_or_temporary_shared_secret:
+        Token/temporary credentials shared secret if available.
     :returns:
         PLAINTEXT signature.
     """
-    return _get_plaintext_signature(consumer_secret, token_secret=token_secret)
+    return _get_plaintext_signature(client_shared_secret,
+                                    token_or_temporary_shared_secret)
 
 
-def _get_plaintext_signature(consumer_secret, token_secret=None):
+def _get_plaintext_signature(client_shared_secret,
+                             token_or_temporary_shared_secret=None):
     """
     Calculates the PLAINTEXT signature.
 
-    :param consumer_secret:
-        Client (consumer) secret
-    :param token_secret:
-        Token secret if available.
+    :param client_shared_secret:
+        Client (consumer) shared secret
+    :param token_or_temporary_shared_secret:
+        Token/temporary credentials shared secret if available.
     :returns:
         PLAINTEXT signature.
     """
-    sig_elems = [percent_encode(consumer_secret) if consumer_secret else ""]
-    sig_elems.append(percent_encode(token_secret) if token_secret else "")
-    return "&".join(sig_elems)
+    client_shared_secret = client_shared_secret or ""
+    token_or_temporary_shared_secret = token_or_temporary_shared_secret or ""
+    return "&".join([
+        percent_encode(a) for a in [
+            client_shared_secret, token_or_temporary_shared_secret]])
 
 
 def get_signature_base_string(method, url, oauth_params):
     """
     Calculates a signature base string based on the URL, method, and
-    oauth arameters.
+    oauth parameters.
 
     Any query parameter by the name "oauth_signature" will be excluded
     from the base string.
@@ -332,7 +346,7 @@ def get_signature_base_string(method, url, oauth_params):
     :returns:
         Base string.
     """
-    allowed_methods = ("POST", "PUT", "GET", "DELETE",
+    allowed_methods = ("POST", "GET", "PUT", "DELETE",
                        "OPTIONS", "TRACE", "HEAD", "CONNECT",
                        "PATCH")
     method_normalized = method.upper()
@@ -341,7 +355,7 @@ def get_signature_base_string(method, url, oauth_params):
     if not url:
         raise ValueError("URL must be specified.")
     if not isinstance(oauth_params, dict):
-        raise ValueError("Query parameters must be specified as a dictionary.")
+        raise ValueError("Protocol parameters must be specified as a dictionary.")
 
     scheme, netloc, path, matrix_params, query, fragment = urlparse_normalized(url)
     query_string = _get_signature_base_string_query(query, oauth_params)
@@ -356,10 +370,10 @@ def _get_signature_base_string_query(url_query_params, oauth_params):
 
     :see: Parameter Normalization (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)
     :param url_query_params:
-        A dictionary of URL query parameters. Any parameters starting
+        A dictionary or string of URL query parameters. Any parameters starting
         with "oauth_" will be ignored.
     :param oauth_params:
-        A dictionary of protocol-specific query parameters. Any parameter
+        A dictionary or string of protocol-specific query parameters. Any parameter
         names that do not begin with ``oauth_`` will be excluded from the
         normalized query string. ``oauth_signature`` is also specially excluded.
     :returns:

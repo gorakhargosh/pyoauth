@@ -89,11 +89,11 @@ class Test_oauth_get_hmac_sha1_signature(object):
             oauth_signature=ex["REQUEST_TOKEN_OAUTH_SIGNATURE"],
             )
         assert_equal(get_hmac_sha1_signature(
-            consumer_secret=ex["OAUTH_CONSUMER_SECRET"],
+            ex["OAUTH_CONSUMER_SECRET"],
             method=ex["REQUEST_TOKEN_METHOD"],
             url=ex["REQUEST_TOKEN_URL"],
             oauth_params=oauth_params,
-            token_secret=None),
+            token_or_temporary_shared_secret=None),
                      expected_oauth_signature
         )
 
@@ -131,20 +131,20 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
 
         # consumer_secret is a string.
         assert_equal(get_rsa_sha1_signature(
-            consumer_secret=self.oauth_consumer_secret,
+            self.oauth_consumer_secret,
             method=self.http_method,
             url=self.url,
             oauth_params=self.oauth_params,
-            token_secret=self.oauth_token_secret
+            token_or_temporary_shared_secret=self.oauth_token_secret
         ), self.oauth_signature)
 
         # consumer_secret is an RSA instance.
         assert_equal(get_rsa_sha1_signature(
-            consumer_secret=RSA.importKey(self.oauth_consumer_secret),
+            RSA.importKey(self.oauth_consumer_secret),
             method=self.http_method,
             url=self.url,
             oauth_params=self.oauth_params,
-            token_secret=self.oauth_token_secret
+            token_or_temporary_shared_secret=self.oauth_token_secret
         ), self.oauth_signature)
 
 
@@ -154,21 +154,21 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         # consumer_secret is a string.
         assert_true(check_rsa_sha1_signature(
             signature=self.oauth_signature,
-            consumer_secret=self.oauth_consumer_secret,
+            client_shared_secret=self.oauth_consumer_secret,
             method=self.http_method,
             url=self.url,
             oauth_params=self.oauth_params,
-            token_secret=self.oauth_token_secret
+            token_or_temporary_shared_secret=self.oauth_token_secret
         ))
 
         # consumer_secret is an RSA instance.
         assert_true(check_rsa_sha1_signature(
             signature=self.oauth_signature,
-            consumer_secret=RSA.importKey(self.oauth_consumer_secret),
+            client_shared_secret=RSA.importKey(self.oauth_consumer_secret),
             method=self.http_method,
             url=self.url,
             oauth_params=self.oauth_params,
-            token_secret=self.oauth_token_secret
+            token_or_temporary_shared_secret=self.oauth_token_secret
         ))
 
     def test_get_raises_NotImplementedError_when_Crypto_unavailable(self):
@@ -220,38 +220,38 @@ class Test_oauth_get_plaintext_signature(object):
 
     def test_when_both_secrets_present(self):
         assert_equal(get_plaintext_signature(
-            consumer_secret=self.oauth_consumer_secret,
+            self.oauth_consumer_secret,
             method="POST",
             url="http://example.com/",
             oauth_params=self.oauth_params,
-            token_secret=self.oauth_token_secret,
+            token_or_temporary_shared_secret=self.oauth_token_secret,
             ), "consumer%20test%20secret&token%20test%20secret")
 
     def test_when_consumer_secret_present(self):
         assert_equal(get_plaintext_signature(
-            consumer_secret=self.oauth_consumer_secret,
+            self.oauth_consumer_secret,
             method="POST",
             url="http://example.com/",
             oauth_params=self.oauth_params,
-            token_secret=None
+            token_or_temporary_shared_secret=None
         ), "consumer%20test%20secret&")
 
     def test_when_token_secret_present(self):
         assert_equal(get_plaintext_signature(
-            consumer_secret="",
+            "",
             method="POST",
             url="http://example.com/",
             oauth_params=self.oauth_params,
-            token_secret=self.oauth_token_secret
+            token_or_temporary_shared_secret=self.oauth_token_secret
         ), "&token%20test%20secret")
 
     def test_when_neither_secret_present(self):
         assert_equal(get_plaintext_signature(
-            consumer_secret="",
+            "",
             method="POST",
             url="http://example.com/",
             oauth_params=self.oauth_params,
-            token_secret=None
+            token_or_temporary_shared_secret=None
         ), "&")
 
 
