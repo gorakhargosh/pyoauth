@@ -45,7 +45,6 @@ Authorization Header
 
 import binascii
 import hmac
-import logging
 import time
 import uuid
 import re
