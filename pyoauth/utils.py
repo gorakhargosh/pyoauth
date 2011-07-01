@@ -380,7 +380,7 @@ def _get_signature_base_string_query(url_query_params, oauth_params):
     return query
 
 
-def get_normalized_authorization_header_value(oauth_params, realm=None):
+def get_normalized_authorization_header_value(oauth_params, realm=None, param_delimiter=","):
     """
     Builds the Authorization header value.
 
@@ -390,33 +390,45 @@ def get_normalized_authorization_header_value(oauth_params, realm=None):
     :param realm:
         If specified, the realm is included into the Authorization header.
         The realm is never percent-encoded according to the OAuth spec.
+    :param param_delimiter:
+        The delimiter used to separate header value parameters.
+        According to the Specification, this must be a comma ",". However,
+        certain services like Yahoo! use "&" instead. Comma is default.
+
+        See https://github.com/oauth/oauth-ruby/pull/12
     :returns:
         A properly formatted Authorization header value.
     """
     indentation = " " * len("Authorization: ")
     if realm:
-        s = 'OAuth realm="' + to_utf8(realm) + '",\n' + indentation
+        s = 'OAuth realm="' + to_utf8(realm) + '"' + param_delimiter + '\n' + indentation
     else:
         s = 'OAuth '
     oauth_params = protocol_params_sanitize(oauth_params)
     normalized_param_pairs = urlencode_sl(oauth_params)
-    delimiter = ",\n" + indentation
+    delimiter = param_delimiter + "\n" + indentation
     s += delimiter.join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
 
 
-def parse_authorization_header_value(header_value):
+def parse_authorization_header_value(header_value, param_delimiter=","):
     """
     Parses the OAuth Authorization header.
 
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param header_value:
         Header value.
+    :param param_delimiter:
+        The delimiter used to separate header value parameters.
+        According to the Specification, this must be a comma ",". However,
+        certain services like Yahoo! use "&" instead. Comma is default.
+
+        See https://github.com/oauth/oauth-ruby/pull/12
     :returns:
         Dictionary of parameter name value pairs.
     """
     d = {}
-    param_list, realm = _parse_authorization_header_value_l(header_value)
+    param_list, realm = _parse_authorization_header_value_l(header_value, param_delimiter=param_delimiter)
     for name, value in param_list:
         d[name] = [value]
         #if name in d:
@@ -427,7 +439,7 @@ def parse_authorization_header_value(header_value):
     return d, realm
 
 
-def _parse_authorization_header_value_l(header_value):
+def _parse_authorization_header_value_l(header_value, param_delimiter=","):
     """
     Parses the OAuth Authorization header preserving the order of the
     parameters as in the header value.
@@ -435,6 +447,12 @@ def _parse_authorization_header_value_l(header_value):
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param header_value:
         Header value. Non protocol parameters will be ignored.
+    :param param_delimiter:
+        The delimiter used to separate header value parameters.
+        According to the Specification, this must be a comma ",". However,
+        certain services like Yahoo! use "&" instead. Comma is default.
+
+        See https://github.com/oauth/oauth-ruby/pull/12
     :returns:
         Tuple:
         (list of parameter name value pairs in order or appearance, realm)
@@ -447,12 +465,12 @@ def _parse_authorization_header_value_l(header_value):
     header_value = re.sub(pattern, "", to_utf8(header_value).strip(), 1)
     realm = None
 
-    pairs = [param_pair.strip() for param_pair in header_value.split(",")]
+    pairs = [param_pair.strip() for param_pair in header_value.split(param_delimiter)]
     decoded_pairs = []
     for param in pairs:
         if not param:
-            if header_value.endswith(","):
-                raise ValueError("Malformed `Authorization` header value -- found trailing comma")
+            if header_value.endswith(param_delimiter):
+                raise ValueError("Malformed `Authorization` header value -- found trailing `%r` character" % param_delimiter)
             #else:
             #    continue
         nv = param.split("=", 1)
