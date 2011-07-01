@@ -30,8 +30,8 @@ Percent-encoding
 Query string parsing and construction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autofunction:: parse_qs
-.. autofunction:: urlencode_sorted
-.. autofunction:: urlencode_sorted_list
+.. autofunction:: urlencode_s
+.. autofunction:: urlencode_sl
 
 URL parsing and convenience utilities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,7 +127,7 @@ def percent_decode(value):
     return unquote_plus(to_utf8(value))
 
 
-def urlencode_sorted(query_params, allow_func=None):
+def urlencode_s(query_params, allow_func=None):
     """
     Serializes a dictionary of query parameters into a string of query
     parameters, ``name=value`` pairs separated by ``&``, sorted first by
@@ -152,10 +152,10 @@ def urlencode_sorted(query_params, allow_func=None):
         percent-encoding rules and specification.
     """
     return "&".join([k + "=" + v for k, v in
-                     urlencode_sorted_list(query_params, allow_func=allow_func)])
+                     urlencode_sl(query_params, allow_func=allow_func)])
 
 
-def urlencode_sorted_list(query_params, allow_func=None):
+def urlencode_sl(query_params, allow_func=None):
     """
     Serializes a dictionary of query parameters into a list of query
     parameters, ``(name, value)`` pairs, sorted first by ``name`` then by
@@ -281,7 +281,7 @@ def query_params_add(url, extra_query_params, allow_func=None):
     scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
 
     d = query_params_merge(query, extra_query_params)
-    qs = urlencode_sorted(d, allow_func=allow_func)
+    qs = urlencode_s(d, allow_func=allow_func)
     return urlunparse((scheme, netloc, path, params, qs, fragment))
 
 
@@ -355,7 +355,7 @@ def query_params_append(query_params, extra_query_params):
 
     query_params = query_params_dict(query_params)
     extra_query_params = query_params_dict(extra_query_params)
-    return "&".join([urlencode_sorted(query_params), urlencode_sorted(extra_query_params)])
+    return "&".join([urlencode_s(query_params), urlencode_s(extra_query_params)])
 
 
 def query_params_filter(query_params, allow_func=None):
@@ -423,7 +423,7 @@ def query_params_dict(query_params):
                 d[n] = list(v)
         return d
         # Alternative, but slower:
-        #return parse_qs(urlencode_sorted(query_params))
+        #return parse_qs(urlencode_s(query_params))
     elif query_params is None:
         return {}
     else:
@@ -501,7 +501,7 @@ def url_sanitize(url):
         Normalized sanitized URL.
     """
     scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
-    query = urlencode_sorted(query_params_sanitize(query))
+    query = urlencode_s(query_params_sanitize(query))
     return urlunparse((scheme, netloc, path, params, query, None))
 
 
@@ -530,6 +530,6 @@ def url_append_query(url, query_params):
         return url
     scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
     query = (query + "&") if query else query
-    query_string = query + urlencode_sorted(query_params_dict(query_params))
+    query_string = query + urlencode_s(query_params_dict(query_params))
     return urlunparse((scheme, netloc, path, params, query_string, fragment))
 

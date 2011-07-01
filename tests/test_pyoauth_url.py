@@ -8,7 +8,7 @@ try:
 except ImportError:
     assert_dict_equal = assert_equal
 from pyoauth.url import percent_decode, percent_encode, parse_qs, \
-    urlencode_sorted, urlencode_sorted_list, query_params_dict, \
+    urlencode_s, urlencode_sl, query_params_dict, \
     query_params_merge, urlparse_normalized, query_params_add, \
     query_params_sanitize, protocol_params_sanitize, url_sanitize, \
     url_append_query
@@ -237,7 +237,7 @@ class Test_oauth_urlencode(object):
             "oauth_nonce": "7d8f3e4a",
         }
         valid_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
-        assert_equal(urlencode_sorted(params), valid_query_string)
+        assert_equal(urlencode_s(params), valid_query_string)
 
 
 class Test_oauth_urlencode_sl(object):
@@ -270,7 +270,7 @@ class Test_oauth_urlencode_sl(object):
             ("oauth_timestamp", "137131201"),
             ("oauth_token", "kkk9d7dh3k39sjv7"),
         ]
-        assert_equal(urlencode_sorted_list(params), valid_params_list)
+        assert_equal(urlencode_sl(params), valid_params_list)
 
     def test_blank_list_value_not_preserved(self):
         params = {
@@ -288,7 +288,7 @@ class Test_oauth_urlencode_sl(object):
             ("oauth_timestamp", "137131201"),
             ("oauth_token", "kkk9d7dh3k39sjv7"),
         ]
-        assert_equal(urlencode_sorted_list(params), valid_params_list)
+        assert_equal(urlencode_sl(params), valid_params_list)
 
 
 
@@ -324,7 +324,7 @@ class Test_oauth_url_query_params_merge(object):
 &oauth_token=kkk9d7dh3k39sjv7\
 """
         resulting_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
-        assert_equal(urlencode_sorted(query_params_merge(params1, params2, params3)), resulting_query_string)
+        assert_equal(urlencode_s(query_params_merge(params1, params2, params3)), resulting_query_string)
 
 
 class Test_urlparse_normalized(object):
@@ -457,7 +457,7 @@ class Test_oauth_url_query_params_dict(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_equal(urlencode_sorted(query_params_dict(query_string)), urlencode_sorted(expected_params))
+        assert_equal(urlencode_s(query_params_dict(query_string)), urlencode_s(expected_params))
 
     def test_ignores_prefixed_question_mark_character_if_included(self):
         query_string = "?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
@@ -473,7 +473,7 @@ class Test_oauth_url_query_params_dict(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_equal(urlencode_sorted(query_params_dict(query_string)), urlencode_sorted(expected_params))
+        assert_equal(urlencode_s(query_params_dict(query_string)), urlencode_s(expected_params))
 
     def test_returns_empty_dict_when_argument_None(self):
         assert_equal(query_params_dict(None), {})
@@ -505,10 +505,10 @@ class Test_oauth_url_query_params_sanitize(object):
             "c@": [""],
             "c2": [""],
         }
-        expected_result = urlencode_sorted(expected_params)
+        expected_result = urlencode_s(expected_params)
 
-        assert_equal(urlencode_sorted(query_params_sanitize(params)), expected_result)
-        assert_equal(urlencode_sorted(query_params_sanitize(query_string)), expected_result)
+        assert_equal(urlencode_s(query_params_sanitize(params)), expected_result)
+        assert_equal(urlencode_s(query_params_sanitize(query_string)), expected_result)
 
 
 class Test_oauth_url_sanitize(object):
@@ -521,7 +521,7 @@ class Test_oauth_url_sanitize(object):
             "c@": [""],
             "c2": [""],
         }
-        expected_result = "http://www.example.com/request?" + urlencode_sorted(expected_params)  # Fragment ignored.
+        expected_result = "http://www.example.com/request?" + urlencode_s(expected_params)  # Fragment ignored.
         assert_equal(url_sanitize(query_string), expected_result)
 
 class Test_oauth_protocol_params_sanitize(object):
@@ -546,10 +546,10 @@ class Test_oauth_protocol_params_sanitize(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        expected_result = urlencode_sorted(expected_params)
+        expected_result = urlencode_s(expected_params)
 
-        assert_equal(urlencode_sorted(protocol_params_sanitize(params)), expected_result)
-        assert_equal(urlencode_sorted(protocol_params_sanitize(query_string)), expected_result)
+        assert_equal(urlencode_s(protocol_params_sanitize(params)), expected_result)
+        assert_equal(urlencode_s(protocol_params_sanitize(query_string)), expected_result)
 
     def test_raises_ValueError_when_multiple_protocol_param_values_found(self):
         params = {

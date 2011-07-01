@@ -40,21 +40,21 @@ from pyoauth.url import \
     protocol_params_sanitize, \
     query_params_sanitize, \
     query_params_add, \
-    urlencode_sorted, \
+    urlencode_s, \
     url_append_query, \
     parse_qs, query_params_append
-from pyoauth.utils import oauth_generate_nonce, \
-    oauth_generate_timestamp, \
-    oauth_get_hmac_sha1_signature, \
-    oauth_get_rsa_sha1_signature, \
-    oauth_get_plaintext_signature, \
-    oauth_get_normalized_authorization_header_value
+from pyoauth.utils import generate_nonce, \
+    generate_timestamp, \
+    get_hmac_sha1_signature, \
+    get_rsa_sha1_signature, \
+    get_plaintext_signature, \
+    get_normalized_authorization_header_value
 
 
 SIGNATURE_METHOD_MAP = {
-    SIGNATURE_METHOD_HMAC_SHA1: oauth_get_hmac_sha1_signature,
-    SIGNATURE_METHOD_RSA_SHA1: oauth_get_rsa_sha1_signature,
-    SIGNATURE_METHOD_PLAINTEXT: oauth_get_plaintext_signature,
+    SIGNATURE_METHOD_HMAC_SHA1: get_hmac_sha1_signature,
+    SIGNATURE_METHOD_RSA_SHA1: get_rsa_sha1_signature,
+    SIGNATURE_METHOD_PLAINTEXT: get_plaintext_signature,
 }
 
 
@@ -457,8 +457,8 @@ class Client(object):
         oauth_params = dict(
             oauth_consumer_key=self._client_credentials.identifier,
             oauth_signature_method=oauth_signature_method,
-            oauth_timestamp=oauth_generate_timestamp(),
-            oauth_nonce=oauth_generate_nonce(),
+            oauth_timestamp=generate_timestamp(),
+            oauth_nonce=generate_nonce(),
             oauth_version=self.oauth_version,
         )
 
@@ -507,7 +507,7 @@ class Client(object):
         #
         # See Parameter Transmission (http://tools.ietf.org/html/rfc5849#section-3.6)
         if self._use_authorization_header or headers.has_key("Authorization"):
-            auth_header_value = oauth_get_normalized_authorization_header_value(oauth_params, realm=realm)
+            auth_header_value = get_normalized_authorization_header_value(oauth_params, realm=realm)
             headers["Authorization"] = auth_header_value
             # Empty the params if using authorization so that they are not
             # included multiple times in a request below.

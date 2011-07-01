@@ -24,22 +24,22 @@
 
 Functions
 ---------
-.. autofunction:: oauth_generate_nonce
-.. autofunction:: oauth_generate_verification_code
-.. autofunction:: oauth_generate_timestamp
+.. autofunction:: generate_nonce
+.. autofunction:: generate_verification_code
+.. autofunction:: generate_timestamp
 
 OAuth Signature and Base String
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: oauth_get_hmac_sha1_signature
-.. autofunction:: oauth_get_rsa_sha1_signature
-.. autofunction:: oauth_check_rsa_sha1_signature
-.. autofunction:: oauth_get_plaintext_signature
-.. autofunction:: oauth_get_signature_base_string
+.. autofunction:: get_hmac_sha1_signature
+.. autofunction:: get_rsa_sha1_signature
+.. autofunction:: check_rsa_sha1_signature
+.. autofunction:: get_plaintext_signature
+.. autofunction:: get_signature_base_string
 
 Authorization Header
 ~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: oauth_get_normalized_authorization_header_value
-.. autofunction:: oauth_parse_authorization_header_value
+.. autofunction:: get_normalized_authorization_header_value
+.. autofunction:: parse_authorization_header_value
 
 """
 
@@ -81,11 +81,11 @@ except ImportError:
 
 from pyoauth.unicode import to_utf8
 from pyoauth.url import percent_encode, percent_decode, \
-    urlencode_sorted_list, urlencode_sorted, urlparse_normalized, \
+    urlencode_sl, urlencode_s, urlparse_normalized, \
     protocol_params_sanitize, query_params_sanitize
 
 
-def oauth_generate_nonce(length=-1):
+def generate_nonce(length=-1):
     """
     Calculates an OAuth nonce.
 
@@ -103,7 +103,7 @@ def oauth_generate_nonce(length=-1):
     return binascii.b2a_hex(uuid.uuid4().bytes)[:length]
 
 
-def oauth_generate_verification_code(length=8):
+def generate_verification_code(length=8):
     """
     Calculates an OAuth verification code.
 
@@ -125,10 +125,10 @@ def oauth_generate_verification_code(length=8):
         A string representation of a randomly-generated hexadecimal OAuth
         verification code.
     """
-    return oauth_generate_nonce(length=length)
+    return generate_nonce(length=length)
 
 
-def oauth_generate_timestamp():
+def generate_timestamp():
     """
     Generates an OAuth timestamp.
 
@@ -140,7 +140,7 @@ def oauth_generate_timestamp():
     return bytes(int(time.time()))
 
 
-def oauth_get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=None, token_secret=None):
+def get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=None, token_secret=None):
     """
     Calculates an HMAC-SHA1 signature for a base string.
 
@@ -161,13 +161,13 @@ def oauth_get_hmac_sha1_signature(consumer_secret, method, url, oauth_params=Non
         HMAC-SHA1 signature.
     """
     oauth_params = oauth_params or {}
-    base_string = oauth_get_signature_base_string(method, url, oauth_params)
-    key = _oauth_get_plaintext_signature(consumer_secret, token_secret=token_secret)
+    base_string = get_signature_base_string(method, url, oauth_params)
+    key = _get_plaintext_signature(consumer_secret, token_secret=token_secret)
     hashed = hmac.new(key, base_string, sha1)
     return binascii.b2a_base64(hashed.digest())[:-1]
 
 
-def oauth_get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None, token_secret=None, _rsa=RSA):
+def get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None, token_secret=None, _rsa=RSA):
     """
     Calculates an RSA-SHA1 OAuth signature.
 
@@ -198,7 +198,7 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None
     except AttributeError:
         key = _rsa.importKey(consumer_secret)
 
-    base_string = oauth_get_signature_base_string(method, url, oauth_params)
+    base_string = get_signature_base_string(method, url, oauth_params)
     digest = sha1(base_string).digest()
     signature = key.sign(_pkcs1_v1_5_encode(key, digest), "")[0]
     signature_bytes = long_to_bytes(signature)
@@ -206,7 +206,7 @@ def oauth_get_rsa_sha1_signature(consumer_secret, method, url, oauth_params=None
     return binascii.b2a_base64(signature_bytes)[:-1]
 
 
-def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, oauth_params=None, token_secret=None, _rsa=RSA):
+def check_rsa_sha1_signature(signature, consumer_secret, method, url, oauth_params=None, token_secret=None, _rsa=RSA):
     """
     Verifies a RSA-SHA1 OAuth signature.
 
@@ -241,7 +241,7 @@ def oauth_check_rsa_sha1_signature(signature, consumer_secret, method, url, oaut
     except AttributeError:
         key = _rsa.importKey(consumer_secret)
 
-    base_string = oauth_get_signature_base_string(method, url, oauth_params)
+    base_string = get_signature_base_string(method, url, oauth_params)
     digest = sha1(base_string).digest()
     signature = bytes_to_long(binascii.a2b_base64(signature))
     data = _pkcs1_v1_5_encode(key, digest)
@@ -272,7 +272,7 @@ def _pkcs1_v1_5_encode(rsa_key, sha1_digest):
     return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + sha1_digest
 
 
-def oauth_get_plaintext_signature(consumer_secret, method, url, oauth_params=None, token_secret=None):
+def get_plaintext_signature(consumer_secret, method, url, oauth_params=None, token_secret=None):
     """
     Calculates a PLAINTEXT signature for a base string.
 
@@ -292,10 +292,10 @@ def oauth_get_plaintext_signature(consumer_secret, method, url, oauth_params=Non
     :returns:
         PLAINTEXT signature.
     """
-    return _oauth_get_plaintext_signature(consumer_secret, token_secret=token_secret)
+    return _get_plaintext_signature(consumer_secret, token_secret=token_secret)
 
 
-def _oauth_get_plaintext_signature(consumer_secret, token_secret=None):
+def _get_plaintext_signature(consumer_secret, token_secret=None):
     """
     Calculates the PLAINTEXT signature.
 
@@ -311,7 +311,7 @@ def _oauth_get_plaintext_signature(consumer_secret, token_secret=None):
     return "&".join(sig_elems)
 
 
-def oauth_get_signature_base_string(method, url, oauth_params):
+def get_signature_base_string(method, url, oauth_params):
     """
     Calculates a signature base string based on the URL, method, and
     oauth arameters.
@@ -345,12 +345,12 @@ def oauth_get_signature_base_string(method, url, oauth_params):
         raise ValueError("Query parameters must be specified as a dictionary.")
 
     scheme, netloc, path, matrix_params, query, fragment = urlparse_normalized(url)
-    query_string = _oauth_get_signature_base_string_query(query, oauth_params)
+    query_string = _get_signature_base_string_query(query, oauth_params)
     normalized_url = urlunparse((scheme, netloc, path, matrix_params, None, None))
     return "&".join(percent_encode(e) for e in [method_normalized, normalized_url, query_string])
 
 
-def _oauth_get_signature_base_string_query(url_query_params, oauth_params):
+def _get_signature_base_string_query(url_query_params, oauth_params):
     """
     Serializes URL query parameters and OAuth protocol parameters into a valid
     OAuth base string URI query string.
@@ -377,11 +377,11 @@ def _oauth_get_signature_base_string_query(url_query_params, oauth_params):
     # the entire list of parameters.
     def allow_func(name, value):
         return name not in ('oauth_signature', )
-    query = urlencode_sorted(query_params, allow_func=allow_func)
+    query = urlencode_s(query_params, allow_func=allow_func)
     return query
 
 
-def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
+def get_normalized_authorization_header_value(oauth_params, realm=None):
     """
     Builds the Authorization header value.
 
@@ -400,13 +400,13 @@ def oauth_get_normalized_authorization_header_value(oauth_params, realm=None):
     else:
         s = 'OAuth '
     oauth_params = protocol_params_sanitize(oauth_params)
-    normalized_param_pairs = urlencode_sorted_list(oauth_params)
+    normalized_param_pairs = urlencode_sl(oauth_params)
     delimiter = ",\n" + indentation
     s += delimiter.join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
     return s
 
 
-def oauth_parse_authorization_header_value(header_value):
+def parse_authorization_header_value(header_value):
     """
     Parses the OAuth Authorization header.
 
@@ -417,7 +417,7 @@ def oauth_parse_authorization_header_value(header_value):
         Dictionary of parameter name value pairs.
     """
     d = {}
-    param_list, realm = _oauth_parse_authorization_header_value_l(header_value)
+    param_list, realm = _parse_authorization_header_value_l(header_value)
     for name, value in param_list:
         d[name] = [value]
         #if name in d:
@@ -428,7 +428,7 @@ def oauth_parse_authorization_header_value(header_value):
     return d, realm
 
 
-def _oauth_parse_authorization_header_value_l(header_value):
+def _parse_authorization_header_value_l(header_value):
     """
     Parses the OAuth Authorization header preserving the order of the
     parameters as in the header value.
