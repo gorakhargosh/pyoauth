@@ -43,7 +43,7 @@ from pyoauth.url import \
     url_add_query, \
     urlencode_s, \
     url_append_query, \
-    parse_qs, query_params_append, is_valid_callback_url
+    parse_qs, query_string_append, is_valid_callback_url
 from pyoauth.utils import generate_nonce, \
     generate_timestamp, \
     get_hmac_sha1_signature, \
@@ -538,7 +538,7 @@ class Client(object):
             # in this case but added to the payload instead.
             request_url = url
             headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
-            payload = query_params_append(payload_params, oauth_params)
+            payload = query_string_append(payload_params, oauth_params)
         else: #if method == "GET":
             request_url = url_append_query(url_with_payload_params_added, oauth_params)
             payload = ""

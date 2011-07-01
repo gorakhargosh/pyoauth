@@ -11,7 +11,7 @@ from pyoauth.url import percent_decode, percent_encode, parse_qs, \
     urlencode_s, urlencode_sl, query_params_dict, \
     query_params_add, urlparse_normalized, url_add_query, \
     query_params_sanitize, protocol_params_sanitize, url_sanitize, \
-    url_append_query
+    url_append_query, query_string_append
 
 from urlparse import urlparse
 
@@ -326,6 +326,23 @@ class Test_query_params_add(object):
         resulting_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
         assert_equal(urlencode_s(query_params_add(params1, params2, params3)), resulting_query_string)
 
+
+
+class Test_query_string_append(object):
+    def test_appends_query_params_properly(self):
+        params1 = {
+            "a2": "r b",
+            "b5": "=%3D",
+            "a3": ["a"],
+            "c2": [""],
+        }
+        params2 = {
+            "a3": ["2 q"],
+            "c@": "",
+        }
+        params3 = "oauth_nonce=7d8f3e4a"
+        resulting_query_string = "a2=r%20b&a3=a&b5=%3D%253D&c2=&a3=2%20q&c%40=&oauth_nonce=7d8f3e4a"
+        assert_equal(query_string_append(params1, params2, params3), resulting_query_string)
 
 class Test_urlparse_normalized(object):
     def test_valid_parts_and_normalization(self):

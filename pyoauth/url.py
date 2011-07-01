@@ -368,24 +368,22 @@ def query_params_add(query_params, *extra_query_params):
 #    return d
 
 
-def query_params_append(query_params, extra_query_params):
+def query_string_append(*query_params):
     """
     Appends additional query parameters to a query string. The additional
     query parameters appear after the initial query string.
 
-    :param query_params:
-        Query parameter dictionary or query string.
     :param extra_query_params:
         Additional query parameters dictionary or query string.
     :returns:
         Concatenated query string.
     """
-    if not extra_query_params: return query_params
-    if not query_params:       return extra_query_params
-
-    query_params = query_params_dict(query_params)
-    extra_query_params = query_params_dict(extra_query_params)
-    return "&".join([urlencode_s(query_params), urlencode_s(extra_query_params)])
+    li = []
+    for qp in query_params:
+        qs = urlencode_s(query_params_dict(qp))
+        if qs:
+            li.append(qs)
+    return "&".join(li)
 
 
 def query_params_filter(query_params, allow_func=None):
