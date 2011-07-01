@@ -444,11 +444,11 @@ def parse_authorization_header_value(header_value, param_delimiter=","):
     d = {}
     param_list, realm = _parse_authorization_header_value_l(header_value, param_delimiter=param_delimiter)
     for name, value in param_list:
-        d[name] = [value]
-        #if name in d:
-        #    d[name].append(value)
-        #else:
-        #    d[name] = [value]
+        #d[name] = [value]
+        if name in d:
+            d[name].append(value)
+        else:
+            d[name] = [value]
     d = protocol_params_sanitize(d)
     return d, realm
 

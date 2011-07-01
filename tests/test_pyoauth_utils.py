@@ -453,7 +453,7 @@ class Test_oauth_parse_authorization_header(object):
     def test_ValueError_when_multiple_values(self):
         test_value = '''OAuth realm="Examp%20le",
             oauth_something="%20Some+Example",
-            oauth_something="another%20thing",
+            oauth_something="another%20thing"
         '''
         assert_raises(ValueError, parse_authorization_header_value, test_value)
 
