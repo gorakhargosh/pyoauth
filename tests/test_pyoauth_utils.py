@@ -14,8 +14,14 @@ class Test_oauth_generate_nonce(object):
                          "Nonce is not unique.")
 
     def test_length(self):
-        default_length = 31
+        default_length = 32
         assert_equal(len(generate_nonce()), default_length,
+                     "Nonce length does not match default expected length of %d." % default_length)
+        assert_equal(len(generate_nonce(None)), default_length,
+                     "Nonce length does not match default expected length of %d." % default_length)
+        assert_equal(len(generate_nonce(0)), default_length,
+                     "Nonce length does not match default expected length of %d." % default_length)
+        assert_equal(len(generate_nonce(-1)), default_length,
                      "Nonce length does not match default expected length of %d." % default_length)
         assert_equal(len(generate_nonce(length=10)), 10,
                      "Nonce length does not match expected length.")
@@ -30,6 +36,12 @@ class Test_oauth_generate_verification_code(object):
         default_length = 8
         assert_equal(len(generate_verification_code()), default_length,
                      "Verification code length does not match default expected length of %d." % default_length)
+        assert_equal(len(generate_verification_code(None)), 32,
+                     "Verification code length does not match default expected length of %d." % 32)
+        assert_equal(len(generate_verification_code(0)), 32,
+                     "Verification code length does not match default expected length of %d." % 32)
+        assert_equal(len(generate_verification_code(-1)), 32,
+                     "Verification code length does not match default expected length of %d." % 32)
         assert_equal(len(generate_verification_code(length=10)), 10,
                      "Verification code length does not match expected length.")
 

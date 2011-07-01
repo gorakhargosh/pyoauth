@@ -45,6 +45,7 @@ Authorization Header
 
 import binascii
 import hmac
+import logging
 import time
 import uuid
 import re
@@ -84,7 +85,7 @@ from pyoauth.url import percent_encode, percent_decode, \
     protocol_params_sanitize, query_params_sanitize
 
 
-def generate_nonce(length=-1):
+def generate_nonce(length=None):
     """
     Calculates an OAuth nonce.
 
@@ -94,11 +95,16 @@ def generate_nonce(length=-1):
 
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param length:
-        Length of the nonce to be returned.
-        Default -1, which means the entire 31-character nonce is returned.
+        Length of the nonce to be returned. Default None.
+        If 0, negative, or ``None``, the entire 32-character value will
+        be returned as well.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth nonce.
     """
+    if length > 32:
+        logging.warning("Maximum verification code length is restricted to 32 characters.")
+    elif length <= 0:  # Negative, 0, or None check.
+        length = None
     return binascii.b2a_hex(uuid.uuid4().bytes)[:length]
 
 
@@ -119,7 +125,9 @@ def generate_verification_code(length=8):
         Resource Owner Authorization
         (http://tools.ietf.org/html/rfc5849#section-2.2)
     :param length:
-        Length of the verification code. Defaults to 8.
+        Length of the nonce to be returned. Default 8.
+        If 0, negative, or ``None``, the entire 32-character value will
+        be returned as well.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth
         verification code.
