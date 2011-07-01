@@ -176,7 +176,7 @@ def get_hmac_sha1_signature(client_shared_secret,
 def get_rsa_sha1_signature(client_shared_secret,
                            method, url, oauth_params=None,
                            token_or_temporary_shared_secret=None,
-                           _rsa=RSA):
+                           _test_rsa=RSA):
     """
     Calculates an RSA-SHA1 OAuth signature.
 
@@ -198,14 +198,14 @@ def get_rsa_sha1_signature(client_shared_secret,
     """
     oauth_params = oauth_params or {}
 
-    if _rsa is None:
+    if _test_rsa is None:
         raise NotImplementedError()
 
     try:
         getattr(client_shared_secret, "sign")
         key = client_shared_secret
     except AttributeError:
-        key = _rsa.importKey(client_shared_secret)
+        key = _test_rsa.importKey(client_shared_secret)
 
     base_string = get_signature_base_string(method, url, oauth_params)
     digest = sha1(base_string).digest()
@@ -218,7 +218,7 @@ def get_rsa_sha1_signature(client_shared_secret,
 def check_rsa_sha1_signature(signature, client_shared_secret,
                              method, url, oauth_params=None,
                              token_or_temporary_shared_secret=None,
-                             _rsa=RSA):
+                             _test_rsa=RSA):
     """
     Verifies a RSA-SHA1 OAuth signature.
 
@@ -244,14 +244,14 @@ def check_rsa_sha1_signature(signature, client_shared_secret,
     """
     oauth_params = oauth_params or {}
 
-    if _rsa is None:
+    if _test_rsa is None:
         raise NotImplementedError()
 
     try:
         getattr(client_shared_secret, "publickey")
         key = client_shared_secret
     except AttributeError:
-        key = _rsa.importKey(client_shared_secret)
+        key = _test_rsa.importKey(client_shared_secret)
 
     base_string = get_signature_base_string(method, url, oauth_params)
     digest = sha1(base_string).digest()

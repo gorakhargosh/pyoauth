@@ -510,6 +510,7 @@ class Client(object):
         )
 
         # Filter and add additional OAuth parameters.
+        _force_override_reserved_oauth_params_for_tests = "__test_force_override_reserved_oauth_params" in extra_oauth_params
         extra_oauth_params = protocol_params_sanitize(extra_oauth_params)
         reserved_oauth_params = (
             "oauth_signature",     # Calculated from given parameters.
@@ -519,7 +520,7 @@ class Client(object):
             "oauth_version",       # Optional but MUST be set to "1.0" according to spec.
         )
         for k, v in extra_oauth_params.items():
-            if k in reserved_oauth_params:
+            if not _force_override_reserved_oauth_params_for_tests and k in reserved_oauth_params:
                 # Don't override these required system-generated protocol parameters.
                 raise ValueError("Cannot override system-generated protocol parameter `%r`." % k)
             else:

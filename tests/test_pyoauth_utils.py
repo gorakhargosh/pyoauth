@@ -195,7 +195,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
                       self.url,
                       self.oauth_params,
                       self.oauth_token_secret,
-                      None
+                      _test_rsa=None
         )
 
     def test_check_raises_NotImplementedError_when_Crypto_unavailable(self):
@@ -208,7 +208,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
                       self.url,
                       self.oauth_params,
                       self.oauth_token_secret,
-                      None
+                      _test_rsa=None
         )
 
 
