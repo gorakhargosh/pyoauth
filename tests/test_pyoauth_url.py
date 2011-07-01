@@ -8,10 +8,10 @@ try:
 except ImportError:
     assert_dict_equal = assert_equal
 from pyoauth.url import percent_decode, percent_encode, parse_qs, \
-    urlencode_s, urlencode_sl, query_params_dict, \
-    query_params_add, urlparse_normalized, url_add_query, \
+    urlencode_s, urlencode_sl, query_unflatten, \
+    query_add, urlparse_normalized, url_add_query, \
     query_params_sanitize, protocol_params_sanitize, url_sanitize, \
-    url_append_query, query_string_append
+    url_append_query, query_append
 
 from urlparse import urlparse
 
@@ -305,7 +305,7 @@ class Test_url_add_query(object):
         resulting_url = "http://UserName:PassWORdX@www.example.com:8000/result;param1?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7#fragment"
         assert_equal(url_add_query(url, params1), resulting_url)
 
-class Test_query_params_add(object):
+class Test_query_add(object):
     def test_adds_query_params_properly(self):
         params1 = {
             "a2": "r b",
@@ -324,11 +324,11 @@ class Test_query_params_add(object):
 &oauth_token=kkk9d7dh3k39sjv7\
 """
         resulting_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
-        assert_equal(urlencode_s(query_params_add(params1, params2, params3)), resulting_query_string)
+        assert_equal(urlencode_s(query_add(params1, params2, params3)), resulting_query_string)
 
 
 
-class Test_query_string_append(object):
+class Test_query_append(object):
     def test_appends_query_params_properly(self):
         params1 = {
             "a2": "r b",
@@ -342,7 +342,7 @@ class Test_query_string_append(object):
         }
         params3 = "oauth_nonce=7d8f3e4a"
         resulting_query_string = "a2=r%20b&a3=a&b5=%3D%253D&c2=&a3=2%20q&c%40=&oauth_nonce=7d8f3e4a"
-        assert_equal(query_string_append(params1, params2, params3), resulting_query_string)
+        assert_equal(query_append(params1, params2, params3), resulting_query_string)
 
 class Test_urlparse_normalized(object):
     def test_valid_parts_and_normalization(self):
@@ -432,7 +432,7 @@ class Test_urlparse_normalized(object):
         assert_equal(urlparse_normalized(url), result)
 
 
-class Test_query_params_dict(object):
+class Test_query_unflatten(object):
     def test_unflattens_dict(self):
         params = {
             "a2": "r b",
@@ -458,7 +458,7 @@ class Test_query_params_dict(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_dict_equal(query_params_dict(params), expected_params)
+        assert_dict_equal(query_unflatten(params), expected_params)
 
     def test_parses_query_string(self):
         query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
@@ -474,7 +474,7 @@ class Test_query_params_dict(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_equal(urlencode_s(query_params_dict(query_string)), urlencode_s(expected_params))
+        assert_equal(urlencode_s(query_unflatten(query_string)), urlencode_s(expected_params))
 
     def test_ignores_prefixed_question_mark_character_if_included(self):
         query_string = "?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
@@ -490,14 +490,14 @@ class Test_query_params_dict(object):
             "oauth_timestamp": ["137131201"],
             "oauth_nonce": ["7d8f3e4a"],
         }
-        assert_equal(urlencode_s(query_params_dict(query_string)), urlencode_s(expected_params))
+        assert_equal(urlencode_s(query_unflatten(query_string)), urlencode_s(expected_params))
 
     def test_returns_empty_dict_when_argument_None(self):
-        assert_equal(query_params_dict(None), {})
+        assert_equal(query_unflatten(None), {})
 
     def test_ValueError_when_invalid_query_params_value(self):
-        assert_raises(ValueError, query_params_dict, True)
-        assert_raises(ValueError, query_params_dict, 5)
+        assert_raises(ValueError, query_unflatten, True)
+        assert_raises(ValueError, query_unflatten, 5)
 
 
 class Test_query_params_sanitize(object):

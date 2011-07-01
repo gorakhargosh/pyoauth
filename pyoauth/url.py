@@ -42,9 +42,9 @@ URL parsing and convenience utilities
 
 Query parameters
 ~~~~~~~~~~~~~~~~
-.. autofunction:: query_params_add
-.. autofunction:: query_params_filter
-.. autofunction:: query_params_dict
+.. autofunction:: query_add
+.. autofunction:: query_filter
+.. autofunction:: query_unflatten
 
 Parameter sanitization
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -280,7 +280,7 @@ def url_add_query(url, extra_query_params, allow_func=None):
     """
     scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
 
-    d = query_params_add(query, extra_query_params)
+    d = query_add(query, extra_query_params)
     qs = urlencode_s(d, allow_func=allow_func)
     return urlunparse((scheme, netloc, path, params, qs, fragment))
 
@@ -310,27 +310,23 @@ def url_append_query(url, query_params):
         return url
     scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
     query = (query + "&") if query else query
-    query_string = query + urlencode_s(query_params_dict(query_params))
+    query_string = query + urlencode_s(query_unflatten(query_params))
     return urlunparse((scheme, netloc, path, params, query_string, fragment))
 
 
 
-def query_params_add(query_params, *extra_query_params):
+def query_add(*query_params):
     """
     Merges multiple query parameter dictionaries or strings.
 
-    :param query_params:
-        Query string or a dictionary of query parameters.
     :param extra_query_params:
         One or more query string or a dictionary of query parameters.
     :returns:
         A dictionary of merged query parameters.
     """
-    query_params = query_params_dict(query_params)
     d = {}
-    d.update(query_params)
-    for qp in extra_query_params:
-        qp = query_params_dict(qp)
+    for qp in query_params:
+        qp = query_unflatten(qp)
         for name, value in qp.items():
             if name in d:
                 d[name].extend(value)
@@ -339,7 +335,7 @@ def query_params_add(query_params, *extra_query_params):
     return d
 
 
-#def query_params_update(query_params, *extra_query_params):
+#def query_update(query_params, *extra_query_params):
 #    """
 #    Updates a dictionary of query parameters or a query string with
 #    replacement parameter values from the specified additional
@@ -359,16 +355,16 @@ def query_params_add(query_params, *extra_query_params):
 #    :returns:
 #        A dictionary of updated query parameters.
 #    """
-#    query_params = query_params_dict(query_params)
+#    query_params = query_unflatten(query_params)
 #    d = {}
 #    d.update(query_params)
 #    for qp in extra_query_params:
-#        qp = query_params_dict(qp)
+#        qp = query_unflatten(qp)
 #        d.update(qp)
 #    return d
 
 
-def query_string_append(*query_params):
+def query_append(*query_params):
     """
     Appends additional query parameters to a query string. The additional
     query parameters appear after the initial query string.
@@ -380,13 +376,13 @@ def query_string_append(*query_params):
     """
     li = []
     for qp in query_params:
-        qs = urlencode_s(query_params_dict(qp))
+        qs = urlencode_s(query_unflatten(qp))
         if qs:
             li.append(qs)
     return "&".join(li)
 
 
-def query_params_filter(query_params, allow_func=None):
+def query_filter(query_params, allow_func=None):
     """
     Filters query parameters out of a query parameter dictionary or
     query string.
@@ -396,7 +392,7 @@ def query_params_filter(query_params, allow_func=None):
         def allow_only_parameter_names_starting_with_oauth(name, value):
             return name.startswith("oauth")
 
-        query_params_filter(query_params,
+        query_filter(query_params,
             allow_func=allow_only_parameter_names_starting_with_oauth)
 
     :param query_params:
@@ -412,7 +408,7 @@ def query_params_filter(query_params, allow_func=None):
     :returns:
         A filtered dictionary of query parameters.
     """
-    query_params = query_params_dict(query_params)
+    query_params = query_unflatten(query_params)
     d = {}
     for name, value in query_params.items():
         if allow_func and not allow_func(name, value):
@@ -422,7 +418,7 @@ def query_params_filter(query_params, allow_func=None):
     return d
 
 
-def query_params_dict(query_params):
+def query_unflatten(query_params):
     """
     Given a query string parses it into an un-flattened query parameter
     dictionary or given a parameter dictionary, un-flattens it.
@@ -490,7 +486,7 @@ def protocol_params_sanitize(query_params):
         else:
             logging.warning("Invalid protocol parameter ignored: `%r`", n)
             return False
-    return query_params_filter(query_params, allow_func=allow_func)
+    return query_filter(query_params, allow_func=allow_func)
 
 
 def query_params_sanitize(query_params):
@@ -512,7 +508,7 @@ def query_params_sanitize(query_params):
         else:
             logging.warning("Protocol parameter ignored from URL query parameters: `%r`", n)
             return False
-    return query_params_filter(query_params, allow_func=allow_func)
+    return query_filter(query_params, allow_func=allow_func)
 
 
 def url_sanitize(url):
