@@ -95,7 +95,7 @@ class Client(object):
 
             See http://tools.ietf.org/html/rfc5849#section-2.3
     :param use_authorization_header:
-        ``True`` to use the HTTP Authorization header to pass OAuth
+        ``True`` (default) to use the HTTP Authorization header to pass OAuth
         parameters; ``False`` will force using the URL query string or
         the entity-body of a request.
 
@@ -227,7 +227,7 @@ class Client(object):
 
         return self._build_request(method=method,
                                    url=self._temporary_credentials_request_uri,
-                                   payload_pparams=payload_params,
+                                   payload_params=payload_params,
                                    headers=headers,
                                    realm=realm,
                                    oauth_signature_method=oauth_signature_method,
