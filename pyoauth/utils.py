@@ -163,7 +163,8 @@ def get_hmac_sha1_signature(client_shared_secret,
     """
     oauth_params = oauth_params or {}
     base_string = get_signature_base_string(method, url, oauth_params)
-    key = _get_plaintext_signature(client_shared_secret, token_or_temporary_shared_secret)
+    key = _get_plaintext_signature(client_shared_secret,
+                                   token_or_temporary_shared_secret)
     hashed = hmac.new(key, base_string, sha1)
     return binascii.b2a_base64(hashed.digest())[:-1]
 
@@ -360,7 +361,9 @@ def get_signature_base_string(method, url, oauth_params):
     scheme, netloc, path, matrix_params, query, fragment = urlparse_normalized(url)
     query_string = _get_signature_base_string_query(query, oauth_params)
     normalized_url = urlunparse((scheme, netloc, path, matrix_params, None, None))
-    return "&".join(percent_encode(e) for e in [method_normalized, normalized_url, query_string])
+    return "&".join([
+        percent_encode(e) for e in [
+            method_normalized, normalized_url, query_string]])
 
 
 def _get_signature_base_string_query(url_query_params, oauth_params):
@@ -394,7 +397,9 @@ def _get_signature_base_string_query(url_query_params, oauth_params):
     return query
 
 
-def get_normalized_authorization_header_value(oauth_params, realm=None, param_delimiter=","):
+def get_normalized_authorization_header_value(oauth_params,
+                                              realm=None,
+                                              param_delimiter=","):
     """
     Builds the Authorization header value.
 
@@ -415,13 +420,20 @@ def get_normalized_authorization_header_value(oauth_params, realm=None, param_de
     """
     indentation = " " * len("Authorization: ")
     if realm:
-        s = 'OAuth realm="' + to_utf8(realm) + '"' + param_delimiter + '\n' + indentation
+        s = "".join([
+            'OAuth realm="',
+            to_utf8(realm),
+            '"',
+            param_delimiter,
+            '\n',
+            indentation
+        ])
     else:
         s = 'OAuth '
     oauth_params = protocol_params_sanitize(oauth_params)
     normalized_param_pairs = urlencode_sl(oauth_params)
     delimiter = param_delimiter + "\n" + indentation
-    s += delimiter.join([k+'="'+v+ '"' for k, v in normalized_param_pairs])
+    s += delimiter.join([k + '="' + v + '"' for k, v in normalized_param_pairs])
     return s
 
 
@@ -442,9 +454,14 @@ def parse_authorization_header_value(header_value, param_delimiter=","):
         Dictionary of parameter name value pairs.
     """
     d = {}
-    param_list, realm = _parse_authorization_header_value_l(header_value, param_delimiter=param_delimiter)
+    param_list, realm = \
+        _parse_authorization_header_value_l(header_value,
+                                            param_delimiter=param_delimiter)
     for name, value in param_list:
         #d[name] = [value]
+        # We do keep track of multiple values because they will be
+        # detected by the sanitization below and flagged as an error
+        # in the Authorization header value.
         if name in d:
             d[name].append(value)
         else:
@@ -479,7 +496,8 @@ def _parse_authorization_header_value_l(header_value, param_delimiter=","):
     header_value = re.sub(pattern, "", to_utf8(header_value).strip(), 1)
     realm = None
 
-    pairs = [param_pair.strip() for param_pair in header_value.split(param_delimiter)]
+    pairs = [param_pair.strip()
+             for param_pair in header_value.split(param_delimiter)]
     decoded_pairs = []
     for param in pairs:
         if not param:
