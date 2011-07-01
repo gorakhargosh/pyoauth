@@ -43,7 +43,7 @@ from pyoauth.url import \
     url_add_query, \
     urlencode_s, \
     url_append_query, \
-    parse_qs, query_params_append
+    parse_qs, query_params_append, is_valid_callback_url
 from pyoauth.utils import generate_nonce, \
     generate_timestamp, \
     get_hmac_sha1_signature, \
@@ -208,6 +208,9 @@ class Client(object):
         :returns:
             An instance of :class:`pyoauth.http.RequestProxy`.
         """
+        if not is_valid_callback_url(oauth_callback):
+            raise ValueError("`oauth_callback` parameter value is invalid: `%r`" % (oauth_callback, ))
+
         return self._build_request(method=method,
                                    url=self._temporary_credentials_request_uri,
                                    payload_pparams=payload_params,
@@ -279,6 +282,9 @@ class Client(object):
         :returns:
             An instance of :class:`pyoauth.http.RequestProxy`.
         """
+        if "oauth_callback" in extra_oauth_params:
+            raise ValueError("`oauth_callback` is reserved for use with temporary credentials request only.")
+
         return self._build_request(method=method,
                                    url=self._token_request_uri,
                                    payload_params=payload_params,
@@ -332,6 +338,9 @@ class Client(object):
         :returns:
             An instance of :class:`pyoauth.http.RequestProxy`.
         """
+        if "oauth_callback" in extra_oauth_params:
+            raise ValueError("`oauth_callback` is reserved for use with temporary credentials request only.")
+
         return self._build_request(method=method,
                                    url=url,
                                    payload_params=payload_params,
@@ -456,14 +465,6 @@ class Client(object):
             if k in preserved_oauth_params:
                 # Don't override these required system-generated protocol parameters.
                 raise ValueError("Cannot override system-generated protocol parameter `%r`." % k)
-            elif k == "oauth_callback":
-                if is_bytes_or_unicode(v) and v:
-                    # Set a callback URL only if it is available.
-                    # TODO: Either "oob" or absolute URI according to the spec.
-                    # TODO: Add validation.
-                    oauth_params["oauth_callback"] = v
-                else:
-                    raise ValueError("`oauth_callback` parameter value is invalid: `%r`" % (v, ))
             else:
                 if k in oauth_params:
                     # Warn when an existing protocol parameter is being

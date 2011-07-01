@@ -535,3 +535,25 @@ def url_sanitize(url):
     return urlunparse((scheme, netloc, path, params, query, None))
 
 
+def is_valid_callback_url(url):
+    """
+    Determines whether a specified URl is a valid oauth_callback callback
+    absolute URL as required by http://tools.ietf.org/html/rfc5849#section-2.1
+    (Temporary Credentials) in the OAuth specification.
+
+    :param url:
+        The URL to validate.
+    :returns:
+        ``True`` if valid; ``False`` otherwise.
+    """
+    if not is_bytes_or_unicode(oauth_callback):
+        return False
+    if url == "oob":
+        return True
+    else:
+        scheme, netloc, _, _, _, _, _ = urlparse(url)
+        if scheme.lower() in ("http", "https") and netloc:
+            return True
+        else:
+            return False
+
