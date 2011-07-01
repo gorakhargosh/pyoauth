@@ -107,7 +107,8 @@ class Client(object):
                  temporary_credentials_request_uri,
                  resource_owner_authorization_uri,
                  token_request_uri,
-                 use_authorization_header=True):
+                 use_authorization_header=True,
+                 authorization_header_param_delimiter=","):
         """
         Creates an instance of an OAuth 1.0 client.
 
@@ -148,12 +149,19 @@ class Client(object):
 
             However, not all OAuth servers may support this feature. Therefore,
             you can set this to ``False`` for use with such services.
+        :param authorization_header_param_delimiter:
+            The delimiter used to separate header value parameters.
+            According to the Specification, this must be a comma ",". However,
+            certain services like Yahoo! use "&" instead. Comma is default.
+
+            See https://github.com/oauth/oauth-ruby/pull/12
         """
         self._client_credentials = client_credentials
         self._temporary_credentials_request_uri = url_sanitize(temporary_credentials_request_uri)
         self._resource_owner_authorization_uri = url_sanitize(resource_owner_authorization_uri)
         self._token_request_uri = url_sanitize(token_request_uri)
         self._use_authorization_header = use_authorization_header
+        self._authorization_header_param_delimiter = authorization_header_param_delimiter
 
     @property
     def oauth_version(self):
@@ -182,15 +190,7 @@ class Client(object):
             will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
-
-            Including a "Authorization" header is equivalent to instantiating
-            this class with ``use_authorization_header=True``, but the scope
-            is limited to only the current request.
-
-            If the "Authorization" header is included, its value will be
-            replaced with a system-generated value, and OAuth parameters
-            will not be included in either the query string or the request
-            entity body.
+            Must not include the "Authorization" header.
         :param realm:
             The value to use for the realm parameter in the Authorization HTTP
             header. It will be excluded from the base string, however.
@@ -264,15 +264,7 @@ class Client(object):
             will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
-
-            Including a "Authorization" header is equivalent to instantiating
-            this class with ``use_authorization_header=True``, but the scope
-            is limited to only the current request.
-
-            If the "Authorization" header is included, its value will be
-            replaced with a system-generated value, and OAuth parameters
-            will not be included in either the query string or the request
-            entity body.
+            Must not include the "Authorization" header.
         :param realm:
             The value to use for the realm parameter in the Authorization HTTP
             header. It will be excluded from the base string, however.
@@ -325,15 +317,7 @@ class Client(object):
             will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
-
-            Including a "Authorization" header is equivalent to instantiating
-            this class with ``use_authorization_header=True``, but the scope
-            is limited to only the current request.
-
-            If the "Authorization" header is included, its value will be
-            replaced with a system-generated value, and OAuth parameters
-            will not be included in either the query string or the request
-            entity body.
+            Must not include the "Authorization" header.
         :param realm:
             The value to use for the realm parameter in the Authorization HTTP
             header. It will be excluded from the base string, however.
@@ -423,15 +407,7 @@ class Client(object):
             will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
-
-            Including a "Authorization" header is equivalent to instantiating
-            this class with ``use_authorization_header=True``, but the scope
-            is limited to only the current request.
-
-            If the "Authorization" header is included, its value will be
-            replaced with a system-generated value, and OAuth parameters
-            will not be included in either the query string or the request
-            entity body.
+            Must not include the "Authorization" header.
         :param realm:
             The value to use for the realm parameter in the Authorization HTTP
             header. It will be excluded from the base string, however.
@@ -518,8 +494,10 @@ class Client(object):
         # 3. Request entity body.
         #
         # See Parameter Transmission (http://tools.ietf.org/html/rfc5849#section-3.6)
-        if self._use_authorization_header or "Authorization" in headers:
-            auth_header_value = get_normalized_authorization_header_value(oauth_params, realm=realm)
+        if "Authorization" in headers:
+            raise ValueError("Authorization field is already present in headers.")
+        if self._use_authorization_header:
+            auth_header_value = get_normalized_authorization_header_value(oauth_params, realm=realm, param_delimiter=self._authorization_header_param_delimiter)
             headers["Authorization"] = auth_header_value
             # Empty the params if using authorization so that they are not
             # included multiple times in a request below.
