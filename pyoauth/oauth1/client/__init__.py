@@ -205,7 +205,7 @@ class Client(object):
             The parameter names must begin with "oauth_". Any other parameters
             with names that do not begin with this prefix will be ignored.
         :returns:
-            An instance of :class:`pyoauth.http.Request`.
+            An instance of :class:`pyoauth.http.RequestProxy`.
         """
         return self._build_request(method=method,
                                    url=self._temporary_credentials_request_uri,
@@ -284,7 +284,7 @@ class Client(object):
             The parameter names must begin with "oauth_". Any other parameters
             with names that do not begin with this prefix will be ignored.
         :returns:
-            An instance of :class:`pyoauth.http.Request`.
+            An instance of :class:`pyoauth.http.RequestProxy`.
         """
         return self._build_request(method=method,
                                    url=self._token_request_uri,
@@ -345,7 +345,7 @@ class Client(object):
             The parameter names must begin with "oauth_". Any other parameters
             with names that do not begin with this prefix will be ignored.
         :returns:
-            An instance of :class:`pyoauth.http.Request`.
+            An instance of :class:`pyoauth.http.RequestProxy`.
         """
         return self._build_request(method=method,
                                    url=url,
@@ -387,10 +387,10 @@ class Client(object):
 
         :param response:
             The response of the OAuth server wrapped into a
-            :class:`pyoauth.http.Response` object.
+            :class:`pyoauth.http.ResponseProxy` object.
         """
-        #if not isinstance(response, Response):
-        #    raise ValueError("``response`` must be of type pyoauth.http.Response")
+        #if not isinstance(response, ResponseProxy):
+        #    raise ValueError("``response`` must be of type pyoauth.http.ResponseProxy")
         if response.error:
             raise ValueError("Could not fetch temporary credentials -- HTTP status code: %d" % response.status_code)
         if not response.body:

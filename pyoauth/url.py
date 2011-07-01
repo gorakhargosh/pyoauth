@@ -309,7 +309,7 @@ def query_params_merge(query_params, *extra_query_params):
     return d
 
 
-#def oauth_query_params_update(query_params, *extra_query_params):
+#def query_params_update(query_params, *extra_query_params):
 #    """
 #    Updates a dictionary of query parameters or a query string with
 #    replacement parameter values from the specified additional
