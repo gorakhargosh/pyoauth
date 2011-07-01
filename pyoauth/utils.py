@@ -102,7 +102,7 @@ def generate_nonce(length=None):
         A string representation of a randomly-generated hexadecimal OAuth nonce.
     """
     if length > 32:
-        logging.warning("Maximum verification code length is restricted to 32 characters.")
+        raise ValueError("Maximum length is restricted to 32 characters.")
     elif length <= 0:  # Negative, 0, or None check.
         length = None
     return binascii.b2a_hex(uuid.uuid4().bytes)[:length]

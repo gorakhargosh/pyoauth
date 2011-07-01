@@ -26,6 +26,8 @@ class Test_oauth_generate_nonce(object):
         assert_equal(len(generate_nonce(length=10)), 10,
                      "Nonce length does not match expected length.")
 
+        assert_raises(ValueError, generate_nonce, 33)
+
     def test_is_string(self):
         assert_true(isinstance(generate_nonce(), str),
                     "Nonce is not a bytestring.")
@@ -44,6 +46,7 @@ class Test_oauth_generate_verification_code(object):
                      "Verification code length does not match default expected length of %d." % 32)
         assert_equal(len(generate_verification_code(length=10)), 10,
                      "Verification code length does not match expected length.")
+        assert_raises(ValueError, generate_verification_code, 33)
 
     def test_uniqueness(self):
         assert_not_equal(generate_verification_code(),
