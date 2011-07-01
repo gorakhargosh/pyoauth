@@ -35,6 +35,7 @@ from pyoauth.oauth1 import \
     SIGNATURE_METHOD_HMAC_SHA1, \
     SIGNATURE_METHOD_RSA_SHA1, \
     SIGNATURE_METHOD_PLAINTEXT
+from pyoauth.unicode import is_bytes_or_unicode
 from pyoauth.url import \
     url_sanitize, \
     protocol_params_sanitize, \
@@ -175,7 +176,7 @@ class Client(object):
                                             headers=None,
                                             realm=None,
                                             oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-                                            oauth_callback=None,
+                                            oauth_callback="oob",
                                             **extra_oauth_params):
         """
         Builds an OAuth request for temporary credentials.
@@ -356,8 +357,12 @@ class Client(object):
 
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
-        if not (status_code and body and headers):
-            raise ValueError("You must specify the HTTP status code, the response body, and the response headers.")
+        if not status_code:
+            raise ValueError("Invalid status code: `%r`" % (status_code, ))
+        if not body:
+            raise ValueError("Body is invalid or empty: `%r`" % (body, ))
+        if not headers:
+            raise ValueError("Headers are invalid or not specified: `%r`" % (headers, ))
 
         response = ResponseProxy(status_code=status_code, body=body, headers=headers)
         self._validate_oauth_response(response)
@@ -376,13 +381,13 @@ class Client(object):
         #if not isinstance(response, ResponseProxy):
         #    raise ValueError("``response`` must be of type pyoauth.http.ResponseProxy")
         if response.error:
-            raise ValueError("Could not fetch temporary credentials -- HTTP status code: %d" % response.status_code)
+            raise ValueError("Could not fetch credentials -- HTTP status code: %d" % (response.status_code, ))
         if not response.body:
             # For empty bodies.
-            raise ValueError("OAuth server did not return a valid response")
+            raise ValueError("OAuth server did not return a valid response: `%r`" % (response.body, ))
         # The response body must be URL encoded.
         if not response.is_body_form_urlencoded():
-            raise ValueError("OAuth server response must have Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
+            raise ValueError("OAuth server response must have Content-Type: `%s`" % (CONTENT_TYPE_FORM_URLENCODED, ))
 
     def _build_request(self,
                       method,
@@ -426,7 +431,7 @@ class Client(object):
         realm = realm or ""
 
         if oauth_signature_method not in SIGNATURE_METHOD_MAP:
-            raise ValueError("Invalid signature method specified -- `%r`" % (oauth_signature_method,))
+            raise ValueError("Invalid signature method specified: `%r`" % (oauth_signature_method,))
 
         # Required OAuth protocol parameters.
         # See Making Requests (http://tools.ietf.org/html/rfc5849#section-3.1)
@@ -452,11 +457,11 @@ class Client(object):
                 # Don't override these required system-generated protocol parameters.
                 raise ValueError("Cannot override system-generated protocol parameter `%r`." % k)
             elif k == "oauth_callback":
-                if v:
+                if is_bytes_or_unicode(v) and v:
                     # Set a callback URL only if it is available.
                     oauth_params["oauth_callback"] = v
                 else:
-                    raise ValueError("oauth_callback parameter value is undefined.")
+                    raise ValueError("`oauth_callback` parameter value is invalid: `%r`" % (v, ))
             else:
                 if k in oauth_params:
                     # Warn when an existing protocol parameter is being
@@ -495,7 +500,7 @@ class Client(object):
         #
         # See Parameter Transmission (http://tools.ietf.org/html/rfc5849#section-3.6)
         if "Authorization" in headers:
-            raise ValueError("Authorization field is already present in headers.")
+            raise ValueError("Authorization field is already present in headers: %r" % (headers, ))
         if self._use_authorization_header:
             auth_header_value = get_normalized_authorization_header_value(oauth_params, realm=realm, param_delimiter=self._authorization_header_param_delimiter)
             headers["Authorization"] = auth_header_value
