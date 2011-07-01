@@ -16,7 +16,8 @@ sys.path[0:0] = [parent_dir_path]
 # Explicitly define which packages/modules to cover.
 cover_packages = [
     "pyoauth",
-    "pyoauth.utils",
+    "pyoauth.oauth1",
+    "pyoauth.oauth1.client",
 ]
 
 if __name__ == "__main__":

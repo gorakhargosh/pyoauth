@@ -16,35 +16,3 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-class OAuthToken(object):
-    def __init__(self, key, secret):
-        self._key = key
-        self._secret = secret
-
-    @property
-    def key(self):
-        return self._key
-
-    @property
-    def secret(self):
-        return self._secret
-
-
-class Error(RuntimeError):
-    """Generic exception class."""
-
-    def __init__(self, message='OAuth error occurred.'):
-        self._message = message
-
-    @property
-    def message(self):
-        """A hack to get around the deprecation errors in 2.6."""
-        return self._message
-
-    def __str__(self):
-        return self._message
-
-
-class OAuthMissingSignature(Error):
-    pass

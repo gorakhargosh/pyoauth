@@ -25,6 +25,7 @@ Classes
 .. autoclass:: Client
    :members:
    :show-inheritance:
+
 """
 
 import logging
@@ -63,45 +64,100 @@ class Client(object):
     """
     OAuth 1.0 Client.
 
-    Authorization in simple words:
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    1. Construct a client with its client credentials.
+    :param client_credentials:
+        Client (consumer) credentials.
+    :param temporary_credentials_request_uri:
+        OAuth request token URI.
 
-    2. Send an HTTPS request for temporary credentials with a callback URL
-       which the server will call with an OAuth verification code after
-       authorizing the resource owner (end-user).
+        Any query parameters starting with ``oauth_`` will be excluded from
+        the URL. All OAuth parameters must be specified in their respective
+        requests.
 
-    3. Obtain temporary credentials from a successful server response.
+        .. NOTE::
+            Must use SSL/TLS.
 
-    4. Use the temporary credentials to build an authorization URL and
-       redirect the resource owner (end-user) to the generated URL.
+            See http://tools.ietf.org/html/rfc5849#section-2.1
+    :param resource_owner_authorization_uri:
+        OAuth authorization URI.
 
-    5. If a callback URL is not provided when requesting temporary credentials,
-       the server displays the OAuth verification code to the resource owner
-       (end-user), which she then types into your application.
+        Any query parameters starting with ``oauth_`` will be excluded from
+        the URL. All OAuth parameters must be specified in their respective
+        requests.
+    :param token_request_uri:
+        OAuth access token request URI.
 
-       OR
+        Any query parameters starting with ``oauth_`` will be excluded from
+        the URL. All OAuth parameters must be specified in their respective
+        requests.
 
-       If a callback URL is provided, the server redirects the resource owner
-       (end-user) after authorization to your callback URL attaching the
-       OAuth verification code as a query parameter.
+        .. NOTE::
+            Must use SSL/TLS.
 
-    6. Using the obtained OAuth verification code from step 5 and the
-       temporary credentials obtained in step 3, send an HTTPS request for
-       token credentials.
+            See http://tools.ietf.org/html/rfc5849#section-2.3
+    :param use_authorization_header:
+        ``True`` to use the HTTP Authorization header to pass OAuth
+        parameters; ``False`` will force using the URL query string or
+        the entity-body of a request.
 
-    7. Obtain token credentials from a successful server response.
+        Using the HTTP Authorization header is preferable for many reasons
+        including:
 
-    8. Save the token credentials for future use (say, in a database).
+        1. Keeps your server request logs clean and readable.
 
-    Accessing a resource:
-    ~~~~~~~~~~~~~~~~~~~~~
-    1. Construct a client with its client credentials.
+        2. Separates any protocol-specific parameters from server or
+           application-specific parameters.
 
-    2. Using the token credentials that you have saved (say, in a database),
-       send an HTTP request to a resource URL.
+        3. Debugging OAuth problems is easier.
 
-    3. Obtain the response and deal with it.
+        However, not all OAuth servers may support this feature. Therefore,
+        you can set this to ``False`` for use with such services.
+    :param authorization_header_param_delimiter:
+        The delimiter used to separate header value parameters.
+        According to the Specification, this must be a comma ``,``. However,
+        certain services like Yahoo! use ``&`` instead. Comma is default.
+
+            See https://github.com/oauth/oauth-ruby/pull/12
+
+
+    .. NOTE:: Authorization in simple words:
+
+        1. Construct a client with its client credentials.
+
+        2. Send an HTTPS request for temporary credentials with a callback URL
+           which the server will call with an OAuth verification code after
+           authorizing the resource owner (end-user).
+
+        3. Obtain temporary credentials from a successful server response.
+
+        4. Use the temporary credentials to build an authorization URL and
+           redirect the resource owner (end-user) to the generated URL.
+
+        5. If a callback URL is not provided when requesting temporary credentials,
+           the server displays the OAuth verification code to the resource owner
+           (end-user), which she then types into your application.
+
+           OR
+
+           If a callback URL is provided, the server redirects the resource owner
+           (end-user) after authorization to your callback URL attaching the
+           OAuth verification code as a query parameter.
+
+        6. Using the obtained OAuth verification code from step 5 and the
+           temporary credentials obtained in step 3, send an HTTPS request for
+           token credentials.
+
+        7. Obtain token credentials from a successful server response.
+
+        8. Save the token credentials for future use (say, in a database).
+
+    .. NOTE:: Accessing a resource:
+
+        1. Construct a client with its client credentials.
+
+        2. Using the token credentials that you have saved (say, in a database),
+           send an HTTP request to a resource URL.
+
+        3. Obtain the response and deal with it.
     """
     def __init__(self,
                  client_credentials,
@@ -112,59 +168,6 @@ class Client(object):
                  authorization_header_param_delimiter=","):
         """
         Creates an instance of an OAuth 1.0 client.
-
-        :param client_credentials:
-            Client (consumer) credentials.
-        :param temporary_credentials_request_uri:
-            OAuth request token URI.
-
-            Any query parameters starting with "oauth_" will be excluded from
-            the URL. All OAuth parameters must be specified in their respective
-            requests.
-            .. NOTE::
-                Must use SSL/TLS.
-
-                See http://tools.ietf.org/html/rfc5849#section-2.1
-        :param resource_owner_authorization_uri:
-            OAuth authorization URI.
-
-            Any query parameters starting with "oauth_" will be excluded from
-            the URL. All OAuth parameters must be specified in their respective
-            requests.
-        :param token_request_uri:
-            OAuth access token request URI.
-
-            Any query parameters starting with "oauth_" will be excluded from
-            the URL. All OAuth parameters must be specified in their respective
-            requests.
-
-            .. NOTE::
-                Must use SSL/TLS.
-
-                See http://tools.ietf.org/html/rfc5849#section-2.3
-        :param use_authorization_header:
-            ``True`` to use the HTTP Authorization header to pass OAuth
-            parameters; ``False`` will force using the URL query string or
-            the entity-body of a request.
-
-            Using the HTTP Authorization header is preferable for many reasons
-            including:
-
-            1. Keeps your server request logs clean and readable.
-
-            2. Separates any protocol-specific parameters from server or
-               application-specific parameters.
-
-            3. Debugging OAuth problems is easier.
-
-            However, not all OAuth servers may support this feature. Therefore,
-            you can set this to ``False`` for use with such services.
-        :param authorization_header_param_delimiter:
-            The delimiter used to separate header value parameters.
-            According to the Specification, this must be a comma ",". However,
-            certain services like Yahoo! use "&" instead. Comma is default.
-
-            See https://github.com/oauth/oauth-ruby/pull/12
         """
         self._client_credentials = client_credentials
         self._temporary_credentials_request_uri = oauth_url_sanitize(temporary_credentials_request_uri, force_secure=True)
@@ -195,8 +198,8 @@ class Client(object):
         :param payload_params:
             A dictionary of payload parameters. These will be serialized
             into the URL or the entity-body depending on the HTTP request method.
-            These must not include any parameters starting with "oauth_". Any
-            of these parameters with names starting with the "oauth_" prefix
+            These must not include any parameters starting with ``oauth_``. Any
+            of these parameters with names starting with the ``oauth_`` prefix
             will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
@@ -205,14 +208,16 @@ class Client(object):
             The value to use for the realm parameter in the Authorization HTTP
             header. It will be excluded from the base string, however.
         :param oauth_signature_method:
-            One of ``SIGNATURE_METHOD_HMAC_SHA1``,
-            ``SIGNATURE_METHOD_RSA_SHA1``, or ``SIGNATURE_METHOD_PLAINTEXT``.
+            One of:
+            1. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_HMAC_SHA1`
+            2. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_RSA_SHA1`
+            3. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_PLAINTEXT`
         :param oauth_callback:
             A callback URL that you want the server to call when done
             with your requests.
         :param extra_oauth_params:
             Any additional oauth parameters you would like to include.
-            The parameter names must begin with "oauth_". Any other parameters
+            The parameter names must begin with ``oauth_``. Any other parameters
             with names that do not begin with this prefix will be ignored.
         :returns:
             An instance of :class:`pyoauth.http.RequestProxy`.
@@ -238,7 +243,7 @@ class Client(object):
             the temporary credentials request.
         :param query_params:
             Additional query parameters that you would like to include
-            into the authorization URL. Parameters beginning with the "oauth_"
+            into the authorization URL. Parameters beginning with the ``oauth_``
             prefix will be ignored.
         """
         url = self._resource_owner_authorization_uri
@@ -265,7 +270,7 @@ class Client(object):
         :param temporary_credentials:
             Temporary credentials obtained from the response to the
             request built by
-            :method:`Client.build_temporary_credentials_request`.
+            :func:`Client.build_temporary_credentials_request`.
         :param oauth_verifier:
             OAuth verification string sent by the server to your callback URI
             or input by the user into your application.
@@ -274,8 +279,8 @@ class Client(object):
         :param payload_params:
             A dictionary of payload parameters. These will be serialized
             into the URL or the entity-body depending on the HTTP request method.
-            These must not include any parameters starting with "oauth_". Any
-            of these parameters with names starting with the "oauth_" prefix
+            These must not include any parameters starting with ``oauth_``. Any
+            of these parameters with names starting with the ``oauth_`` prefix
             will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
@@ -284,11 +289,13 @@ class Client(object):
             The value to use for the realm parameter in the Authorization HTTP
             header. It will be excluded from the base string, however.
         :param oauth_signature_method:
-            One of ``SIGNATURE_METHOD_HMAC_SHA1``,
-            ``SIGNATURE_METHOD_RSA_SHA1``, or ``SIGNATURE_METHOD_PLAINTEXT``.
+            One of:
+            1. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_HMAC_SHA1`
+            2. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_RSA_SHA1`
+            3. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_PLAINTEXT`
         :param extra_oauth_params:
             Any additional oauth parameters you would like to include.
-            The parameter names must begin with "oauth_". Any other parameters
+            The parameter names must begin with ``oauth_``. Any other parameters
             with names that do not begin with this prefix will be ignored.
         :returns:
             An instance of :class:`pyoauth.http.RequestProxy`.
@@ -322,7 +329,7 @@ class Client(object):
         :param token_credentials:
             Temporary credentials obtained from the response to the
             request built by
-            :method:`Client.build_temporary_credentials_request`.
+            :func:`Client.build_temporary_credentials_request`.
         :param method:
             The HTTP method to use.
         :param url:
@@ -330,8 +337,8 @@ class Client(object):
         :param payload_params:
             A dictionary of payload parameters. These will be serialized
             into the URL or the entity-body depending on the HTTP request method.
-            These must not include any parameters starting with "oauth_". Any
-            of these parameters with names starting with the "oauth_" prefix
+            These must not include any parameters starting with ``oauth_``. Any
+            of these parameters with names starting with the ``oauth_`` prefix
             will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
@@ -340,11 +347,13 @@ class Client(object):
             The value to use for the realm parameter in the Authorization HTTP
             header. It will be excluded from the base string, however.
         :param oauth_signature_method:
-            One of ``SIGNATURE_METHOD_HMAC_SHA1``,
-            ``SIGNATURE_METHOD_RSA_SHA1``, or ``SIGNATURE_METHOD_PLAINTEXT``.
+            One of:
+            1. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_HMAC_SHA1`
+            2. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_RSA_SHA1`
+            3. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_PLAINTEXT`
         :param extra_oauth_params:
             Any additional oauth parameters you would like to include.
-            The parameter names must begin with "oauth_". Any other parameters
+            The parameter names must begin with ``oauth_``. Any other parameters
             with names that do not begin with this prefix will be ignored.
         :returns:
             An instance of :class:`pyoauth.http.RequestProxy`.
@@ -467,8 +476,8 @@ class Client(object):
         :param payload_params:
             A dictionary of payload parameters. These will be serialized
             into the URL or the entity-body depending on the HTTP request method.
-            These must not include any parameters starting with "oauth_". Any
-            of these parameters with names starting with the "oauth_" prefix
+            These must not include any parameters starting with ``oauth_``. Any
+            of these parameters with names starting with the ``oauth_`` prefix
             will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
@@ -481,7 +490,7 @@ class Client(object):
             ``SIGNATURE_METHOD_RSA_SHA1``, or ``SIGNATURE_METHOD_PLAINTEXT``.
         :param extra_oauth_params:
             Any additional oauth parameters you would like to include.
-            The parameter names must begin with "oauth_". Any other parameters
+            The parameter names must begin with ``oauth_``. Any other parameters
             with names that do not begin with this prefix will be ignored.
         :returns:
             An instance of :class:`pyoauth.http.Request`.
@@ -546,7 +555,7 @@ class Client(object):
                                                                   method, signature_url, oauth_params)
 
         # Build request data now.
-        # OAuth parameters and any parameters starting with the "oauth_"
+        # OAuth parameters and any parameters starting with the ``oauth_``
         # must be included only in ONE of these three locations:
         #
         # 1. Authorization header.

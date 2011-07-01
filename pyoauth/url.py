@@ -319,7 +319,7 @@ def query_add(*query_params):
     """
     Merges multiple query parameter dictionaries or strings.
 
-    :param extra_query_params:
+    :param query_params:
         One or more query string or a dictionary of query parameters.
     :returns:
         A dictionary of merged query parameters.
@@ -369,7 +369,7 @@ def query_append(*query_params):
     Appends additional query parameters to a query string. The additional
     query parameters appear after the initial query string.
 
-    :param extra_query_params:
+    :param query_params:
         Additional query parameters dictionary or query string.
     :returns:
         Concatenated query string.
