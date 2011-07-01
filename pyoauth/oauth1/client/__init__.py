@@ -506,7 +506,7 @@ class Client(object):
         # 3. Request entity body.
         #
         # See Parameter Transmission (http://tools.ietf.org/html/rfc5849#section-3.6)
-        if self._use_authorization_header or headers.has_key("Authorization"):
+        if self._use_authorization_header or "Authorization" in headers:
             auth_header_value = get_normalized_authorization_header_value(oauth_params, realm=realm)
             headers["Authorization"] = auth_header_value
             # Empty the params if using authorization so that they are not
