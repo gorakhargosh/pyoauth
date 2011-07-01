@@ -492,8 +492,20 @@ class Client(object):
         # Filter payload parameters for the request.
         payload_params = query_params_sanitize(payload_params)
 
-        # Determine the request's OAuth signature.
+        #if not method == "PUT":
+        #
+        # TODO:
+        #    I'm not entirely certain yet about whether PUT payload
+        #    params should be included in the signature or not.
+        #    Here is why:
+        #    http://groups.google.com/group/oauth/browse_thread/thread/fdc0b11f2c4a8dc3/
+        #
+        #    However, until I'm certain that PUT parameters encoded with
+        #    application/x-www-form-urlencoded must not be signed,
+        #    I'm not handling PUT explicitly in this method.
         url_with_payload_params_added = url_add_query(url, payload_params)
+
+        # Determine the request's OAuth signature.
         oauth_params["oauth_signature"] = self._sign_request_data(oauth_signature_method,
                                                                   method, url_with_payload_params_added, oauth_params)
 
@@ -516,16 +528,6 @@ class Client(object):
         if method in ("POST", "PUT"):
             # The payload params are not appended to the OAuth request URL
             # in this case but added to the payload instead.
-            #
-            # TODO:
-            #    I'm not entirely certain yet about whether PUT payload
-            #    params should be included in the signature or not.
-            #    Here is why:
-            #    http://groups.google.com/group/oauth/browse_thread/thread/fdc0b11f2c4a8dc3/
-            #
-            #    However, until I'm certain that PUT parameters encoded with
-            #    application/x-www-form-urlencoded must not be signed,
-            #    I'm not handling PUT explicitly in this method.
             request_url = url
             headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
             payload = query_params_append(payload_params, oauth_params)
