@@ -56,7 +56,7 @@ def _url_equals(url1, url2):
         parse_qs(u1.query, keep_blank_values=True) == parse_qs(u2.query, keep_blank_values=True)
 
 
-class Test_oauth_parse_qs(object):
+class Test_parse_qs(object):
     def test_are_blank_values_preserved(self):
         assert_dict_equal(parse_qs("a="), {"a": [""]})
         assert_dict_equal(parse_qs("a"), {"a": [""]})
@@ -89,7 +89,7 @@ class Test_oauth_parse_qs(object):
                  'c2': ['']})
 
 
-class Test_oauth_escape(object):
+class Test_percent_encode(object):
     # TODO:
     #def test_unicode_input_encoded_to_utf8(self):
     #    assert_equal(percent_encode(u'åéîøü'.encode('utf16')),
@@ -180,7 +180,7 @@ class Test_oauth_escape(object):
         assert_equal(percent_encode(5), "5")
 
 
-class Test_oauth_unescape(object):
+class Test_percent_decode(object):
     _unsafe_characters = [" ",
                        ":",
                        "!",
@@ -222,7 +222,7 @@ class Test_oauth_unescape(object):
         assert_equal(percent_decode('+'), ' ', "Plus character in encoding is not treated as space character.")
 
 
-class Test_oauth_urlencode(object):
+class Test_urlencode_s(object):
     def test_valid_query_string(self):
         params = {
             "a2": "r b",
@@ -240,7 +240,7 @@ class Test_oauth_urlencode(object):
         assert_equal(urlencode_s(params), valid_query_string)
 
 
-class Test_oauth_urlencode_sl(object):
+class Test_urlencode_sl(object):
     def test_valid_query_params_list(self):
         params = {
             "a2": "r b",
@@ -292,7 +292,7 @@ class Test_oauth_urlencode_sl(object):
 
 
 
-class Test_oauth_url_query_params_add(object):
+class Test_url_add_query(object):
     def test_adds_query_params_properly(self):
         params1 = {
             "a2": "r b",
@@ -305,7 +305,7 @@ class Test_oauth_url_query_params_add(object):
         resulting_url = "http://UserName:PassWORdX@www.example.com:8000/result;param1?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7#fragment"
         assert_equal(url_add_query(url, params1), resulting_url)
 
-class Test_oauth_url_query_params_merge(object):
+class Test_query_params_add(object):
     def test_adds_query_params_properly(self):
         params1 = {
             "a2": "r b",
@@ -415,7 +415,7 @@ class Test_urlparse_normalized(object):
         assert_equal(urlparse_normalized(url), result)
 
 
-class Test_oauth_url_query_params_dict(object):
+class Test_query_params_dict(object):
     def test_unflattens_dict(self):
         params = {
             "a2": "r b",
@@ -483,7 +483,7 @@ class Test_oauth_url_query_params_dict(object):
         assert_raises(ValueError, query_params_dict, 5)
 
 
-class Test_oauth_url_query_params_sanitize(object):
+class Test_query_params_sanitize(object):
     def test_filter(self):
         params = {
             "a2": ["r b"],
@@ -511,7 +511,7 @@ class Test_oauth_url_query_params_sanitize(object):
         assert_equal(urlencode_s(query_params_sanitize(query_string)), expected_result)
 
 
-class Test_oauth_url_sanitize(object):
+class Test_url_sanitize(object):
     def test_sanitization_and_removes_fragment(self):
         query_string = "http://www.EXAMPLE.com/request?a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7#fragment"
         expected_params = {
@@ -524,7 +524,7 @@ class Test_oauth_url_sanitize(object):
         expected_result = "http://www.example.com/request?" + urlencode_s(expected_params)  # Fragment ignored.
         assert_equal(url_sanitize(query_string), expected_result)
 
-class Test_oauth_protocol_params_sanitize(object):
+class Test_protocol_params_sanitize(object):
     def test_filter(self):
         params = {
             "a2": ["r b"],
@@ -563,7 +563,7 @@ class Test_oauth_protocol_params_sanitize(object):
         assert_raises(ValueError, protocol_params_sanitize, params)
 
 
-class Test_oauth_url_append_query_params(object):
+class Test_url_append_query(object):
     def test_does_not_prefix_with_ampersand_when_url_has_no_query_params(self):
         url = "https://www.example.com/authorize"
         assert_equal(url_append_query(url, dict(a=1)), "https://www.example.com/authorize?a=1")

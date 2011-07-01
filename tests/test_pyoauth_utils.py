@@ -8,7 +8,7 @@ except ImportError:
 from nose import SkipTest
 from pyoauth.utils import parse_authorization_header_value, _get_signature_base_string_query, get_normalized_authorization_header_value, percent_encode, percent_decode, generate_nonce, generate_verification_code, generate_timestamp, get_hmac_sha1_signature, get_rsa_sha1_signature, check_rsa_sha1_signature, get_plaintext_signature, get_signature_base_string, _get_plaintext_signature
 
-class Test_oauth_generate_nonce(object):
+class Test_generate_nonce(object):
     def test_uniqueness(self):
         assert_not_equal(generate_nonce(), generate_nonce(),
                          "Nonce is not unique.")
@@ -33,7 +33,7 @@ class Test_oauth_generate_nonce(object):
                     "Nonce is not a bytestring.")
 
 
-class Test_oauth_generate_verification_code(object):
+class Test_generate_verification_code(object):
     def test_length(self):
         default_length = 8
         assert_equal(len(generate_verification_code()), default_length,
@@ -58,7 +58,7 @@ class Test_oauth_generate_verification_code(object):
                     "Verification code is not a bytestring.")
 
 
-class Test_oauth_generate_timestamp(object):
+class Test_generate_timestamp(object):
     def test_is_positive_integer_string(self):
         assert_true(int(generate_timestamp()) > 0,
                     "Timestamp is not positive integer string.")
@@ -72,7 +72,7 @@ class Test_oauth_generate_timestamp(object):
                     "Timestamp is an empty string.")
 
 
-class Test_oauth_get_hmac_sha1_signature(object):
+class Test_get_hmac_sha1_signature(object):
     _EXAMPLES = {
         # Example 1.2 in the RFC.
         'ex1.2': dict(
@@ -113,7 +113,7 @@ class Test_oauth_get_hmac_sha1_signature(object):
         )
 
 
-class Test_oauth_get_and_check_rsa_sha1_signature(object):
+class Test_get_and_check_rsa_sha1_signature(object):
     # Taken from https://github.com/rick446/python-oauth2/commit/a8bee2ad1a993faa1e13a04f14f1754489ad35bd
     def setUp(self):
         self.oauth_signature_method = "RSA-SHA1"
@@ -214,7 +214,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
 
 
 
-class Test_oauth_get_plaintext_signature(object):
+class Test_get_plaintext_signature(object):
     def setUp(self):
         self.oauth_signature_method = "PLAINTEXT"
         self.oauth_token_key = "token test key"
@@ -270,7 +270,7 @@ class Test_oauth_get_plaintext_signature(object):
         ), "&")
 
 
-class Test__oauth_get_plaintext_signature(object):
+class Test__get_plaintext_signature(object):
     def test_both_secrets_present(self):
         assert_equal(_get_plaintext_signature("ab cd", "47fba"),
                      "ab%20cd&47fba")
@@ -293,7 +293,7 @@ class Test__oauth_get_plaintext_signature(object):
                      "ab%20cd&47%20f%24a")
 
 
-class Test_oauth_get_signature_base_string(object):
+class Test_get_signature_base_string(object):
     def setUp(self):
         self.oauth_params = dict(
             oauth_consumer_key="9djdj82h48djs9d2",
@@ -344,7 +344,7 @@ class Test_oauth_get_signature_base_string(object):
 
 
 
-class Test_oauth_get_normalized_query_string(object):
+class Test_get_normalized_query_string(object):
     def setUp(self):
         self.specification_url_query_params = {
             'b5': ['=%3D'],
@@ -433,7 +433,7 @@ class Test_oauth_get_normalized_query_string(object):
             "realm=something")
 
 
-class Test_oauth_get_normalized_authorization_header_value(object):
+class Test_get_normalized_authorization_header_value(object):
     def test_equality_and_realm(self):
         params = {
             'realm': ['Examp%20le'],
@@ -464,7 +464,7 @@ class Test_oauth_get_normalized_authorization_header_value(object):
         assert_raises(ValueError, get_normalized_authorization_header_value, params)
 
 
-class Test_oauth_parse_authorization_header(object):
+class Test_parse_authorization_header_value(object):
     def test_ValueError_when_multiple_values(self):
         test_value = '''OAuth realm="Examp%20le",
             oauth_something="%20Some+Example",
