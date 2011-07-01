@@ -367,7 +367,7 @@ class Client(object):
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
         params, credentials = self._parse_credentials_response(status_code, body, headers)
-        callback_confirmed = params.get("oauth_callback_confirmed", "").lower()
+        callback_confirmed = params.get("oauth_callback_confirmed", [""])[0].lower()
         if callback_confirmed != "true":
             raise ValueError("Invalid OAuth server response -- `oauth_callback_confirmed` MUST be set to `true`.")
         return params, credentials

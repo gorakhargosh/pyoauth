@@ -610,7 +610,6 @@ class Test_is_valid_callback_url(object):
         assert_false(is_valid_callback_url([]))
         assert_false(is_valid_callback_url(()))
 
-
     def test_url_must_be_absolute(self):
         assert_true(is_valid_callback_url("http://example.com/"))
         assert_false(is_valid_callback_url("mailto:someone@somewhere.com"))

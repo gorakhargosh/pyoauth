@@ -39,7 +39,15 @@ class TestClient_OAuth_1_0_Example:
         url = self.client.get_authorization_url(self.temporary_credentials, a="something here", b=["another thing", 5], oauth_ignored="ignored")
         assert_equal(url, "https://photos.example.net/authorize?a=something%20here&b=5&b=another%20thing&oauth_token=" + self.temporary_credentials.identifier)
 
-    def test_parse_credentials_response(self):
+    def test_parse_temporary_credentials_response(self):
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        assert_raises(ValueError, self.client.parse_temporary_credentials_response, 200, "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=", headers)
+        assert_raises(ValueError, self.client.parse_temporary_credentials_response, 200, "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=false", headers)
+
+
+    def test__parse_credentials_response(self):
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
         }
