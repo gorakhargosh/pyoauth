@@ -42,7 +42,7 @@ URL parsing and convenience utilities
 Query parameters
 ~~~~~~~~~~~~~~~~
 .. autofunction:: url_add_query
-.. autofunction:: query_params_merge
+.. autofunction:: query_params_add
 .. autofunction:: query_params_filter
 .. autofunction:: query_params_dict
 
@@ -280,7 +280,7 @@ def url_add_query(url, extra_query_params, allow_func=None):
     """
     scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
 
-    d = query_params_merge(query, extra_query_params)
+    d = query_params_add(query, extra_query_params)
     qs = urlencode_s(d, allow_func=allow_func)
     return urlunparse((scheme, netloc, path, params, qs, fragment))
 
@@ -315,7 +315,7 @@ def url_append_query(url, query_params):
 
 
 
-def query_params_merge(query_params, *extra_query_params):
+def query_params_add(query_params, *extra_query_params):
     """
     Merges multiple query parameter dictionaries or strings.
 
