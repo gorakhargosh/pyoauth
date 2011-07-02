@@ -552,7 +552,7 @@ class Test_url_sanitize(object):
         assert_equal(oauth_url_sanitize(secure_url, force_secure=True), "https://www.example.com/request")
 
 
-class Test_protocol_params_sanitize(object):
+class Test_request_protocol_params_sanitize(object):
     def test_filter(self):
         params = {
             "a2": ["r b"],
@@ -590,6 +590,25 @@ class Test_protocol_params_sanitize(object):
         }
         assert_raises(ValueError, request_protocol_params_sanitize, params)
 
+    def test_raises_ValueError_when_confidential_params_found(self):
+        params1 = {
+            "a2": ["r b"],
+            "b5": ["=%3D"],
+            "a3": ["a", "2 q"],
+            "c@": [""],
+            "c2": [""],
+            "oauth_consumer_secret": ["something"]
+        }
+        params2 = {
+            "a2": ["r b"],
+            "b5": ["=%3D"],
+            "a3": ["a", "2 q"],
+            "c@": [""],
+            "c2": [""],
+            "oauth_token_secret": ["something"]
+        }
+        assert_raises(ValueError, request_protocol_params_sanitize, params1)
+        assert_raises(ValueError, request_protocol_params_sanitize, params2)
 
 class Test_url_append_query(object):
     def test_does_not_prefix_with_ampersand_when_url_has_no_query_params(self):
