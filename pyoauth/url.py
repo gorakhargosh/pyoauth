@@ -460,10 +460,11 @@ def request_protocol_params_sanitize(query_params):
     Removes non-OAuth and non-transmittable OAuth parameters from the
     request query parameters.
 
-    Used only in base string construction, Authorization headers construction
-    and parsing, and OAuth requests ONLY.
+    .. WARNING:: Do NOT use this function with responses. Use ONLY with requests.
 
-    Do NOT use this function with responses. Use ONLY with requests.
+        Specifically used ONLY in base string construction, Authorization
+        headers construction and parsing, and OAuth requests.
+
 
     :param query_params:
         Query string or query parameter dictionary. Does not filter out
