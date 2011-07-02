@@ -581,7 +581,7 @@ class Test_request_protocol_params_sanitize(object):
         assert_equal(urlencode_s(request_protocol_params_sanitize(params)), expected_result)
         assert_equal(urlencode_s(request_protocol_params_sanitize(query_string)), expected_result)
 
-    def test_raises_InvalidProtocolParametersError_when_multiple_protocol_param_values_found(self):
+    def test_raises_InvalidOAuthParametersError_when_multiple_protocol_param_values_found(self):
         params = {
             "a2": ["r b"],
             "b5": ["=%3D"],

@@ -353,7 +353,7 @@ class Test_get_signature_base_string(object):
         assert_raises(InvalidUrlError, get_signature_base_string, "POST", "",
                 {})
 
-    def test_InvalidProtocolParametersError_when_query_params_is_not_dict(self):
+    def test_InvalidOAuthParametersError_when_query_params_is_not_dict(self):
         assert_raises(InvalidOAuthParametersError, get_signature_base_string, "POST",
                       "http://www.google.com/", None)
 
@@ -509,7 +509,7 @@ class Test_get_normalized_authorization_header_value(object):
                                                                param_delimiter="&")
                      , expected_value)
 
-    def test_InvalidProtocolParametersError_when_multiple_values(self):
+    def test_InvalidOAuthParametersError_when_multiple_values(self):
         params = {
             'realm': ['Examp%20le'],
             'oauth_something': [' Some Example', "another thing"],
@@ -519,7 +519,7 @@ class Test_get_normalized_authorization_header_value(object):
 
 
 class Test_parse_authorization_header_value(object):
-    def test_InvalidProtocolParametersError_when_multiple_values(self):
+    def test_InvalidOAuthParametersError_when_multiple_values(self):
         test_value = '''OAuth realm="Examp%20le",
             oauth_something="%20Some+Example",
             oauth_something="another%20thing"
@@ -602,17 +602,17 @@ class Test_parse_authorization_header_value(object):
                          '`OAuth realm` found in header names')
             assert_false(name.lower() == "realm", '`realm` found in header names')
 
-    def test_InvalidAuthorizationHeaderValueError_when_trailing_comma_is_found(self):
+    def test_InvalidAuthorizationHeaderError_when_trailing_comma_is_found(self):
         header_value = '''OAuth oauth_consumer_key="0685bd9184jfhq22",
             oauth_token="ad180jjd733klru7",'''
         assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value, header_value)
 
-    def test_InvalidAuthorizationHeaderValueError_when_bad_parameter_field(self):
+    def test_InvalidAuthorizationHeaderError_when_bad_parameter_field(self):
         header_value = '''OAuth realm="http://www.google.com/",something'''
         assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value,
                       header_value)
 
-    def test_InvalidAuthorizationHeaderValueError_when_bad_parameter_value(self):
+    def test_InvalidAuthorizationHeaderError_when_bad_parameter_value(self):
         header_value = '''OAuth realm="http://www.google.com/",something='''
         assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value,
                       header_value)
@@ -621,7 +621,7 @@ class Test_parse_authorization_header_value(object):
         assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value,
                       header_value)
 
-    def test_InvalidAuthorizationHeaderValueError_when_missing_quotes_around_value(self):
+    def test_InvalidAuthorizationHeaderError_when_missing_quotes_around_value(self):
         header_value = '''OAuth realm="http://www.google.com/",something="something'''
         assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value,
                       header_value)
