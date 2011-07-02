@@ -138,6 +138,13 @@ class Test_Client_build_request(object):
                       self.client._temporary_credentials_request_uri,
                       oauth_signature="dummy-signature")
 
+    def tests_raises_ValueError_when_Authorization_header_is_already_present(self):
+        assert_raises(ValueError,
+                      self.client._build_request,
+                      "POST",
+                      self.client._temporary_credentials_request_uri,
+                      headers={"Authorization", "blah blah."})
+
     def test_valid_request_generated(self):
         valid_request = RequestProxy("GET",
                                      "http://photos.example.net/photos?file=vacation.jpg&size=original",
