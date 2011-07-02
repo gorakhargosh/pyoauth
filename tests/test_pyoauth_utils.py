@@ -143,53 +143,6 @@ class Test_get_hmac_sha1_signature(object):
                                                  )
             )
 
-#    _EXAMPLES = {
-#        # Example 1.2 in the RFC.
-#        'ex1.2-temporary-credentials-request': dict(
-#            oauth_consumer_key="dpf43f3p2l4k3l03",
-#            oauth_consumer_secret="kd94hf93k423kf44",
-#            oauth_signature_method="HMAC-SHA1",
-#            realm="Photos",
-#            method="POST",
-#            url="https://photos.example.net/initiate",
-#            oauth_timestamp="137131200",
-#            oauth_nonce="wIjqoS",
-#            oauth_signature="74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
-#            oauth_callback="http://printer.example.com/ready",
-#            ),
-#        'ex1.2-token-credentials-request': dict(
-#            oauth_consumer_key="dpf43f3p2l4k3l03",
-#            oauth_consumer_secret="kd94hf93k423kf44",
-#            oauth_signature_method="HMAC-SHA1",
-#            realm="Photos",
-#            method="POST",
-#            url="https://photos.example.net/token",
-#            oauth_timestamp="137131201",
-#            oauth_nonce="walatlh",
-#            oauth_verifier="hfdp7dh39dks9884",
-#            oauth_signature="gKgrFCywp7rO0OXSjdot/IHF7IU=",
-#            ),
-#    }
-#
-#    def test_valid_signature(self):
-#        ex = self._EXAMPLES['ex1.2-temporary-credentials-request']
-#        expected_oauth_signature = ex['oauth_signature']
-#        oauth_params = dict(
-#            realm=ex["realm"],
-#            oauth_consumer_key=ex["oauth_consumer_key"],
-#            oauth_signature_method=ex["oauth_signature_method"],
-#            oauth_timestamp=ex["oauth_timestamp"],
-#            oauth_nonce=ex["oauth_nonce"],
-#            oauth_callback=ex["oauth_callback"],
-#            oauth_signature=ex["oauth_signature"],
-#            )
-#        assert_equal(get_hmac_sha1_signature(ex["oauth_consumer_secret"],
-#                                             method=ex["method"],
-#                                             url=ex["url"],
-#                                             oauth_params=oauth_params,
-#                                             token_or_temporary_shared_secret=None),
-#            expected_oauth_signature)
-
 
 class Test_get_and_check_rsa_sha1_signature(object):
     # Taken from https://github.com/rick446/python-oauth2/commit/a8bee2ad1a993faa1e13a04f14f1754489ad35bd
@@ -534,6 +487,26 @@ class Test_get_normalized_authorization_header_value(object):
                                                                      realm="http://example.com/")
                      , expected_value)
 
+
+    def test_param_delimiter_can_be_changed(self):
+        params = {
+            'realm': ['Examp%20le'],
+            'oauth_nonce': ['4572616e48616d6d65724c61686176'],
+            'oauth_timestamp': ['137131200'],
+            'oauth_consumer_key': ['0685bd9184jfhq22'],
+            'oauth_something': [' Some Example'],
+            'oauth_signature_method': ['HMAC-SHA1'],
+            'oauth_version': ['1.0'],
+            'oauth_token': ['ad180jjd733klru7'],
+            'oauth_empty': [''],
+            'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
+            }
+        expected_value = 'OAuth realm="http://example.com/"&\n    oauth_consumer_key="0685bd9184jfhq22"&\n    oauth_empty=""&\n    oauth_nonce="4572616e48616d6d65724c61686176"&\n    oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D"&\n    oauth_signature_method="HMAC-SHA1"&\n    oauth_something="%20Some%20Example"&\n    oauth_timestamp="137131200"&\n    oauth_token="ad180jjd733klru7"&\n    oauth_version="1.0"'
+        assert_equal(get_normalized_authorization_header_value(params,
+                                                               realm="http://example.com/",
+                                                               param_delimiter="&")
+                     , expected_value)
+
     def test_ValueError_when_multiple_values(self):
         params = {
             'realm': ['Examp%20le'],
@@ -550,8 +523,36 @@ class Test_parse_authorization_header_value(object):
         '''
         assert_raises(ValueError, parse_authorization_header_value, test_value)
 
+    def test_param_delimiter_can_be_changed(self):
+        expected_value = ({
+            'oauth_nonce': ['4572616e48616d6d65724c61686176'],
+            'oauth_timestamp': ['137131200'],
+            'oauth_consumer_key': ['0685bd9184jfhq22'],
+            'oauth_something': [' Some Example'],
+            'oauth_signature_method': ['HMAC-SHA1'],
+            'oauth_version': ['1.0'],
+            'oauth_token': ['ad180jjd733klru7'],
+            'oauth_empty': [''],
+            'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
+            }, 'Examp%20le'
+        )
+        assert_equal(expected_value, parse_authorization_header_value('''
+            OAuth
+
+            realm="Examp%20le"&
+            oauth_consumer_key="0685bd9184jfhq22"&
+            oauth_token="ad180jjd733klru7"&
+            oauth_signature_method="HMAC-SHA1"&
+            oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D"&
+            oauth_timestamp="137131200"&
+            oauth_nonce="4572616e48616d6d65724c61686176"&
+            oauth_version="1.0"&
+            oauth_something="%20Some+Example"&
+            oauth_empty=""
+        ''', param_delimiter="&"), "parsing failed.")
+
+
     def test_equality_encoding_realm_emptyValues(self):
-        # assert_equal(expected, parse_authorization_header_value(header_value))
         expected_value = ({
             'oauth_nonce': ['4572616e48616d6d65724c61686176'],
             'oauth_timestamp': ['137131200'],
