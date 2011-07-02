@@ -240,3 +240,41 @@ OAuth realm="Photos",
         assert_equal(got_realm, expected_realm)
         assert_dict_equal(got_authorization_header, expected_authorization_header)
 
+    def test_example_post_request(self):
+        valid_request = RequestProxy("POST",
+                                     "https://photos.example.net/initiate",
+                                     payload="",
+                                     headers={
+                                         "Authorization": '''\
+OAuth realm="Photos",
+    oauth_callback="http://printer.example.com/ready",
+    oauth_consumer_key="dpf43f3p2l4k3l03",
+    oauth_nonce="wIjqoS",
+    oauth_signature="74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
+    oauth_signature_method="HMAC-SHA1",
+    oauth_timestamp="137131200"
+    '''})
+
+        method = "POST"
+        url = "https://photos.example.net/initiate"
+        params = None
+        request = self.client._build_request(method,
+                                             url,
+                                             params,
+                                             token_or_temporary_credentials=None,
+                                             realm="Photos",
+                                             oauth_signature_method="HMAC-SHA1",
+                                             oauth_timestamp="137131200",
+                                             oauth_consumer_key="dpf43f3p2l4k3l03",
+                                             oauth_nonce="wIjqoS",
+                                             oauth_callback="http://printer.example.com/ready",
+                                             _test_force_override_reserved_oauth_params=True,
+                                             _test_force_exclude_oauth_version=True)
+        assert_equal(request.method, valid_request.method)
+        assert_equal(request.payload, valid_request.payload)
+        assert_equal(request.url, valid_request.url)
+
+        expected_authorization_header, expected_realm = parse_authorization_header_value(valid_request.headers["Authorization"])
+        got_authorization_header, got_realm = parse_authorization_header_value(request.headers["Authorization"])
+        assert_equal(got_realm, expected_realm)
+        assert_dict_equal(got_authorization_header, expected_authorization_header)
