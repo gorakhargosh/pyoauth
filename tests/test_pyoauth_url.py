@@ -3,6 +3,8 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
+from pyoauth.error import InvalidUrlError, InvalidQueryParametersError, InsecureOAuthUrlError, InvalidProtocolParametersError, InsecureProtocolParametersError
+
 try:
     from nose.tools import assert_dict_equal
 except ImportError:
@@ -415,9 +417,9 @@ class Test_urlparse_normalized(object):
         assert_equal(urlparse_normalized(url), result)
 
 
-    def test_ValueError_when_url_invalid(self):
-        assert_raises(ValueError, urlparse_normalized, None)
-        assert_raises(ValueError, urlparse_normalized, "")
+    def test_InvalidUrlError_when_url_invalid(self):
+        assert_raises(InvalidUrlError, urlparse_normalized, None)
+        assert_raises(InvalidUrlError, urlparse_normalized, "")
 
     def test_url_with_matrix_params(self):
         result = (
@@ -495,9 +497,9 @@ class Test_query_unflatten(object):
     def test_returns_empty_dict_when_argument_None(self):
         assert_equal(query_unflatten(None), {})
 
-    def test_ValueError_when_invalid_query_params_value(self):
-        assert_raises(ValueError, query_unflatten, True)
-        assert_raises(ValueError, query_unflatten, 5)
+    def test_InvalidQueryParametersError_when_invalid_query_params_value(self):
+        assert_raises(InvalidQueryParametersError, query_unflatten, True)
+        assert_raises(InvalidQueryParametersError, query_unflatten, 5)
 
 
 class Test_query_params_sanitize(object):
@@ -545,8 +547,8 @@ class Test_url_sanitize(object):
         insecure_url = "http://www.EXAMPLE.com/request"
         secure_url = "https://www.EXAMPLE.com/request"
 
-        assert_raises(ValueError, oauth_url_sanitize, insecure_url)
-        assert_raises(ValueError, oauth_url_sanitize, insecure_url, True)
+        assert_raises(InsecureOAuthUrlError, oauth_url_sanitize, insecure_url)
+        assert_raises(InsecureOAuthUrlError, oauth_url_sanitize, insecure_url, True)
         assert_equal(oauth_url_sanitize(insecure_url, force_secure=False), "http://www.example.com/request")
         assert_equal(oauth_url_sanitize(secure_url, force_secure=False), "https://www.example.com/request")
         assert_equal(oauth_url_sanitize(secure_url, force_secure=True), "https://www.example.com/request")
@@ -579,7 +581,7 @@ class Test_request_protocol_params_sanitize(object):
         assert_equal(urlencode_s(request_protocol_params_sanitize(params)), expected_result)
         assert_equal(urlencode_s(request_protocol_params_sanitize(query_string)), expected_result)
 
-    def test_raises_ValueError_when_multiple_protocol_param_values_found(self):
+    def test_raises_InvalidProtocolParametersError_when_multiple_protocol_param_values_found(self):
         params = {
             "a2": ["r b"],
             "b5": ["=%3D"],
@@ -588,9 +590,9 @@ class Test_request_protocol_params_sanitize(object):
             "c2": [""],
             "oauth_token": ["kkk9d7dh3k39sjv7", "ahdsa7hd3uhadasd"],
         }
-        assert_raises(ValueError, request_protocol_params_sanitize, params)
+        assert_raises(InvalidProtocolParametersError, request_protocol_params_sanitize, params)
 
-    def test_raises_ValueError_when_confidential_params_found(self):
+    def test_raises_InsecureProtocolParametersError_when_confidential_params_found(self):
         params1 = {
             "a2": ["r b"],
             "b5": ["=%3D"],
@@ -607,8 +609,8 @@ class Test_request_protocol_params_sanitize(object):
             "c2": [""],
             "oauth_token_secret": ["something"]
         }
-        assert_raises(ValueError, request_protocol_params_sanitize, params1)
-        assert_raises(ValueError, request_protocol_params_sanitize, params2)
+        assert_raises(InsecureProtocolParametersError, request_protocol_params_sanitize, params1)
+        assert_raises(InsecureProtocolParametersError, request_protocol_params_sanitize, params2)
 
 class Test_url_append_query(object):
     def test_does_not_prefix_with_ampersand_when_url_has_no_query_params(self):

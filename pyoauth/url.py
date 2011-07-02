@@ -53,6 +53,7 @@ Parameter sanitization
 
 """
 import logging
+from pyoauth.error import InvalidQueryParametersError, InsecureProtocolParametersError, InvalidProtocolParametersError, InsecureOAuthUrlError, InvalidUrlError
 
 try:
     # Python 3.
@@ -221,7 +222,7 @@ def urlparse_normalized(url):
         ``(scheme, netloc, path, params, query, fragment)``
     """
     if not url:
-        raise ValueError("Invalid URL.")
+        raise InvalidUrlError("Invalid URL `%r`" % (url,))
 
     parts = urlparse(url)
 
@@ -431,7 +432,8 @@ def query_unflatten(query_params):
     :param query_params:
         A query parameter dictionary or a query string.
         If this argument is ``None`` an empty dictionary will be returned.
-        Any other value will raise a ``ValueError`` exception.
+        Any other value will raise a
+        :class:`pyoauth.errors.InvalidQueryParametersError` exception.
     :returns:
         An un-flattened query parameter dictionary.
     """
@@ -451,8 +453,7 @@ def query_unflatten(query_params):
     elif query_params is None:
         return {}
     else:
-        raise ValueError("Query parameters must be passed as a dictionary or a query string.")
-
+        raise InvalidQueryParametersError("Dictionary or query string required: got `%r` instead" % (query_params, ))
 
 
 def request_protocol_params_sanitize(protocol_params):
@@ -487,9 +488,9 @@ def request_protocol_params_sanitize(protocol_params):
                 # Point 2. Each parameter MUST NOT appear more than once per
                 # request, so we disallow multiple values for a protocol
                 # parameter.
-                raise ValueError("Multiple protocol parameter values found %r=%r" % (n, v))
+                raise InvalidProtocolParametersError("Multiple protocol parameter values found %r=%r" % (n, v))
             elif n in ("oauth_consumer_secret", "oauth_token_secret", ):
-                raise ValueError("[SECURITY-ISSUE] Client attempting to transmit confidential protocol parameter `%r`. Communication is insecure if this is in your server logs." % (n, ))
+                raise InsecureProtocolParametersError("[SECURITY-ISSUE] Client attempting to transmit confidential protocol parameter `%r`. Communication is insecure if this is in your server logs." % (n, ))
             else:
                 return True
         else:
@@ -536,7 +537,7 @@ def oauth_url_sanitize(url, force_secure=True):
     scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
     query = urlencode_s(query_params_sanitize(query))
     if force_secure and scheme != "https":
-        raise ValueError("OAuth 1.0 specification requires the use of SSL/TLS for inter-server communication.")
+        raise InsecureOAuthUrlError("OAuth 1.0 specification requires the use of SSL/TLS for inter-server communication.")
     elif not force_secure and scheme != "https":
         logging.warning("CAUTION: RFC specification requires the use of SSL/TLS for credential requests.")
     return urlunparse((scheme, netloc, path, params, query, None))
