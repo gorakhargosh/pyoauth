@@ -378,11 +378,12 @@ def _get_signature_base_string_query(url_query_params, oauth_params):
     :see: Parameter Normalization (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)
     :param url_query_params:
         A dictionary or string of URL query parameters. Any parameters starting
-        with "oauth_" will be ignored.
+        with ``oauth_`` will be ignored.
     :param oauth_params:
         A dictionary or string of protocol-specific query parameters. Any parameter
         names that do not begin with ``oauth_`` will be excluded from the
-        normalized query string. ``oauth_signature`` is also specially excluded.
+        normalized query string. ``oauth_signature``, ``oauth_consumer_secret``,
+        and ``oauth_token_secret`` are also specifically excluded.
     :returns:
         Normalized string of query parameters.
     """
@@ -393,10 +394,13 @@ def _get_signature_base_string_query(url_query_params, oauth_params):
     query_params.update(url_query_params)
     query_params.update(oauth_params)
 
-    # Now encode the parameters, while ignoring 'oauth_signature' from
-    # the entire list of parameters.
+    # Now encode the parameters, while ignoring 'oauth_signature' and obviously,
+    # the secrets from the entire list of parameters.
     def allow_func(name, value):
-        return name not in ('oauth_signature', )
+        return name not in ("oauth_signature",
+                            #"oauth_consumer_secret",    # Already filtered by protocol parameter sanitization above.
+                            #"oauth_token_secret",       # Already filtered by protocol parameter sanitization above.
+                            )
     query = urlencode_s(query_params, allow_func=allow_func)
     return query
 
