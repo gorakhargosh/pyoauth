@@ -168,7 +168,7 @@ class Client(object):
                  client_credentials,
                  temporary_credentials_request_uri,
                  resource_owner_authorization_uri,
-                 token_request_uri,
+                 token_credentials_request_uri,
                  use_authorization_header=True,
                  authorization_header_param_delimiter=","):
         """
@@ -181,8 +181,8 @@ class Client(object):
         self._resource_owner_authorization_uri = \
             oauth_url_sanitize(resource_owner_authorization_uri,
                                force_secure=False)
-        self._token_request_uri = \
-            oauth_url_sanitize(token_request_uri,
+        self._token_credentials_request_uri = \
+            oauth_url_sanitize(token_credentials_request_uri,
                                force_secure=True)
         self._use_authorization_header = use_authorization_header
         self._authorization_header_param_delimiter = authorization_header_param_delimiter
@@ -315,7 +315,7 @@ class Client(object):
             raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
 
         return self._build_request(method=method,
-                                   url=self._token_request_uri,
+                                   url=self._token_credentials_request_uri,
                                    payload_params=payload_params,
                                    headers=headers,
                                    token_or_temporary_credentials=temporary_credentials,

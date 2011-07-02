@@ -34,7 +34,7 @@ class TestClient_OAuth_1_0_Example:
         c = self.client
         assert_equal(c._temporary_credentials_request_uri, "https://photos.example.net/initiate")
         assert_equal(c._resource_owner_authorization_uri, "https://photos.example.net/authorize")
-        assert_equal(c._token_request_uri, "https://photos.example.net/token")
+        assert_equal(c._token_credentials_request_uri, "https://photos.example.net/token")
         assert_equal(c._use_authorization_header, True)
         assert_equal(c._client_credentials.identifier, "dpf43f3p2l4k3l03")
         assert_equal(c._client_credentials.shared_secret, "kd94hf93k423kf44")
