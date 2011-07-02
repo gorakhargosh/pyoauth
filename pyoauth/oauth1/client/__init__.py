@@ -29,6 +29,13 @@ Classes
 """
 
 import logging
+from pyoauth.error import IllegalArgumentError, \
+    InvalidHttpResponseError, \
+    HttpError, \
+    InvalidSignatureMethodError, \
+    OverridingReservedOAuthParameterError, \
+    InvalidAuthorizationHeaderError, \
+    InvalidContentTypeError
 
 from pyoauth.http import RequestProxy, ResponseProxy, CONTENT_TYPE_FORM_URLENCODED
 from pyoauth.oauth1 import \
@@ -301,7 +308,7 @@ class Client(object):
             An instance of :class:`pyoauth.http.RequestProxy`.
         """
         if "oauth_callback" in extra_oauth_params:
-            raise ValueError("`oauth_callback` is reserved for use with temporary credentials request only.")
+            raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
 
         return self._build_request(method=method,
                                    url=self._token_request_uri,
@@ -360,7 +367,7 @@ class Client(object):
             An instance of :class:`pyoauth.http.RequestProxy`.
         """
         if "oauth_callback" in extra_oauth_params:
-            raise ValueError("`oauth_callback` is reserved for use with temporary credentials request only.")
+            raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
 
         return self._build_request(method=method,
                                    url=url,
@@ -429,31 +436,23 @@ class Client(object):
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
         if not status_code:
-            raise ValueError("Invalid status code: `%r`" % (status_code, ))
+            raise InvalidHttpResponseError("Invalid status code: `%r`" % (status_code, ))
         if not body:
-            raise ValueError("Body is invalid or empty: `%r`" % (body, ))
+            raise InvalidHttpResponseError("Body is invalid or empty: `%r`" % (body, ))
         if not headers:
-            raise ValueError("Headers are invalid or not specified: `%r`" % (headers, ))
+            raise InvalidHttpResponseError("Headers are invalid or not specified: `%r`" % (headers, ))
 
         response = ResponseProxy(status_code=status_code, body=body, headers=headers)
-        self._validate_oauth_response(response)
+
+        if response.error:
+            raise HttpError("Could not fetch credentials -- HTTP status code: %d" % (response.status_code, ))
+        # The response body must be URL encoded.
+        if not response.is_body_form_urlencoded():
+            raise InvalidContentTypeError("OAuth credentials server response must have Content-Type: `%s`" % (CONTENT_TYPE_FORM_URLENCODED, ))
+
         params = parse_qs(response.body)
         return params, Credentials(identifier=params["oauth_token"][0],
                                    shared_secret=params["oauth_token_secret"][0])
-
-    def _validate_oauth_response(self, response):
-        """
-        Validates an OAuth server response.
-
-        :param response:
-            The response of the OAuth server wrapped into a
-            :class:`pyoauth.http.ResponseProxy` object.
-        """
-        if response.error:
-            raise ValueError("Could not fetch credentials -- HTTP status code: %d" % (response.status_code, ))
-        # The response body must be URL encoded.
-        if not response.is_body_form_urlencoded():
-            raise ValueError("OAuth server response must have Content-Type: `%s`" % (CONTENT_TYPE_FORM_URLENCODED, ))
 
     def _build_request(self,
                       method,
@@ -500,7 +499,7 @@ class Client(object):
         realm = realm or ""
 
         if oauth_signature_method not in SIGNATURE_METHOD_MAP:
-            raise ValueError("Invalid signature method specified: `%r`" % (oauth_signature_method,))
+            raise InvalidSignatureMethodError("Invalid signature method specified: `%r`" % (oauth_signature_method,))
 
         # Required OAuth protocol parameters.
         # See Making Requests (http://tools.ietf.org/html/rfc5849#section-3.1)
@@ -528,7 +527,7 @@ class Client(object):
         for k, v in extra_oauth_params.items():
             if not _force_override_reserved_oauth_params_for_tests and k in reserved_oauth_params:
                 # Don't override these required system-generated protocol parameters.
-                raise ValueError("Cannot override system-generated protocol parameter `%r`." % k)
+                raise OverridingReservedOAuthParameterError("Cannot override system-generated protocol parameter `%r`." % k)
             else:
                 if k in oauth_params:
                     # Warn when an existing protocol parameter is being
@@ -569,7 +568,7 @@ class Client(object):
         #
         # See Parameter Transmission (http://tools.ietf.org/html/rfc5849#section-3.6)
         if "Authorization" in headers:
-            raise ValueError("Authorization field is already present in headers: %r" % (headers, ))
+            raise InvalidAuthorizationHeaderError("Authorization field is already present in headers: `%r`" % (headers, ))
         if self._use_authorization_header:
             auth_header_value = get_normalized_authorization_header_value(oauth_params, realm=realm, param_delimiter=self._authorization_header_param_delimiter)
             headers["Authorization"] = auth_header_value

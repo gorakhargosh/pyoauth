@@ -3,7 +3,11 @@
 
 from nose import SkipTest
 from nose.tools import assert_equal, assert_raises
-from pyoauth.error import InvalidOAuthParametersError
+from pyoauth.error import InvalidOAuthParametersError, \
+    InvalidAuthorizationHeaderError, \
+    InvalidSignatureMethodError, \
+    OverridingReservedOAuthParameterError, \
+    InvalidHttpResponseError, HttpError, InvalidContentTypeError
 from pyoauth.http import RequestProxy
 from pyoauth.utils import parse_authorization_header_value
 
@@ -96,15 +100,15 @@ class TestClient_OAuth_1_0_Example:
             "Content-Type": "application/x-www-form-urlencoded",
         }
 
-        assert_raises(ValueError, self.client._parse_credentials_response, None, body, headers)
-        assert_raises(ValueError, self.client._parse_credentials_response, status_code, None, headers)
-        assert_raises(ValueError, self.client._parse_credentials_response, status_code, body, None)
+        assert_raises(InvalidHttpResponseError, self.client._parse_credentials_response, None, body, headers)
+        assert_raises(InvalidHttpResponseError, self.client._parse_credentials_response, status_code, None, headers)
+        assert_raises(InvalidHttpResponseError, self.client._parse_credentials_response, status_code, body, None)
 
-        assert_raises(ValueError, self.client._parse_credentials_response, 300, body, headers)
-        assert_raises(ValueError, self.client._parse_credentials_response, 199, body, headers)
+        assert_raises(HttpError, self.client._parse_credentials_response, 300, body, headers)
+        assert_raises(HttpError, self.client._parse_credentials_response, 199, body, headers)
 
-        assert_raises(ValueError, self.client._parse_credentials_response, 200, "", headers)
-        assert_raises(ValueError, self.client._parse_credentials_response, 200, body, {"Content-Type": "invalid"})
+        assert_raises(InvalidHttpResponseError, self.client._parse_credentials_response, 200, "", headers)
+        assert_raises(InvalidContentTypeError, self.client._parse_credentials_response, 200, body, {"Content-Type": "invalid"})
 
 
 class Test_Client_build_request(object):
@@ -118,8 +122,8 @@ class Test_Client_build_request(object):
         self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
         self.token_credentials = Credentials(identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
 
-    def test_raises_ValueError_when_signature_method_invalid(self):
-        assert_raises(ValueError,
+    def test_raises_InvalidSignatureMethodError_when_signature_method_invalid(self):
+        assert_raises(InvalidSignatureMethodError,
                       self.client._build_request,
                       "POST",
                       self.client._temporary_credentials_request_uri,
@@ -132,15 +136,15 @@ class Test_Client_build_request(object):
                       self.client._temporary_credentials_request_uri,
                       oauth_something=[1, 2, 3])
 
-    def test_raises_ValueError_when_overriding_reserved_oauth_params(self):
-        assert_raises(ValueError,
+    def test_raises_OverridingReservedOAuthParameterError_when_overriding_reserved_oauth_params(self):
+        assert_raises(OverridingReservedOAuthParameterError,
                       self.client._build_request,
                       "POST",
                       self.client._temporary_credentials_request_uri,
                       oauth_signature="dummy-signature")
 
-    def tests_raises_ValueError_when_Authorization_header_is_already_present(self):
-        assert_raises(ValueError,
+    def tests_raises_InvalidAuthorizationHeaderError_when_Authorization_header_is_already_present(self):
+        assert_raises(InvalidAuthorizationHeaderError,
                       self.client._build_request,
                       "POST",
                       self.client._temporary_credentials_request_uri,

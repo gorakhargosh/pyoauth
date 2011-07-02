@@ -53,3 +53,22 @@ class InvalidHttpMethodError(OAuthError):
 
 class InvalidAuthorizationHeaderError(OAuthError):
     pass
+
+class IllegalArgumentError(OAuthError):
+    pass
+
+
+class InvalidHttpResponseError(OAuthError):
+    pass
+
+class HttpError(OAuthError):
+    pass
+
+class InvalidContentTypeError(OAuthError):
+    pass
+
+class InvalidSignatureMethodError(OAuthError):
+    pass
+
+class OverridingReservedOAuthParameterError(OAuthError):
+    pass
