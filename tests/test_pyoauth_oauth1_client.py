@@ -4,6 +4,7 @@
 from nose import SkipTest
 from nose.tools import assert_equal, assert_raises
 from pyoauth.http import RequestProxy
+from pyoauth.utils import parse_authorization_header_value
 
 try:
     from nose.tools import assert_dict_equal
@@ -170,6 +171,9 @@ OAuth realm="Photos",
         assert_equal(request.method, valid_request.method)
         assert_equal(request.payload, valid_request.payload)
         assert_equal(request.url, valid_request.url)
-        print(request.headers["Authorization"])
-        assert_dict_equal(request.headers, valid_request.headers)
+
+        expected_authorization_header, expected_realm = parse_authorization_header_value(valid_request.headers["Authorization"])
+        got_authorization_header, got_realm = parse_authorization_header_value(request.headers["Authorization"])
+        assert_equal(got_realm, expected_realm)
+        assert_dict_equal(got_authorization_header, expected_authorization_header)
 

@@ -599,7 +599,6 @@ class Client(object):
         """
         sign_func = SIGNATURE_METHOD_MAP[signature_method]
         credentials_shared_secret = credentials.shared_secret if credentials else None
-        print(credentials_shared_secret)
         return sign_func(self._client_credentials.shared_secret,
                          method, url, oauth_params,
                          credentials_shared_secret)
