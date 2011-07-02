@@ -73,44 +73,122 @@ class Test_generate_timestamp(object):
 
 
 class Test_get_hmac_sha1_signature(object):
-    _EXAMPLES = {
-        # Example 1.2 in the RFC.
-        'ex1.2': dict(
-            OAUTH_CONSUMER_KEY="dpf43f3p2l4k3l03",
-            OAUTH_CONSUMER_SECRET="kd94hf93k423kf44",
-
-            OAUTH_SIGNATURE_METHOD="HMAC-SHA1",
-
-            REQUEST_TOKEN_REALM="Photos",
-            REQUEST_TOKEN_METHOD="POST",
-            REQUEST_TOKEN_URL="https://photos.example.net/initiate",
-            REQUEST_TOKEN_OAUTH_TIMESTAMP="137131200",
-            REQUEST_TOKEN_OAUTH_NONCE="wIjqoS",
-            REQUEST_TOKEN_OAUTH_SIGNATURE="74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
-            REQUEST_TOKEN_OAUTH_CALLBACK="http://printer.example.com/ready",
+    _examples = (
+        # Temporary credentials request.
+        {
+            "method": "POST",
+            "realm": "Photos",
+            "url": "https://photos.example.net/initiate",
+            "oauth_consumer_secret": "kd94hf93k423kf44",
+            "oauth_token_secret": None,
+            "oauth_signature": "74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
+            "oauth_params": dict(
+                oauth_consumer_key="dpf43f3p2l4k3l03",
+                oauth_signature_method="HMAC-SHA1",
+                oauth_timestamp="137131200",
+                oauth_nonce="wIjqoS",
+                oauth_callback="http://printer.example.com/ready",
             )
-    }
-
-    def test_valid_signature(self):
-        ex = self._EXAMPLES['ex1.2']
-        expected_oauth_signature = ex['REQUEST_TOKEN_OAUTH_SIGNATURE']
-        oauth_params = dict(
-            realm=ex["REQUEST_TOKEN_REALM"],
-            oauth_consumer_key=ex["OAUTH_CONSUMER_KEY"],
-            oauth_signature_method=ex["OAUTH_SIGNATURE_METHOD"],
-            oauth_timestamp=ex["REQUEST_TOKEN_OAUTH_TIMESTAMP"],
-            oauth_nonce=ex["REQUEST_TOKEN_OAUTH_NONCE"],
-            oauth_callback=ex["REQUEST_TOKEN_OAUTH_CALLBACK"],
-            oauth_signature=ex["REQUEST_TOKEN_OAUTH_SIGNATURE"],
+        },
+        # Token credentials request.
+        {
+            "method": "POST",
+            "realm": "Photos",
+            "url": "https://photos.example.net/token",
+            "oauth_consumer_secret": "kd94hf93k423kf44",
+            "oauth_token_secret": "hdhd0244k9j7ao03",
+            "oauth_signature": "gKgrFCywp7rO0OXSjdot/IHF7IU=",
+            "oauth_params": dict(
+                oauth_consumer_key="dpf43f3p2l4k3l03",
+                oauth_token="hh5s93j4hdidpola",
+                oauth_signature_method="HMAC-SHA1",
+                oauth_timestamp="137131201",
+                oauth_nonce="walatlh",
+                oauth_verifier="hfdp7dh39dks9884",
             )
-        assert_equal(get_hmac_sha1_signature(
-            ex["OAUTH_CONSUMER_SECRET"],
-            method=ex["REQUEST_TOKEN_METHOD"],
-            url=ex["REQUEST_TOKEN_URL"],
-            oauth_params=oauth_params,
-            token_or_temporary_shared_secret=None),
-                     expected_oauth_signature
-        )
+        },
+
+        # Resource access request.
+        {
+            "method": "GET",
+            "realm": "Photos",
+            "url": "http://photos.example.net/photos?file=vacation.jpg&size=original",
+            "oauth_consumer_secret": "kd94hf93k423kf44",
+            "oauth_token_secret": "pfkkdhi9sl3r4s00",
+            "oauth_signature": "MdpQcU8iPSUjWoN/UDMsK2sui9I=",
+            "oauth_params": dict(
+                oauth_consumer_key="dpf43f3p2l4k3l03",
+                oauth_token="nnch734d00sl2jdk",
+                oauth_signature_method="HMAC-SHA1",
+                oauth_timestamp="137131202",
+                oauth_nonce="chapoH",
+            ),
+        },
+    )
+
+    def test_signature_is_valid(self):
+        for example in self._examples:
+            client_shared_secret = example["oauth_consumer_secret"]
+            token_or_temporary_shared_secret = example["oauth_token_secret"]
+            url = example["url"]
+            method = example["method"]
+            oauth_params = example["oauth_params"]
+            expected_signature = example["oauth_signature"]
+            assert_equal(expected_signature,
+                         get_hmac_sha1_signature(client_shared_secret,
+                                                 method=method,
+                                                 url=url,
+                                                 oauth_params=oauth_params,
+                                                 token_or_temporary_shared_secret=token_or_temporary_shared_secret
+                                                 )
+            )
+
+#    _EXAMPLES = {
+#        # Example 1.2 in the RFC.
+#        'ex1.2-temporary-credentials-request': dict(
+#            oauth_consumer_key="dpf43f3p2l4k3l03",
+#            oauth_consumer_secret="kd94hf93k423kf44",
+#            oauth_signature_method="HMAC-SHA1",
+#            realm="Photos",
+#            method="POST",
+#            url="https://photos.example.net/initiate",
+#            oauth_timestamp="137131200",
+#            oauth_nonce="wIjqoS",
+#            oauth_signature="74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
+#            oauth_callback="http://printer.example.com/ready",
+#            ),
+#        'ex1.2-token-credentials-request': dict(
+#            oauth_consumer_key="dpf43f3p2l4k3l03",
+#            oauth_consumer_secret="kd94hf93k423kf44",
+#            oauth_signature_method="HMAC-SHA1",
+#            realm="Photos",
+#            method="POST",
+#            url="https://photos.example.net/token",
+#            oauth_timestamp="137131201",
+#            oauth_nonce="walatlh",
+#            oauth_verifier="hfdp7dh39dks9884",
+#            oauth_signature="gKgrFCywp7rO0OXSjdot/IHF7IU=",
+#            ),
+#    }
+#
+#    def test_valid_signature(self):
+#        ex = self._EXAMPLES['ex1.2-temporary-credentials-request']
+#        expected_oauth_signature = ex['oauth_signature']
+#        oauth_params = dict(
+#            realm=ex["realm"],
+#            oauth_consumer_key=ex["oauth_consumer_key"],
+#            oauth_signature_method=ex["oauth_signature_method"],
+#            oauth_timestamp=ex["oauth_timestamp"],
+#            oauth_nonce=ex["oauth_nonce"],
+#            oauth_callback=ex["oauth_callback"],
+#            oauth_signature=ex["oauth_signature"],
+#            )
+#        assert_equal(get_hmac_sha1_signature(ex["oauth_consumer_secret"],
+#                                             method=ex["method"],
+#                                             url=ex["url"],
+#                                             oauth_params=oauth_params,
+#                                             token_or_temporary_shared_secret=None),
+#            expected_oauth_signature)
 
 
 class Test_get_and_check_rsa_sha1_signature(object):

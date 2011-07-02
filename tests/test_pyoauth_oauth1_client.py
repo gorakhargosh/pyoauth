@@ -139,7 +139,7 @@ class Test_Client_build_request(object):
 
     def test_valid_request_generated(self):
         valid_request = RequestProxy("GET",
-                                     "https://photos.example.net/photos?file=vacation.jpg&size=original",
+                                     "http://photos.example.net/photos?file=vacation.jpg&size=original",
                                      payload="",
                                      headers={
                                          "Authorization": '''\
@@ -153,7 +153,7 @@ OAuth realm="Photos",
     '''})
 
         method = "GET"
-        url = "https://photos.example.net/photos"
+        url = "http://photos.example.net/photos"
         params = dict(file="vacation.jpg", size="original")
         request = self.client._build_request(method,
                                              url,
