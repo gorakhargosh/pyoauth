@@ -3,7 +3,7 @@
 
 from nose import SkipTest
 from nose.tools import assert_equal, assert_raises
-from pyoauth.error import InvalidProtocolParametersError
+from pyoauth.error import InvalidOAuthParametersError
 from pyoauth.http import RequestProxy
 from pyoauth.utils import parse_authorization_header_value
 
@@ -126,7 +126,7 @@ class Test_Client_build_request(object):
                       oauth_signature_method="BLAH")
 
     def test_raises_ValueError_when_multiple_oauth_param_values(self):
-        assert_raises(InvalidProtocolParametersError,
+        assert_raises(InvalidOAuthParametersError,
                       self.client._build_request,
                       "POST",
                       self.client._temporary_credentials_request_uri,

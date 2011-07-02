@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from nose.tools import assert_equal, assert_not_equal, assert_false, assert_true, assert_raises
-from pyoauth.error import InvalidProtocolParametersError, InvalidAuthorizationHeaderValueError, InvalidHttpMethodError, InvalidUrlError
+from pyoauth.error import InvalidOAuthParametersError, InvalidAuthorizationHeaderError, InvalidHttpMethodError, InvalidUrlError
 
 try:
     from nose.tools import assert_dict_equal
@@ -354,7 +354,7 @@ class Test_get_signature_base_string(object):
                 {})
 
     def test_InvalidProtocolParametersError_when_query_params_is_not_dict(self):
-        assert_raises(InvalidProtocolParametersError, get_signature_base_string, "POST",
+        assert_raises(InvalidOAuthParametersError, get_signature_base_string, "POST",
                       "http://www.google.com/", None)
 
     def test_base_string_does_not_contain_oauth_signature(self):
@@ -514,7 +514,7 @@ class Test_get_normalized_authorization_header_value(object):
             'realm': ['Examp%20le'],
             'oauth_something': [' Some Example', "another thing"],
             }
-        assert_raises(InvalidProtocolParametersError, get_normalized_authorization_header_value, params)
+        assert_raises(InvalidOAuthParametersError, get_normalized_authorization_header_value, params)
 
 
 
@@ -524,7 +524,7 @@ class Test_parse_authorization_header_value(object):
             oauth_something="%20Some+Example",
             oauth_something="another%20thing"
         '''
-        assert_raises(InvalidProtocolParametersError, parse_authorization_header_value, test_value)
+        assert_raises(InvalidOAuthParametersError, parse_authorization_header_value, test_value)
 
     def test_param_delimiter_can_be_changed(self):
         expected_value = ({
@@ -605,31 +605,31 @@ class Test_parse_authorization_header_value(object):
     def test_InvalidAuthorizationHeaderValueError_when_trailing_comma_is_found(self):
         header_value = '''OAuth oauth_consumer_key="0685bd9184jfhq22",
             oauth_token="ad180jjd733klru7",'''
-        assert_raises(InvalidAuthorizationHeaderValueError, parse_authorization_header_value, header_value)
+        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value, header_value)
 
     def test_InvalidAuthorizationHeaderValueError_when_bad_parameter_field(self):
         header_value = '''OAuth realm="http://www.google.com/",something'''
-        assert_raises(InvalidAuthorizationHeaderValueError, parse_authorization_header_value,
+        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value,
                       header_value)
 
     def test_InvalidAuthorizationHeaderValueError_when_bad_parameter_value(self):
         header_value = '''OAuth realm="http://www.google.com/",something='''
-        assert_raises(InvalidAuthorizationHeaderValueError, parse_authorization_header_value,
+        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value,
                       header_value)
 
         header_value = '''OAuth realm="http://www.google.com/",something="'''
-        assert_raises(InvalidAuthorizationHeaderValueError, parse_authorization_header_value,
+        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value,
                       header_value)
 
     def test_InvalidAuthorizationHeaderValueError_when_missing_quotes_around_value(self):
         header_value = '''OAuth realm="http://www.google.com/",something="something'''
-        assert_raises(InvalidAuthorizationHeaderValueError, parse_authorization_header_value,
+        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value,
                       header_value)
 
         header_value = '''OAuth realm="http://www.google.com/",something=something"'''
-        assert_raises(InvalidAuthorizationHeaderValueError, parse_authorization_header_value,
+        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value,
                       header_value)
 
         header_value = '''OAuth realm="http://www.google.com/",something=something'''
-        assert_raises(InvalidAuthorizationHeaderValueError, parse_authorization_header_value,
+        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value,
                       header_value)

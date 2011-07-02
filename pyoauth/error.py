@@ -20,16 +20,12 @@ class OAuthError(RuntimeError):
 
 
 class InvalidQueryParametersError(OAuthError):
-    """
-    Raised when query parameters passed into a function or method
-    are invalid.
-    """
     pass
 
-class InsecureProtocolParametersError(OAuthError):
+class InsecureOAuthParametersError(OAuthError):
     pass
 
-class InvalidProtocolParametersError(OAuthError):
+class InvalidOAuthParametersError(OAuthError):
     pass
 
 class InsecureOAuthUrlError(OAuthError):
@@ -41,5 +37,5 @@ class InvalidUrlError(OAuthError):
 class InvalidHttpMethodError(OAuthError):
     pass
 
-class InvalidAuthorizationHeaderValueError(OAuthError):
+class InvalidAuthorizationHeaderError(OAuthError):
     pass

@@ -3,7 +3,7 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.error import InvalidUrlError, InvalidQueryParametersError, InsecureOAuthUrlError, InvalidProtocolParametersError, InsecureProtocolParametersError
+from pyoauth.error import InvalidUrlError, InvalidQueryParametersError, InsecureOAuthUrlError, InvalidOAuthParametersError, InsecureOAuthParametersError
 
 try:
     from nose.tools import assert_dict_equal
@@ -590,7 +590,7 @@ class Test_request_protocol_params_sanitize(object):
             "c2": [""],
             "oauth_token": ["kkk9d7dh3k39sjv7", "ahdsa7hd3uhadasd"],
         }
-        assert_raises(InvalidProtocolParametersError, request_protocol_params_sanitize, params)
+        assert_raises(InvalidOAuthParametersError, request_protocol_params_sanitize, params)
 
     def test_raises_InsecureProtocolParametersError_when_confidential_params_found(self):
         params1 = {
@@ -609,8 +609,8 @@ class Test_request_protocol_params_sanitize(object):
             "c2": [""],
             "oauth_token_secret": ["something"]
         }
-        assert_raises(InsecureProtocolParametersError, request_protocol_params_sanitize, params1)
-        assert_raises(InsecureProtocolParametersError, request_protocol_params_sanitize, params2)
+        assert_raises(InsecureOAuthParametersError, request_protocol_params_sanitize, params1)
+        assert_raises(InsecureOAuthParametersError, request_protocol_params_sanitize, params2)
 
 class Test_url_append_query(object):
     def test_does_not_prefix_with_ampersand_when_url_has_no_query_params(self):

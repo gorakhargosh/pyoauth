@@ -53,7 +53,7 @@ Parameter sanitization
 
 """
 import logging
-from pyoauth.error import InvalidQueryParametersError, InsecureProtocolParametersError, InvalidProtocolParametersError, InsecureOAuthUrlError, InvalidUrlError
+from pyoauth.error import InvalidQueryParametersError, InsecureOAuthParametersError, InvalidOAuthParametersError, InsecureOAuthUrlError, InvalidUrlError
 
 try:
     # Python 3.
@@ -488,9 +488,9 @@ def request_protocol_params_sanitize(protocol_params):
                 # Point 2. Each parameter MUST NOT appear more than once per
                 # request, so we disallow multiple values for a protocol
                 # parameter.
-                raise InvalidProtocolParametersError("Multiple protocol parameter values found %r=%r" % (n, v))
+                raise InvalidOAuthParametersError("Multiple protocol parameter values found %r=%r" % (n, v))
             elif n in ("oauth_consumer_secret", "oauth_token_secret", ):
-                raise InsecureProtocolParametersError("[SECURITY-ISSUE] Client attempting to transmit confidential protocol parameter `%r`. Communication is insecure if this is in your server logs." % (n, ))
+                raise InsecureOAuthParametersError("[SECURITY-ISSUE] Client attempting to transmit confidential protocol parameter `%r`. Communication is insecure if this is in your server logs." % (n, ))
             else:
                 return True
         else:

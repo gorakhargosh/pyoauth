@@ -48,7 +48,7 @@ import hmac
 import time
 import uuid
 import re
-from pyoauth.error import InvalidHttpMethodError, InvalidUrlError, InvalidProtocolParametersError, InvalidAuthorizationHeaderValueError
+from pyoauth.error import InvalidHttpMethodError, InvalidUrlError, InvalidOAuthParametersError, InvalidAuthorizationHeaderError
 
 
 try:
@@ -361,7 +361,7 @@ def get_signature_base_string(method, url, oauth_params):
     if not url:
         raise InvalidUrlError("URL must be specified: got `%r`" % (url, ))
     if not isinstance(oauth_params, dict):
-        raise InvalidProtocolParametersError("Dictionary required: got `%r`" % (oauth_params, ))
+        raise InvalidOAuthParametersError("Dictionary required: got `%r`" % (oauth_params, ))
 
     scheme, netloc, path, matrix_params, query, fragment = urlparse_normalized(url)
     query_string = _get_signature_base_string_query(query, oauth_params)
@@ -511,17 +511,17 @@ def _parse_authorization_header_value_l(header_value, param_delimiter=","):
     for param in pairs:
         if not param:
             if header_value.endswith(param_delimiter):
-                raise InvalidAuthorizationHeaderValueError("Malformed `Authorization` header value -- found trailing `%r` character" % param_delimiter)
+                raise InvalidAuthorizationHeaderError("Malformed `Authorization` header value -- found trailing `%r` character" % param_delimiter)
             #else:
             #    continue
         nv = param.split("=", 1)
         if len(nv) != 2:
-            raise InvalidAuthorizationHeaderValueError("bad parameter field: `%r`" % (param, ))
+            raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" % (param, ))
         name, value = nv[0].strip(), nv[1].strip()
         if len(value) < 2:
-            raise InvalidAuthorizationHeaderValueError("bad parameter value: `%r` -- missing quotes?" % (param, ))
+            raise InvalidAuthorizationHeaderError("bad parameter value: `%r` -- missing quotes?" % (param, ))
         if value[0] != '"' or value[-1] != '"':
-            raise InvalidAuthorizationHeaderValueError("missing quotes around parameter value: `%r` -- values must be quoted using (\")" % (param, ))
+            raise InvalidAuthorizationHeaderError("missing quotes around parameter value: `%r` -- values must be quoted using (\")" % (param, ))
 
         # We only need to remove a single pair of quotes. Do not use str.strip('"').
         # We need to be able to detect problems with the values too.
