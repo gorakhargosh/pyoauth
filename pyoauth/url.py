@@ -455,7 +455,7 @@ def query_unflatten(query_params):
 
 
 
-def request_protocol_params_sanitize(query_params):
+def request_protocol_params_sanitize(protocol_params):
     """
     Removes non-OAuth and non-transmittable OAuth parameters from the
     request query parameters.
@@ -466,7 +466,7 @@ def request_protocol_params_sanitize(query_params):
         headers construction and parsing, and OAuth requests.
 
 
-    :param query_params:
+    :param protocol_params:
         Query string or query parameter dictionary. Does not filter out
         ``oauth_signature``, but DOES filter out ``oauth_consumer_secret`` and
         ``oauth_token_secret``. These secret parameters must never be
@@ -495,7 +495,7 @@ def request_protocol_params_sanitize(query_params):
         else:
             logging.warning("Invalid protocol parameter ignored: `%r`", n)
             return False
-    return query_filter(query_params, allow_func=allow_func)
+    return query_filter(protocol_params, allow_func=allow_func)
 
 
 def query_params_sanitize(query_params):
