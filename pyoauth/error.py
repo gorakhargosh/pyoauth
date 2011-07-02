@@ -72,3 +72,6 @@ class InvalidSignatureMethodError(OAuthError):
 
 class OverridingReservedOAuthParameterError(OAuthError):
     pass
+
+class SignatureMethodNotSupported(OAuthError):
+    pass
