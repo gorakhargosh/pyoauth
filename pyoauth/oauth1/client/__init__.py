@@ -43,13 +43,11 @@ from pyoauth.oauth1 import \
     SIGNATURE_METHOD_HMAC_SHA1, \
     SIGNATURE_METHOD_RSA_SHA1, \
     SIGNATURE_METHOD_PLAINTEXT
-from pyoauth.unicode import is_bytes_or_unicode
 from pyoauth.url import \
     oauth_url_sanitize, \
     request_protocol_params_sanitize, \
     query_params_sanitize, \
     url_add_query, \
-    urlencode_s, \
     url_append_query, \
     parse_qs, query_append, is_valid_callback_url
 from pyoauth.utils import generate_nonce, \

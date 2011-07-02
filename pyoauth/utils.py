@@ -48,7 +48,10 @@ import hmac
 import time
 import uuid
 import re
-from pyoauth.error import InvalidHttpMethodError, InvalidUrlError, InvalidOAuthParametersError, InvalidAuthorizationHeaderError
+from pyoauth.error import InvalidHttpMethodError, \
+    InvalidUrlError, \
+    InvalidOAuthParametersError, \
+    InvalidAuthorizationHeaderError
 
 
 try:

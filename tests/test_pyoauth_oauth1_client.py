@@ -7,7 +7,7 @@ from pyoauth.error import InvalidOAuthParametersError, \
     InvalidAuthorizationHeaderError, \
     InvalidSignatureMethodError, \
     OverridingReservedOAuthParameterError, \
-    InvalidHttpResponseError, HttpError, InvalidContentTypeError
+    InvalidHttpResponseError, HttpError, InvalidContentTypeError, IllegalArgumentError
 from pyoauth.http import RequestProxy
 from pyoauth.utils import parse_authorization_header_value
 
@@ -110,6 +110,57 @@ class TestClient_OAuth_1_0_Example:
         assert_raises(InvalidHttpResponseError, self.client._parse_credentials_response, 200, "", headers)
         assert_raises(InvalidContentTypeError, self.client._parse_credentials_response, 200, body, {"Content-Type": "invalid"})
 
+
+class Test_Client_build_temporary_credentials_request(object):
+    def setUp(self):
+        self.client_credentials = Credentials(identifier="dpf43f3p2l4k3l03", shared_secret="kd94hf93k423kf44")
+        self.client = Client(self.client_credentials,
+                             temporary_credentials_request_uri="https://photos.example.net/initiate",
+                             resource_owner_authorization_uri="https://photos.example.net/authorize",
+                             token_request_uri="https://photos.example.net/token",
+                             use_authorization_header=True)
+        self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
+        self.token_credentials = Credentials(identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
+
+    def test_raises_ValueError_when_oauth_callback_is_invalid(self):
+        assert_raises(ValueError, self.client.build_temporary_credentials_request, oauth_callback="foobar")
+
+class Test_Client_build_token_credentials_request(object):
+    def setUp(self):
+        self.client_credentials = Credentials(identifier="dpf43f3p2l4k3l03", shared_secret="kd94hf93k423kf44")
+        self.client = Client(self.client_credentials,
+                             temporary_credentials_request_uri="https://photos.example.net/initiate",
+                             resource_owner_authorization_uri="https://photos.example.net/authorize",
+                             token_request_uri="https://photos.example.net/token",
+                             use_authorization_header=True)
+        self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
+        self.token_credentials = Credentials(identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
+
+    def test_raises_IllegalArgumentError_when_oauth_callback_specified(self):
+        assert_raises(IllegalArgumentError,
+                      self.client.build_token_credentials_request,
+                      temporary_credentials=self.temporary_credentials,
+                      oauth_verifier="something",
+                      oauth_callback="oob")
+
+class Test_Client_build_resource_request(object):
+    def setUp(self):
+        self.client_credentials = Credentials(identifier="dpf43f3p2l4k3l03", shared_secret="kd94hf93k423kf44")
+        self.client = Client(self.client_credentials,
+                             temporary_credentials_request_uri="https://photos.example.net/initiate",
+                             resource_owner_authorization_uri="https://photos.example.net/authorize",
+                             token_request_uri="https://photos.example.net/token",
+                             use_authorization_header=True)
+        self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
+        self.token_credentials = Credentials(identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
+
+    def test_raises_IllegalArgumentError_when_oauth_callback_specified(self):
+        assert_raises(IllegalArgumentError,
+                      self.client.build_resource_request,
+                      token_credentials=self.token_credentials,
+                      method="POST",
+                      url="http://photos.example.net/request",
+                      oauth_callback="oob")
 
 class Test_Client_build_request(object):
     def setUp(self):
