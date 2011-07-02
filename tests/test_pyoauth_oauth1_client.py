@@ -25,7 +25,7 @@ class TestClient_OAuth_1_0_Example:
         self.client = Client(self.client_credentials,
                              temporary_credentials_request_uri="https://photos.example.net/initiate",
                              resource_owner_authorization_uri="https://photos.example.net/authorize",
-                             token_request_uri="https://photos.example.net/token",
+                             token_credentials_request_uri="https://photos.example.net/token",
                              use_authorization_header=True)
         self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
         self.token_credentials = Credentials(identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
@@ -117,7 +117,7 @@ class Test_Client_build_temporary_credentials_request(object):
         self.client = Client(self.client_credentials,
                              temporary_credentials_request_uri="https://photos.example.net/initiate",
                              resource_owner_authorization_uri="https://photos.example.net/authorize",
-                             token_request_uri="https://photos.example.net/token",
+                             token_credentials_request_uri="https://photos.example.net/token",
                              use_authorization_header=True)
         self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
         self.token_credentials = Credentials(identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
@@ -131,7 +131,7 @@ class Test_Client_build_token_credentials_request(object):
         self.client = Client(self.client_credentials,
                              temporary_credentials_request_uri="https://photos.example.net/initiate",
                              resource_owner_authorization_uri="https://photos.example.net/authorize",
-                             token_request_uri="https://photos.example.net/token",
+                             token_credentials_request_uri="https://photos.example.net/token",
                              use_authorization_header=True)
         self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
         self.token_credentials = Credentials(identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
@@ -149,7 +149,7 @@ class Test_Client_build_resource_request(object):
         self.client = Client(self.client_credentials,
                              temporary_credentials_request_uri="https://photos.example.net/initiate",
                              resource_owner_authorization_uri="https://photos.example.net/authorize",
-                             token_request_uri="https://photos.example.net/token",
+                             token_credentials_request_uri="https://photos.example.net/token",
                              use_authorization_header=True)
         self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
         self.token_credentials = Credentials(identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
@@ -168,7 +168,7 @@ class Test_Client_build_request(object):
         self.client = Client(self.client_credentials,
                              temporary_credentials_request_uri="https://photos.example.net/initiate",
                              resource_owner_authorization_uri="https://photos.example.net/authorize",
-                             token_request_uri="https://photos.example.net/token",
+                             token_credentials_request_uri="https://photos.example.net/token",
                              use_authorization_header=True)
         self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
         self.token_credentials = Credentials(identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")

@@ -480,11 +480,11 @@ class Test_get_normalized_authorization_header_value(object):
             'oauth_empty': [''],
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }
-        expected_value = 'OAuth oauth_consumer_key="0685bd9184jfhq22",\n    oauth_empty="",\n    oauth_nonce="4572616e48616d6d65724c61686176",\n    oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",\n    oauth_signature_method="HMAC-SHA1",\n    oauth_something="%20Some%20Example",\n    oauth_timestamp="137131200",\n    oauth_token="ad180jjd733klru7",\n    oauth_version="1.0"'
+        expected_value = 'OAuth oauth_consumer_key="0685bd9184jfhq22",oauth_empty="",oauth_nonce="4572616e48616d6d65724c61686176",oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",oauth_signature_method="HMAC-SHA1",oauth_something="%20Some%20Example",oauth_timestamp="137131200",oauth_token="ad180jjd733klru7",oauth_version="1.0"'
         assert_equal(get_normalized_authorization_header_value(params),
                      expected_value)
 
-        expected_value = 'OAuth realm="http://example.com/",\n    oauth_consumer_key="0685bd9184jfhq22",\n    oauth_empty="",\n    oauth_nonce="4572616e48616d6d65724c61686176",\n    oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",\n    oauth_signature_method="HMAC-SHA1",\n    oauth_something="%20Some%20Example",\n    oauth_timestamp="137131200",\n    oauth_token="ad180jjd733klru7",\n    oauth_version="1.0"'
+        expected_value = 'OAuth realm="http://example.com/",oauth_consumer_key="0685bd9184jfhq22",oauth_empty="",oauth_nonce="4572616e48616d6d65724c61686176",oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",oauth_signature_method="HMAC-SHA1",oauth_something="%20Some%20Example",oauth_timestamp="137131200",oauth_token="ad180jjd733klru7",oauth_version="1.0"'
         assert_equal(get_normalized_authorization_header_value(params,
                                                                      realm="http://example.com/")
                      , expected_value)
@@ -503,7 +503,7 @@ class Test_get_normalized_authorization_header_value(object):
             'oauth_empty': [''],
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }
-        expected_value = 'OAuth realm="http://example.com/"&\n    oauth_consumer_key="0685bd9184jfhq22"&\n    oauth_empty=""&\n    oauth_nonce="4572616e48616d6d65724c61686176"&\n    oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D"&\n    oauth_signature_method="HMAC-SHA1"&\n    oauth_something="%20Some%20Example"&\n    oauth_timestamp="137131200"&\n    oauth_token="ad180jjd733klru7"&\n    oauth_version="1.0"'
+        expected_value = 'OAuth realm="http://example.com/"&oauth_consumer_key="0685bd9184jfhq22"&oauth_empty=""&oauth_nonce="4572616e48616d6d65724c61686176"&oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D"&oauth_signature_method="HMAC-SHA1"&oauth_something="%20Some%20Example"&oauth_timestamp="137131200"&oauth_token="ad180jjd733klru7"&oauth_version="1.0"'
         assert_equal(get_normalized_authorization_header_value(params,
                                                                realm="http://example.com/",
                                                                param_delimiter="&")

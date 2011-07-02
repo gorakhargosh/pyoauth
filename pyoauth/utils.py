@@ -415,6 +415,9 @@ def get_normalized_authorization_header_value(oauth_params,
     """
     Builds the Authorization header value.
 
+    Please note that the generated authorization header value MUST be
+    on a SINGLE line.
+
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param oauth_params:
         Protocol-specific parameters excluding the ``realm`` parameter.
@@ -430,22 +433,13 @@ def get_normalized_authorization_header_value(oauth_params,
     :returns:
         A properly formatted Authorization header value.
     """
-    indentation = " " * 4 #len("Authorization: ")
     if realm:
-        s = "".join([
-            'OAuth realm="',
-            to_utf8(realm),
-            '"',
-            param_delimiter,
-            '\n',
-            indentation
-        ])
+        s = 'OAuth realm="' + to_utf8(realm) + '"' + param_delimiter
     else:
         s = 'OAuth '
     oauth_params = request_protocol_params_sanitize(oauth_params)
     normalized_param_pairs = urlencode_sl(oauth_params)
-    delimiter = param_delimiter + "\n" + indentation
-    s += delimiter.join([k + '="' + v + '"' for k, v in normalized_param_pairs])
+    s += param_delimiter.join([k + '="' + v + '"' for k, v in normalized_param_pairs])
     return s
 
 
