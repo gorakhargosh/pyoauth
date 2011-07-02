@@ -486,8 +486,7 @@ def protocol_params_sanitize(query_params):
                 # parameter.
                 raise ValueError("Multiple protocol parameter values found %r=%r" % (n, v))
             elif n in ("oauth_consumer_secret", "oauth_token_secret", ):
-                logging.warning("[SECURITY-ISSUE] Ignored non-transmittable protocol parameter `%r`. Communication is insecure if this is in your server logs." % (n, ))
-                return False
+                raise ValueError("[SECURITY-ISSUE] Attempting to transmit confidential protocol parameter `%r`. Communication is insecure if this is in your server logs." % (n, ))
             else:
                 return True
         else:
