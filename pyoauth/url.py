@@ -536,8 +536,9 @@ def oauth_url_sanitize(url, force_secure=True):
     scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
     query = urlencode_s(query_params_sanitize(query))
     if force_secure and scheme != "https":
-        #logging.warning("RFC specification requires the use of SSL/TLS for inter-server communication.")
         raise ValueError("OAuth 1.0 specification requires the use of SSL/TLS for inter-server communication.")
+    elif not force_secure and scheme != "https":
+        logging.warning("CAUTION: RFC specification requires the use of SSL/TLS for credential requests.")
     return urlunparse((scheme, netloc, path, params, query, None))
 
 
