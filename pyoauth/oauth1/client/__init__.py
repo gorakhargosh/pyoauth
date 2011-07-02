@@ -175,9 +175,15 @@ class Client(object):
         Creates an instance of an OAuth 1.0 client.
         """
         self._client_credentials = client_credentials
-        self._temporary_credentials_request_uri = oauth_url_sanitize(temporary_credentials_request_uri, force_secure=True)
-        self._resource_owner_authorization_uri = oauth_url_sanitize(resource_owner_authorization_uri, force_secure=False)
-        self._token_request_uri = oauth_url_sanitize(token_request_uri, force_secure=True)
+        self._temporary_credentials_request_uri = \
+            oauth_url_sanitize(temporary_credentials_request_uri,
+                               force_secure=True)
+        self._resource_owner_authorization_uri = \
+            oauth_url_sanitize(resource_owner_authorization_uri,
+                               force_secure=False)
+        self._token_request_uri = \
+            oauth_url_sanitize(token_request_uri,
+                               force_secure=True)
         self._use_authorization_header = use_authorization_header
         self._authorization_header_param_delimiter = authorization_header_param_delimiter
 
@@ -568,7 +574,10 @@ class Client(object):
         if "Authorization" in headers:
             raise InvalidAuthorizationHeaderError("Authorization field is already present in headers: `%r`" % (headers, ))
         if self._use_authorization_header:
-            auth_header_value = get_normalized_authorization_header_value(oauth_params, realm=realm, param_delimiter=self._authorization_header_param_delimiter)
+            auth_header_value = \
+                get_normalized_authorization_header_value(oauth_params,
+                                                          realm=realm,
+                                                          param_delimiter=self._authorization_header_param_delimiter)
             headers["Authorization"] = auth_header_value
             # Empty the params if using authorization so that they are not
             # included multiple times in a request below.
@@ -585,7 +594,10 @@ class Client(object):
             request_url = url_append_query(request_url, oauth_params)
             payload = ""
 
-        return RequestProxy(method, url=request_url, payload=payload, headers=headers)
+        return RequestProxy(method,
+                            url=request_url,
+                            payload=payload,
+                            headers=headers)
 
     def _sign_request_data(self, signature_method,
                            method, url, oauth_params,
