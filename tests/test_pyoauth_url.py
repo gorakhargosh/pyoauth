@@ -10,7 +10,7 @@ except ImportError:
 from pyoauth.url import percent_decode, percent_encode, parse_qs, \
     urlencode_s, urlencode_sl, query_unflatten, \
     query_add, urlparse_normalized, url_add_query, \
-    query_params_sanitize, protocol_params_sanitize, oauth_url_sanitize, \
+    query_params_sanitize, request_protocol_params_sanitize, oauth_url_sanitize, \
     url_append_query, query_append, is_valid_callback_url
 
 from urlparse import urlparse
@@ -576,8 +576,8 @@ class Test_protocol_params_sanitize(object):
         }
         expected_result = urlencode_s(expected_params)
 
-        assert_equal(urlencode_s(protocol_params_sanitize(params)), expected_result)
-        assert_equal(urlencode_s(protocol_params_sanitize(query_string)), expected_result)
+        assert_equal(urlencode_s(request_protocol_params_sanitize(params)), expected_result)
+        assert_equal(urlencode_s(request_protocol_params_sanitize(query_string)), expected_result)
 
     def test_raises_ValueError_when_multiple_protocol_param_values_found(self):
         params = {
@@ -588,7 +588,7 @@ class Test_protocol_params_sanitize(object):
             "c2": [""],
             "oauth_token": ["kkk9d7dh3k39sjv7", "ahdsa7hd3uhadasd"],
         }
-        assert_raises(ValueError, protocol_params_sanitize, params)
+        assert_raises(ValueError, request_protocol_params_sanitize, params)
 
 
 class Test_url_append_query(object):

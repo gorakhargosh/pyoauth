@@ -39,7 +39,7 @@ from pyoauth.oauth1 import \
 from pyoauth.unicode import is_bytes_or_unicode
 from pyoauth.url import \
     oauth_url_sanitize, \
-    protocol_params_sanitize, \
+    request_protocol_params_sanitize, \
     query_params_sanitize, \
     url_add_query, \
     urlencode_s, \
@@ -517,7 +517,7 @@ class Client(object):
 
         # Filter and add additional OAuth parameters.
         _force_override_reserved_oauth_params_for_tests = "_test_force_override_reserved_oauth_params" in extra_oauth_params
-        extra_oauth_params = protocol_params_sanitize(extra_oauth_params)
+        extra_oauth_params = request_protocol_params_sanitize(extra_oauth_params)
         reserved_oauth_params = (
             "oauth_signature",     # Calculated from given parameters.
             "oauth_nonce",         # System-generated.

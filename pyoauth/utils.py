@@ -81,7 +81,7 @@ except ImportError:
 from pyoauth.unicode import to_utf8
 from pyoauth.url import percent_encode, percent_decode, \
     urlencode_sl, urlencode_s, urlparse_normalized, \
-    protocol_params_sanitize, query_params_sanitize
+    request_protocol_params_sanitize, query_params_sanitize
 
 
 def generate_nonce(length=None):
@@ -388,7 +388,7 @@ def _get_signature_base_string_query(url_query_params, oauth_params):
         Normalized string of query parameters.
     """
     url_query_params = query_params_sanitize(url_query_params)
-    oauth_params = protocol_params_sanitize(oauth_params)
+    oauth_params = request_protocol_params_sanitize(oauth_params)
 
     query_params = {}
     query_params.update(url_query_params)
@@ -438,7 +438,7 @@ def get_normalized_authorization_header_value(oauth_params,
         ])
     else:
         s = 'OAuth '
-    oauth_params = protocol_params_sanitize(oauth_params)
+    oauth_params = request_protocol_params_sanitize(oauth_params)
     normalized_param_pairs = urlencode_sl(oauth_params)
     delimiter = param_delimiter + "\n" + indentation
     s += delimiter.join([k + '="' + v + '"' for k, v in normalized_param_pairs])
@@ -474,7 +474,7 @@ def parse_authorization_header_value(header_value, param_delimiter=","):
             d[name].append(value)
         else:
             d[name] = [value]
-    d = protocol_params_sanitize(d)
+    d = request_protocol_params_sanitize(d)
     return d, realm
 
 

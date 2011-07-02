@@ -48,7 +48,7 @@ Query parameters
 
 Parameter sanitization
 ~~~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: protocol_params_sanitize
+.. autofunction:: request_protocol_params_sanitize
 .. autofunction:: query_params_sanitize
 
 """
@@ -455,13 +455,15 @@ def query_unflatten(query_params):
 
 
 
-def protocol_params_sanitize(query_params):
+def request_protocol_params_sanitize(query_params):
     """
     Removes non-OAuth and non-transmittable OAuth parameters from the
-    query parameters.
+    request query parameters.
 
     Used only in base string construction, Authorization headers construction
-    and parsing, and OAuth requests.
+    and parsing, and OAuth requests ONLY.
+
+    Do NOT use this function with responses. Use ONLY with requests.
 
     :param query_params:
         Query string or query parameter dictionary. Does not filter out
@@ -486,7 +488,7 @@ def protocol_params_sanitize(query_params):
                 # parameter.
                 raise ValueError("Multiple protocol parameter values found %r=%r" % (n, v))
             elif n in ("oauth_consumer_secret", "oauth_token_secret", ):
-                raise ValueError("[SECURITY-ISSUE] Attempting to transmit confidential protocol parameter `%r`. Communication is insecure if this is in your server logs." % (n, ))
+                raise ValueError("[SECURITY-ISSUE] Client attempting to transmit confidential protocol parameter `%r`. Communication is insecure if this is in your server logs." % (n, ))
             else:
                 return True
         else:
