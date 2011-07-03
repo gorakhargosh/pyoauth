@@ -312,8 +312,8 @@ class Client(object):
         :returns:
             An instance of :class:`pyoauth.http.RequestProxy`.
         """
-        if "oauth_token" in extra_oauth_params:
-            raise IllegalArgumentError("`oauth_token` is taken from the temporary credentials. Do not specify.")
+#        if "oauth_token" in extra_oauth_params:
+#            raise IllegalArgumentError("`oauth_token` is taken from the temporary credentials. Do not specify.")
         if "oauth_callback" in extra_oauth_params:
             raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
 
@@ -325,7 +325,6 @@ class Client(object):
                                    realm=realm,
                                    oauth_signature_method=oauth_signature_method,
                                    oauth_verifier=oauth_verifier,
-                                   oauth_token=temporary_credentials.identifier,
                                    **extra_oauth_params)
 
     def build_resource_request(self,
@@ -373,8 +372,8 @@ class Client(object):
         :returns:
             An instance of :class:`pyoauth.http.RequestProxy`.
         """
-        if "oauth_token" in extra_oauth_params:
-            raise IllegalArgumentError("`oauth_token` is taken from the token credentials. Do not specify.")
+#        if "oauth_token" in extra_oauth_params:
+#            raise IllegalArgumentError("`oauth_token` is taken from the token credentials. Do not specify.")
         if "oauth_callback" in extra_oauth_params:
             raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
 
@@ -385,7 +384,6 @@ class Client(object):
                                    realm=realm,
                                    token_or_temporary_credentials=token_credentials,
                                    oauth_signature_method=oauth_signature_method,
-                                   oauth_token=token_credentials.identifier
                                    **extra_oauth_params)
 
     def parse_temporary_credentials_response(self, status_code, status, body, headers):
@@ -412,28 +410,27 @@ class Client(object):
             raise ValueError("Invalid OAuth server response -- `oauth_callback_confirmed` MUST be set to `true`.")
         return params, credentials
 
-    def check_verification_code(self, temporary_credentials, oauth_token, oauth_verifier):
+    def check_verification_code(self, temporary_credentials, response_oauth_token, response_oauth_verifier):
         """
         When the OAuth 1.0 server redirects the resource owner to your
         callback URL, it will attach two parameters to the query string.
 
-        1. oauth_token - Must match your temporary credentials identifier.
-        2. oauth_verifier - Server generated verification code that you will
-           use in the next step, that is requesting token credentials.
+        1. ``oauth_token``: Must match your temporary credentials identifier.
+        2. ``oauth_verifier``: Server-generated verification code that you will
+           use in the next step--that is requesting token credentials.
 
         :param temporary_credentials:
             Temporary credentials
-        :param oauth_token:
+        :param response_oauth_token:
             The value of the ``oauth_token`` parameter as obtained
             from the server redirect.
-        :param oauth_verifier:
+        :param response_oauth_verifier:
             The value of the ``oauth_verifier`` parameter as obtained
             from the server redirect.
         """
-        if temporary_credentials.identifier != oauth_token:
-            raise InvalidHttpRequestError("OAuth token returned in callback query `%r` does not match temporary credentials: `%r`" % (oauth_token, temporary_credentials.identifer,))
-        return oauth_verifier
-
+        if temporary_credentials.identifier != response_oauth_token:
+            raise InvalidHttpRequestError("OAuth token returned in callback query `%r` does not match temporary credentials: `%r`" % (response_oauth_token, temporary_credentials.identifer,))
+        return response_oauth_verifier
 
     def parse_token_credentials_response(self, status_code, status, body, headers):
         """
@@ -519,7 +516,7 @@ class Client(object):
             Must not include the "Authorization" header.
         :param realm:
             The value to use for the realm parameter in the Authorization HTTP
-            header. It will be excluded from the base string, however.
+            header. It will be excluded from the request signature.
         :param oauth_signature_method:
             One of:
             1. :attr:`pyoauth.oauth1.SIGNATURE_METHOD_HMAC_SHA1`
@@ -548,6 +545,8 @@ class Client(object):
             oauth_nonce=generate_nonce(),
             oauth_version=self.oauth_version,
         )
+        if token_or_temporary_credentials:
+            oauth_params["oauth_token"] = token_or_temporary_credentials.identifier
 
         if "_test_force_exclude_oauth_version" in extra_oauth_params:
             del oauth_params["oauth_version"]
@@ -561,6 +560,7 @@ class Client(object):
             "oauth_timestamp",     # System-generated.
             "oauth_consumer_key",  # Provided when creating the client instance.
             "oauth_version",       # Optional but MUST be set to "1.0" according to spec.
+            "oauth_token",         # Determined from the token or temporary credentials.
         )
         for k, v in extra_oauth_params.items():
             if not _force_override_reserved_oauth_params_for_tests and k in reserved_oauth_params:
