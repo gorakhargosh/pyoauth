@@ -383,13 +383,15 @@ class Client(object):
                                    oauth_token=token_credentials.identifier
                                    **extra_oauth_params)
 
-    def parse_temporary_credentials_response(self, status_code, body, headers):
+    def parse_temporary_credentials_response(self, status_code, status, body, headers):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         temporary credentials request.
 
         :param status_code:
             HTTP response status code.
+        :param status:
+            HTTP status message
         :param body:
             HTTP response body.
         :param headers:
@@ -399,19 +401,21 @@ class Client(object):
 
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
-        params, credentials = self._parse_credentials_response(status_code, body, headers)
+        params, credentials = self._parse_credentials_response(status_code, status, body, headers)
         callback_confirmed = params.get("oauth_callback_confirmed", [""])[0].lower()
         if callback_confirmed != "true":
             raise ValueError("Invalid OAuth server response -- `oauth_callback_confirmed` MUST be set to `true`.")
         return params, credentials
 
-    def parse_token_credentials_response(self, status_code, body, headers):
+    def parse_token_credentials_response(self, status_code, status, body, headers):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         token credentials request.
 
         :param status_code:
             HTTP response status code.
+        :param status:
+            HTTP status message.
         :param body:
             HTTP response body.
         :param headers:
@@ -421,9 +425,9 @@ class Client(object):
 
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
-        return self._parse_credentials_response(status_code, body, headers)
+        return self._parse_credentials_response(status_code, status, body, headers)
 
-    def _parse_credentials_response(self, status_code, body, headers):
+    def _parse_credentials_response(self, status_code, status, body, headers):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         credential request.
@@ -441,15 +445,17 @@ class Client(object):
         """
         if not status_code:
             raise InvalidHttpResponseError("Invalid status code: `%r`" % (status_code, ))
+        if not status:
+            raise InvalidHttpResponseError("Invalid status message: `%r`" % (status, ))
         if not body:
             raise InvalidHttpResponseError("Body is invalid or empty: `%r`" % (body, ))
         if not headers:
             raise InvalidHttpResponseError("Headers are invalid or not specified: `%r`" % (headers, ))
 
-        response = ResponseProxy(status_code=status_code, body=body, headers=headers)
+        response = ResponseProxy(status_code=status_code, status=status, body=body, headers=headers)
 
         if response.error:
-            raise HttpError("Could not fetch credentials -- HTTP status code: %d" % (response.status_code, ))
+            raise HttpError("Could not fetch credentials: HTTP %d - %s" % (response.status_code, response.status,))
         # The response body must be URL encoded.
         if not response.is_body_form_urlencoded():
             raise InvalidContentTypeError("OAuth credentials server response must have Content-Type: `%s`" % (CONTENT_TYPE_FORM_URLENCODED, ))

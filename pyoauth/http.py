@@ -70,8 +70,9 @@ class ResponseProxy(object):
     Framework implementers can subclass this class and must use it with
     the client methods for them to work.
     """
-    def __init__(self, status_code, body, headers=None):
+    def __init__(self, status_code, status, body, headers=None):
         self._body = body
+        self._status_message = status
         self._status_code = status_code
         self._headers = headers or {}
 
@@ -86,6 +87,10 @@ class ResponseProxy(object):
     @property
     def status_code(self):
         return self._status_code
+
+    @property
+    def status(self):
+        return self._status_message
 
     @property
     def headers(self):
