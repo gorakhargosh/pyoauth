@@ -261,6 +261,7 @@ class Client(object):
         if query_params:
             query_params = query_params_sanitize(query_params)
             url = url_append_query(url, query_params)
+        # So that the "oauth_token" appears LAST.
         return url_append_query(url, {
             "oauth_token": temporary_credentials.identifier,
         })
