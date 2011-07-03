@@ -66,7 +66,7 @@ class GoogleClient(Client):
 
         GoogleClient._check_signature_method(oauth_signature_method)
 
-        super(GoogleClient, self).build_temporary_credentials_request(
+        return super(GoogleClient, self).build_temporary_credentials_request(
             method=method,
             payload_params=payload_params,
             headers=headers,
@@ -88,10 +88,32 @@ class GoogleClient(Client):
 
         GoogleClient._check_signature_method(oauth_signature_method)
 
-        super(GoogleClient, self).build_token_credentials_request(
+        return super(GoogleClient, self).build_token_credentials_request(
             temporary_credentials=temporary_credentials,
             oauth_verifier=oauth_verifier,
             method=method,
+            payload_params=payload_params,
+            headers=headers,
+            realm=realm,
+            oauth_signature_method=oauth_signature_method,
+            **extra_oauth_params
+        )
+
+    def build_resource_request(self,
+                               token_credentials,
+                               method,
+                               url,
+                               payload_params=None,
+                               headers=None,
+                               realm=None,
+                               oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
+                               **extra_oauth_params):
+        GoogleClient._check_signature_method(oauth_signature_method)
+
+        return super(GoogleClient, self).build_resource_request(
+            token_credentials=token_credentials,
+            method=method,
+            url=url,
             payload_params=payload_params,
             headers=headers,
             realm=realm,
