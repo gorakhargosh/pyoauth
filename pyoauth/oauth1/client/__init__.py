@@ -35,7 +35,7 @@ from pyoauth.error import IllegalArgumentError, \
     InvalidSignatureMethodError, \
     OverridingReservedOAuthParameterError, \
     InvalidAuthorizationHeaderError, \
-    InvalidContentTypeError
+    InvalidContentTypeError, InvalidHttpRequestError
 
 from pyoauth.http import RequestProxy, ResponseProxy, CONTENT_TYPE_FORM_URLENCODED
 from pyoauth.oauth1 import \
@@ -426,7 +426,7 @@ class Client(object):
             from the server redirect.
         """
         if temporary_credentials.identifier != oauth_token:
-            raise InvalidHttpRequestError("OAuth token returned in callback `%r` does not match temporary credentials: `%r`" % (oauth_token, temporary_credentials.identifer,))
+            raise InvalidHttpRequestError("OAuth token returned in callback query `%r` does not match temporary credentials: `%r`" % (oauth_token, temporary_credentials.identifer,))
         return oauth_verifier
 
 
