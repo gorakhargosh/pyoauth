@@ -75,6 +75,11 @@ class Credentials(object):
     def secret(self):
         return self._shared_secret
 
+    # Mostly used when storing a secure cookie for temporary credentials
+    # between redirects.
+    def to_dict(self):
+        return dict(identifier=self._identifier, shared_secret=self._shared_secret)
+
     # Used for comparison of credentials.
     @property
     def key(self):
