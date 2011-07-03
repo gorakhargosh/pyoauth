@@ -413,7 +413,7 @@ class Client(object):
                                    oauth_signature_method=oauth_signature_method,
                                    **extra_oauth_params)
 
-    def check_verification_code(self, temporary_credentials, response_oauth_token, response_oauth_verifier):
+    def check_verification_code(self, temporary_credentials, oauth_token, oauth_verifier):
         """
         When the OAuth 1.0 server redirects the resource owner to your
         callback URL, it will attach two parameters to the query string.
@@ -424,16 +424,16 @@ class Client(object):
 
         :param temporary_credentials:
             Temporary credentials
-        :param response_oauth_token:
+        :param oauth_token:
             The value of the ``oauth_token`` parameter as obtained
             from the server redirect.
-        :param response_oauth_verifier:
+        :param oauth_verifier:
             The value of the ``oauth_verifier`` parameter as obtained
             from the server redirect.
         """
-        if temporary_credentials.identifier != response_oauth_token:
-            raise InvalidHttpRequestError("OAuth token returned in callback query `%r` does not match temporary credentials: `%r`" % (response_oauth_token, temporary_credentials.identifer,))
-        return response_oauth_verifier
+        if temporary_credentials.identifier != oauth_token:
+            raise InvalidHttpRequestError("OAuth token returned in callback query `%r` does not match temporary credentials: `%r`" % (oauth_token, temporary_credentials.identifer,))
+        return oauth_verifier
 
     def parse_temporary_credentials_response(self, response):
         """
