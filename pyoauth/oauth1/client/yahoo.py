@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Google OAuth 1.0 Client.
+# Yahoo! OAuth 1.0 Client.
 #
 # Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
 #
@@ -18,24 +18,24 @@
 
 
 from pyoauth.error import SignatureMethodNotSupportedError
-from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, SIGNATURE_METHOD_PLAINTEXT
+from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, SIGNATURE_METHOD_RSA_SHA1
 
 from pyoauth.oauth1.client import Client
 
-class GoogleClient(Client):
+class YahooClient(Client):
     """
-    Creates an instance of a Google OAuth 1.0 client.
+    Creates an instance of a Yahoo! OAuth 1.0 client.
 
-    :see: http://code.google.com/apis/accounts/docs/OAuth_ref.html
+    :see: http://developer.yahoo.com/oauth/guide/oauth-auth-flow.html
     """
-    _OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI = "https://www.google.com/accounts/OAuthGetRequestToken"
-    _OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI = "https://www.google.com/accounts/OAuthAuthorizeToken"
-    _OAUTH_TOKEN_CREDENTIALS_REQUEST_URI = "https://www.google.com/accounts/OAuthGetAccessToken"
+    _OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI = "https://api.login.yahoo.com/oauth/v2/get_request_token"
+    _OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI = "https://api.login.yahoo.com/oauth/v2/request_auth"
+    _OAUTH_TOKEN_CREDENTIALS_REQUEST_URI = "https://api.login.yahoo.com/oauth/v2/get_token"
 
     def __init__(self,
                  client_credentials,
                  use_authorization_header=True):
-        super(GoogleClient, self).__init__(
+        super(YahooClient, self).__init__(
             client_credentials=client_credentials,
             temporary_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
             resource_owner_authorization_uri=self._OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI,
@@ -45,12 +45,11 @@ class GoogleClient(Client):
 
     @classmethod
     def _check_signature_method(cls, signature_method):
-        if signature_method == SIGNATURE_METHOD_PLAINTEXT:
-            raise SignatureMethodNotSupportedError("Google OAuth 1.0 does not support the `%r` signature method." % signature_method)
+        if signature_method == SIGNATURE_METHOD_RSA_SHA1:
+            raise SignatureMethodNotSupportedError("Yahoo! OAuth 1.0 does not support the `%r` signature method." % signature_method)
 
     def build_temporary_credentials_request(self,
-                                            scope,
-                                            xoauth_displayname=None,
+                                            xoauth_lang_pref=None,
                                             method="POST",
                                             payload_params=None,
                                             headers=None,
@@ -59,16 +58,14 @@ class GoogleClient(Client):
                                             oauth_callback="oob",
                                             **extra_oauth_params):
         payload_params = payload_params or {}
-        google_params = dict(
-            scope=scope,
-        )
-        if xoauth_displayname:
-            google_params["xoauth_displayname"] = xoauth_displayname
-        payload_params.update(google_params)
+        yahoo_params = dict()
+        if xoauth_lang_pref:
+            yahoo_params["xoauth_lang_pref"] = xoauth_lang_pref
+        payload_params.update(yahoo_params)
 
-        GoogleClient._check_signature_method(oauth_signature_method)
+        YahooClient._check_signature_method(oauth_signature_method)
 
-        return super(GoogleClient, self).build_temporary_credentials_request(
+        return super(YahooClient, self).build_temporary_credentials_request(
             method=method,
             payload_params=payload_params,
             headers=headers,
@@ -87,9 +84,9 @@ class GoogleClient(Client):
                                         realm=None,
                                         oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
                                         **extra_oauth_params):
-        GoogleClient._check_signature_method(oauth_signature_method)
+        YahooClient._check_signature_method(oauth_signature_method)
 
-        return super(GoogleClient, self).build_token_credentials_request(
+        return super(YahooClient, self).build_token_credentials_request(
             temporary_credentials=temporary_credentials,
             oauth_verifier=oauth_verifier,
             method=method,
@@ -109,9 +106,9 @@ class GoogleClient(Client):
                                realm=None,
                                oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
                                **extra_oauth_params):
-        GoogleClient._check_signature_method(oauth_signature_method)
+        YahooClient._check_signature_method(oauth_signature_method)
 
-        return super(GoogleClient, self).build_resource_request(
+        return super(YahooClient, self).build_resource_request(
             token_credentials=token_credentials,
             method=method,
             url=url,
