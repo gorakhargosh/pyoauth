@@ -32,15 +32,13 @@ class YahooClient(Client):
     _OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI = "https://api.login.yahoo.com/oauth/v2/request_auth"
     _OAUTH_TOKEN_CREDENTIALS_REQUEST_URI = "https://api.login.yahoo.com/oauth/v2/get_token"
 
-    def __init__(self,
-                 client_credentials,
-                 use_authorization_header=True):
+    def __init__(self, client_credentials):
         super(YahooClient, self).__init__(
             client_credentials=client_credentials,
             temporary_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
             resource_owner_authorization_uri=self._OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI,
             token_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            use_authorization_header=use_authorization_header
+            use_authorization_header=True
         )
 
     @classmethod
