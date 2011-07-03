@@ -6,7 +6,6 @@ from nose.tools import assert_equal, assert_raises
 from pyoauth.error import InvalidOAuthParametersError, \
     InvalidAuthorizationHeaderError, \
     InvalidSignatureMethodError, \
-    OverridingReservedOAuthParameterError, \
     InvalidHttpResponseError, HttpError, InvalidContentTypeError, IllegalArgumentError
 from pyoauth.http import RequestProxy
 from pyoauth.utils import parse_authorization_header_value
@@ -201,7 +200,7 @@ class Test_Client_build_request(object):
                       self.client._build_request,
                       "POST",
                       self.client._temporary_credentials_request_uri,
-                      headers={"Authorization", "blah blah."})
+                      headers={"Authorization": "blah blah."})
 
     def test_valid_request_generated(self):
         valid_request = RequestProxy("GET",

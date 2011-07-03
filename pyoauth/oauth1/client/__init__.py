@@ -33,7 +33,6 @@ from pyoauth.error import IllegalArgumentError, \
     InvalidHttpResponseError, \
     HttpError, \
     InvalidSignatureMethodError, \
-    OverridingReservedOAuthParameterError, \
     InvalidAuthorizationHeaderError, \
     InvalidContentTypeError, InvalidHttpRequestError
 
