@@ -24,12 +24,13 @@ setup(
     packages=["pyoauth"],
     include_package_data=True,
     install_requires=[
-        "httplib2 >=0.7.1",
         "PyCrypto >=2.3"
     ],
     keywords=' '.join([
         "python",
         "oauth",
+        "oauth1",
+        "oauth2",
         "client",
         "server",
         "rfc5849",
