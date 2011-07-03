@@ -166,8 +166,9 @@ class Client(object):
     def __init__(self,
                  client_credentials,
                  temporary_credentials_request_uri,
-                 resource_owner_authorization_uri,
                  token_credentials_request_uri,
+                 resource_owner_authorization_uri,
+                 resource_owner_authentication_uri=None,
                  use_authorization_header=True,
                  authorization_header_param_delimiter=","):
         """
@@ -183,6 +184,12 @@ class Client(object):
         self._token_credentials_request_uri = \
             oauth_url_sanitize(token_credentials_request_uri,
                                force_secure=True)
+        if resource_owner_authentication_uri:
+            self._resource_owner_authentication_uri = \
+                oauth_url_sanitize(resource_owner_authentication_uri,
+                                   force_secure=False)
+        else:
+            self._resource_owner_authentication_uri = ""
         self._use_authorization_header = use_authorization_header
         self._authorization_header_param_delimiter = authorization_header_param_delimiter
 
@@ -264,6 +271,31 @@ class Client(object):
         return url_append_query(url, {
             "oauth_token": temporary_credentials.identifier,
         })
+
+    def get_authentication_url(self, temporary_credentials, **query_params):
+        """
+        Calculates the automatic authentication redirect URL to which the
+        user will be (re)directed.
+
+        :param temporary_credentials:
+            Temporary credentials obtained after parsing the response to
+            the temporary credentials request.
+        :param query_params:
+            Additional query parameters that you would like to include
+            into the authorization URL. Parameters beginning with the ``oauth_``
+            prefix will be ignored.
+        """
+        url = self._resource_owner_authentication_uri
+        if not url:
+            raise NotImplementedError("Service does not support automatic authentication redirects.")
+        if query_params:
+            query_params = query_params_sanitize(query_params)
+            url = url_append_query(url, query_params)
+        # So that the "oauth_token" appears LAST.
+        return url_append_query(url, {
+            "oauth_token": temporary_credentials.identifier,
+        })
+
 
     def build_token_credentials_request(self,
                                         temporary_credentials,

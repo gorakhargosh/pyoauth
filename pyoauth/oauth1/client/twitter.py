@@ -25,6 +25,7 @@ class TwitterClient(Client):
     """
     _OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI = "https://api.twitter.com/oauth/request_token"
     _OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI = "https://api.twitter.com/oauth/authorize"
+    _OAUTH_RESOURCE_OWNER_AUTHENTICATION_URI = "http://api.twitter.com/oauth/authenticate"
     _OAUTH_TOKEN_CREDENTIALS_REQUEST_URI = "https://api.twitter.com/oauth/access_token"
 
     def __init__(self,
@@ -33,8 +34,10 @@ class TwitterClient(Client):
         super(TwitterClient, self).__init__(
             client_credentials=client_credentials,
             temporary_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            resource_owner_authorization_uri=self._OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI,
             token_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
+            resource_owner_authorization_uri=self._OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI,
+            resource_owner_authentication_uri=self._OAUTH_RESOURCE_OWNER_AUTHENTICATION_URI,
             use_authorization_header=use_authorization_header
         )
+
 

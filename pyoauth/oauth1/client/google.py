@@ -38,8 +38,8 @@ class GoogleClient(Client):
         super(GoogleClient, self).__init__(
             client_credentials=client_credentials,
             temporary_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            resource_owner_authorization_uri=self._OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI,
             token_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
+            resource_owner_authorization_uri=self._OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI,
             use_authorization_header=use_authorization_header
         )
 
