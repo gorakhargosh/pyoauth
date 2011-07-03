@@ -10,6 +10,7 @@ except ImportError:
 from nose import SkipTest
 from pyoauth.utils import parse_authorization_header_value, _get_signature_base_string_query, get_normalized_authorization_header_value, percent_encode, percent_decode, generate_nonce, generate_verification_code, generate_timestamp, get_hmac_sha1_signature, get_rsa_sha1_signature, check_rsa_sha1_signature, get_plaintext_signature, get_signature_base_string, _get_plaintext_signature
 
+
 class Test_generate_nonce(object):
     def test_uniqueness(self):
         assert_not_equal(generate_nonce(), generate_nonce(),
