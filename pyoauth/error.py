@@ -16,13 +16,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-class OAuthError(RuntimeError):
+class Error(RuntimeError):
     """
     Base exception class.
     """
     def __init__(self, message="OAuth error occurred"):
         self._message = message
-        super(OAuthError, self).__init__()
+        super(Error, self).__init__()
 
     @property
     def message(self):
@@ -33,45 +33,47 @@ class OAuthError(RuntimeError):
         return self._message
 
 
-class InvalidQueryParametersError(OAuthError):
+class InvalidQueryParametersError(Error):
     pass
 
-class InsecureOAuthParametersError(OAuthError):
+class InsecureOAuthParametersError(Error):
     pass
 
-class InvalidOAuthParametersError(OAuthError):
+class InvalidOAuthParametersError(Error):
     pass
 
-class InsecureOAuthUrlError(OAuthError):
+class InsecureOAuthUrlError(Error):
     pass
 
-class InvalidUrlError(OAuthError):
+class InvalidUrlError(Error):
     pass
 
-class InvalidHttpMethodError(OAuthError):
+class InvalidHttpMethodError(Error):
     pass
 
-class InvalidAuthorizationHeaderError(OAuthError):
+class InvalidAuthorizationHeaderError(Error):
     pass
 
-class IllegalArgumentError(OAuthError):
+class IllegalArgumentError(Error):
     pass
 
-
-class InvalidHttpResponseError(OAuthError):
+class InvalidHttpRequestError(Error):
     pass
 
-class HttpError(OAuthError):
+class InvalidHttpResponseError(Error):
     pass
 
-class InvalidContentTypeError(OAuthError):
+class HttpError(Error):
     pass
 
-class InvalidSignatureMethodError(OAuthError):
+class InvalidContentTypeError(Error):
     pass
 
-class OverridingReservedOAuthParameterError(OAuthError):
+class InvalidSignatureMethodError(Error):
     pass
 
-class SignatureMethodNotSupported(OAuthError):
+class OverridingReservedOAuthParameterError(Error):
+    pass
+
+class SignatureMethodNotSupportedError(Error):
     pass

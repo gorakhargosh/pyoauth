@@ -407,6 +407,29 @@ class Client(object):
             raise ValueError("Invalid OAuth server response -- `oauth_callback_confirmed` MUST be set to `true`.")
         return params, credentials
 
+    def check_verification_code(self, temporary_credentials, oauth_token, oauth_verifier):
+        """
+        When the OAuth 1.0 server redirects the resource owner to your
+        callback URL, it will attach two parameters to the query string.
+
+        1. oauth_token - Must match your temporary credentials identifier.
+        2. oauth_verifier - Server generated verification code that you will
+           use in the next step, that is requesting token credentials.
+
+        :param temporary_credentials:
+            Temporary credentials
+        :param oauth_token:
+            The value of the ``oauth_token`` parameter as obtained
+            from the server redirect.
+        :param oauth_verifier:
+            The value of the ``oauth_verifier`` parameter as obtained
+            from the server redirect.
+        """
+        if temporary_credentials.identifier != oauth_token:
+            raise InvalidHttpRequestError("OAuth token returned in callback `%r` does not match temporary credentials: `%r`" % (oauth_token, temporary_credentials.identifer,))
+        return oauth_verifier
+
+
     def parse_token_credentials_response(self, status_code, status, body, headers):
         """
         Parses the entity-body of the OAuth server response to an OAuth
