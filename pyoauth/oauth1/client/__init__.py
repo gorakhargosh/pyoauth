@@ -311,6 +311,8 @@ class Client(object):
         :returns:
             An instance of :class:`pyoauth.http.RequestProxy`.
         """
+        if "oauth_token" in extra_oauth_params:
+            raise IllegalArgumentError("`oauth_token` is taken from the temporary credentials. Do not specify.")
         if "oauth_callback" in extra_oauth_params:
             raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
 
@@ -370,6 +372,8 @@ class Client(object):
         :returns:
             An instance of :class:`pyoauth.http.RequestProxy`.
         """
+        if "oauth_token" in extra_oauth_params:
+            raise IllegalArgumentError("`oauth_token` is taken from the token credentials. Do not specify.")
         if "oauth_callback" in extra_oauth_params:
             raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
 
