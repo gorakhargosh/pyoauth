@@ -15,6 +15,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+
 from pyoauth.error import SignatureMethodNotSupportedError
 from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, SIGNATURE_METHOD_PLAINTEXT
 
@@ -44,7 +46,7 @@ class GoogleClient(Client):
     @classmethod
     def _check_signature_method(cls, signature_method):
         if signature_method == SIGNATURE_METHOD_PLAINTEXT:
-            raise SignatureMethodNotSupportedError("Google OAuth 1.0 does not support the PLAINTEXT signature method.")
+            raise SignatureMethodNotSupportedError("Google OAuth 1.0 does not support the `%r` signature method." % signature_method)
 
     def build_temporary_credentials_request(self,
                                             scope,
