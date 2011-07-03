@@ -72,8 +72,5 @@ class InvalidContentTypeError(Error):
 class InvalidSignatureMethodError(Error):
     pass
 
-class OverridingReservedOAuthParameterError(Error):
-    pass
-
 class SignatureMethodNotSupportedError(Error):
     pass

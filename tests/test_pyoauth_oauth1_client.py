@@ -189,8 +189,8 @@ class Test_Client_build_request(object):
                       self.client._temporary_credentials_request_uri,
                       oauth_something=[1, 2, 3])
 
-    def test_raises_OverridingReservedOAuthParameterError_when_overriding_reserved_oauth_params(self):
-        assert_raises(OverridingReservedOAuthParameterError,
+    def test_raises_IllegalArgumentError_when_overriding_reserved_oauth_params(self):
+        assert_raises(IllegalArgumentError,
                       self.client._build_request,
                       "POST",
                       self.client._temporary_credentials_request_uri,

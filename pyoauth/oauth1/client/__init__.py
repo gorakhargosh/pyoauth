@@ -565,7 +565,7 @@ class Client(object):
         for k, v in extra_oauth_params.items():
             if not _force_override_reserved_oauth_params_for_tests and k in reserved_oauth_params:
                 # Don't override these required system-generated protocol parameters.
-                raise OverridingReservedOAuthParameterError("Cannot override system-generated protocol parameter `%r`." % k)
+                raise IllegalArgumentError("Cannot override system-generated protocol parameter `%r`." % k)
             else:
                 if k in oauth_params:
                     # Warn when an existing protocol parameter is being
