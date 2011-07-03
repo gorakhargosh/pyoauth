@@ -34,10 +34,10 @@ class RequestProxy(object):
     Framework implementers can subclass this class and must use it with
     the client methods for them to work.
     """
-    def __init__(self, method, url, payload=None, headers=None):
+    def __init__(self, method, url, body=None, headers=None):
         self._method = method.upper()
         self._url = url
-        self._payload = payload
+        self._body = body
         self._headers = headers
 
     @property
@@ -53,11 +53,11 @@ class RequestProxy(object):
 
     @property
     def payload(self):
-        return self._payload
+        return self._body
 
     @property
     def body(self):
-        return self.payload
+        return self._body
 
     @property
     def headers(self):
@@ -78,6 +78,10 @@ class ResponseProxy(object):
 
     @property
     def body(self):
+        return self._body
+
+    @property
+    def payload(self):
         return self._body
 
     @property

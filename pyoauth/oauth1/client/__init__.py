@@ -36,7 +36,7 @@ from pyoauth.error import IllegalArgumentError, \
     InvalidAuthorizationHeaderError, \
     InvalidContentTypeError, InvalidHttpRequestError
 
-from pyoauth.http import RequestProxy, ResponseProxy, CONTENT_TYPE_FORM_URLENCODED
+from pyoauth.http import RequestProxy, CONTENT_TYPE_FORM_URLENCODED
 from pyoauth.oauth1 import \
     Credentials, \
     SIGNATURE_METHOD_HMAC_SHA1, \
@@ -413,30 +413,6 @@ class Client(object):
                                    oauth_signature_method=oauth_signature_method,
                                    **extra_oauth_params)
 
-    def parse_temporary_credentials_response(self, status_code, status, body, headers):
-        """
-        Parses the entity-body of the OAuth server response to an OAuth
-        temporary credentials request.
-
-        :param status_code:
-            HTTP response status code.
-        :param status:
-            HTTP status message
-        :param body:
-            HTTP response body.
-        :param headers:
-            HTTP response headers.
-        :returns:
-            A tuple of the form::
-
-                (parameter dictionary, pyoauth.oauth1.Credentials instance)
-        """
-        params, credentials = self._parse_credentials_response(status_code, status, body, headers)
-        callback_confirmed = params.get("oauth_callback_confirmed", [""])[0].lower()
-        if callback_confirmed != "true":
-            raise ValueError("Invalid OAuth server response -- `oauth_callback_confirmed` MUST be set to `true`.")
-        return params, credentials
-
     def check_verification_code(self, temporary_credentials, response_oauth_token, response_oauth_verifier):
         """
         When the OAuth 1.0 server redirects the resource owner to your
@@ -459,52 +435,58 @@ class Client(object):
             raise InvalidHttpRequestError("OAuth token returned in callback query `%r` does not match temporary credentials: `%r`" % (response_oauth_token, temporary_credentials.identifer,))
         return response_oauth_verifier
 
-    def parse_token_credentials_response(self, status_code, status, body, headers):
+    def parse_temporary_credentials_response(self, response):
+        """
+        Parses the entity-body of the OAuth server response to an OAuth
+        temporary credentials request.
+
+        :param response:
+            An instance of :class:`pyoauth.http.ResponseProxy`.
+        :returns:
+            A tuple of the form::
+
+                (parameter dictionary, pyoauth.oauth1.Credentials instance)
+        """
+        params, credentials = self._parse_credentials_response(response)
+        callback_confirmed = params.get("oauth_callback_confirmed", [""])[0].lower()
+        if callback_confirmed != "true":
+            raise ValueError("Invalid OAuth server response -- `oauth_callback_confirmed` MUST be set to `true`.")
+        return params, credentials
+
+    def parse_token_credentials_response(self, response):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         token credentials request.
 
-        :param status_code:
-            HTTP response status code.
-        :param status:
-            HTTP status message.
-        :param body:
-            HTTP response body.
-        :param headers:
-            HTTP response headers.
+        :param response:
+            An instance of :class:`pyoauth.http.ResponseProxy`.
         :returns:
             A tuple of the form::
 
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
-        return self._parse_credentials_response(status_code, status, body, headers)
+        return self._parse_credentials_response(response)
 
-    def _parse_credentials_response(self, status_code, status, body, headers):
+    def _parse_credentials_response(self, response):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         credential request.
 
-        :param status_code:
-            HTTP response status code.
-        :param body:
-            HTTP response body.
-        :param headers:
-            HTTP response headers.
+        :param response:
+            An instance of :class:`pyoauth.http.ResponseProxy`.
         :returns:
             A tuple of the form::
 
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
-        if not status_code:
-            raise InvalidHttpResponseError("Invalid status code: `%r`" % (status_code, ))
-        if not status:
-            raise InvalidHttpResponseError("Invalid status message: `%r`" % (status, ))
-        if not body:
-            raise InvalidHttpResponseError("Body is invalid or empty: `%r`" % (body, ))
-        if not headers:
-            raise InvalidHttpResponseError("Headers are invalid or not specified: `%r`" % (headers, ))
-
-        response = ResponseProxy(status_code=status_code, status=status, body=body, headers=headers)
+        if not response.status_code:
+            raise InvalidHttpResponseError("Invalid status code: `%r`" % (response.status_code, ))
+        if not response.status:
+            raise InvalidHttpResponseError("Invalid status message: `%r`" % (response.status, ))
+        if not response.payload:
+            raise InvalidHttpResponseError("Body is invalid or empty: `%r`" % (response.payload, ))
+        if not response.headers:
+            raise InvalidHttpResponseError("Headers are invalid or not specified: `%r`" % (response.headers, ))
 
         if response.error:
             raise HttpError("Could not fetch credentials: HTTP %d - %s" % (response.status_code, response.status,))
@@ -512,7 +494,7 @@ class Client(object):
         if not response.is_body_form_urlencoded():
             raise InvalidContentTypeError("OAuth credentials server response must have Content-Type: `%s`" % (CONTENT_TYPE_FORM_URLENCODED, ))
 
-        params = parse_qs(response.body)
+        params = parse_qs(response.payload)
         return params, Credentials(identifier=params["oauth_token"][0],
                                    shared_secret=params["oauth_token_secret"][0])
 
@@ -657,7 +639,7 @@ class Client(object):
 
         return RequestProxy(method,
                             url=request_url,
-                            payload=payload,
+                            body=payload,
                             headers=headers)
 
     def _sign_request_data(self, signature_method,
