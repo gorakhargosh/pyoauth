@@ -60,6 +60,10 @@ class RequestProxy(object):
         return self._body
 
     @property
+    def content(self):
+        return self._body
+
+    @property
     def headers(self):
         return self._headers
 
