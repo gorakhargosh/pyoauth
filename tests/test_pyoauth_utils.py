@@ -3,35 +3,39 @@
 from nose.tools import assert_equal, assert_not_equal, assert_false, assert_true, assert_raises
 from pyoauth.error import InvalidOAuthParametersError, InvalidAuthorizationHeaderError, InvalidHttpMethodError, InvalidUrlError
 
+
+try:
+    bytes
+except Exception:
+    bytes = str
+
 try:
     from nose.tools import assert_dict_equal
 except ImportError:
     assert_dict_equal = assert_equal
 from nose import SkipTest
-from pyoauth.utils import parse_authorization_header_value, _generate_signature_base_string_query, generate_normalized_authorization_header_value, percent_encode, percent_decode, generate_nonce, generate_verification_code, generate_timestamp, generate_hmac_sha1_signature, generate_rsa_sha1_signature, check_rsa_sha1_signature, generate_plaintext_signature, generate_signature_base_string, _generate_plaintext_signature
+from pyoauth.utils import parse_authorization_header_value, _generate_signature_base_string_query, generate_normalized_authorization_header_value, percent_encode, percent_decode, generate_nonce, generate_verification_code, generate_timestamp, generate_hmac_sha1_signature, generate_rsa_sha1_signature, check_rsa_sha1_signature, generate_plaintext_signature, generate_signature_base_string, _generate_plaintext_signature, generate_random_string
 
 
-class Test_generate_nonce(object):
+class Test_generate_random_string(object):
     def test_uniqueness(self):
-        assert_not_equal(generate_nonce(), generate_nonce(),
-                         "Nonce is not unique.")
+        assert_not_equal(generate_random_string(64, False), generate_random_string(64, False))
 
-    def test_length(self):
-        default_length = 32
-        assert_equal(len(generate_nonce()), default_length,
-                     "Nonce length does not match default expected length of %d." % default_length)
-        assert_equal(len(generate_nonce(length=10)), 10,
-                     "Nonce length does not match expected length.")
+    def test_hex_length(self):
+        for i in range(1, 1000):
+            assert_equal(len(generate_random_string(64, False)), 16)
 
-        assert_raises(ValueError, generate_nonce, 0)
-        assert_raises(ValueError, generate_nonce, -1)
-        assert_raises(ValueError, generate_nonce, 33)
-        assert_raises(TypeError, generate_nonce, None)
-        assert_raises(TypeError, generate_nonce, "")
+    def test_unsigned_integer(self):
+        assert_true(int(generate_random_string(64, True)) >= 0)
+        assert_true(int(generate_random_string(64, False), 16) >= 0)
 
-    def test_is_string(self):
-        assert_true(isinstance(generate_nonce(), str),
-                    "Nonce is not a bytestring.")
+    def test_raises_ValueError_when_invalid_bit_strength(self):
+        assert_raises(ValueError, generate_random_string, 63)
+        assert_raises(ValueError, generate_random_string, 0)
+
+    def test_result_is_string(self):
+        assert_true(isinstance(generate_random_string(64, True), bytes))
+        assert_true(isinstance(generate_random_string(64, False), bytes))
 
 
 class Test_generate_verification_code(object):
@@ -55,7 +59,7 @@ class Test_generate_verification_code(object):
                          "Verification code is not unique.")
 
     def test_is_string(self):
-        assert_true(isinstance(generate_verification_code(), str),
+        assert_true(isinstance(generate_verification_code(), bytes),
                     "Verification code is not a bytestring.")
 
 
@@ -65,7 +69,7 @@ class Test_generate_timestamp(object):
                     "Timestamp is not positive integer string.")
 
     def test_is_string(self):
-        assert_true(isinstance(generate_timestamp(), str),
+        assert_true(isinstance(generate_timestamp(), bytes),
                     "Timestamp is not a string.")
 
     def test_is_not_empty_string(self):

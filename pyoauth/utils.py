@@ -47,7 +47,6 @@ import binascii
 import hmac
 import os
 import time
-import uuid
 import re
 from pyoauth.error import InvalidHttpMethodError, \
     InvalidUrlError, \
@@ -89,20 +88,47 @@ from pyoauth.url import percent_encode, percent_decode, \
     request_protocol_params_sanitize, query_params_sanitize
 
 
-def generate_nonce(length=32):
-    """
-    Calculates an OAuth nonce.
 
-    :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
-    :param length:
-        Length of the nonce to be returned. Default 32.
-        The length MUST be a positive even number.
-    :returns:
-        A string representation of a randomly-generated hexadecimal OAuth nonce.
+def generate_random_string(bit_strength=64, decimal=False):
     """
-    if length % 2 or length <= 0:
-        raise ValueError("This function expects a positive even number length: got length `%r`." % (length, ))
-    return binascii.b2a_hex(os.urandom(length/2))
+    Generates a random ASCII-encoded unsigned integral number in decimal
+    or hexadecimal representation.
+
+    :param bit_strength:
+        Bit strength.
+    :param decimal:
+        ``True`` if you want the decimal representation; ``False`` for
+        hexadecimal.
+    :returns:
+        A string representation of a randomly-generated ASCII-encoded
+        hexadecimal/decimal-representation unsigned integral number
+        based on the bit strength specified.
+    """
+    if bit_strength % 8 or bit_strength <= 0:
+        raise ValueError("This function expects a bit strength: got `%r`." % (bit_strength, ))
+    n_bytes = bit_strength / 8
+    value = binascii.b2a_hex(os.urandom(n_bytes))
+    if decimal:
+        value = bytes(int(value, 16))
+    return value
+
+
+def generate_nonce(bit_strength=64, decimal=True):
+    """
+    Generates a random ASCII-encoded unsigned integral number in decimal
+    or hexadecimal representation.
+
+    :param bit_strength:
+        Bit strength.
+    :param decimal:
+        ``True`` (default) if you want the decimal representation; ``False`` for
+        hexadecimal.
+    :returns:
+        A string representation of a randomly-generated ASCII-encoded
+        hexadecimal/decimal-representation unsigned integral number
+        based on the bit strength specified.
+    """
+    return generate_random_string(bit_strength, decimal)
 
 
 def generate_verification_code(length=8):
@@ -125,7 +151,9 @@ def generate_verification_code(length=8):
         A string representation of a randomly-generated hexadecimal OAuth
         verification code.
     """
-    return generate_nonce(length=length)
+    if length % 2 or length <= 0:
+        raise ValueError("This function expects a positive even number length: got length `%r`." % (length, ))
+    return binascii.b2a_hex(os.urandom(length/2))
 
 
 def generate_timestamp():
