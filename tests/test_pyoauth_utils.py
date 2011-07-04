@@ -20,16 +20,13 @@ class Test_generate_nonce(object):
         default_length = 32
         assert_equal(len(generate_nonce()), default_length,
                      "Nonce length does not match default expected length of %d." % default_length)
-        assert_equal(len(generate_nonce(None)), default_length,
-                     "Nonce length does not match default expected length of %d." % default_length)
-        assert_equal(len(generate_nonce(0)), default_length,
-                     "Nonce length does not match default expected length of %d." % default_length)
-        assert_equal(len(generate_nonce(-1)), default_length,
-                     "Nonce length does not match default expected length of %d." % default_length)
         assert_equal(len(generate_nonce(length=10)), 10,
                      "Nonce length does not match expected length.")
 
+        assert_raises(ValueError, generate_nonce, 0)
+        assert_raises(ValueError, generate_nonce, -1)
         assert_raises(ValueError, generate_nonce, 33)
+        assert_raises(TypeError, generate_nonce, None)
 
     def test_is_string(self):
         assert_true(isinstance(generate_nonce(), str),
@@ -41,15 +38,14 @@ class Test_generate_verification_code(object):
         default_length = 8
         assert_equal(len(generate_verification_code()), default_length,
                      "Verification code length does not match default expected length of %d." % default_length)
-        assert_equal(len(generate_verification_code(None)), 32,
-                     "Verification code length does not match default expected length of %d." % 32)
-        assert_equal(len(generate_verification_code(0)), 32,
-                     "Verification code length does not match default expected length of %d." % 32)
-        assert_equal(len(generate_verification_code(-1)), 32,
-                     "Verification code length does not match default expected length of %d." % 32)
         assert_equal(len(generate_verification_code(length=10)), 10,
                      "Verification code length does not match expected length.")
+
         assert_raises(ValueError, generate_verification_code, 33)
+        assert_raises(ValueError, generate_verification_code, 0)
+        assert_raises(ValueError, generate_verification_code, -1)
+        assert_raises(ValueError, generate_verification_code, 33)
+        assert_raises(TypeError, generate_verification_code, None)
 
     def test_uniqueness(self):
         assert_not_equal(generate_verification_code(),

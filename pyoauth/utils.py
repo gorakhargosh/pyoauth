@@ -96,15 +96,12 @@ def generate_nonce(length=32):
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param length:
         Length of the nonce to be returned. Default 32.
-        If 0, negative, or ``None``, a 32 character value will
-        be returned as well. The length MUST be an even number.
+        oThe length MUST be an even number.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth nonce.
     """
-    if not length or length < 0:
-        length = 32
-    if length % 2:
-        raise ValueError("This function expects an even length: got length `%d`." % (length, ))
+    if length <= 0 or length % 2:
+        raise ValueError("This function expects an even positive length: got length `%d`." % (length, ))
     return binascii.b2a_hex(os.urandom(length/2))
 
 
