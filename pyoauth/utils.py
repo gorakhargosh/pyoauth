@@ -45,6 +45,7 @@ Authorization Header
 
 import binascii
 import hmac
+import os
 import time
 import uuid
 import re
@@ -88,27 +89,23 @@ from pyoauth.url import percent_encode, percent_decode, \
     request_protocol_params_sanitize, query_params_sanitize
 
 
-def generate_nonce(length=None):
+def generate_nonce(length=32):
     """
     Calculates an OAuth nonce.
 
-    .. NOTE::
-        I don't get it. Why did they have to name it "nonce"? Nonce feels like
-        it's been borrowed from the Oxford Dictionary of Constipatese.
-
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param length:
-        Length of the nonce to be returned. Default None.
-        If 0, negative, or ``None``, the entire 32-character value will
-        be returned as well.
+        Length of the nonce to be returned. Default 32.
+        If 0, negative, or ``None``, a 32 character value will
+        be returned as well. The length MUST be an even number.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth nonce.
     """
-    if length > 32:
-        raise ValueError("Maximum length is restricted to 32 characters.")
-    elif length <= 0:  # Negative, 0, or None check.
-        length = None
-    return binascii.b2a_hex(uuid.uuid4().bytes)[:length]
+    if not length or length < 0:
+        length = 32
+    if length % 2:
+        raise ValueError("This function expects an even length.")
+    return binascii.b2a_hex(os.urandom(length/2))
 
 
 def generate_verification_code(length=8):
@@ -125,9 +122,9 @@ def generate_verification_code(length=8):
         Resource Owner Authorization
         (http://tools.ietf.org/html/rfc5849#section-2.2)
     :param length:
-        Length of the nonce to be returned. Default 8.
-        If 0, negative, or ``None``, the entire 32-character value will
-        be returned as well.
+        Length of the nonce to be returned. Default 32.
+        If 0, negative, or ``None``, a 32 character value will
+        be returned as well. The length MUST be an even number.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth
         verification code.
