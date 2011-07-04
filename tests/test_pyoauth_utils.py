@@ -26,7 +26,7 @@ class Test_generate_nonce(object):
         assert_raises(ValueError, generate_nonce, 0)
         assert_raises(ValueError, generate_nonce, -1)
         assert_raises(ValueError, generate_nonce, 33)
-        assert_raises(TypeError, generate_nonce, None)
+        assert_raises(ValueError, generate_nonce, None)
 
     def test_is_string(self):
         assert_true(isinstance(generate_nonce(), str),
@@ -45,7 +45,7 @@ class Test_generate_verification_code(object):
         assert_raises(ValueError, generate_verification_code, 0)
         assert_raises(ValueError, generate_verification_code, -1)
         assert_raises(ValueError, generate_verification_code, 33)
-        assert_raises(TypeError, generate_verification_code, None)
+        assert_raises(ValueError, generate_verification_code, None)
 
     def test_uniqueness(self):
         assert_not_equal(generate_verification_code(),
