@@ -101,7 +101,7 @@ def generate_nonce(length=32):
         A string representation of a randomly-generated hexadecimal OAuth nonce.
     """
     if length <= 0 or length % 2:
-        raise ValueError("This function expects an even positive length: got length `%d`." % (length, ))
+        raise ValueError("This function expects an even positive length: got length `%r`." % (length, ))
     return binascii.b2a_hex(os.urandom(length/2))
 
 
