@@ -208,14 +208,13 @@ class Test_Client_build_request(object):
                                      body="",
                                      headers={
                                          "Authorization": '''\
-OAuth realm="Photos",
-    oauth_consumer_key="dpf43f3p2l4k3l03",
-    oauth_nonce="chapoH",
-    oauth_signature="MdpQcU8iPSUjWoN%2FUDMsK2sui9I%3D",
-    oauth_signature_method="HMAC-SHA1",
-    oauth_timestamp="137131202",
-    oauth_token="nnch734d00sl2jdk"
-    '''})
+OAuth realm="Photos",\
+    oauth_consumer_key="dpf43f3p2l4k3l03",\
+    oauth_nonce="chapoH",\
+    oauth_signature="MdpQcU8iPSUjWoN%2FUDMsK2sui9I%3D",\
+    oauth_signature_method="HMAC-SHA1",\
+    oauth_timestamp="137131202",\
+    oauth_token="nnch734d00sl2jdk"'''})
 
         method = "GET"
         url = "http://photos.example.net/photos"
@@ -247,14 +246,13 @@ OAuth realm="Photos",
                                      body="",
                                      headers={
                                          "Authorization": '''\
-OAuth realm="Photos",
-    oauth_callback="http://printer.example.com/ready",
-    oauth_consumer_key="dpf43f3p2l4k3l03",
-    oauth_nonce="wIjqoS",
-    oauth_signature="74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
-    oauth_signature_method="HMAC-SHA1",
-    oauth_timestamp="137131200"
-    '''})
+OAuth realm="Photos",\
+    oauth_callback="http://printer.example.com/ready",\
+    oauth_consumer_key="dpf43f3p2l4k3l03",\
+    oauth_nonce="wIjqoS",\
+    oauth_signature="74KNZJeDHnMBp0EMJ9ZHt/XKycU=",\
+    oauth_signature_method="HMAC-SHA1",\
+    oauth_timestamp="137131200"'''})
 
         method = "POST"
         url = "https://photos.example.net/initiate"

@@ -519,11 +519,17 @@ class Test_get_normalized_authorization_header_value(object):
 
 class Test_parse_authorization_header_value(object):
     def test_InvalidOAuthParametersError_when_multiple_values(self):
-        test_value = '''OAuth realm="Examp%20le",
-            oauth_something="%20Some+Example",
-            oauth_something="another%20thing"
+        test_value = '''OAuth realm="Examp%20le",\
+            oauth_something="%20Some+Example",\
+            oauth_something="another%20thing"\
         '''
         assert_raises(InvalidOAuthParametersError, parse_authorization_header_value, test_value)
+
+    def test_value_must_not_have_newlines_when_strict(self):
+        test_value = '''OAuth realm="Examp%20le",
+            oauth_something="%20Some+Example",
+        '''
+        assert_raises(ValueError, parse_authorization_header_value, test_value, strict=True)
 
     def test_param_delimiter_can_be_changed(self):
         expected_value = ({
@@ -538,21 +544,36 @@ class Test_parse_authorization_header_value(object):
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }, 'Examp%20le'
         )
-        assert_equal(expected_value, parse_authorization_header_value('''
-            OAuth
+        assert_equal(expected_value, parse_authorization_header_value('''\
+            OAuth\
+\
+            realm="Examp%20le"&\
+            oauth_consumer_key="0685bd9184jfhq22"&\
+            oauth_token="ad180jjd733klru7"&\
+            oauth_signature_method="HMAC-SHA1"&\
+            oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D"&\
+            oauth_timestamp="137131200"&\
+            oauth_nonce="4572616e48616d6d65724c61686176"&\
+            oauth_version="1.0"&\
+            oauth_something="%20Some+Example"&\
+            oauth_empty=""\
+        ''', param_delimiter="&", strict=False), "parsing failed.")
 
-            realm="Examp%20le"&
-            oauth_consumer_key="0685bd9184jfhq22"&
-            oauth_token="ad180jjd733klru7"&
-            oauth_signature_method="HMAC-SHA1"&
-            oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D"&
-            oauth_timestamp="137131200"&
-            oauth_nonce="4572616e48616d6d65724c61686176"&
-            oauth_version="1.0"&
-            oauth_something="%20Some+Example"&
-            oauth_empty=""
-        ''', param_delimiter="&"), "parsing failed.")
-
+    def test_param_delimiter_must_be_comma_when_strict(self):
+        assert_raises(ValueError, parse_authorization_header_value, '''\
+            OAuth\
+\
+            realm="Examp%20le"&\
+            oauth_consumer_key="0685bd9184jfhq22"&\
+            oauth_token="ad180jjd733klru7"&\
+            oauth_signature_method="HMAC-SHA1"&\
+            oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D"&\
+            oauth_timestamp="137131200"&\
+            oauth_nonce="4572616e48616d6d65724c61686176"&\
+            oauth_version="1.0"&\
+            oauth_something="%20Some+Example"&\
+            oauth_empty=""\
+        ''', param_delimiter="&", strict=True)
 
     def test_equality_encoding_realm_emptyValues(self):
         expected_value = ({
@@ -567,32 +588,32 @@ class Test_parse_authorization_header_value(object):
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }, 'Examp%20le'
         )
-        assert_equal(expected_value, parse_authorization_header_value('''
-            OAuth
-
-            realm="Examp%20le",
-            oauth_consumer_key="0685bd9184jfhq22",
-            oauth_token="ad180jjd733klru7",
-            oauth_signature_method="HMAC-SHA1",
-            oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",
-            oauth_timestamp="137131200",
-            oauth_nonce="4572616e48616d6d65724c61686176",
-            oauth_version="1.0",
-            oauth_something="%20Some+Example",
-            oauth_empty=""
+        assert_equal(expected_value, parse_authorization_header_value('''\
+            OAuth\
+\
+            realm="Examp%20le",\
+            oauth_consumer_key="0685bd9184jfhq22",\
+            oauth_token="ad180jjd733klru7",\
+            oauth_signature_method="HMAC-SHA1",\
+            oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",\
+            oauth_timestamp="137131200",\
+            oauth_nonce="4572616e48616d6d65724c61686176",\
+            oauth_version="1.0",\
+            oauth_something="%20Some+Example",\
+            oauth_empty=""\
         '''), "parsing failed.")
 
     def test_dict_does_not_contain_string_OAuth_realm(self):
-        header_value = '''OAuth realm="http://example.com",
-            oauth_consumer_key="0685bd9184jfhq22",
-            oauth_token="ad180jjd733klru7",
-            oauth_signature_method="HMAC-SHA1",
-            oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",
-            oauth_timestamp="137131200",
-            oauth_nonce="4572616e48616d6d65724c61686176",
-            oauth_version="1.0",
-            oauth_something="%20Some+Example",
-            oauth_empty=""
+        header_value = '''OAuth realm="http://example.com",\
+            oauth_consumer_key="0685bd9184jfhq22",\
+            oauth_token="ad180jjd733klru7",\
+            oauth_signature_method="HMAC-SHA1",\
+            oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",\
+            oauth_timestamp="137131200",\
+            oauth_nonce="4572616e48616d6d65724c61686176",\
+            oauth_version="1.0",\
+            oauth_something="%20Some+Example",\
+            oauth_empty=""\
         '''
         params, realm = parse_authorization_header_value(
             header_value)
@@ -602,7 +623,7 @@ class Test_parse_authorization_header_value(object):
             assert_false(name.lower() == "realm", '`realm` found in header names')
 
     def test_InvalidAuthorizationHeaderError_when_trailing_comma_is_found(self):
-        header_value = '''OAuth oauth_consumer_key="0685bd9184jfhq22",
+        header_value = '''OAuth oauth_consumer_key="0685bd9184jfhq22",\
             oauth_token="ad180jjd733klru7",'''
         assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header_value, header_value)
 

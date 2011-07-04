@@ -436,7 +436,7 @@ def get_normalized_authorization_header_value(oauth_params,
     return s
 
 
-def parse_authorization_header_value(header_value, param_delimiter=","):
+def parse_authorization_header_value(header_value, param_delimiter=",", strict=True):
     """
     Parses the OAuth Authorization header.
 
@@ -448,14 +448,22 @@ def parse_authorization_header_value(header_value, param_delimiter=","):
         According to the Specification, this must be a comma ",". However,
         certain services like Yahoo! use "&" instead. Comma is default.
 
+        If you want to use another delimiter character, the ``strict``
+        argument to this function must also be set to ``False``.
         See https://github.com/oauth/oauth-ruby/pull/12
+    :param strict:
+        When ``True``, more strict checking will be performed.
+        The authorization header value must be on a single line.
+        The param delimiter MUST be a comma.
+        When ``False``, the parser is a bit lenient.
     :returns:
         Dictionary of parameter name value pairs.
     """
     d = {}
     param_list, realm = \
         _parse_authorization_header_value_l(header_value,
-                                            param_delimiter=param_delimiter)
+                                            param_delimiter=param_delimiter,
+                                            strict=strict)
     for name, value in param_list:
         #d[name] = [value]
         # We do keep track of multiple values because they will be
@@ -469,7 +477,7 @@ def parse_authorization_header_value(header_value, param_delimiter=","):
     return d, realm
 
 
-def _parse_authorization_header_value_l(header_value, param_delimiter=","):
+def _parse_authorization_header_value_l(header_value, param_delimiter=",", strict=True):
     """
     Parses the OAuth Authorization header preserving the order of the
     parameters as in the header value.
@@ -482,7 +490,14 @@ def _parse_authorization_header_value_l(header_value, param_delimiter=","):
         According to the Specification, this must be a comma ",". However,
         certain services like Yahoo! use "&" instead. Comma is default.
 
+        If you want to use another delimiter character, the ``strict``
+        argument to this function must also be set to ``False``.
         See https://github.com/oauth/oauth-ruby/pull/12
+    :param strict:
+        When ``True`` (default), strict checking will be performed.
+        The authorization header value must be on a single line.
+        The param delimiter MUST be a comma.
+        When ``False``, the parser is a bit lenient.
     :returns:
         Tuple:
         (list of parameter name value pairs in order or appearance, realm)
@@ -491,8 +506,15 @@ def _parse_authorization_header_value_l(header_value, param_delimiter=","):
         a realm parameter.
     """
     # Remove the auth-scheme from the value.
+    header_value = to_utf8(header_value)
+    if strict:
+        if "\n" in header_value:
+            raise ValueError("Header value must be on a single line: got `%r`" % (header_value, ))
+        if param_delimiter != ",":
+            raise ValueError("The param delimiter must be a comma: got `%r`" % (param_delimiter, ))
+
     pattern = re.compile(r"(^OAuth[\s]+)", re.IGNORECASE)
-    header_value = re.sub(pattern, "", to_utf8(header_value).strip(), 1)
+    header_value = re.sub(pattern, "", header_value.strip(), 1)
     realm = None
 
     pairs = [param_pair.strip()
