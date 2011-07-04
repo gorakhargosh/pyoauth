@@ -8,7 +8,7 @@ try:
 except ImportError:
     assert_dict_equal = assert_equal
 from nose import SkipTest
-from pyoauth.utils import parse_authorization_header_value, _get_signature_base_string_query, get_normalized_authorization_header_value, percent_encode, percent_decode, generate_nonce, generate_verification_code, generate_timestamp, get_hmac_sha1_signature, get_rsa_sha1_signature, check_rsa_sha1_signature, get_plaintext_signature, get_signature_base_string, _get_plaintext_signature
+from pyoauth.utils import parse_authorization_header_value, _generate_signature_base_string_query, generate_normalized_authorization_header_value, percent_encode, percent_decode, generate_nonce, generate_verification_code, generate_timestamp, generate_hmac_sha1_signature, generate_rsa_sha1_signature, check_rsa_sha1_signature, generate_plaintext_signature, generate_signature_base_string, _generate_plaintext_signature
 
 
 class Test_generate_nonce(object):
@@ -73,7 +73,7 @@ class Test_generate_timestamp(object):
                     "Timestamp is an empty string.")
 
 
-class Test_get_hmac_sha1_signature(object):
+class Test_generate_hmac_sha1_signature(object):
     _examples = (
         # Temporary credentials request.
         {
@@ -136,7 +136,7 @@ class Test_get_hmac_sha1_signature(object):
             oauth_params = example["oauth_params"]
             expected_signature = example["oauth_signature"]
             assert_equal(expected_signature,
-                         get_hmac_sha1_signature(client_shared_secret,
+                         generate_hmac_sha1_signature(client_shared_secret,
                                                  method=method,
                                                  url=url,
                                                  oauth_params=oauth_params,
@@ -145,7 +145,7 @@ class Test_get_hmac_sha1_signature(object):
             )
 
 
-class Test_get_and_check_rsa_sha1_signature(object):
+class Test_generate_and_check_rsa_sha1_signature(object):
     # Taken from https://github.com/rick446/python-oauth2/commit/a8bee2ad1a993faa1e13a04f14f1754489ad35bd
     def setUp(self):
         self.oauth_signature_method = "RSA-SHA1"
@@ -177,7 +177,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         from Crypto.PublicKey import RSA
 
         # consumer_secret is a string.
-        assert_equal(get_rsa_sha1_signature(
+        assert_equal(generate_rsa_sha1_signature(
             self.oauth_consumer_secret,
             method=self.http_method,
             url=self.url,
@@ -186,7 +186,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         ), self.oauth_signature)
 
         # consumer_secret is an RSA instance.
-        assert_equal(get_rsa_sha1_signature(
+        assert_equal(generate_rsa_sha1_signature(
             RSA.importKey(self.oauth_consumer_secret),
             method=self.http_method,
             url=self.url,
@@ -221,7 +221,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
     def test_get_raises_NotImplementedError_when_Crypto_unavailable(self):
         # consumer_secret is a string.
         assert_raises(NotImplementedError,
-                      get_rsa_sha1_signature,
+                      generate_rsa_sha1_signature,
                       self.oauth_consumer_secret,
                       self.http_method,
                       self.url,
@@ -246,7 +246,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
 
 
 
-class Test_get_plaintext_signature(object):
+class Test_generate_plaintext_signature(object):
     def setUp(self):
         self.oauth_signature_method = "PLAINTEXT"
         self.oauth_token_key = "token test key"
@@ -266,7 +266,7 @@ class Test_get_plaintext_signature(object):
         )
 
     def test_when_both_secrets_present(self):
-        assert_equal(get_plaintext_signature(
+        assert_equal(generate_plaintext_signature(
             self.oauth_consumer_secret,
             method="POST",
             url="http://example.com/",
@@ -275,7 +275,7 @@ class Test_get_plaintext_signature(object):
             ), "consumer%20test%20secret&token%20test%20secret")
 
     def test_when_consumer_secret_present(self):
-        assert_equal(get_plaintext_signature(
+        assert_equal(generate_plaintext_signature(
             self.oauth_consumer_secret,
             method="POST",
             url="http://example.com/",
@@ -284,7 +284,7 @@ class Test_get_plaintext_signature(object):
         ), "consumer%20test%20secret&")
 
     def test_when_token_secret_present(self):
-        assert_equal(get_plaintext_signature(
+        assert_equal(generate_plaintext_signature(
             "",
             method="POST",
             url="http://example.com/",
@@ -293,7 +293,7 @@ class Test_get_plaintext_signature(object):
         ), "&token%20test%20secret")
 
     def test_when_neither_secret_present(self):
-        assert_equal(get_plaintext_signature(
+        assert_equal(generate_plaintext_signature(
             "",
             method="POST",
             url="http://example.com/",
@@ -302,30 +302,30 @@ class Test_get_plaintext_signature(object):
         ), "&")
 
 
-class Test__get_plaintext_signature(object):
+class Test__generate_plaintext_signature(object):
     def test_both_secrets_present(self):
-        assert_equal(_get_plaintext_signature("ab cd", "47fba"),
+        assert_equal(_generate_plaintext_signature("ab cd", "47fba"),
                      "ab%20cd&47fba")
 
     def test_consumer_secret_absent(self):
-        assert_equal(_get_plaintext_signature(None, "47fba"), "&47fba")
-        assert_equal(_get_plaintext_signature("", "47fba"), "&47fba")
+        assert_equal(_generate_plaintext_signature(None, "47fba"), "&47fba")
+        assert_equal(_generate_plaintext_signature("", "47fba"), "&47fba")
 
 
     def test_token_secret_absent(self):
-        assert_equal(_get_plaintext_signature("ab cd", None), "ab%20cd&")
-        assert_equal(_get_plaintext_signature("ab cd", ""), "ab%20cd&")
+        assert_equal(_generate_plaintext_signature("ab cd", None), "ab%20cd&")
+        assert_equal(_generate_plaintext_signature("ab cd", ""), "ab%20cd&")
 
     def test_both_secrets_absent(self):
-        assert_equal(_get_plaintext_signature(None, None), "&")
-        assert_equal(_get_plaintext_signature("", ""), "&")
+        assert_equal(_generate_plaintext_signature(None, None), "&")
+        assert_equal(_generate_plaintext_signature("", ""), "&")
 
     def test_both_secrets_are_encoded(self):
-        assert_equal(_get_plaintext_signature("ab cd", "47 f$a"),
+        assert_equal(_generate_plaintext_signature("ab cd", "47 f$a"),
                      "ab%20cd&47%20f%24a")
 
 
-class Test_get_signature_base_string(object):
+class Test_generate_signature_base_string(object):
     def setUp(self):
         self.oauth_params = dict(
             oauth_consumer_key="9djdj82h48djs9d2",
@@ -337,7 +337,7 @@ class Test_get_signature_base_string(object):
         )
 
     def test_valid_base_string(self):
-        base_string = get_signature_base_string("POST",
+        base_string = generate_signature_base_string("POST",
                                                       "http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q"
                                                       ,
                                                       self.oauth_params)
@@ -345,15 +345,15 @@ class Test_get_signature_base_string(object):
                      "POST&http%3A%2F%2Fexample.com%2Frequest&a2%3Dr%2520b%26a3%3D2%2520q%26a3%3Da%26b5%3D%253D%25253D%26c%2540%3D%26c2%3D%26oauth_consumer_key%3D9djdj82h48djs9d2%26oauth_nonce%3D7d8f3e4a%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131201%26oauth_token%3Dkkk9d7dh3k39sjv7")
 
     def test_InvalidHttpMethodError_when_invalid_http_method(self):
-        assert_raises(InvalidHttpMethodError, get_signature_base_string, "TypO",
+        assert_raises(InvalidHttpMethodError, generate_signature_base_string, "TypO",
                       "http://example.com/request", {})
 
     def test_InvalidUrlError_when_url_blank_or_None(self):
-        assert_raises(InvalidUrlError, get_signature_base_string, "POST", "",
+        assert_raises(InvalidUrlError, generate_signature_base_string, "POST", "",
                 {})
 
     def test_InvalidOAuthParametersError_when_query_params_is_not_dict(self):
-        assert_raises(InvalidOAuthParametersError, get_signature_base_string, "POST",
+        assert_raises(InvalidOAuthParametersError, generate_signature_base_string, "POST",
                       "http://www.google.com/", None)
 
     def test_base_string_does_not_contain_oauth_signature(self):
@@ -363,7 +363,7 @@ class Test_get_signature_base_string(object):
         }
         oauth_params.update(self.oauth_params)
         url = "http://example.com/request?oauth_signature=foobar&realm=something"
-        base_string = get_signature_base_string("POST", url, oauth_params)
+        base_string = generate_signature_base_string("POST", url, oauth_params)
         assert_true("oauth_signature%3D" not in base_string)
         assert_true("realm%3Dexample.com" not in base_string)
         assert_true("realm%3Dsomething" in base_string)
@@ -372,11 +372,11 @@ class Test_get_signature_base_string(object):
     def test_base_string_preserves_matrix_params_and_drops_default_ports(self):
         url = "http://social.yahooapis.com:80/v1/user/6677/connections;start=0;count=20?format=json#fragment"
         base_string = "POST&http://social.yahooapis.com/v1/user/6677/connections;start=0;count=20&format=json"
-        assert_equal(percent_decode(get_signature_base_string("POST", url, dict())), base_string)
+        assert_equal(percent_decode(generate_signature_base_string("POST", url, dict())), base_string)
 
 
 
-class Test_get_normalized_query_string(object):
+class Test_generate_signature_base_string_query(object):
     def setUp(self):
         self.specification_url_query_params = {
             'b5': ['=%3D'],
@@ -415,44 +415,44 @@ class Test_get_normalized_query_string(object):
         self.simplegeo_example_correct_query_string = 'multi=%C2%AE&multi=%C2%AE&multi=BAR&multi=FOO&multi_same=FOO&multi_same=FOO&oauth_consumer_key=0685bd9184jfhq22&oauth_nonce=4572616e48616d6d65724c61686176&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131200&oauth_token=ad180jjd733klru7&oauth_version=1.0&uni_unicode_object=%C2%AE&uni_utf8_bytes=%C2%AE'
 
     def test_oauth_specification_example(self):
-        assert_equal(_get_signature_base_string_query(
+        assert_equal(_generate_signature_base_string_query(
             self.specification_url_query_params,
             self.specification_example_oauth_params),
                      self.specification_example_query_string)
 
     def test_simplegeo_example(self):
         assert_not_equal(
-            _get_signature_base_string_query(self.simplegeo_example_url_query_params,
+            _generate_signature_base_string_query(self.simplegeo_example_url_query_params,
                                               self.simplegeo_example_oauth_params),
             self.simplegeo_example_wrong_order_query_string)
         assert_equal(
-            _get_signature_base_string_query(self.simplegeo_example_url_query_params,
+            _generate_signature_base_string_query(self.simplegeo_example_url_query_params,
                                               self.simplegeo_example_oauth_params),
             self.simplegeo_example_correct_query_string)
 
     def test_query_params_sorted_order(self):
         assert_equal("a=1&b=2&b=4&b=8",
-                     _get_signature_base_string_query(dict(b=[8, 2, 4], a=1), {}))
-        qs = _get_signature_base_string_query(
+                     _generate_signature_base_string_query(dict(b=[8, 2, 4], a=1), {}))
+        qs = _generate_signature_base_string_query(
             dict(a=5, b=6, c=["w", "a", "t", "e", "r"]), {})
         assert_equal("a=5&b=6&c=a&c=e&c=r&c=t&c=w", qs)
 
     def test_multiple_values(self):
         assert_equal("a=5&a=8",
-                     _get_signature_base_string_query(dict(a=[5, 8]), {}))
+                     _generate_signature_base_string_query(dict(a=[5, 8]), {}))
 
     def test_non_string_single_value(self):
-        assert_equal("a=5", _get_signature_base_string_query(dict(a=5), None))
+        assert_equal("a=5", _generate_signature_base_string_query(dict(a=5), None))
         assert_equal("aFlag=True&bFlag=False",
-                     _get_signature_base_string_query(
+                     _generate_signature_base_string_query(
                          dict(aFlag=True, bFlag=False), None))
 
     def test_no_query_params_returns_empty_string(self):
-        assert_equal("", _get_signature_base_string_query({}, {}))
-        assert_equal("", _get_signature_base_string_query(None, None))
+        assert_equal("", _generate_signature_base_string_query({}, {}))
+        assert_equal("", _generate_signature_base_string_query(None, None))
 
     def test_oauth_signature_and_realm_are_excluded_properly(self):
-        qs = _get_signature_base_string_query({
+        qs = _generate_signature_base_string_query({
             "oauth_signature": "something"
             },
             self.specification_example_oauth_params
@@ -461,11 +461,11 @@ class Test_get_normalized_query_string(object):
         assert_true("realm=" not in qs)
 
         assert_true(
-            _get_signature_base_string_query(dict(realm="something"), dict()),
+            _generate_signature_base_string_query(dict(realm="something"), dict()),
             "realm=something")
 
 
-class Test_get_normalized_authorization_header_value(object):
+class Test_generate_normalized_authorization_header_value(object):
     def test_equality_and_realm(self):
         params = {
             'realm': ['Examp%20le'],
@@ -480,11 +480,11 @@ class Test_get_normalized_authorization_header_value(object):
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }
         expected_value = 'OAuth oauth_consumer_key="0685bd9184jfhq22",oauth_empty="",oauth_nonce="4572616e48616d6d65724c61686176",oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",oauth_signature_method="HMAC-SHA1",oauth_something="%20Some%20Example",oauth_timestamp="137131200",oauth_token="ad180jjd733klru7",oauth_version="1.0"'
-        assert_equal(get_normalized_authorization_header_value(params),
+        assert_equal(generate_normalized_authorization_header_value(params),
                      expected_value)
 
         expected_value = 'OAuth realm="http://example.com/",oauth_consumer_key="0685bd9184jfhq22",oauth_empty="",oauth_nonce="4572616e48616d6d65724c61686176",oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",oauth_signature_method="HMAC-SHA1",oauth_something="%20Some%20Example",oauth_timestamp="137131200",oauth_token="ad180jjd733klru7",oauth_version="1.0"'
-        assert_equal(get_normalized_authorization_header_value(params,
+        assert_equal(generate_normalized_authorization_header_value(params,
                                                                      realm="http://example.com/")
                      , expected_value)
 
@@ -503,7 +503,7 @@ class Test_get_normalized_authorization_header_value(object):
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }
         expected_value = 'OAuth realm="http://example.com/"&oauth_consumer_key="0685bd9184jfhq22"&oauth_empty=""&oauth_nonce="4572616e48616d6d65724c61686176"&oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D"&oauth_signature_method="HMAC-SHA1"&oauth_something="%20Some%20Example"&oauth_timestamp="137131200"&oauth_token="ad180jjd733klru7"&oauth_version="1.0"'
-        assert_equal(get_normalized_authorization_header_value(params,
+        assert_equal(generate_normalized_authorization_header_value(params,
                                                                realm="http://example.com/",
                                                                param_delimiter="&")
                      , expected_value)
@@ -513,7 +513,7 @@ class Test_get_normalized_authorization_header_value(object):
             'realm': ['Examp%20le'],
             'oauth_something': [' Some Example', "another thing"],
             }
-        assert_raises(InvalidOAuthParametersError, get_normalized_authorization_header_value, params)
+        assert_raises(InvalidOAuthParametersError, generate_normalized_authorization_header_value, params)
 
 
 

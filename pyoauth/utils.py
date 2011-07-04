@@ -30,15 +30,15 @@ Functions
 
 OAuth Signature and Base String
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: get_hmac_sha1_signature
-.. autofunction:: get_rsa_sha1_signature
+.. autofunction:: generate_hmac_sha1_signature
+.. autofunction:: generate_rsa_sha1_signature
 .. autofunction:: check_rsa_sha1_signature
-.. autofunction:: get_plaintext_signature
-.. autofunction:: get_signature_base_string
+.. autofunction:: generate_plaintext_signature
+.. autofunction:: generate_signature_base_string
 
 Authorization Header
 ~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: get_normalized_authorization_header_value
+.. autofunction:: generate_normalized_authorization_header_value
 .. autofunction:: parse_authorization_header_value
 
 """
@@ -140,7 +140,7 @@ def generate_timestamp():
     return bytes(int(time.time()))
 
 
-def get_hmac_sha1_signature(client_shared_secret,
+def generate_hmac_sha1_signature(client_shared_secret,
                             method, url, oauth_params=None,
                             token_or_temporary_shared_secret=None):
     """
@@ -163,14 +163,14 @@ def get_hmac_sha1_signature(client_shared_secret,
         HMAC-SHA1 signature.
     """
     oauth_params = oauth_params or {}
-    base_string = get_signature_base_string(method, url, oauth_params)
-    key = _get_plaintext_signature(client_shared_secret,
+    base_string = generate_signature_base_string(method, url, oauth_params)
+    key = _generate_plaintext_signature(client_shared_secret,
                                    token_or_temporary_shared_secret)
     hashed = hmac.new(key, base_string, sha1)
     return binascii.b2a_base64(hashed.digest())[:-1]
 
 
-def get_rsa_sha1_signature(client_shared_secret,
+def generate_rsa_sha1_signature(client_shared_secret,
                            method, url, oauth_params=None,
                            token_or_temporary_shared_secret=None,
                            _test_rsa=RSA):
@@ -204,7 +204,7 @@ def get_rsa_sha1_signature(client_shared_secret,
     except AttributeError:
         key = _test_rsa.importKey(client_shared_secret)
 
-    base_string = get_signature_base_string(method, url, oauth_params)
+    base_string = generate_signature_base_string(method, url, oauth_params)
     digest = sha1(base_string).digest()
     signature = key.sign(_pkcs1_v1_5_encode(key, digest), "")[0]
     signature_bytes = long_to_bytes(signature)
@@ -250,7 +250,7 @@ def check_rsa_sha1_signature(signature, client_shared_secret,
     except AttributeError:
         key = _test_rsa.importKey(client_shared_secret)
 
-    base_string = get_signature_base_string(method, url, oauth_params)
+    base_string = generate_signature_base_string(method, url, oauth_params)
     digest = sha1(base_string).digest()
     signature = bytes_to_long(binascii.a2b_base64(signature))
     data = _pkcs1_v1_5_encode(key, digest)
@@ -281,7 +281,7 @@ def _pkcs1_v1_5_encode(rsa_key, sha1_digest):
     return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + sha1_digest
 
 
-def get_plaintext_signature(client_shared_secret,
+def generate_plaintext_signature(client_shared_secret,
                             method, url, oauth_params=None,
                             token_or_temporary_shared_secret=None):
     """
@@ -303,11 +303,11 @@ def get_plaintext_signature(client_shared_secret,
     :returns:
         PLAINTEXT signature.
     """
-    return _get_plaintext_signature(client_shared_secret,
+    return _generate_plaintext_signature(client_shared_secret,
                                     token_or_temporary_shared_secret)
 
 
-def _get_plaintext_signature(client_shared_secret,
+def _generate_plaintext_signature(client_shared_secret,
                              token_or_temporary_shared_secret=None):
     """
     Calculates the PLAINTEXT signature.
@@ -326,7 +326,7 @@ def _get_plaintext_signature(client_shared_secret,
             client_shared_secret, token_or_temporary_shared_secret]])
 
 
-def get_signature_base_string(method, url, oauth_params):
+def generate_signature_base_string(method, url, oauth_params):
     """
     Calculates a signature base string based on the URL, method, and
     oauth parameters.
@@ -360,14 +360,14 @@ def get_signature_base_string(method, url, oauth_params):
         raise InvalidOAuthParametersError("Dictionary required: got `%r`" % (oauth_params, ))
 
     scheme, netloc, path, matrix_params, query, fragment = urlparse_normalized(url)
-    query_string = _get_signature_base_string_query(query, oauth_params)
+    query_string = _generate_signature_base_string_query(query, oauth_params)
     normalized_url = urlunparse((scheme, netloc, path, matrix_params, None, None))
     return "&".join([
         percent_encode(e) for e in [
             method_normalized, normalized_url, query_string]])
 
 
-def _get_signature_base_string_query(url_query_params, oauth_params):
+def _generate_signature_base_string_query(url_query_params, oauth_params):
     """
     Serializes URL query parameters and OAuth protocol parameters into a valid
     OAuth base string URI query string.
@@ -402,7 +402,7 @@ def _get_signature_base_string_query(url_query_params, oauth_params):
     return query
 
 
-def get_normalized_authorization_header_value(oauth_params,
+def generate_normalized_authorization_header_value(oauth_params,
                                               realm=None,
                                               param_delimiter=","):
     """

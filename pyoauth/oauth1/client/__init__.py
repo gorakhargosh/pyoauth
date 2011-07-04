@@ -51,16 +51,16 @@ from pyoauth.url import \
     parse_qs, query_append, is_valid_callback_url
 from pyoauth.utils import generate_nonce, \
     generate_timestamp, \
-    get_hmac_sha1_signature, \
-    get_rsa_sha1_signature, \
-    get_plaintext_signature, \
-    get_normalized_authorization_header_value
+    generate_hmac_sha1_signature, \
+    generate_rsa_sha1_signature, \
+    generate_plaintext_signature, \
+    generate_normalized_authorization_header_value
 
 
 SIGNATURE_METHOD_MAP = {
-    SIGNATURE_METHOD_HMAC_SHA1: get_hmac_sha1_signature,
-    SIGNATURE_METHOD_RSA_SHA1: get_rsa_sha1_signature,
-    SIGNATURE_METHOD_PLAINTEXT: get_plaintext_signature,
+    SIGNATURE_METHOD_HMAC_SHA1: generate_hmac_sha1_signature,
+    SIGNATURE_METHOD_RSA_SHA1: generate_rsa_sha1_signature,
+    SIGNATURE_METHOD_PLAINTEXT: generate_plaintext_signature,
 }
 
 
@@ -621,7 +621,7 @@ class Client(object):
             raise InvalidAuthorizationHeaderError("Authorization field is already present in headers: `%r`" % (headers, ))
         if self._use_authorization_header:
             auth_header_value = \
-                get_normalized_authorization_header_value(oauth_params,
+                generate_normalized_authorization_header_value(oauth_params,
                                                           realm=realm,
                                                           param_delimiter=self._authorization_header_param_delimiter)
             headers["Authorization"] = auth_header_value
