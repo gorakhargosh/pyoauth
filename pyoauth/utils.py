@@ -88,7 +88,7 @@ from pyoauth.url import percent_encode, percent_decode, \
 
 
 
-def generate_random_string(bit_strength=64, decimal=False):
+def generate_random_string(bit_strength=64, decimal=True):
     """
     Generates a random ASCII-encoded unsigned integral number in decimal
     or hexadecimal representation.
@@ -96,7 +96,7 @@ def generate_random_string(bit_strength=64, decimal=False):
     :param bit_strength:
         Bit strength.
     :param decimal:
-        ``True`` if you want the decimal representation; ``False`` for
+        ``True`` (default) if you want the decimal representation; ``False`` for
         hexadecimal.
     :returns:
         A string representation of a randomly-generated ASCII-encoded

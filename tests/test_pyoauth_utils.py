@@ -14,28 +14,44 @@ try:
 except ImportError:
     assert_dict_equal = assert_equal
 from nose import SkipTest
-from pyoauth.utils import parse_authorization_header_value, _generate_signature_base_string_query, generate_normalized_authorization_header_value, percent_encode, percent_decode, generate_nonce, generate_verification_code, generate_timestamp, generate_hmac_sha1_signature, generate_rsa_sha1_signature, check_rsa_sha1_signature, generate_plaintext_signature, generate_signature_base_string, _generate_plaintext_signature, generate_random_string
+from pyoauth.utils import parse_authorization_header_value, \
+    _generate_signature_base_string_query, \
+    generate_normalized_authorization_header_value, \
+    percent_encode, \
+    percent_decode, \
+    generate_verification_code, \
+    generate_timestamp, \
+    generate_hmac_sha1_signature, \
+    generate_rsa_sha1_signature, \
+    check_rsa_sha1_signature, \
+    generate_plaintext_signature, \
+    generate_signature_base_string, \
+    _generate_plaintext_signature, \
+    generate_nonce
 
 
-class Test_generate_random_string(object):
+class Test_generate_nonce(object):
     def test_uniqueness(self):
-        assert_not_equal(generate_random_string(64, False), generate_random_string(64, False))
+        assert_not_equal(generate_nonce(64, False), generate_nonce(64, False))
+        assert_not_equal(generate_nonce(64, True), generate_nonce(64, True))
 
     def test_hex_length(self):
         for i in range(1, 1000):
-            assert_equal(len(generate_random_string(64, False)), 16)
+            assert_equal(len(generate_nonce(64, False)), 16)
 
     def test_unsigned_integer(self):
-        assert_true(int(generate_random_string(64, True)) >= 0)
-        assert_true(int(generate_random_string(64, False), 16) >= 0)
+        assert_true(int(generate_nonce(64, True)) >= 0)
+        assert_true(int(generate_nonce(64, False), 16) >= 0)
 
     def test_raises_ValueError_when_invalid_bit_strength(self):
-        assert_raises(ValueError, generate_random_string, 63)
-        assert_raises(ValueError, generate_random_string, 0)
+        assert_raises(ValueError, generate_nonce, 63)
+        assert_raises(ValueError, generate_nonce, 0)
 
     def test_result_is_string(self):
-        assert_true(isinstance(generate_random_string(64, True), bytes))
-        assert_true(isinstance(generate_random_string(64, False), bytes))
+        assert_true(isinstance(generate_nonce(64, True), bytes))
+        assert_true(isinstance(generate_nonce(64, False), bytes))
+
+
 
 
 class Test_generate_verification_code(object):
