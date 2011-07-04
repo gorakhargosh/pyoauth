@@ -96,12 +96,12 @@ def generate_nonce(length=32):
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param length:
         Length of the nonce to be returned. Default 32.
-        oThe length MUST be an even number.
+        The length MUST be a positive even number.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth nonce.
     """
     if length % 2 or length <= 0:
-        raise ValueError("This function expects an even positive length: got length `%r`." % (length, ))
+        raise ValueError("This function expects a positive even number length: got length `%r`." % (length, ))
     return binascii.b2a_hex(os.urandom(length/2))
 
 
@@ -119,9 +119,8 @@ def generate_verification_code(length=8):
         Resource Owner Authorization
         (http://tools.ietf.org/html/rfc5849#section-2.2)
     :param length:
-        Length of the nonce to be returned. Default 32.
-        If 0, negative, or ``None``, a 32 character value will
-        be returned as well. The length MUST be an even number.
+        Length of the verification code to be returned. Default 32.
+        The length MUST be a positive even number.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth
         verification code.
