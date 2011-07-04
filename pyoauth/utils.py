@@ -104,7 +104,7 @@ def generate_nonce(length=32):
     if not length or length < 0:
         length = 32
     if length % 2:
-        raise ValueError("This function expects an even length.")
+        raise ValueError("This function expects an even length: got length `%d`." % (length, ))
     return binascii.b2a_hex(os.urandom(length/2))
 
 
