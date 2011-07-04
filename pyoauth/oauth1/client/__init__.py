@@ -586,14 +586,17 @@ class Client(object):
         # Filter payload parameters for the request.
         payload_params = query_params_sanitize(payload_params)
 
-        # TODO: I'm not entirely certain yet about whether PUT payload
-        #    params should be included in the signature or not.
-        #    Here is why:
+        # I was not entirely certain about whether PUT payload
+        # params should be included in the signature or not.
+        # Here is why:
+        #
         #    http://groups.google.com/group/oauth/browse_thread/thread/fdc0b11f2c4a8dc3/
         #
-        #    However, until I'm certain that PUT parameters encoded with
-        #    application/x-www-form-urlencoded must not be signed,
-        #    I'm not handling PUT explicitly in this method.
+        # However, Appendix A in the RFC specification clarifies this point.
+        # form URL encoded entity bodies in a request using any HTTP verb
+        # must be part of the base string used for the signature.
+        # Therefore, do NOT exclude payload params from the signature URL
+        # when the PUT HTTP method is used.
         #
         #if method == "PUT":
         #     signature_url = url
