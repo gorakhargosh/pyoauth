@@ -88,11 +88,16 @@ from pyoauth.url import percent_encode, percent_decode, \
 
 
 
-def generate_random_string(bit_strength=64, decimal=True):
+def generate_nonce(bit_strength=64, decimal=True):
     """
     Generates a random ASCII-encoded unsigned integral number in decimal
     or hexadecimal representation.
 
+    .. NOTE::
+        Why based on bit strength? See:
+        http://code.google.com/apis/accounts/docs/OAuth_ref.html#RequestToken
+
+    :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param bit_strength:
         Bit strength.
     :param decimal:
@@ -110,24 +115,6 @@ def generate_random_string(bit_strength=64, decimal=True):
     if decimal:
         value = bytes(int(value, 16))
     return value
-
-
-def generate_nonce(bit_strength=64, decimal=True):
-    """
-    Generates a random ASCII-encoded unsigned integral number in decimal
-    or hexadecimal representation.
-
-    :param bit_strength:
-        Bit strength.
-    :param decimal:
-        ``True`` (default) if you want the decimal representation; ``False`` for
-        hexadecimal.
-    :returns:
-        A string representation of a randomly-generated ASCII-encoded
-        hexadecimal/decimal-representation unsigned integral number
-        based on the bit strength specified.
-    """
-    return generate_random_string(bit_strength, decimal)
 
 
 def generate_verification_code(length=8):
