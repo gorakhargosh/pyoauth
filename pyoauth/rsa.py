@@ -26,7 +26,6 @@ Functions
 ---------
 .. autofunction:: sign
 .. autofunction:: verify
-.. autofunction:: pkcs1_v1_5_encode
 """
 
 import sys
