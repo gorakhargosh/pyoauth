@@ -4,6 +4,7 @@
 from nose.tools import assert_equal, assert_not_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
 from pyoauth.error import InvalidUrlError, InvalidQueryParametersError, InsecureOAuthUrlError, InvalidOAuthParametersError, InsecureOAuthParametersError
+from pyoauth.unicode import to_utf8_if_unicode
 
 try:
     from nose.tools import assert_dict_equal
@@ -133,6 +134,23 @@ class Test_percent_encode(object):
         self.uni_utf8_bytes = '\xc2\xae'
         self.uni_unicode_object = u'\u00ae'
 
+    def test_oauth_test_cases(self):
+        # http://wiki.oauth.net/w/page/12238556/TestCases
+        ex = [
+            ('abcABC123', 'abcABC123'),
+            ('-._~', '-._~'),
+            ('%', '%25'),
+            ('+', '%2B'),
+            ('&=*', '%26%3D%2A'),
+            (u'\u000A', '%0A'),
+            (u'\u0020', '%20'),
+            (u'\u007F', '%7F'),
+            (u'\u0080', '%C2%80'),
+            (u'\u3001', '%E3%80%81'),
+        ]
+        for k, v in ex:
+            assert_equal(percent_encode(k), v)
+
     def test_utf8_bytestring_left_as_is(self):
         assert_equal(percent_encode(self.uni_utf8_bytes), "%C2%AE")
 
@@ -223,6 +241,22 @@ class Test_percent_decode(object):
     def test_plus_is_treated_as_space_character(self):
         assert_equal(percent_decode('+'), ' ', "Plus character in encoding is not treated as space character.")
 
+    def test_oauth_test_cases(self):
+        # http://wiki.oauth.net/w/page/12238556/TestCases
+        ex = [
+            ('abcABC123', 'abcABC123'),
+            ('-._~', '-._~'),
+            ('%', '%25'),
+            ('+', '%2B'),
+            ('&=*', '%26%3D%2A'),
+            (u'\u000A', '%0A'),
+            (u'\u0020', '%20'),
+            (u'\u007F', '%7F'),
+            (u'\u0080', '%C2%80'),
+            (u'\u3001', '%E3%80%81'),
+        ]
+        for k, v in ex:
+            assert_equal(percent_decode(v), to_utf8_if_unicode(k))
 
 class Test_urlencode_s(object):
     def test_valid_query_string(self):
