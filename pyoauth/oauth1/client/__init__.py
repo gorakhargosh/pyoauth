@@ -592,6 +592,7 @@ class Client(object):
         #
         #    http://groups.google.com/group/oauth/browse_thread/thread/fdc0b11f2c4a8dc3/
         #
+        # http://tools.ietf.org/html/rfc5849#appendix-A
         # However, Appendix A in the RFC specification clarifies this point.
         # form URL encoded entity bodies in a request using any HTTP verb
         # must be part of the base string used for the signature.
@@ -629,16 +630,16 @@ class Client(object):
             # included multiple times in a request below.
             oauth_params = None
 
-        if method in ("POST", "PUT"):
+        if method == "GET":
+            request_url = url_add_query(url, payload_params)
+            request_url = url_append_query(request_url, oauth_params)
+            payload = ""
+        else:
             # The payload params are not appended to the OAuth request URL
             # in this case but added to the payload instead.
             request_url = url
             headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
             payload = query_append(payload_params, oauth_params)
-        else:
-            request_url = url_add_query(url, payload_params)
-            request_url = url_append_query(request_url, oauth_params)
-            payload = ""
 
         return RequestProxy(method,
                             url=request_url,
