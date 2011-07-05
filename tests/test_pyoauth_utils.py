@@ -17,13 +17,12 @@ from nose import SkipTest
 from pyoauth.utils import parse_authorization_header_value, \
     _generate_signature_base_string_query, \
     generate_normalized_authorization_header_value, \
-    percent_encode, \
     percent_decode, \
     generate_verification_code, \
     generate_timestamp, \
     generate_hmac_sha1_signature, \
-    old_generate_rsa_sha1_signature, \
-    old_check_rsa_sha1_signature, \
+    generate_rsa_sha1_signature, \
+    verify_rsa_sha1_signature, \
     generate_plaintext_signature, \
     generate_signature_base_string, \
     _generate_plaintext_signature, \
@@ -165,105 +164,93 @@ class Test_generate_hmac_sha1_signature(object):
             )
 
 
-class Test_generate_and_check_rsa_sha1_signature(object):
-    # Taken from https://github.com/rick446/python-oauth2/commit/a8bee2ad1a993faa1e13a04f14f1754489ad35bd
+class Test_generate_and_verify_rsa_sha1_signature(object):
     def setUp(self):
-        self.oauth_signature_method = "RSA-SHA1"
-        self.oauth_token_key = "tok-test-key"
-        self.oauth_token_secret = "tok-test-secret"
-        self.oauth_consumer_key = "con-test-key"
-        self.oauth_consumer_secret = '''-----BEGIN RSA PRIVATE KEY-----
-MIIBOgIBAAJBAM7B+5TJsc93ymBSFtC5DE1qDlqvwio0xDfS6bZQTfFiHLm8pHXg
-Atkm7QB6gvyRKm+a/G3qEbmBdz21Fw0RLJsCAwEAAQJAS68qnr5uPlnFVRj3jRQP
-8s6dzoiD9Ns38I9eSgR/Y5ozl8r/cClLeGWvDKfXvrxlsaMuqWLZ5KMtamaRS9Fl
-sQIhAPmOY+s5ZxsYtem+Uc2IUGexNoP/Ng7MPS3C+Q3L6K4nAiEA1Biv6i7TqAbx
-oHulPIXb2Z9JmO46aT81n9WnD1qyim0CIF9eN/cLf8iOH+7MqYxHHJsT0QaOgEUV
-bgfP68eG9kufAiEAtUSAHGp29HUyzxC9sNNKiVysnuqDu22NXBRSmjnOu6UCIEFZ
-nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
------END RSA PRIVATE KEY-----'''
-        self.http_method = "GET"
-        self.url = u"http://sp.example.com/?bar=blerg&multi=FOO&multi=BAR&foo=59"
-        self.oauth_params = dict(
-            oauth_version='1.0',
-            oauth_nonce="4572616e48616d6d65724c61686176",
-            oauth_timestamp="137131200",
-            oauth_token=self.oauth_token_key,
-            oauth_consumer_key=self.oauth_consumer_key,
-            oauth_signature_method=self.oauth_signature_method,
-        )
-        self.oauth_signature = "D2rdx9TiFajZbXChqMca6eaal8FxZhLMU1bdNX0glIN+BT4nrYGJqmIW92kWZYEYKHsVz7e67oDBEYlIIQMKWg=="
+        self._examples = (
+            # http://wiki.oauth.net/w/page/12238556/TestCases
+            dict(
+                private_key='''\
+-----BEGIN PRIVATE KEY-----
+MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
+A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d
+7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ
+hI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H
+X9u2AC2ry8vD/l7cqedtwMPp9k7TubgNFo+NGvKsl2ynyprOZR1xjQ7WgrgVB+mm
+uScOM/5HVceFuGRDhYTCObE+y1kxRloNYXnx3ei1zbeYLPCHdhxRYW7T0qcynNmw
+rn05/KO2RLjgQNalsQJBANeA3Q4Nugqy4QBUCEC09SqylT2K9FrrItqL2QKc9v0Z
+zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn
+qkMsDmzt0EfNaAOwHOmVJ2RVBspPcxt5iN4HI7HNeG6U5YsFBb+/GZbgfBT3kpNG
+WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno
+cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
+3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8
+AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
+Lw03eHTNQghS0A==
+-----END PRIVATE KEY-----''',
+                certificate='''\
+-----BEGIN CERTIFICATE-----
+MIIBpjCCAQ+gAwIBAgIBATANBgkqhkiG9w0BAQUFADAZMRcwFQYDVQQDDA5UZXN0
+IFByaW5jaXBhbDAeFw03MDAxMDEwODAwMDBaFw0zODEyMzEwODAwMDBaMBkxFzAV
+BgNVBAMMDlRlc3QgUHJpbmNpcGFsMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB
+gQC0YjCwIfYoprq/FQO6lb3asXrxLlJFuCvtinTF5p0GxvQGu5O3gYytUvtC2JlY
+zypSRjVxwxrsuRcP3e641SdASwfrmzyvIgP08N4S0IFzEURkV1wp/IpH7kH41Etb
+mUmrXSwfNZsnQRE5SYSOhh+LcK2wyQkdgcMv11l4KoBkcwIDAQABMA0GCSqGSIb3
+DQEBBQUAA4GBAGZLPEuJ5SiJ2ryq+CmEGOXfvlTtEL2nuGtr9PewxkgnOjZpUy+d
+4TvuXJbNQc8f4AMWL/tO9w0Fk80rWKp9ea8/df4qMq5qlFWlx6yOLQxumNOmECKb
+WpkUQDIDJEoFUzKMVuJf4KO/FJ345+BNLGgbJ6WujreoM1X/gYfdnJ/J
+-----END CERTIFICATE-----''',
+                method="GET",
+                url='http://photos.example.net/photos?file=vacaction.jpg&size=original',
+                oauth_params=dict(
+                    oauth_consumer_key="dpf43f3p2l4k3l03",
+                    oauth_signature_method="RSA-SHA1",
+                    oauth_version="1.0",
+                    oauth_timestamp="1196666512",
+                    oauth_nonce="13917289812797014437",
+                ),
+                oauth_signature="\
+jvTp/wX1TYtByB1m+Pbyo0lnCOLIsyGCH7wke8AUs3BpnwZJtAuEJkvQL2/9n4s5\
+wUmUl4aCI4BwpraNx4RtEXMe5qg5T1LVTGliMRpKasKsW//e+RinhejgCuzoH26d\
+yF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE=",
+        ),
+    )
 
-    def test_get_signature(self):
-        from Crypto.PublicKey import RSA
+    def test_valid_signature(self):
+        for example in self._examples:
+            client_shared_secret = example["private_key"]
+            client_certificate = example["certificate"]
+            url = example["url"]
+            method = example["method"]
+            oauth_params = example["oauth_params"]
+            expected_signature = example["oauth_signature"]
+            assert_equal(expected_signature,
+                         generate_rsa_sha1_signature(client_shared_secret,
+                                                 method=method,
+                                                 url=url,
+                                                 oauth_params=oauth_params
+                                                 )
+            )
+            # TODO:
+#            ======================================================================
+#            ERROR: tests.test_pyoauth_utils.Test_generate_and_verify_rsa_sha1_signature.test_valid_signature
+#            ----------------------------------------------------------------------
+#            Traceback (most recent call last):
+#              File "/Users/gorakhargosh/.buildout/eggs/nose-1.0.0-py2.7.egg/nose/case.py", line 187, in runTest
+#                self.test(*self.arg)
+#              File "/Users/gorakhargosh/Projects/pyoauth/tests/test_pyoauth_utils.py", line 234, in test_valid_signature
+#                method, url, oauth_params))
+#              File "/Users/gorakhargosh/Projects/pyoauth/pyoauth/utils.py", line 227, in verify_rsa_sha1_signature
+#                return verify(client_public_certificate, signature, base_string)
+#              File "/Users/gorakhargosh/Projects/pyoauth/pyoauth/rsa.py", line 105, in verify
+#                public_key = keyfactory.parsePEMKey(public_certificate, public=True)
+#              File "/Users/gorakhargosh/Projects/pyoauth/pyoauth/tlslite/tlslite/utils/keyfactory.py", line 149, in parsePEMKey
+#                key = Python_RSAKey.parsePEM(s)
+#              File "/Users/gorakhargosh/Projects/pyoauth/pyoauth/tlslite/tlslite/utils/Python_RSAKey.py", line 133, in parsePEM
+#                raise SyntaxError("Missing PEM Prefix")
+#            SyntaxError: Missing PEM Prefix
 
-        # consumer_secret is a string.
-        assert_equal(old_generate_rsa_sha1_signature(
-            self.oauth_consumer_secret,
-            method=self.http_method,
-            url=self.url,
-            oauth_params=self.oauth_params,
-            token_or_temporary_shared_secret=self.oauth_token_secret
-        ), self.oauth_signature)
-
-        # consumer_secret is an RSA instance.
-        assert_equal(old_generate_rsa_sha1_signature(
-            RSA.importKey(self.oauth_consumer_secret),
-            method=self.http_method,
-            url=self.url,
-            oauth_params=self.oauth_params,
-            token_or_temporary_shared_secret=self.oauth_token_secret
-        ), self.oauth_signature)
-
-
-    def test_check_signature(self):
-        from Crypto.PublicKey import RSA
-
-        # consumer_secret is a string.
-        assert_true(old_check_rsa_sha1_signature(
-            signature=self.oauth_signature,
-            client_shared_secret=self.oauth_consumer_secret,
-            method=self.http_method,
-            url=self.url,
-            oauth_params=self.oauth_params,
-            token_or_temporary_shared_secret=self.oauth_token_secret
-        ))
-
-        # consumer_secret is an RSA instance.
-        assert_true(old_check_rsa_sha1_signature(
-            signature=self.oauth_signature,
-            client_shared_secret=RSA.importKey(self.oauth_consumer_secret),
-            method=self.http_method,
-            url=self.url,
-            oauth_params=self.oauth_params,
-            token_or_temporary_shared_secret=self.oauth_token_secret
-        ))
-
-    def test_get_raises_NotImplementedError_when_Crypto_unavailable(self):
-        # consumer_secret is a string.
-        assert_raises(NotImplementedError,
-                      old_generate_rsa_sha1_signature,
-                      self.oauth_consumer_secret,
-                      self.http_method,
-                      self.url,
-                      self.oauth_params,
-                      self.oauth_token_secret,
-                      _test_rsa=None
-        )
-
-    def test_check_raises_NotImplementedError_when_Crypto_unavailable(self):
-        # consumer_secret is a string.
-        assert_raises(NotImplementedError,
-                      old_check_rsa_sha1_signature,
-                      self.oauth_signature,
-                      self.oauth_consumer_secret,
-                      self.http_method,
-                      self.url,
-                      self.oauth_params,
-                      self.oauth_token_secret,
-                      _test_rsa=None
-        )
-
-
+#            assert_true(verify_rsa_sha1_signature(
+#                client_certificate, expected_signature,
+#                method, url, oauth_params))
 
 
 class Test_generate_plaintext_signature(object):

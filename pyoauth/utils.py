@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Protocol-specific utility functions.
 #
-# Copyright (C) 2010 Rick Copeland <rcopeland@geek.net>
 # Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -30,8 +29,8 @@ Functions
 OAuth Signature and Base String
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autofunction:: generate_hmac_sha1_signature
-.. autofunction:: old_generate_rsa_sha1_signature
-.. autofunction:: old_check_rsa_sha1_signature
+.. autofunction:: generate_rsa_sha1_signature
+.. autofunction:: verify_rsa_sha1_signature
 .. autofunction:: generate_plaintext_signature
 .. autofunction:: generate_signature_base_string
 
@@ -48,10 +47,7 @@ import os
 import time
 import re
 
-try:
-    from hashlib import sha1
-except ImportError:
-    import sha as sha1  # Deprecated
+from hashlib import sha1
 
 try:
     # Python 3.
@@ -69,22 +65,11 @@ from pyoauth.url import percent_encode, percent_decode, \
     urlencode_sl, urlencode_s, urlparse_normalized, \
     request_protocol_params_sanitize, query_params_sanitize
 
-# OLD
-try:
-    from Crypto.PublicKey import RSA
-    from Crypto.Util.number import long_to_bytes, bytes_to_long
-except ImportError:
-    RSA = None
-    def long_to_bytes(v):
-        raise NotImplementedError()
-    def bytes_to_long(v):
-        raise NotImplementedError()
 
 try:
     bytes
 except Exception:
     bytes = str
-
 
 
 def generate_nonce(bit_strength=64, decimal=True):
@@ -183,14 +168,14 @@ def generate_hmac_sha1_signature(client_shared_secret,
     return binascii.b2a_base64(hashed.digest())[:-1]
 
 
-def old_generate_rsa_sha1_signature(client_private_key,
-                           method, url, oauth_params=None,
-                           token_or_temporary_shared_secret=None,
-                           _test_rsa=RSA):
+def generate_rsa_sha1_signature(client_private_key,
+                                method, url, oauth_params=None,
+                                *args, **kwargs):
     """
     Calculates an RSA-SHA1 OAuth signature.
 
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
+
     :param client_private_key:
         Client (consumer) secret (private key).
     :param method:
@@ -201,50 +186,29 @@ def old_generate_rsa_sha1_signature(client_private_key,
     :param oauth_params:
         Base string protocol-specific query parameters.
         All non-protocol parameters will be ignored.
-    :param token_or_temporary_shared_secret:
-        (Unused) Token/temporary credentials shared secret if available.
     :returns:
         RSA-SHA1 signature.
     """
-    # Arguments.
+    from pyoauth.rsa import sign
+
     oauth_params = oauth_params or {}
-    if _test_rsa is None:
-        raise NotImplementedError()
-    try:
-        getattr(client_private_key, "sign")
-        private_key = client_private_key
-    except AttributeError:
-        private_key = _test_rsa.importKey(client_private_key)
-
-    # Calculate the base string.
     base_string = generate_signature_base_string(method, url, oauth_params)
-
-    signature = private_key.sign(
-        _pkcs1_v1_5_encode(
-            private_key,
-            sha1(base_string).digest()
-        ), ""
-    )[0]
-    signature_bytes = long_to_bytes(signature)
-
-    return binascii.b2a_base64(signature_bytes)[:-1]
+    return sign(client_private_key, base_string)
 
 
-def old_check_rsa_sha1_signature(signature,
-                             client_public_key,
-                             method, url, oauth_params=None,
-                             token_or_temporary_shared_secret=None,
-                             _test_rsa=RSA):
+def verify_rsa_sha1_signature(client_public_certificate,
+                              signature,
+                              method, url, oauth_params=None,
+                              *args, **kwargs):
     """
     Verifies a RSA-SHA1 OAuth signature.
 
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
-    :author:
-        Rick Copeland <rcopeland@geek.net>
+
+    :param client_public_certificate:
+        Client (consumer) public key (certificate).
     :param signature:
         RSA-SHA1 OAuth signature.
-    :param client_public_key:
-        Client (consumer) public key.
     :param method:
         Base string HTTP method.
     :param url:
@@ -253,52 +217,14 @@ def old_check_rsa_sha1_signature(signature,
     :param oauth_params:
         Base string protocol-specific query parameters.
         All non-protocol parameters will be ignored.
-    :param token_or_temporary_shared_secret:
-        (Unused)Token/temporary credentials shared secret if available.
     :returns:
         ``True`` if verified to be correct; ``False`` otherwise.
     """
+    from pyoauth.rsa import verify
+
     oauth_params = oauth_params or {}
-
-    if _test_rsa is None:
-        raise NotImplementedError()
-
-    try:
-        getattr(client_public_key, "publickey")
-        key = client_public_key
-    except AttributeError:
-        key = _test_rsa.importKey(client_public_key)
-
     base_string = generate_signature_base_string(method, url, oauth_params)
-
-    digest = sha1(base_string).digest()
-    signature = bytes_to_long(binascii.a2b_base64(signature))
-    data = _pkcs1_v1_5_encode(key, digest)
-
-    return key.publickey().verify(data, (signature,))
-
-
-def _pkcs1_v1_5_encode(key, data):
-    """
-    Encodes a SHA1 digest using PKCS1's emsa-pkcs1-v1_5 encoding.
-
-    Adapted from paramiko.
-
-    :author:
-        Rick Copeland <rcopeland@geek.net>
-
-    :param key:
-        RSA Key.
-    :param data:
-        Data
-    :returns:
-        A blob of data as large as the key's N, using PKCS1's
-        "emsa-pkcs1-v1_5" encoding.
-    """
-    SHA1_DIGESTINFO = '\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14'
-    size = len(long_to_bytes(key.n))
-    filler = '\xff' * (size - len(SHA1_DIGESTINFO) - len(data) - 3)
-    return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + data
+    return verify(client_public_certificate, signature, base_string)
 
 
 def generate_plaintext_signature(client_shared_secret,
