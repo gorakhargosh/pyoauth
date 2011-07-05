@@ -1,0 +1,3 @@
+[submodule "pyoauth/tlslite"]
+	path = pyoauth/tlslite
+	url = git@github.com:gorakhargosh/tlslite.git
