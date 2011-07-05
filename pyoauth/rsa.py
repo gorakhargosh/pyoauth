@@ -39,6 +39,7 @@ sys.path[0:0] = [
 import binascii
 from base64 import b64decode
 from tlslite.utils import keyfactory
+from tlslite.X509 import X509
 
 
 def sign(private_key, base_string):
@@ -101,5 +102,10 @@ def verify(public_certificate, signature, base_string):
         ``True`` if signature matches; ``False`` if verification fails.
     """
     decoded_signature = b64decode(signature)
-    public_key = keyfactory.parsePEMKey(public_certificate, public=True)
+
+    cert_parser = X509()
+    cert_parser.parse(public_certificate)
+    public_key = cert_parser.publicKey
+
+    #public_key = keyfactory.parsePEMKey(public_certificate, public=True)
     return public_key.hashAndVerify(decoded_signature, base_string)

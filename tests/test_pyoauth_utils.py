@@ -169,7 +169,7 @@ class Test_generate_and_verify_rsa_sha1_signature(object):
         self._examples = (
             # http://wiki.oauth.net/w/page/12238556/TestCases
             dict(
-                private_key='''\
+                private_key='''
 -----BEGIN PRIVATE KEY-----
 MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
 A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d
@@ -186,7 +186,7 @@ cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
 AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A==
 -----END PRIVATE KEY-----''',
-                certificate='''\
+                certificate='''
 -----BEGIN CERTIFICATE-----
 MIIBpjCCAQ+gAwIBAgIBATANBgkqhkiG9w0BAQUFADAZMRcwFQYDVQQDDA5UZXN0
 IFByaW5jaXBhbDAeFw03MDAxMDEwODAwMDBaFw0zODEyMzEwODAwMDBaMBkxFzAV
@@ -198,6 +198,13 @@ DQEBBQUAA4GBAGZLPEuJ5SiJ2ryq+CmEGOXfvlTtEL2nuGtr9PewxkgnOjZpUy+d
 4TvuXJbNQc8f4AMWL/tO9w0Fk80rWKp9ea8/df4qMq5qlFWlx6yOLQxumNOmECKb
 WpkUQDIDJEoFUzKMVuJf4KO/FJ345+BNLGgbJ6WujreoM1X/gYfdnJ/J
 -----END CERTIFICATE-----''',
+                public_key='''
+-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC0YjCwIfYoprq/FQO6lb3asXrx
+LlJFuCvtinTF5p0GxvQGu5O3gYytUvtC2JlYzypSRjVxwxrsuRcP3e641SdASwfr
+mzyvIgP08N4S0IFzEURkV1wp/IpH7kH41EtbmUmrXSwfNZsnQRE5SYSOhh+LcK2w
+yQkdgcMv11l4KoBkcwIDAQAB
+-----END PUBLIC KEY-----''',
                 method="GET",
                 url='http://photos.example.net/photos?file=vacaction.jpg&size=original',
                 oauth_params=dict(
@@ -229,28 +236,9 @@ yF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE=",
                                                  oauth_params=oauth_params
                                                  )
             )
-            # TODO:
-#            ======================================================================
-#            ERROR: tests.test_pyoauth_utils.Test_generate_and_verify_rsa_sha1_signature.test_valid_signature
-#            ----------------------------------------------------------------------
-#            Traceback (most recent call last):
-#              File "/Users/gorakhargosh/.buildout/eggs/nose-1.0.0-py2.7.egg/nose/case.py", line 187, in runTest
-#                self.test(*self.arg)
-#              File "/Users/gorakhargosh/Projects/pyoauth/tests/test_pyoauth_utils.py", line 234, in test_valid_signature
-#                method, url, oauth_params))
-#              File "/Users/gorakhargosh/Projects/pyoauth/pyoauth/utils.py", line 227, in verify_rsa_sha1_signature
-#                return verify(client_public_certificate, signature, base_string)
-#              File "/Users/gorakhargosh/Projects/pyoauth/pyoauth/rsa.py", line 105, in verify
-#                public_key = keyfactory.parsePEMKey(public_certificate, public=True)
-#              File "/Users/gorakhargosh/Projects/pyoauth/pyoauth/tlslite/tlslite/utils/keyfactory.py", line 149, in parsePEMKey
-#                key = Python_RSAKey.parsePEM(s)
-#              File "/Users/gorakhargosh/Projects/pyoauth/pyoauth/tlslite/tlslite/utils/Python_RSAKey.py", line 133, in parsePEM
-#                raise SyntaxError("Missing PEM Prefix")
-#            SyntaxError: Missing PEM Prefix
-
-#            assert_true(verify_rsa_sha1_signature(
-#                client_certificate, expected_signature,
-#                method, url, oauth_params))
+            assert_true(verify_rsa_sha1_signature(
+                client_certificate, expected_signature,
+                method, url, oauth_params))
 
 
 class Test_generate_plaintext_signature(object):

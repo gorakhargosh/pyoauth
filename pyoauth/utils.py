@@ -164,8 +164,8 @@ def generate_hmac_sha1_signature(client_shared_secret,
     base_string = generate_signature_base_string(method, url, oauth_params)
     key = _generate_plaintext_signature(client_shared_secret,
                                    token_or_temporary_shared_secret)
-    hashed = hmac.new(key, base_string, sha1)
-    return binascii.b2a_base64(hashed.digest())[:-1]
+    digest = hmac.new(key, base_string, sha1).digest()
+    return binascii.b2a_base64(digest)[:-1]
 
 
 def generate_rsa_sha1_signature(client_private_key,
@@ -190,6 +190,7 @@ def generate_rsa_sha1_signature(client_private_key,
         RSA-SHA1 signature.
     """
     from pyoauth.rsa import sign
+    from pyoauth.rsa_alt import sign as sign2
 
     oauth_params = oauth_params or {}
     base_string = generate_signature_base_string(method, url, oauth_params)
