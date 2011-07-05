@@ -22,8 +22,8 @@ from pyoauth.utils import parse_authorization_header_value, \
     generate_verification_code, \
     generate_timestamp, \
     generate_hmac_sha1_signature, \
-    generate_rsa_sha1_signature, \
-    check_rsa_sha1_signature, \
+    old_generate_rsa_sha1_signature, \
+    old_check_rsa_sha1_signature, \
     generate_plaintext_signature, \
     generate_signature_base_string, \
     _generate_plaintext_signature, \
@@ -197,7 +197,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         from Crypto.PublicKey import RSA
 
         # consumer_secret is a string.
-        assert_equal(generate_rsa_sha1_signature(
+        assert_equal(old_generate_rsa_sha1_signature(
             self.oauth_consumer_secret,
             method=self.http_method,
             url=self.url,
@@ -206,7 +206,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         ), self.oauth_signature)
 
         # consumer_secret is an RSA instance.
-        assert_equal(generate_rsa_sha1_signature(
+        assert_equal(old_generate_rsa_sha1_signature(
             RSA.importKey(self.oauth_consumer_secret),
             method=self.http_method,
             url=self.url,
@@ -219,7 +219,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         from Crypto.PublicKey import RSA
 
         # consumer_secret is a string.
-        assert_true(check_rsa_sha1_signature(
+        assert_true(old_check_rsa_sha1_signature(
             signature=self.oauth_signature,
             client_shared_secret=self.oauth_consumer_secret,
             method=self.http_method,
@@ -229,7 +229,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
         ))
 
         # consumer_secret is an RSA instance.
-        assert_true(check_rsa_sha1_signature(
+        assert_true(old_check_rsa_sha1_signature(
             signature=self.oauth_signature,
             client_shared_secret=RSA.importKey(self.oauth_consumer_secret),
             method=self.http_method,
@@ -241,7 +241,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
     def test_get_raises_NotImplementedError_when_Crypto_unavailable(self):
         # consumer_secret is a string.
         assert_raises(NotImplementedError,
-                      generate_rsa_sha1_signature,
+                      old_generate_rsa_sha1_signature,
                       self.oauth_consumer_secret,
                       self.http_method,
                       self.url,
@@ -253,7 +253,7 @@ nqb0GVzfF6wbsf40mkp1kdHq/fNiFRrLYWWJSpGY
     def test_check_raises_NotImplementedError_when_Crypto_unavailable(self):
         # consumer_secret is a string.
         assert_raises(NotImplementedError,
-                      check_rsa_sha1_signature,
+                      old_check_rsa_sha1_signature,
                       self.oauth_signature,
                       self.oauth_consumer_secret,
                       self.http_method,

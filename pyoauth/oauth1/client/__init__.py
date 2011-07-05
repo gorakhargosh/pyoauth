@@ -52,14 +52,14 @@ from pyoauth.url import \
 from pyoauth.utils import generate_nonce, \
     generate_timestamp, \
     generate_hmac_sha1_signature, \
-    generate_rsa_sha1_signature, \
+    old_generate_rsa_sha1_signature, \
     generate_plaintext_signature, \
     generate_normalized_authorization_header_value
 
 
 SIGNATURE_METHOD_MAP = {
     SIGNATURE_METHOD_HMAC_SHA1: generate_hmac_sha1_signature,
-    SIGNATURE_METHOD_RSA_SHA1: generate_rsa_sha1_signature,
+    SIGNATURE_METHOD_RSA_SHA1: old_generate_rsa_sha1_signature,
     SIGNATURE_METHOD_PLAINTEXT: generate_plaintext_signature,
 }
 

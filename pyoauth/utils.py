@@ -30,8 +30,8 @@ Functions
 OAuth Signature and Base String
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autofunction:: generate_hmac_sha1_signature
-.. autofunction:: generate_rsa_sha1_signature
-.. autofunction:: check_rsa_sha1_signature
+.. autofunction:: old_generate_rsa_sha1_signature
+.. autofunction:: old_check_rsa_sha1_signature
 .. autofunction:: generate_plaintext_signature
 .. autofunction:: generate_signature_base_string
 
@@ -47,15 +47,11 @@ import hmac
 import os
 import time
 import re
-from pyoauth.error import InvalidHttpMethodError, \
-    InvalidUrlError, \
-    InvalidOAuthParametersError, \
-    InvalidAuthorizationHeaderError
 
 try:
-    bytes
-except Exception:
-    bytes = str
+    from hashlib import sha1
+except ImportError:
+    import sha as sha1  # Deprecated
 
 try:
     # Python 3.
@@ -64,7 +60,16 @@ except ImportError:
     # Python 2.5+
     from urlparse import urlunparse
 
+from pyoauth.unicode import to_utf8
+from pyoauth.error import InvalidHttpMethodError, \
+    InvalidUrlError, \
+    InvalidOAuthParametersError, \
+    InvalidAuthorizationHeaderError
+from pyoauth.url import percent_encode, percent_decode, \
+    urlencode_sl, urlencode_s, urlparse_normalized, \
+    request_protocol_params_sanitize, query_params_sanitize
 
+# OLD
 try:
     from Crypto.PublicKey import RSA
     from Crypto.Util.number import long_to_bytes, bytes_to_long
@@ -76,14 +81,9 @@ except ImportError:
         raise NotImplementedError()
 
 try:
-    from hashlib import sha1
-except ImportError:
-    import sha as sha1  # Deprecated
-
-from pyoauth.unicode import to_utf8
-from pyoauth.url import percent_encode, percent_decode, \
-    urlencode_sl, urlencode_s, urlparse_normalized, \
-    request_protocol_params_sanitize, query_params_sanitize
+    bytes
+except Exception:
+    bytes = str
 
 
 
@@ -183,7 +183,7 @@ def generate_hmac_sha1_signature(client_shared_secret,
     return binascii.b2a_base64(hashed.digest())[:-1]
 
 
-def generate_rsa_sha1_signature(client_shared_secret,
+def old_generate_rsa_sha1_signature(client_private_key,
                            method, url, oauth_params=None,
                            token_or_temporary_shared_secret=None,
                            _test_rsa=RSA):
@@ -191,8 +191,8 @@ def generate_rsa_sha1_signature(client_shared_secret,
     Calculates an RSA-SHA1 OAuth signature.
 
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
-    :param client_shared_secret:
-        Client (consumer) shared secret.
+    :param client_private_key:
+        Client (consumer) secret (private key).
     :param method:
         Base string HTTP method.
     :param url:
@@ -202,30 +202,36 @@ def generate_rsa_sha1_signature(client_shared_secret,
         Base string protocol-specific query parameters.
         All non-protocol parameters will be ignored.
     :param token_or_temporary_shared_secret:
-        Token/temporary credentials shared secret if available.
+        (Unused) Token/temporary credentials shared secret if available.
     :returns:
         RSA-SHA1 signature.
     """
+    # Arguments.
     oauth_params = oauth_params or {}
-
     if _test_rsa is None:
         raise NotImplementedError()
-
     try:
-        getattr(client_shared_secret, "sign")
-        key = client_shared_secret
+        getattr(client_private_key, "sign")
+        private_key = client_private_key
     except AttributeError:
-        key = _test_rsa.importKey(client_shared_secret)
+        private_key = _test_rsa.importKey(client_private_key)
 
+    # Calculate the base string.
     base_string = generate_signature_base_string(method, url, oauth_params)
-    digest = sha1(base_string).digest()
-    signature = key.sign(_pkcs1_v1_5_encode(key, digest), "")[0]
+
+    signature = private_key.sign(
+        _pkcs1_v1_5_encode(
+            private_key,
+            sha1(base_string).digest()
+        ), ""
+    )[0]
     signature_bytes = long_to_bytes(signature)
 
     return binascii.b2a_base64(signature_bytes)[:-1]
 
 
-def check_rsa_sha1_signature(signature, client_shared_secret,
+def old_check_rsa_sha1_signature(signature,
+                             client_public_key,
                              method, url, oauth_params=None,
                              token_or_temporary_shared_secret=None,
                              _test_rsa=RSA):
@@ -237,8 +243,8 @@ def check_rsa_sha1_signature(signature, client_shared_secret,
         Rick Copeland <rcopeland@geek.net>
     :param signature:
         RSA-SHA1 OAuth signature.
-    :param client_shared_secret:
-        Client (consumer) shared secret.
+    :param client_public_key:
+        Client (consumer) public key.
     :param method:
         Base string HTTP method.
     :param url:
@@ -248,7 +254,7 @@ def check_rsa_sha1_signature(signature, client_shared_secret,
         Base string protocol-specific query parameters.
         All non-protocol parameters will be ignored.
     :param token_or_temporary_shared_secret:
-        Token/temporary credentials shared secret if available.
+        (Unused)Token/temporary credentials shared secret if available.
     :returns:
         ``True`` if verified to be correct; ``False`` otherwise.
     """
@@ -258,12 +264,13 @@ def check_rsa_sha1_signature(signature, client_shared_secret,
         raise NotImplementedError()
 
     try:
-        getattr(client_shared_secret, "publickey")
-        key = client_shared_secret
+        getattr(client_public_key, "publickey")
+        key = client_public_key
     except AttributeError:
-        key = _test_rsa.importKey(client_shared_secret)
+        key = _test_rsa.importKey(client_public_key)
 
     base_string = generate_signature_base_string(method, url, oauth_params)
+
     digest = sha1(base_string).digest()
     signature = bytes_to_long(binascii.a2b_base64(signature))
     data = _pkcs1_v1_5_encode(key, digest)
@@ -271,7 +278,7 @@ def check_rsa_sha1_signature(signature, client_shared_secret,
     return key.publickey().verify(data, (signature,))
 
 
-def _pkcs1_v1_5_encode(rsa_key, sha1_digest):
+def _pkcs1_v1_5_encode(key, data):
     """
     Encodes a SHA1 digest using PKCS1's emsa-pkcs1-v1_5 encoding.
 
@@ -280,18 +287,18 @@ def _pkcs1_v1_5_encode(rsa_key, sha1_digest):
     :author:
         Rick Copeland <rcopeland@geek.net>
 
-    :param rsa_key:
+    :param key:
         RSA Key.
-    :param sha1_digest:
-        20-byte SHA1 digest.
+    :param data:
+        Data
     :returns:
         A blob of data as large as the key's N, using PKCS1's
         "emsa-pkcs1-v1_5" encoding.
     """
     SHA1_DIGESTINFO = '\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14'
-    size = len(long_to_bytes(rsa_key.n))
-    filler = '\xff' * (size - len(SHA1_DIGESTINFO) - len(sha1_digest) - 3)
-    return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + sha1_digest
+    size = len(long_to_bytes(key.n))
+    filler = '\xff' * (size - len(SHA1_DIGESTINFO) - len(data) - 3)
+    return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + data
 
 
 def generate_plaintext_signature(client_shared_secret,
