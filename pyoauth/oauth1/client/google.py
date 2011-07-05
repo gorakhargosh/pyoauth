@@ -21,6 +21,7 @@ from pyoauth.error import SignatureMethodNotSupportedError
 from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, SIGNATURE_METHOD_PLAINTEXT
 
 from pyoauth.oauth1.client import Client
+from pyoauth.unicode import is_bytes_or_unicode
 
 class GoogleClient(Client):
     """
@@ -49,7 +50,7 @@ class GoogleClient(Client):
             raise SignatureMethodNotSupportedError("Google OAuth 1.0 does not support the `%r` signature method." % signature_method)
 
     def build_temporary_credentials_request(self,
-                                            scope,
+                                            scopes,
                                             xoauth_displayname=None,
                                             method="POST",
                                             payload_params=None,
@@ -59,6 +60,8 @@ class GoogleClient(Client):
                                             oauth_callback="oob",
                                             **extra_oauth_params):
         payload_params = payload_params or {}
+
+        scope = scopes if is_bytes_or_unicode(scopes) else " ".join(scopes)
         google_params = dict(
             scope=scope,
         )

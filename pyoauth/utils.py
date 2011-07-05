@@ -52,7 +52,6 @@ from pyoauth.error import InvalidHttpMethodError, \
     InvalidOAuthParametersError, \
     InvalidAuthorizationHeaderError
 
-
 try:
     bytes
 except Exception:

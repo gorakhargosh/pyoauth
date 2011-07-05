@@ -54,6 +54,7 @@ Parameter sanitization
 """
 import logging
 from pyoauth.error import InvalidQueryParametersError, InsecureOAuthParametersError, InvalidOAuthParametersError, InsecureOAuthUrlError, InvalidUrlError
+from pyoauth.types import is_sequence
 
 try:
     # Python 3.
@@ -189,12 +190,7 @@ def urlencode_sl(query_params, allow_func=None):
         elif is_bytes_or_unicode(v):
             encoded_pairs.append((k, percent_encode(v),))
         else:
-            try:
-                v = list(v)
-            except TypeError, e:
-                assert "is not iterable" in bytes(e)
-                encoded_pairs.append((k, percent_encode(v),))
-            else:
+            if is_sequence(v):
                 # Loop over the sequence.
                 if len(v) > 0:
                     for i in v:
@@ -204,6 +200,8 @@ def urlencode_sl(query_params, allow_func=None):
                 #else:
                 #    # Preserve blank list values.
                 #    encoded_pairs.append((k, "", ))
+            else:
+                encoded_pairs.append((k, percent_encode(v),))
     # Sort after encoding according to the OAuth spec.
     return sorted(encoded_pairs)
 
