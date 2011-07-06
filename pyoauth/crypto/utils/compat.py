@@ -14,14 +14,6 @@ except ImportError:
         return False
 
 try:
-    import gmpy
-    def is_gmpy_available():
-        return True
-except ImportError:
-    def is_gmpy_available():
-        return False
-
-try:
     import Crypto.Cipher.AES
     def is_pycrypto_available():
         return True
