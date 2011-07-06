@@ -79,7 +79,7 @@ class X509(object):
         subjectPublicKeyP = subjectPublicKeyInfoP.getChild(1)
 
         #Adjust for BIT STRING encapsulation
-        if (subjectPublicKeyP.value[0] !=0):
+        if subjectPublicKeyP.value[0] != 0:
             raise SyntaxError()
         subjectPublicKeyP = ASN1Parser(subjectPublicKeyP.value[1:])
 
@@ -120,11 +120,11 @@ class X509(object):
                 length = cryptlib_py.cryptGetAttributeString(c, name, None)
                 returnVal = array.array('B', [0] * length)
                 cryptlib_py.cryptGetAttributeString(c, name, returnVal)
-                returnVal = returnVal.tostring()
+                return returnVal.tostring()
             except cryptlib_py.CryptException, e:
                 if e[0] == cryptlib_py.CRYPT_ERROR_NOTFOUND:
-                    returnVal = None
-            return returnVal
+                    return None
+                raise e
         finally:
             cryptlib_py.cryptDestroyCert(c)
 
