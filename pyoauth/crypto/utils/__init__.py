@@ -4,6 +4,7 @@
 
 from hashlib import sha1, md5
 
+
 def sha1_hash(*inputs):
     """
     Calculates a SHA-1 hash of a variable number of inputs.

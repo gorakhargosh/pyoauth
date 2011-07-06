@@ -53,7 +53,7 @@ class X509:
         """
 
         if isinstance(bytes, type("")):
-            bytes = stringToBytes(bytes)
+            bytes = bytearray_from_string(bytes)
 
         self.bytes = bytes
         p = ASN1Parser(bytes)

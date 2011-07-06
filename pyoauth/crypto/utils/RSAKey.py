@@ -76,8 +76,8 @@ class RSAKey:
         @return: A PKCS1-SHA1 signature on the passed-in data.
         """
         if not isinstance(bytes, type("")):
-            bytes = bytesToString(bytes)
-        hashBytes = stringToBytes(sha1(bytes).digest())
+            bytes = bytearray_to_string(bytes)
+        hashBytes = bytearray_from_string(sha1(bytes).digest())
         prefixedHashBytes = self._addPKCS1SHA1Prefix(hashBytes)
         sigBytes = self.sign(prefixedHashBytes)
         return sigBytes
@@ -97,8 +97,8 @@ class RSAKey:
         @return: Whether the signature matches the passed-in data.
         """
         if not isinstance(bytes, type("")):
-            bytes = bytesToString(bytes)
-        hashBytes = stringToBytes(sha1(bytes).digest())
+            bytes = bytearray_to_string(bytes)
+        hashBytes = bytearray_from_string(sha1(bytes).digest())
         prefixedHashBytes = self._addPKCS1SHA1Prefix(hashBytes)
         return self.verify(sigBytes, prefixedHashBytes)
 

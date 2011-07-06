@@ -66,7 +66,7 @@ except ImportError:
 try:
     os.urandom(1)
     def getRandomBytes(howMany):
-        return stringToBytes(os.urandom(howMany))
+        return bytearray_from_string(os.urandom(howMany))
     prngName = "os.urandom"
 
 except:
@@ -89,7 +89,7 @@ except:
         try:
             devRandomFile = open("/dev/urandom", "rb")
             def getRandomBytes(howMany):
-                return stringToBytes(devRandomFile.read(howMany))
+                return bytearray_from_string(devRandomFile.read(howMany))
             prngName = "/dev/urandom"
         except IOError:
             #Else get Win32 CryptoAPI PRNG
@@ -99,7 +99,7 @@ except:
                     s = win32prng.getRandomBytes(howMany)
                     if len(s) != howMany:
                         raise AssertionError()
-                    return stringToBytes(s)
+                    return bytearray_from_string(s)
                 prngName ="CryptoAPI"
             except ImportError:
                 #Else no PRNG :-(
@@ -130,12 +130,12 @@ def numberToBytes(n):
     return bytes
 
 def bytesToBase64(bytes):
-    s = bytesToString(bytes)
+    s = bytearray_to_string(bytes)
     return stringToBase64(s)
 
 def base64ToBytes(s):
     s = base64ToString(s)
-    return stringToBytes(s)
+    return bytearray_from_string(s)
 
 def numberToBase64(n):
     bytes = numberToBytes(n)
@@ -146,12 +146,12 @@ def base64ToNumber(s):
     return bytesToNumber(bytes)
 
 def stringToNumber(s):
-    bytes = stringToBytes(s)
+    bytes = bytearray_from_string(s)
     return bytesToNumber(bytes)
 
 def numberToString(s):
     bytes = numberToBytes(s)
-    return bytesToString(bytes)
+    return bytearray_to_string(bytes)
 
 def base64ToString(s):
     try:
@@ -167,7 +167,7 @@ def stringToBase64(s):
 def mpiToNumber(mpi): #mpi is an openssl-format bignum string
     if (ord(mpi[4]) & 0x80) !=0: #Make sure this is a positive number
         raise AssertionError()
-    bytes = stringToBytes(mpi[4:])
+    bytes = bytearray_from_string(mpi[4:])
     return bytesToNumber(bytes)
 
 def numberToMPI(n):
@@ -178,12 +178,12 @@ def numberToMPI(n):
     if (bit_count(n) & 0x7)==0:
         ext = 1
     length = numBytes(n) + ext
-    bytes = concatArrays(bytearray_create_zeros(4+ext), bytes)
+    bytes = bytearray_concat(bytearray_create_zeros(4+ext), bytes)
     bytes[0] = (length >> 24) & 0xFF
     bytes[1] = (length >> 16) & 0xFF
     bytes[2] = (length >> 8) & 0xFF
     bytes[3] = length & 0xFF
-    return bytesToString(bytes)
+    return bytearray_to_string(bytes)
 
 
 
