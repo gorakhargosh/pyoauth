@@ -21,6 +21,16 @@ from pyoauth.crypto.utils.bytearray import bytearray_random, bytearray_to_long
 
 
 def generate_random_long(low, high):
+    """
+    Generates a random long integer.
+
+    :param low:
+        Low
+    :param high:
+        High
+    :returns:
+        Random long integer value.
+    """
     if low >= high:
         raise ValueError("High must be greater than low.")
     num_bits = bit_count(high)
