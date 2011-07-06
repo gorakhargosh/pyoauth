@@ -86,7 +86,9 @@ def bytearray_from_bytes(value):
     :returns:
         Byte array.
     """
-    return bytearray_create_zeros(0).fromstring(value)
+    byte_array = bytearray_create_zeros(0)
+    byte_array.fromstring(value)
+    return byte_array
 
 
 def bytearray_random(count):
