@@ -17,6 +17,10 @@
 #
 # From:
 # http://code.google.com/p/kurrik-resources/source/browse/trunk/src/x509/x509.py?r=14
+#
+# References:
+# Basic Certificate Fields: http://tools.ietf.org/html/rfc3280#section-4.1
+
 
 from pyasn1.codec.der import decoder
 from pyoauth.crypto.codec.pemder import pem_to_der_certificate
@@ -122,7 +126,12 @@ def parse_algorithm_identifier(algorithm_asn1):
 def extract_public_key(certificate):
     """
     Returns a tuple of the RSA exponent and modulus of the public RSA key
-    contained in the PEM-encoded certificate string.
+    contained in the PEM-encoded certificate string::
+
+        SubjectPublicKeyInfo  ::=  SEQUENCE {
+                algorithm            AlgorithmIdentifier,
+                subjectPublicKey     BIT STRING
+        }
 
     :param certificate:
         PEM-encoded X.509 certificate string.
@@ -160,6 +169,7 @@ gYEABdPtdX56mPwSfPMzgSLH7RueLZi5HXqW2krojWsOv3VFnayQKuzXdy5DZrMY
 /tI2AUPXicvBW3GjTfSKmUNvsOXUIC8az3K3iTs1KKekUaidLRlaRZIO0FVEJH5u
 gO9HqAcXxrx99/3agvAVTKAFBFJtiWD1i1LkYeqKrPQOPo8=
 -----END CERTIFICATE-----""",
+    # OAuth 1.0 test case.
     """
 -----BEGIN CERTIFICATE-----
 MIIBpjCCAQ+gAwIBAgIBATANBgkqhkiG9w0BAQUFADAZMRcwFQYDVQQDDA5UZXN0
