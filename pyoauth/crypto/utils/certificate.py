@@ -32,18 +32,6 @@ RSA_PRIVATE_KEY_PEM_HEADER = '-----BEGIN RSA PRIVATE KEY-----'
 RSA_PRIVATE_KEY_PEM_FOOTER = '-----END RSA PRIVATE KEY-----'
 
 
-# Helper functions. Use these instead of using der_to_per and per_to_der.
-pem_to_der_rsa_private_key = partial(pem_to_der, pem_header=RSA_PRIVATE_KEY_PEM_HEADER, pem_footer=RSA_PRIVATE_KEY_PEM_FOOTER)
-pem_to_der_public_key = partial(pem_to_der, pem_header=PUBLIC_KEY_PEM_HEADER, pem_footer=PUBLIC_KEY_PEM_FOOTER)
-pem_to_der_private_key = partial(pem_to_der, pem_header=PRIVATE_KEY_PEM_HEADER, pem_footer=PRIVATE_KEY_PEM_FOOTER)
-pem_to_der_certificate = partial(pem_to_der, pem_header=CERT_PEM_HEADER, pem_footer=CERT_PEM_FOOTER)
-
-der_to_pem_rsa_private_key = partial(der_to_pem, pem_header=RSA_PRIVATE_KEY_PEM_HEADER, pem_footer=RSA_PRIVATE_KEY_PEM_FOOTER)
-der_to_pem_public_key = partial(der_to_pem, pem_header=PUBLIC_KEY_PEM_HEADER, pem_footer=PUBLIC_KEY_PEM_FOOTER)
-der_to_pem_private_key = partial(der_to_pem, pem_header=PRIVATE_KEY_PEM_HEADER, pem_footer=PRIVATE_KEY_PEM_FOOTER)
-der_to_pem_certificate = partial(der_to_pem, pem_header=CERT_PEM_HEADER, pem_footer=CERT_PEM_FOOTER)
-
-
 def cert_time_to_seconds(cert_time):
     """
     Takes a date-time string in standard ASN1_print form
@@ -106,4 +94,16 @@ def der_to_pem(der_cert_bytes, pem_header, pem_footer):
         return (pem_header + '\n' +
                 base64.encodestring(der_cert_bytes) +
                 pem_footer + '\n')
+
+    
+# Helper functions. Use these instead of using der_to_per and per_to_der.
+pem_to_der_rsa_private_key = partial(pem_to_der, pem_header=RSA_PRIVATE_KEY_PEM_HEADER, pem_footer=RSA_PRIVATE_KEY_PEM_FOOTER)
+pem_to_der_public_key = partial(pem_to_der, pem_header=PUBLIC_KEY_PEM_HEADER, pem_footer=PUBLIC_KEY_PEM_FOOTER)
+pem_to_der_private_key = partial(pem_to_der, pem_header=PRIVATE_KEY_PEM_HEADER, pem_footer=PRIVATE_KEY_PEM_FOOTER)
+pem_to_der_certificate = partial(pem_to_der, pem_header=CERT_PEM_HEADER, pem_footer=CERT_PEM_FOOTER)
+
+der_to_pem_rsa_private_key = partial(der_to_pem, pem_header=RSA_PRIVATE_KEY_PEM_HEADER, pem_footer=RSA_PRIVATE_KEY_PEM_FOOTER)
+der_to_pem_public_key = partial(der_to_pem, pem_header=PUBLIC_KEY_PEM_HEADER, pem_footer=PUBLIC_KEY_PEM_FOOTER)
+der_to_pem_private_key = partial(der_to_pem, pem_header=PRIVATE_KEY_PEM_HEADER, pem_footer=PRIVATE_KEY_PEM_FOOTER)
+der_to_pem_certificate = partial(der_to_pem, pem_header=CERT_PEM_HEADER, pem_footer=CERT_PEM_FOOTER)
 
