@@ -8,13 +8,14 @@ parseAsPrivateKey
 """
 
 from pyoauth.crypto.RSAKey import RSAKey
-from pyoauth.crypto.Python_RSAKey import Python_RSAKey
+from pyoauth.crypto.RSAKey.pure import Python_RSAKey
 
 from pyoauth.crypto.utils import cryptomath
 if cryptomath.m2cryptoLoaded:
-    from pyoauth.crypto.OpenSSL_RSAKey import OpenSSL_RSAKey
+    from pyoauth.crypto.RSAKey.OpenSSL import OpenSSL_RSAKey
 if cryptomath.pycryptoLoaded:
-    from pyoauth.crypto.PyCrypto_RSAKey import PyCrypto_RSAKey
+    from pyoauth.crypto.RSAKey.PyCrypto import PyCrypto_RSAKey
+
 
 # **************************************************************************
 # Factory Functions for RSA Keys
