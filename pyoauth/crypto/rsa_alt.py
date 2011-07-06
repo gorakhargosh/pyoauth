@@ -32,7 +32,7 @@
 # 2. http://tools.ietf.org/html/rfc5849#section-3.4.3
 
 import binascii
-from pyoauth.crypto.utils import sha1_hash
+from pyoauth.crypto.utils import sha1_digest
 
 try:
     from Crypto.PublicKey import RSA
@@ -104,7 +104,7 @@ def sign(private_key, base_string):
     signature = private_key.sign(
         pkcs1_v1_5_encode(
             private_key,
-            sha1_hash(base_string)
+            sha1_digest(base_string)
         ), ""
     )[0]
     signature_bytes = long_to_bytes(signature)

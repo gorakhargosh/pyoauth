@@ -6,9 +6,9 @@ import math
 from hashlib import sha1, md5
 
 
-def sha1_hash(*inputs):
+def sha1_digest(*inputs):
     """
-    Calculates a SHA-1 hash of a variable number of inputs.
+    Calculates a SHA-1 digest of a variable number of inputs.
 
     :param inputs:
         A variable number of inputs for which the digest will be calculated.
@@ -21,9 +21,9 @@ def sha1_hash(*inputs):
     return md.digest()
 
 
-def md5_hash(*inputs):
+def md5_digest(*inputs):
     """
-    Calculates a MD5 hash of a variable number of inputs.
+    Calculates a MD5 digest of a variable number of inputs.
 
     :param inputs:
         A variable number of inputs for which the digest will be calculated.

@@ -10,7 +10,7 @@ import math
 import base64
 import binascii
 
-from pyoauth.crypto.utils import bit_count, sha1_hash
+from pyoauth.crypto.utils import bit_count, sha1_digest
 from pyoauth.crypto.utils.bytearray import \
     bytearray_concat, \
     bytearray_create_zeros, \
@@ -202,7 +202,7 @@ def numBytes(n):
     return int(math.ceil(bits / 8.0))
 
 def hashAndBase64(s):
-    return stringToBase64(sha1_hash(s))
+    return stringToBase64(sha1_digest(s))
 
 def getBase64Nonce(numChars=22): #defaults to an 132 bit nonce
     bytes = getRandomBytes(numChars)
