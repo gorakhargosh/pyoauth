@@ -166,7 +166,7 @@ class Test_generate_and_verify_rsa_sha1_signature(object):
         self._examples = (
             # http://wiki.oauth.net/w/page/12238556/TestCases
             dict(
-                private_key='''\
+                private_key='''
 -----BEGIN PRIVATE KEY-----
 MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
 A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d

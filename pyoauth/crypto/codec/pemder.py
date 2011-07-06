@@ -60,13 +60,15 @@ def pem_to_der(pem_cert_string, pem_header, pem_footer):
     :param pem_footer:
         The PEM footer to find.
     """
+    # Be a little lenient.
+    pem_cert_string = pem_cert_string.strip()
     if not pem_cert_string.startswith(pem_header):
         raise ValueError("Invalid PEM encoding; must start with %s"
                          % pem_header)
-    if not pem_cert_string.strip().endswith(pem_footer):
+    if not pem_cert_string.endswith(pem_footer):
         raise ValueError("Invalid PEM encoding; must end with %s"
                          % pem_footer)
-    d = pem_cert_string.strip()[len(pem_header):-len(pem_footer)]
+    d = pem_cert_string[len(pem_header):-len(pem_footer)]
     return base64.decodestring(d)
 
 
