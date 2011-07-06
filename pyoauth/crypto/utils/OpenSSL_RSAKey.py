@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """OpenSSL/M2Crypto RSA implementation."""
 
 from pyoauth.crypto.utils.cryptomath import *

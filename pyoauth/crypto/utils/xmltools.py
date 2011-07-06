@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """Helper functions for XML.
 
 This module has misc. helper functions for working with XML DOM nodes."""

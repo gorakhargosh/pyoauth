@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """Pure-Python RSA implementation."""
 
 from pyoauth.crypto.utils.cryptomath import *

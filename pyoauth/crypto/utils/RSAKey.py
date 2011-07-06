@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """Abstract class for RSA."""
 
 from pyoauth.crypto.utils.cryptomath import *

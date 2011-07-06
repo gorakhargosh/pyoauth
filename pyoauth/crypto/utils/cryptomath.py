@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """cryptomath module
 
 This module has basic math/crypto code."""

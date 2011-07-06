@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 
 """Factory functions for asymmetric cryptography.
 @sort: generateRSAKey, parseXMLKey, parsePEMKey, parseAsPublicKey,

@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 
 """Classes for reading/writing binary data (such as TLS records)."""
 
