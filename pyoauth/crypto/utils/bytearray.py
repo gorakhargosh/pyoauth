@@ -15,6 +15,9 @@ Functions:
 .. autofunction:: bytearray_random
 .. autofunction:: bytearray_to_long
 .. autofunction:: bytearray_from_long
+.. autofunction:: bytearray_b64decode
+.. autofunction:: bytearray_b64encode
+
 """
 
 from array import array
@@ -132,8 +135,24 @@ def bytearray_from_long(n):
 
 
 def bytearray_b64decode(value):
+    """
+    Converts a base-64 encoded value into a byte array.
+
+    :param value:
+        The base-64 encoded value.
+    :returns:
+        Byte array.
+    """
     return bytearray_from_bytes(base64_decode(value))
 
 
 def bytearray_b64encode(byte_array):
+    """
+    Base-64 encodes a byte array.
+
+    :param byte_array:
+        The byte array.
+    :returns:
+        Base-64 encoded byte array without trailing newline.
+    """
     return base64_encode(bytearray_to_bytes(byte_array))
