@@ -52,7 +52,10 @@ except ImportError:
     # Python 2.5+
     from urlparse import urlunparse
 
-from pyoauth.crypto.utils import hmac_sha1_base64, generate_random_uint_string, generate_random_hex_string
+from pyoauth.crypto.utils import hmac_sha1_base64
+from pyoauth.crypto.utils.random import \
+    generate_random_uint_string, \
+    generate_random_hex_string
 from pyoauth.types.unicode import to_utf8
 from pyoauth.types import bytes
 from pyoauth.error import InvalidHttpMethodError, \

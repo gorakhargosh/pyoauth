@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from exceptions import AssertionError
 
 try:
     # Operating system unsigned random.
@@ -26,3 +27,4 @@ except Exception:
             # What the fuck?!
             def generate_random_bytes(count):
                 raise NotImplementedError("What the fuck?! No PRNG available.")
+

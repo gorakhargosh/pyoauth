@@ -24,6 +24,8 @@ from pyoauth.crypto.utils.bytearray import \
 # **************************************************************************
 
 # Try to load M2Crypto/OpenSSL
+from pyoauth.crypto.utils.random import generate_random_number
+
 try:
     from M2Crypto import m2
     m2cryptoLoaded = True
@@ -118,20 +120,6 @@ def getBase64Nonce(numChars=22): #defaults to an 132 bit nonce
 # **************************************************************************
 # Big Number Math
 # **************************************************************************
-
-def generate_random_number(low, high):
-    if low >= high:
-        raise AssertionError()
-    howManyBits = bit_count(high)
-    howManyBytes = byte_count(high)
-    lastBits = howManyBits % 8
-    while 1:
-        byte_array = generate_random_bytes(howManyBytes)
-        if lastBits:
-            byte_array[0] = byte_array[0] % (1 << lastBits)
-        n = bytearray_to_long(byte_array)
-        if n >= low and n < high:
-            return n
 
 def gcd(a,b):
     a, b = max(a,b), min(a,b)

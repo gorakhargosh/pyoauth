@@ -19,7 +19,7 @@ Functions:
 
 from array import array
 from pyoauth.crypto.utils import byte_count
-from pyoauth.crypto.utils.random import generate_random_bytes
+from pyoauth.crypto.utils.prng import generate_random_bytes
 
 
 def bytearray_create(sequence):

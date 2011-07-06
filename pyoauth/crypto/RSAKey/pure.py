@@ -3,6 +3,7 @@
 
 """Pure-Python RSA implementation."""
 
+from pyoauth.crypto.utils.random import generate_random_number
 from pyoauth.crypto.utils.cryptomath import *
 from pyoauth.crypto.utils import xmltools
 from pyoauth.crypto.utils.bytearray import bytearray_to_long
