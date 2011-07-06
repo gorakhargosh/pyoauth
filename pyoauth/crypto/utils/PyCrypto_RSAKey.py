@@ -3,6 +3,7 @@
 
 """PyCrypto RSA implementation."""
 
+from pyoauth.crypto.utils.bytearray import bytearray_to_string
 from pyoauth.crypto.utils.cryptomath import *
 
 from pyoauth.crypto.utils.RSAKey import *

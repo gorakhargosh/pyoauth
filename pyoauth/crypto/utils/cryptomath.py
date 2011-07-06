@@ -11,7 +11,12 @@ import base64
 import binascii
 import hashlib
 
-from pyoauth.crypto.utils.bytearray import *
+from pyoauth.crypto.utils import bit_count
+from pyoauth.crypto.utils.bytearray import \
+    bytearray_concat, \
+    bytearray_create_zeros, \
+    bytearray_from_string, \
+    bytearray_to_string
 
 
 # **************************************************************************

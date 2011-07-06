@@ -3,7 +3,12 @@
 
 """Abstract class for RSA."""
 
+from pyoauth.crypto.utils import bit_count
 from pyoauth.crypto.utils.cryptomath import *
+from pyoauth.crypto.utils.bytearray import \
+    bytearray_create, \
+    bytearray_to_string, \
+    bytearray_from_string
 
 from hashlib import sha1
 

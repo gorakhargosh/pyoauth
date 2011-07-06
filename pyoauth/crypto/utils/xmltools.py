@@ -6,9 +6,8 @@
 This module has misc. helper functions for working with XML DOM nodes."""
 
 import re
-from pyoauth.crypto.utils.bytearray import *
-
 import os
+
 if os.name != "java":
     from xml.dom import minidom
     from xml.sax import saxutils

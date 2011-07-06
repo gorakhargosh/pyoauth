@@ -1,10 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+:module: pyoauth.crypto.utils.codec
+:synopsis: Classes for reading/writing binary data (such as TLS records).
 
-"""Classes for reading/writing binary data (such as TLS records)."""
+Classes:
+--------
+.. autoclass:: Writer
+.. autoclass:: Parser
+"""
 
-from pyoauth.crypto.utils.bytearray import *
+from pyoauth.crypto.utils.bytearray import bytearray_create_zeros
 
 class Writer:
     def __init__(self, length=0):
