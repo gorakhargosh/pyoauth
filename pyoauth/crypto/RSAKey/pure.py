@@ -6,7 +6,7 @@
 """Pure-Python RSA implementation."""
 import logging
 
-from pyoauth.crypto.utils.certificate import \
+from pyoauth.crypto.codec.pemder import \
     pem_to_der_private_key, \
     pem_to_der_rsa_private_key, \
     PRIVATE_KEY_PEM_HEADER, \
