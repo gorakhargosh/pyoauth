@@ -153,6 +153,6 @@ def bytearray_b64encode(byte_array):
     :param byte_array:
         The byte array.
     :returns:
-        Base-64 encoded byte array without trailing newline.
+        Base-64 encoded byte array without newlines.
     """
     return base64_encode(bytearray_to_bytes(byte_array))

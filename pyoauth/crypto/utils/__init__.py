@@ -48,7 +48,7 @@ def base64_encode(bytestring):
     :param bytestring:
         The byte string to encode.
     :returns:
-        Base64 encoded string without newline character.
+        Base64 encoded string without newline characters.
     """
     return binascii.b2a_base64(bytestring)[:-1]
 
