@@ -24,19 +24,12 @@
 Functions
 ---------
 .. autofunction:: to_utf8
-
 .. autofunction:: to_unicode
-
 .. autofunction:: to_utf8_if_unicode
-
 .. autofunction:: to_unicode_if_bytes
-
 .. autofunction:: is_unicode
-
 .. autofunction:: is_bytes
-
 .. autofunction:: is_bytes_or_unicode
-
 """
 
 
