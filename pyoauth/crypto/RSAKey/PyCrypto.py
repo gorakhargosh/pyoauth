@@ -3,6 +3,7 @@
 
 """PyCrypto RSA implementation."""
 
+from pyoauth.crypto.utils.compat import is_pycrypto_available
 from pyoauth.crypto.utils.bytearray import bytearray_to_bytes, bytearray_random
 from pyoauth.crypto.utils.number import *
 from pyoauth.crypto.utils import byte_count
@@ -10,7 +11,7 @@ from pyoauth.crypto.utils.number import bytes_to_long, long_to_bytes
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
 
-if pycryptoLoaded:
+if is_pycrypto_available():
 
     from Crypto.PublicKey import RSA
 

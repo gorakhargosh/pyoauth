@@ -1,14 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""cryptomath module
+"""
+:module: pyoauth.crypto.utils.number
+:synopsis: Cryptography number routines.
 
-This module has basic math/crypto code."""
+Functions:
+----------
+.. autofunction:: bytes_to_long
+.. autofunction:: bytes_to_long_slow
+.. autofunction:: long_to_bytes
+.. autofunction:: long_to_bytes_slow
+
+"""
 
 
 import math
 import struct
 
+from pyoauth.crypto.utils.random import generate_random_number
 from pyoauth.crypto.utils import bit_count, byte_count
 from pyoauth.crypto.utils.bytearray import \
     bytearray_concat, \
@@ -20,44 +30,9 @@ from pyoauth.crypto.utils.bytearray import \
     bytearray_b64decode, \
     bytearray_b64encode
 
-# **************************************************************************
-# Load Optional Modules
-# **************************************************************************
-
-# Try to load M2Crypto/OpenSSL
-from pyoauth.crypto.utils.random import generate_random_number
-
-try:
-    from M2Crypto import m2
-    m2cryptoLoaded = True
-
-except ImportError:
-    m2cryptoLoaded = False
-
-
-#Try to load GMPY
-try:
-    import gmpy
-    gmpyLoaded = True
-except ImportError:
-    gmpyLoaded = False
-
-#Try to load pycrypto
-try:
-    import Crypto.Cipher.AES
-    pycryptoLoaded = True
-except ImportError:
-    pycryptoLoaded = False
-
-
-
-# **************************************************************************
-# Converter Functions
-# **************************************************************************
 # Improved conversion functions contributed by Barry Warsaw, after
 # careful benchmarking
-
-def _long_to_bytes(n, blocksize=0):
+def long_to_bytes(n, blocksize=0):
     """
     Convert a long integer to a byte string::
 
@@ -95,7 +70,7 @@ def _long_to_bytes(n, blocksize=0):
     return s
 
 
-def _bytes_to_long(s):
+def bytes_to_long(s):
     """
     Convert a byte string to a long integer::
 
@@ -119,12 +94,35 @@ def _bytes_to_long(s):
         acc = (acc << 32) + unpack('>I', s[i:i+4])[0]
     return acc
 
-def long_to_bytes(s):
+
+def long_to_bytes_slow(s):
+    """
+    Convert a long integer to a byte string::
+
+        long_to_bytes(n:long) : string
+
+    :param n:
+        Long value
+    :returns:
+        Byte string.
+    """
     byte_array = bytearray_from_long(s)
     return bytearray_to_bytes(byte_array)
 
 
-def bytes_to_long(s):
+def bytes_to_long_slow(s):
+    """
+    Convert a byte string to a long integer::
+
+        bytes_to_long(bytestring) : long
+
+    This is (essentially) the inverse of long_to_bytes().
+
+    :param bytestring:
+        A byte string.
+    :returns:
+        Long.
+    """
     byte_array = bytearray_from_bytes(s)
     return bytearray_to_long(byte_array)
 
@@ -191,7 +189,8 @@ def invMod(a, b):
     return 0
 
 
-if gmpyLoaded:
+try:
+    import gmpy
     def powMod(base, power, modulus):
         base = gmpy.mpz(base)
         power = gmpy.mpz(power)
@@ -199,7 +198,7 @@ if gmpyLoaded:
         result = pow(base, power, modulus)
         return long(result)
 
-else:
+except ImportError:
     #Copied from Bryan G. Olson's post to comp.lang.python
     #Does left-to-right instead of pow()'s right-to-left,
     #thus about 30% faster than the python built-in with small bases

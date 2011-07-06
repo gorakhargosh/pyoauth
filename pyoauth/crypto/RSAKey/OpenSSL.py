@@ -3,6 +3,7 @@
 
 """OpenSSL/M2Crypto RSA implementation."""
 
+from pyoauth.crypto.utils.compat import is_m2crypto_available
 from pyoauth.crypto.utils.number import *
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
@@ -28,7 +29,9 @@ def password_callback(v, prompt1='Enter private key passphrase:',
     return p1
 
 
-if m2cryptoLoaded:
+if is_m2crypto_available():
+    from M2Crypto import m2
+
     class OpenSSL_RSAKey(RSAKey):
         def __init__(self, n=0, e=0):
             self.rsa = None
