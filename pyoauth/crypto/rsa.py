@@ -22,7 +22,7 @@ Functions
 
 import binascii
 from base64 import b64decode
-from pyoauth.crypto import keyfactory
+from pyoauth.crypto.RSAKey import factory
 from pyoauth.crypto.X509 import X509
 
 
@@ -55,7 +55,7 @@ def sign(private_key, base_string):
     :returns:
         Signature.
     """
-    private_key = keyfactory.parsePrivateKey(private_key)
+    private_key = factory.parsePrivateKey(private_key)
     signed = private_key.hashAndSign(base_string)
     return binascii.b2a_base64(signed)[:-1]
 
@@ -91,5 +91,5 @@ def verify(public_certificate, signature, base_string):
     cert_parser.parse(public_certificate)
     public_key = cert_parser.publicKey
 
-    #public_key = keyfactory.parsePEMKey(public_certificate, public=True)
+    #public_key = factory.parsePEMKey(public_certificate, public=True)
     return public_key.hashAndVerify(decoded_signature, base_string)

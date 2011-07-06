@@ -9,7 +9,7 @@ from pyoauth.crypto.utils.bytearray import \
     bytearray_create, bytearray_from_string
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
 from pyoauth.crypto.utils.cryptomath import *
-from pyoauth.crypto.keyfactory import _createPublicRSAKey
+from pyoauth.crypto.RSAKey.factory import _createPublicRSAKey
 
 
 class X509(object):
