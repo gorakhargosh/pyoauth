@@ -7,6 +7,7 @@ This module has basic math/crypto code."""
 
 
 import math
+import struct
 
 from pyoauth.crypto.utils import bit_count, byte_count
 from pyoauth.crypto.utils.bytearray import \
@@ -53,6 +54,79 @@ except ImportError:
 # **************************************************************************
 # Converter Functions
 # **************************************************************************
+# Improved conversion functions contributed by Barry Warsaw, after
+# careful benchmarking
+
+def _long_to_bytes(n, blocksize=0):
+    """
+    Convert a long integer to a byte string::
+
+        long_to_bytes(n:long, blocksize:int) : string
+
+    :param n:
+        Long value
+    :param blocksize:
+        If optional blocksize is given and greater than zero, pad the front of the
+        byte string with binary zeros so that the length is a multiple of
+        blocksize.
+    :returns:
+        Byte string.
+    """
+    # after much testing, this algorithm was deemed to be the fastest
+    s = ''
+    n = long(n)
+    pack = struct.pack
+    while n > 0:
+        s = pack('>I', n & 0xffffffffL) + s
+        n = n >> 32
+    # strip off leading zeros
+    for i in range(len(s)):
+        if s[i] != '\000':
+            break
+    else:
+        # only happens when n == 0
+        s = '\000'
+        i = 0
+    s = s[i:]
+    # add back some pad bytes.  this could be done more efficiently w.r.t. the
+    # de-padding being done above, but sigh...
+    if blocksize > 0 and len(s) % blocksize:
+        s = (blocksize - len(s) % blocksize) * '\000' + s
+    return s
+
+
+def _bytes_to_long(s):
+    """
+    Convert a byte string to a long integer::
+
+        bytes_to_long(bytestring) : long
+
+    This is (essentially) the inverse of long_to_bytes().
+
+    :param bytestring:
+        A byte string.
+    :returns:
+        Long.
+    """
+    acc = 0L
+    unpack = struct.unpack
+    length = len(s)
+    if length % 4:
+        extra = (4 - length % 4)
+        s = '\000' * extra + s
+        length = length + extra
+    for i in range(0, length, 4):
+        acc = (acc << 32) + unpack('>I', s[i:i+4])[0]
+    return acc
+
+def long_to_bytes(s):
+    byte_array = bytearray_from_long(s)
+    return bytearray_to_bytes(byte_array)
+
+
+def bytes_to_long(s):
+    byte_array = bytearray_from_bytes(s)
+    return bytearray_to_long(byte_array)
 
 
 

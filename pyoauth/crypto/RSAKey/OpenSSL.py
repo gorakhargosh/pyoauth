@@ -6,7 +6,8 @@
 from pyoauth.crypto.utils.number import *
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
-from pyoauth.crypto.utils import byte_count, bytes_to_long, long_to_bytes
+from pyoauth.crypto.utils import byte_count
+from pyoauth.crypto.utils.number import bytes_to_long, long_to_bytes
 
 #copied from M2Crypto.util.py, so when we load the local copy of m2
 #we can still use it
