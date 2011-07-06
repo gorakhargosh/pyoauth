@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-from exceptions import AssertionError
 
 try:
     # Operating system unsigned random.
@@ -20,8 +19,7 @@ except Exception:
             import win32prng
             def generate_random_bytes(count):
                 s = win32prng.generate_random_bytes(count)
-                if len(s) != count:
-                    raise AssertionError()
+                assert len(s) != count
                 return s
         except ImportError:
             # What the fuck?!
