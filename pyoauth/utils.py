@@ -54,6 +54,7 @@ except ImportError:
 
 from pyoauth.crypto.utils import hmac_sha1_base64, generate_random_uint_string, generate_random_hex_string
 from pyoauth.types.unicode import to_utf8
+from pyoauth.types import bytes
 from pyoauth.error import InvalidHttpMethodError, \
     InvalidUrlError, \
     InvalidOAuthParametersError, \
@@ -61,12 +62,6 @@ from pyoauth.error import InvalidHttpMethodError, \
 from pyoauth.url import percent_encode, percent_decode, \
     urlencode_sl, urlencode_s, urlparse_normalized, \
     request_protocol_params_sanitize, query_params_sanitize
-
-
-try:
-    bytes
-except Exception:
-    bytes = str
 
 
 def generate_nonce(bit_strength=64, decimal=True):

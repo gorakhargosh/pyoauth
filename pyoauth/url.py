@@ -67,18 +67,13 @@ except ImportError:
     except ImportError:
         from cgi import parse_qs as _parse_qs
 
-try:
-    bytes
-except Exception:
-    bytes = str
-
 from pyoauth.error import InvalidQueryParametersError, \
     InsecureOAuthParametersError, \
     InvalidOAuthParametersError, \
     InsecureOAuthUrlError, \
     InvalidUrlError
-from pyoauth.types import is_sequence
-from pyoauth.types.unicode import to_utf8_if_unicode, to_utf8, is_bytes_or_unicode
+from pyoauth.types import is_sequence, bytes, is_bytes_or_unicode
+from pyoauth.types.unicode import to_utf8_if_unicode, to_utf8
 
 
 def parse_qs(query_string):

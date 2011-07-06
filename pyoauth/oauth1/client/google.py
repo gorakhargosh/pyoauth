@@ -21,7 +21,7 @@ from pyoauth.error import SignatureMethodNotSupportedError
 from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, SIGNATURE_METHOD_PLAINTEXT
 
 from pyoauth.oauth1.client import Client
-from pyoauth.types.unicode import is_bytes_or_unicode
+from pyoauth.types import is_bytes_or_unicode
 
 class GoogleClient(Client):
     """

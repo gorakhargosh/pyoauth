@@ -40,57 +40,7 @@ Functions
 """
 
 
-try:
-    # Python 2.6+
-    bytes
-except Exception:
-    # Python 2.5
-    bytes = str
-
-try:
-    # Not Python3
-    unicode
-except Exception:
-    # Python3.
-    unicode = str
-    basestring = (str, bytes)
-
-
-def is_unicode(value):
-    """
-    Determines whether the given value is a Unicode string.
-
-    :param value:
-        The value to test.
-    :returns:
-        ``True`` if ``value`` is a Unicode string; ``False`` otherwise.
-    """
-    return isinstance(value, unicode)
-
-
-def is_bytes(value):
-    """
-    Determines whether the given value is a byte string.
-
-    :param value:
-        The value to test.
-    :returns:
-        ``True`` if ``value`` is a byte string; ``False`` otherwise.
-    """
-    return isinstance(value, bytes)
-
-
-def is_bytes_or_unicode(value):
-    """
-    Determines whether the given value is an instance of a string irrespective
-    of whether it is a byte string or a Unicode string.
-
-    :param value:
-        The value to test.
-    :returns:
-        ``True`` if ``value`` is a string; ``False`` otherwise.
-    """
-    return isinstance(value, basestring)
+from pyoauth.types import is_unicode, is_bytes
 
 
 def to_utf8(value):
