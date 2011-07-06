@@ -17,6 +17,7 @@ Functions:
 
 from array import array
 
+
 def bytearray_create(sequence):
     """
     Creates a byte array from a given sequence.
@@ -28,6 +29,7 @@ def bytearray_create(sequence):
     """
     return array('B', sequence)
 
+
 def bytearray_create_zeros(count):
     """
     Creates a zero-filled byte array of with ``count`` bytes.
@@ -38,6 +40,7 @@ def bytearray_create_zeros(count):
         Zero-filled byte array.
     """
     return array('B', [0] * count)
+
 
 def bytearray_concat(arr1, arr2):
     """
@@ -52,6 +55,7 @@ def bytearray_concat(arr1, arr2):
     """
     return arr1 + arr2
 
+
 def bytearray_to_string(arr):
     """
     Converts a byte array into a string.
@@ -62,6 +66,7 @@ def bytearray_to_string(arr):
         String.
     """
     return arr.tostring()
+
 
 def bytearray_from_string(value):
     """
