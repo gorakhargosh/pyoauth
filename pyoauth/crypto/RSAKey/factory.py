@@ -6,6 +6,7 @@
 @sort: generateRSAKey, parseXMLKey, parsePEMKey, parseAsPublicKey,
 parseAsPrivateKey
 """
+import logging
 
 from pyoauth.crypto.utils.compat import is_m2crypto_available, is_pycrypto_available
 from pyoauth.crypto.RSAKey import RSAKey
@@ -185,7 +186,8 @@ def parseAsPublicKey(s):
     """
     try:
         return parsePEMKey(s, public=True)
-    except Exception:
+    except Exception, e:
+        logging.exception(e)
         return parseXMLKey(s, public=True)
 
 def parsePrivateKey(s):
@@ -201,7 +203,8 @@ def parsePrivateKey(s):
     """
     try:
         return parsePEMKey(s, private=True)
-    except Exception:
+    except Exception, e:
+        logging.exception(e)
         return parseXMLKey(s, private=True)
 
 def _createPublicKey(key):
