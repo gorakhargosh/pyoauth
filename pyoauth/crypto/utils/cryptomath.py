@@ -5,17 +5,19 @@
 
 This module has basic math/crypto code."""
 
-import os
+
 import math
 import base64
 import binascii
 
-from pyoauth.crypto.utils import bit_count, sha1_digest
+from pyoauth.crypto.utils import bit_count, sha1_digest, byte_count
 from pyoauth.crypto.utils.bytearray import \
     bytearray_concat, \
     bytearray_create_zeros, \
     bytearray_from_string, \
-    bytearray_to_string
+    bytearray_to_string, \
+    bytearray_from_long, \
+    bytearray_to_long
 
 # **************************************************************************
 # Load Optional Modules
@@ -50,46 +52,21 @@ except ImportError:
 # Converter Functions
 # **************************************************************************
 
-def bytesToNumber(bytes):
-    total = 0L
-    multiplier = 1L
-    for count in range(len(bytes)-1, -1, -1):
-        byte = bytes[count]
-        total += multiplier * byte
-        multiplier *= 256
-    return total
-
-def numberToBytes(n):
-    howManyBytes = numBytes(n)
-    bytes = bytearray_create_zeros(howManyBytes)
-    for count in range(howManyBytes-1, -1, -1):
-        bytes[count] = int(n % 256)
-        n >>= 8
-    return bytes
-
-def bytesToBase64(bytes):
-    s = bytearray_to_string(bytes)
+def bytearray_b64encode(byte_array):
+    s = bytearray_to_string(byte_array)
     return stringToBase64(s)
 
-def base64ToBytes(s):
+def bytearray_b64decode(s):
     s = base64ToString(s)
     return bytearray_from_string(s)
 
 def numberToBase64(n):
-    bytes = numberToBytes(n)
-    return bytesToBase64(bytes)
+    byte_array = bytearray_from_long(n)
+    return bytearray_b64encode(byte_array)
 
 def base64ToNumber(s):
-    bytes = base64ToBytes(s)
-    return bytesToNumber(bytes)
-
-def stringToNumber(s):
-    bytes = bytearray_from_string(s)
-    return bytesToNumber(bytes)
-
-def numberToString(s):
-    bytes = numberToBytes(s)
-    return bytearray_to_string(bytes)
+    byte_array = bytearray_b64decode(s)
+    return bytearray_to_long(byte_array)
 
 def base64ToString(s):
     try:
@@ -105,23 +82,23 @@ def stringToBase64(s):
 def mpiToNumber(mpi): #mpi is an openssl-format bignum string
     if (ord(mpi[4]) & 0x80) !=0: #Make sure this is a positive number
         raise AssertionError()
-    bytes = bytearray_from_string(mpi[4:])
-    return bytesToNumber(bytes)
+    byte_array = bytearray_from_string(mpi[4:])
+    return bytearray_to_long(byte_array)
 
 def numberToMPI(n):
-    bytes = numberToBytes(n)
+    byte_array = bytearray_from_long(n)
     ext = 0
     #If the high-order bit is going to be set,
     #add an extra byte of zeros
     if (bit_count(n) & 0x7)==0:
         ext = 1
-    length = numBytes(n) + ext
-    bytes = bytearray_concat(bytearray_create_zeros(4+ext), bytes)
-    bytes[0] = (length >> 24) & 0xFF
-    bytes[1] = (length >> 16) & 0xFF
-    bytes[2] = (length >> 8) & 0xFF
-    bytes[3] = length & 0xFF
-    return bytearray_to_string(bytes)
+    length = byte_count(n) + ext
+    byte_array = bytearray_concat(bytearray_create_zeros(4+ext), byte_array)
+    byte_array[0] = (length >> 24) & 0xFF
+    byte_array[1] = (length >> 16) & 0xFF
+    byte_array[2] = (length >> 8) & 0xFF
+    byte_array[3] = length & 0xFF
+    return bytearray_to_string(byte_array)
 
 
 
@@ -129,18 +106,12 @@ def numberToMPI(n):
 # Misc. Utility Functions
 # **************************************************************************
 
-def numBytes(n):
-    if n==0:
-        return 0
-    bits = bit_count(n)
-    return int(math.ceil(bits / 8.0))
-
 def hashAndBase64(s):
     return stringToBase64(sha1_digest(s))
 
 def getBase64Nonce(numChars=22): #defaults to an 132 bit nonce
-    bytes = generate_random_bytes(numChars)
-    bytesStr = "".join([chr(b) for b in bytes])
+    byte_array = generate_random_bytes(numChars)
+    bytesStr = "".join([chr(b) for b in byte_array])
     return stringToBase64(bytesStr)[:numChars]
 
 
@@ -152,13 +123,13 @@ def getRandomNumber(low, high):
     if low >= high:
         raise AssertionError()
     howManyBits = bit_count(high)
-    howManyBytes = numBytes(high)
+    howManyBytes = byte_count(high)
     lastBits = howManyBits % 8
     while 1:
-        bytes = generate_random_bytes(howManyBytes)
+        byte_array = generate_random_bytes(howManyBytes)
         if lastBits:
-            bytes[0] = bytes[0] % (1 << lastBits)
-        n = bytesToNumber(bytes)
+            byte_array[0] = byte_array[0] % (1 << lastBits)
+        n = bytearray_to_long(byte_array)
         if n >= low and n < high:
             return n
 

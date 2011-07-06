@@ -5,6 +5,7 @@
 
 from pyoauth.crypto.utils.bytearray import bytearray_to_string, bytearray_random
 from pyoauth.crypto.utils.cryptomath import *
+from pyoauth.crypto.utils import byte_count, bytes_to_long, long_to_bytes
 
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
@@ -30,27 +31,27 @@ if pycryptoLoaded:
             return Python_RSAKey(self.n, self.e).hash()
 
         def _rawPrivateKeyOp(self, m):
-            s = numberToString(m)
-            byteLength = numBytes(self.n)
+            s = long_to_bytes(m)
+            byteLength = byte_count(self.n)
             if len(s)== byteLength:
                 pass
             elif len(s) == byteLength-1:
                 s = '\0' + s
             else:
                 raise AssertionError()
-            c = stringToNumber(self.rsa.decrypt((s,)))
+            c = bytes_to_long(self.rsa.decrypt((s,)))
             return c
 
         def _rawPublicKeyOp(self, c):
-            s = numberToString(c)
-            byteLength = numBytes(self.n)
+            s = long_to_bytes(c)
+            byteLength = byte_count(self.n)
             if len(s)== byteLength:
                 pass
             elif len(s) == byteLength-1:
                 s = '\0' + s
             else:
                 raise AssertionError()
-            m = stringToNumber(self.rsa.encrypt(s, None)[0])
+            m = bytes_to_long(self.rsa.encrypt(s, None)[0])
             return m
 
         def writeXMLPublicKey(self, indent=''):

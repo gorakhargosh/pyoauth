@@ -10,7 +10,7 @@ from pyoauth.crypto.utils.bytearray import \
     bytearray_create, bytearray_from_string
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
 from pyoauth.crypto.RSAKey.factory import _createPublicRSAKey
-from pyoauth.crypto.utils.cryptomath import base64ToBytes, bytesToNumber
+from pyoauth.crypto.utils.cryptomath import bytearray_b64decode, bytearray_to_long
 
 
 class X509(object):
@@ -44,7 +44,7 @@ class X509(object):
             raise SyntaxError("Missing PEM postfix")
         s = s[start+len("-----BEGIN CERTIFICATE-----") : end]
 
-        bytes = base64ToBytes(s)
+        bytes = bytearray_b64decode(s)
         self.parseBinary(bytes)
         return self
 
@@ -94,8 +94,8 @@ class X509(object):
         publicExponentP = subjectPublicKeyP.getChild(1)
 
         #Decode them into numbers
-        n = bytesToNumber(modulusP.value)
-        e = bytesToNumber(publicExponentP.value)
+        n = bytearray_to_long(modulusP.value)
+        e = bytearray_to_long(publicExponentP.value)
 
         #Create a public key instance
         self.publicKey = _createPublicRSAKey(n, e)

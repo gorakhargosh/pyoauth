@@ -6,6 +6,7 @@
 from pyoauth.crypto.utils.cryptomath import *
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
+from pyoauth.crypto.utils import byte_count, bytes_to_long, long_to_bytes
 
 #copied from M2Crypto.util.py, so when we load the local copy of m2
 #we can still use it
@@ -61,28 +62,28 @@ if m2cryptoLoaded:
             return Python_RSAKey(self.n, self.e).hash()
 
         def _rawPrivateKeyOp(self, m):
-            s = numberToString(m)
-            byteLength = numBytes(self.n)
+            s = long_to_bytes(m)
+            byteLength = byte_count(self.n)
             if len(s)== byteLength:
                 pass
             elif len(s) == byteLength-1:
                 s = '\0' + s
             else:
                 raise AssertionError()
-            c = stringToNumber(m2.rsa_private_encrypt(self.rsa, s,
+            c = bytes_to_long(m2.rsa_private_encrypt(self.rsa, s,
                                                       m2.no_padding))
             return c
 
         def _rawPublicKeyOp(self, c):
-            s = numberToString(c)
-            byteLength = numBytes(self.n)
+            s = long_to_bytes(c)
+            byteLength = byte_count(self.n)
             if len(s)== byteLength:
                 pass
             elif len(s) == byteLength-1:
                 s = '\0' + s
             else:
                 raise AssertionError()
-            m = stringToNumber(m2.rsa_public_decrypt(self.rsa, s,
+            m = bytes_to_long(m2.rsa_public_decrypt(self.rsa, s,
                                                      m2.no_padding))
             return m
 

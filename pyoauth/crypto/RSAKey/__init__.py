@@ -3,12 +3,15 @@
 
 """Abstract class for RSA."""
 
-from pyoauth.crypto.utils import bit_count, sha1_digest
+from pyoauth.crypto.utils import bit_count, byte_count, sha1_digest
 from pyoauth.crypto.utils.cryptomath import *
 from pyoauth.crypto.utils.bytearray import \
     bytearray_create, \
     bytearray_to_string, \
-    bytearray_from_string, bytearray_random
+    bytearray_from_string, \
+    bytearray_random, \
+    bytearray_to_long, \
+    bytearray_from_long
 
 
 class RSAKey(object):
@@ -121,11 +124,11 @@ class RSAKey(object):
         if not self.hasPrivateKey():
             raise AssertionError()
         paddedBytes = self._addPKCS1Padding(bytes, 1)
-        m = bytesToNumber(paddedBytes)
+        m = bytearray_to_long(paddedBytes)
         if m >= self.n:
             raise ValueError()
         c = self._rawPrivateKeyOp(m)
-        sigBytes = numberToBytes(c)
+        sigBytes = bytearray_from_long(c)
         return sigBytes
 
     def verify(self, sigBytes, bytes):
@@ -143,11 +146,11 @@ class RSAKey(object):
         @return: Whether the signature matches the passed-in data.
         """
         paddedBytes = self._addPKCS1Padding(bytes, 1)
-        c = bytesToNumber(sigBytes)
+        c = bytearray_to_long(sigBytes)
         if c >= self.n:
             return False
         m = self._rawPublicKeyOp(c)
-        checkBytes = numberToBytes(m)
+        checkBytes = bytearray_from_long(m)
         return checkBytes == paddedBytes
 
     def encrypt(self, bytes):
@@ -162,11 +165,11 @@ class RSAKey(object):
         @return: A PKCS1 encryption of the passed-in data.
         """
         paddedBytes = self._addPKCS1Padding(bytes, 2)
-        m = bytesToNumber(paddedBytes)
+        m = bytearray_to_long(paddedBytes)
         if m >= self.n:
             raise ValueError()
         c = self._rawPublicKeyOp(m)
-        encBytes = numberToBytes(c)
+        encBytes = bytearray_from_long(c)
         return encBytes
 
     def decrypt(self, encBytes):
@@ -184,12 +187,12 @@ class RSAKey(object):
         """
         if not self.hasPrivateKey():
             raise AssertionError()
-        c = bytesToNumber(encBytes)
+        c = bytearray_to_long(encBytes)
         if c >= self.n:
             return None
         m = self._rawPrivateKeyOp(c)
-        decBytes = numberToBytes(m)
-        if (len(decBytes) != numBytes(self.n)-1): #Check first byte
+        decBytes = bytearray_from_long(m)
+        if (len(decBytes) != byte_count(self.n)-1): #Check first byte
             return None
         if decBytes[0] != 2: #Check second byte
             return None
@@ -251,7 +254,7 @@ class RSAKey(object):
         return prefixedBytes
 
     def _addPKCS1Padding(self, bytes, blockType):
-        padLength = (numBytes(self.n) - (len(bytes)+3))
+        padLength = (byte_count(self.n) - (len(bytes)+3))
         if blockType == 1: #Signature padding
             pad = [0xFF] * padLength
         elif blockType == 2: #Encryption padding

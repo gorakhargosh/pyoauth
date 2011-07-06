@@ -5,6 +5,7 @@
 
 from pyoauth.crypto.utils.cryptomath import *
 from pyoauth.crypto.utils import xmltools
+from pyoauth.crypto.utils.bytearray import bytearray_to_long
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
 from pyoauth.crypto.RSAKey import RSAKey
 
@@ -122,7 +123,7 @@ class Python_RSAKey(RSAKey):
             if end == -1:
                 raise SyntaxError("Missing PEM Postfix")
             s = s[start+len("-----BEGIN PRIVATE KEY -----") : end]
-            bytes = base64ToBytes(s)
+            bytes = bytearray_b64decode(s)
             return Python_RSAKey._parsePKCS8(bytes)
         else:
             start = s.find("-----BEGIN RSA PRIVATE KEY-----")
@@ -131,7 +132,7 @@ class Python_RSAKey(RSAKey):
                 if end == -1:
                     raise SyntaxError("Missing PEM Postfix")
                 s = s[start+len("-----BEGIN RSA PRIVATE KEY -----") : end]
-                bytes = base64ToBytes(s)
+                bytes = bytearray_b64decode(s)
                 return Python_RSAKey._parseSSLeay(bytes)
         raise SyntaxError("Missing PEM Prefix")
     parsePEM = staticmethod(parsePEM)
@@ -170,14 +171,14 @@ class Python_RSAKey(RSAKey):
         version = privateKeyP.getChild(0).value[0]
         if version != 0:
             raise SyntaxError("Unrecognized RSAPrivateKey version")
-        n = bytesToNumber(privateKeyP.getChild(1).value)
-        e = bytesToNumber(privateKeyP.getChild(2).value)
-        d = bytesToNumber(privateKeyP.getChild(3).value)
-        p = bytesToNumber(privateKeyP.getChild(4).value)
-        q = bytesToNumber(privateKeyP.getChild(5).value)
-        dP = bytesToNumber(privateKeyP.getChild(6).value)
-        dQ = bytesToNumber(privateKeyP.getChild(7).value)
-        qInv = bytesToNumber(privateKeyP.getChild(8).value)
+        n = bytearray_to_long(privateKeyP.getChild(1).value)
+        e = bytearray_to_long(privateKeyP.getChild(2).value)
+        d = bytearray_to_long(privateKeyP.getChild(3).value)
+        p = bytearray_to_long(privateKeyP.getChild(4).value)
+        q = bytearray_to_long(privateKeyP.getChild(5).value)
+        dP = bytearray_to_long(privateKeyP.getChild(6).value)
+        dQ = bytearray_to_long(privateKeyP.getChild(7).value)
+        qInv = bytearray_to_long(privateKeyP.getChild(8).value)
         return Python_RSAKey(n, e, d, p, q, dP, dQ, qInv)
     _parseASN1PrivateKey = staticmethod(_parseASN1PrivateKey)
 
