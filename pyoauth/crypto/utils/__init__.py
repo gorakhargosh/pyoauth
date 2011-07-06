@@ -25,6 +25,7 @@ import os
 import binascii
 import hmac
 from hashlib import sha1, md5
+from pyoauth.types import bytes
 
 
 def sha1_digest(*inputs):
