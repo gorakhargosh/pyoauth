@@ -11,10 +11,10 @@ Functions:
 .. autofunction:: base64_decode
 .. autofunction:: base64_encode
 .. autofunction:: sha1_digest
-.. autofunction:: sha1_hexdigest
+.. autofunction:: sha1_hex_digest
 .. autofunction:: sha1_base64_digest
 .. autofunction:: md5_digest
-.. autofunction:: md5_hexdigest
+.. autofunction:: md5_hex_digest
 .. autofunction:: hmac_sha1_digest
 .. autofunction:: hmac_sha1_base64_digest
 .. autofunction:: bit_count
@@ -68,7 +68,7 @@ def sha1_digest(*inputs):
     return md.digest()
 
 
-def sha1_hexdigest(*inputs):
+def sha1_hex_digest(*inputs):
     """
     Calculates hexadecimal representation of the SHA-1 digest of a variable
     number of inputs.
@@ -109,7 +109,7 @@ def md5_digest(*inputs):
     return md.digest()
 
 
-def md5_hexdigest(*inputs):
+def md5_hex_digest(*inputs):
     """
     Calculates hexadecimal representation of the MD5 digest of a variable
     number of inputs.

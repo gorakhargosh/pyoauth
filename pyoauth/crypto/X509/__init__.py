@@ -5,7 +5,7 @@
 
 import array
 
-from pyoauth.crypto.utils import sha1_hexdigest
+from pyoauth.crypto.utils import sha1_hex_digest
 from pyoauth.crypto.utils.bytearray import \
     bytearray_create, bytearray_from_bytes, bytearray_b64decode
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
@@ -106,7 +106,7 @@ class X509(object):
         @rtype: str
         @return: A hex-encoded fingerprint.
         """
-        return sha1_hexdigest(self.bytes)
+        return sha1_hex_digest(self.bytes)
 
     def getCommonName(self):
         """Get the Subject's Common Name from the certificate.
