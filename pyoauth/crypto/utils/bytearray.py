@@ -14,7 +14,7 @@ Functions:
 .. autofunction:: bytearray_concat
 .. autofunction:: bytearray_to_bytes
 .. autofunction:: bytes_to_bytearray
-.. autofunction:: bytearray_random
+.. autofunction:: generate_random_bytearray
 .. autofunction:: bytearray_to_long
 .. autofunction:: long_to_bytearray
 .. autofunction:: bytearray_b64decode
@@ -91,7 +91,7 @@ def bytes_to_bytearray(byte_string):
     return byte_array
 
 
-def bytearray_random(count):
+def generate_random_bytearray(count):
     """
     Generates a random byte array.
 

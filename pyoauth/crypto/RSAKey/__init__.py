@@ -11,7 +11,7 @@ from pyoauth.crypto.utils.bytearray import \
     bytearray_create, \
     bytearray_to_bytes, \
     bytes_to_bytearray, \
-    bytearray_random, \
+    generate_random_bytearray, \
     bytearray_to_long, \
     long_to_bytearray
 
@@ -264,7 +264,7 @@ class RSAKey(object):
             # Encryption padding
             pad = bytearray_create([])
             while len(pad) < padLength:
-                padBytes = bytearray_random(padLength * 2)
+                padBytes = generate_random_bytearray(padLength * 2)
                 pad = [b for b in padBytes if b != 0]
                 pad = pad[:padLength]
         else:

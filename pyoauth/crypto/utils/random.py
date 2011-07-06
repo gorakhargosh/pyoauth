@@ -19,7 +19,7 @@ import binascii
 from pyoauth.types import bytes
 from pyoauth.crypto.utils.prng import generate_random_bytes
 from pyoauth.crypto.utils import bit_count, byte_count, base64_encode
-from pyoauth.crypto.utils.bytearray import bytearray_random, bytearray_to_long
+from pyoauth.crypto.utils.bytearray import generate_random_bytearray, bytearray_to_long
 
 
 def generate_random_long(low, high):
@@ -39,7 +39,7 @@ def generate_random_long(low, high):
     num_bytes = byte_count(high)
     last_bits = num_bits % 8
     while 1:
-        byte_array = bytearray_random(num_bytes)
+        byte_array = generate_random_bytearray(num_bytes)
         if last_bits:
             byte_array[0] = byte_array[0] % (1 << last_bits)
         n = bytearray_to_long(byte_array)

@@ -66,6 +66,6 @@ if is_pycrypto_available():
         def generate(bits):
             key = PyCrypto_RSAKey()
             #def f(num_bytes):
-            #    return bytearray_to_bytes(bytearray_random(num_bytes))
+            #    return bytearray_to_bytes(generate_random_bytearray(num_bytes))
             key.rsa = RSA.generate(bits, generate_random_bytes)
             return key
