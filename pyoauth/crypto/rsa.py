@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Placed under public domain.
+#
+# Released into public domain.
 
 """
 :module: pyoauth.crypto.rsa

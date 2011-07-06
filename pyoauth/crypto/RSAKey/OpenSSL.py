@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# Released into public domain.
 
 """OpenSSL/M2Crypto RSA implementation."""
 

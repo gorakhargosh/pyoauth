@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Random number and string generation utilities.
+#
+# Released into public domain.
 
 """
 :module: pyoauth.crypto.utils.random

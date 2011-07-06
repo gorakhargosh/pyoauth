@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Cryptographic utility functions.
+#
+# Released into public domain.
 
 """
 :module: pyoauth.crypto.utils
