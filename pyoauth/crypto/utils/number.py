@@ -235,19 +235,29 @@ def lcm(a, b):
     :returns:
         Least common multiple.
     """
-    # TODO: This will break when python division changes, but we can't use // cause
-    #of Jython
+    # TODO: This will break when python division changes, but we can't use //
+    # because of Jython
     return (a * b) / gcd(a, b)
 
 
-#Returns inverse of a mod b, zero if none
-#Uses Extended Euclidean Algorithm
 def inverse_mod(a, b):
+    """
+    Returns inverse of a mod b, zero if none
+
+    Uses Extended Euclidean Algorithm
+
+    :param a:
+        Long value
+    :param b:
+        Long value
+    :returns:
+        Inverse of a mod b, zero if none.
+    """
     c, d = a, b
     uc, ud = 1, 0
-    while c != 0:
-        #TODO: This will break when python division changes, but we can't use //
-        #cause of Jython
+    while c:
+        # TODO: This will break when python division changes, but we can't use //
+        # because of Jython
         q = d / c
         c, d = d-(q*c), c
         uc, ud = ud - (q * uc), uc
@@ -341,7 +351,6 @@ except ImportError:
             assert (prod * prodInv) % modulus == 1
             return prodInv
         return prod
-
 
 
 def make_prime_sieve(n):
