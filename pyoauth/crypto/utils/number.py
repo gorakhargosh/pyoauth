@@ -197,6 +197,7 @@ def long_to_mpi(num):
     byte_array[3] = length & 0xFF
     return bytearray_to_bytes(byte_array)
 
+
 def gcd(a,b):
     """
     Calculates the greatest common divisor.
@@ -227,7 +228,7 @@ def lcm(a, b):
     :returns:
         Least common multiple.
     """
-    #This will break when python division changes, but we can't use // cause
+    # TODO: This will break when python division changes, but we can't use // cause
     #of Jython
     return (a * b) / gcd(a, b)
 
@@ -238,7 +239,7 @@ def inverse_mod(a, b):
     c, d = a, b
     uc, ud = 1, 0
     while c != 0:
-        #This will break when python division changes, but we can't use //
+        #TODO: This will break when python division changes, but we can't use //
         #cause of Jython
         q = d / c
         c, d = d-(q*c), c
@@ -334,7 +335,7 @@ except ImportError:
 
 
 #Pre-calculate a sieve of the ~100 primes < 1000:
-def makeSieve(n):
+def make_prime_sieve(n):
     sieve = range(n)
     for count in range(2, int(math.sqrt(n))):
         if sieve[count] == 0:
@@ -346,9 +347,9 @@ def makeSieve(n):
     sieve = [x for x in sieve[2:] if x]
     return sieve
 
-sieve = makeSieve(1000)
+sieve = make_prime_sieve(1000)
 
-def isPrime(n, iterations=5, display=False):
+def is_prime(n, iterations=5, display=False):
     #Trial division with sieve
     for x in sieve:
         if x >= n: return True
@@ -375,9 +376,9 @@ def isPrime(n, iterations=5, display=False):
         a = generate_random_long(2, n)
     return True
 
-def getRandomPrime(bits, display=False):
-    if bits < 10:
-        raise AssertionError()
+def generate_random_prime(bits, display=False):
+    assert not bits < 10
+
     #The 1.5 ensures the 2 MSBs are set
     #Thus, when used for p,q in RSA, n will have its MSB set
     #
@@ -393,13 +394,15 @@ def getRandomPrime(bits, display=False):
         if p >= high:
             p = generate_random_long(low, high)
             p += 29 - (p % 30)
-        if isPrime(p, display=display):
+        if is_prime(p, display=display):
             return p
 
-#Unused at the moment...
-def getRandomSafePrime(bits, display=False):
-    if bits < 10:
-        raise AssertionError()
+def generate_random_safe_prime(bits, display=False):
+    """
+    Unused at the moment.
+    """
+    assert not bits < 10
+
     #The 1.5 ensures the 2 MSBs are set
     #Thus, when used for p,q in RSA, n will have its MSB set
     #
@@ -417,8 +420,8 @@ def getRandomSafePrime(bits, display=False):
             q += 29 - (q % 30)
         #Ideas from Tom Wu's SRP code
         #Do trial division on p and q before Rabin-Miller
-        if isPrime(q, 0, display=display):
+        if is_prime(q, 0, display=display):
             p = (2 * q) + 1
-            if isPrime(p, display=display):
-                if isPrime(q, display=display):
+            if is_prime(p, display=display):
+                if is_prime(q, display=display):
                     return p

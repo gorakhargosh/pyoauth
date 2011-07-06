@@ -14,8 +14,8 @@ from pyoauth.crypto.RSAKey import RSAKey
 
 class Python_RSAKey(RSAKey):
     def __init__(self, n=0, e=0, d=0, p=0, q=0, dP=0, dQ=0, qInv=0):
-        if (n and not e) or (e and not n):
-            raise AssertionError()
+        assert not ((n and not e) or (e and not n))
+
         self.n = n
         self.e = e
         self.d = d
@@ -103,8 +103,8 @@ class Python_RSAKey(RSAKey):
 
     def generate(bits):
         key = Python_RSAKey()
-        p = getRandomPrime(bits/2, False)
-        q = getRandomPrime(bits/2, False)
+        p = generate_random_prime(bits/2, False)
+        q = generate_random_prime(bits/2, False)
         t = lcm(p-1, q-1)
         key.n = p * q
         key.e = 3L  #Needed to be long, for Java
