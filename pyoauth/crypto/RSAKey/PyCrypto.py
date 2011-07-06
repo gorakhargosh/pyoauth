@@ -7,7 +7,7 @@ from pyoauth.crypto.utils.bytearray import bytearray_to_string
 from pyoauth.crypto.utils.cryptomath import *
 
 from pyoauth.crypto.RSAKey import RSAKey
-from pyoauth.crypto.pure import Python_RSAKey
+from pyoauth.crypto.RSAKey.pure import Python_RSAKey
 
 if pycryptoLoaded:
 
