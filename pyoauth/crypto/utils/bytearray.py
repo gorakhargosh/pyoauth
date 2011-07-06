@@ -115,8 +115,8 @@ def bytearray_to_long(byte_array):
     total = 0L
     multiplier = 1L
     for count in range(len(byte_array)-1, -1, -1):
-        byte = byte_array[count]
-        total += multiplier * byte
+        byte_val = byte_array[count]
+        total += multiplier * byte_val
         multiplier *= 256
     return total
 
