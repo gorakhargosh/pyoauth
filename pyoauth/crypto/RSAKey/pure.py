@@ -131,11 +131,11 @@ class Python_RSAKey(RSAKey):
         PEM-encoded key."""
 
         try:
-            byte_array = bytearray_from_bytes(pem_to_der_private_key(s))
+            byte_array = bytes_to_bytearray(pem_to_der_private_key(s))
             return Python_RSAKey._parsePKCS8(byte_array)
         except ValueError:
             try:
-                byte_array = bytearray_from_bytes(pem_to_der_rsa_private_key(s))
+                byte_array = bytes_to_bytearray(pem_to_der_rsa_private_key(s))
                 return Python_RSAKey._parseSSLeay(byte_array)
             except Exception, e:
                 logging.exception(e)

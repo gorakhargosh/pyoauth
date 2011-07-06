@@ -10,7 +10,7 @@ import array
 from pyoauth.crypto.codec.pemder import pem_to_der_certificate
 from pyoauth.crypto.utils import sha1_hex_digest
 from pyoauth.crypto.utils.bytearray import \
-    bytearray_create, bytearray_from_bytes, bytearray_b64decode
+    bytearray_create, bytes_to_bytearray, bytearray_b64decode
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
 from pyoauth.crypto.RSAKey.factory import _createPublicRSAKey
 from pyoauth.crypto.utils.number import  bytearray_to_long
@@ -38,7 +38,7 @@ class X509(object):
         certificate wrapped with "-----BEGIN CERTIFICATE-----" and
         "-----END CERTIFICATE-----" tags).
         """
-        byte_array = bytearray_from_bytes(pem_to_der_certificate(cert))
+        byte_array = bytes_to_bytearray(pem_to_der_certificate(cert))
         self.parseBinary(byte_array)
         return self
 
@@ -50,7 +50,7 @@ class X509(object):
         """
 
         if isinstance(byte_array, type("")):
-            byte_array = bytearray_from_bytes(byte_array)
+            byte_array = bytes_to_bytearray(byte_array)
 
         self.bytes = byte_array
         p = ASN1Parser(byte_array)

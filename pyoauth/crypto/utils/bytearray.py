@@ -13,10 +13,10 @@ Functions:
 .. autofunction:: bytearray_create_zeros
 .. autofunction:: bytearray_concat
 .. autofunction:: bytearray_to_bytes
-.. autofunction:: bytearray_from_bytes
+.. autofunction:: bytes_to_bytearray
 .. autofunction:: bytearray_random
 .. autofunction:: bytearray_to_long
-.. autofunction:: bytearray_from_long
+.. autofunction:: long_to_bytearray
 .. autofunction:: bytearray_b64decode
 .. autofunction:: bytearray_b64encode
 
@@ -77,7 +77,7 @@ def bytearray_to_bytes(byte_array):
     return byte_array.tostring()
 
 
-def bytearray_from_bytes(value):
+def bytes_to_bytearray(value):
     """
     Converts a string into a byte array.
 
@@ -100,7 +100,7 @@ def bytearray_random(count):
     :returns:
         A random byte array.
     """
-    return bytearray_from_bytes(generate_random_bytes(count))
+    return bytes_to_bytearray(generate_random_bytes(count))
 
 
 def bytearray_to_long(byte_array):
@@ -121,7 +121,7 @@ def bytearray_to_long(byte_array):
     return total
 
 
-def bytearray_from_long(n):
+def long_to_bytearray(n):
     """
     Converts a long into a byte array.
 
@@ -147,7 +147,7 @@ def bytearray_b64decode(value):
     :returns:
         Byte array.
     """
-    return bytearray_from_bytes(base64_decode(value))
+    return bytes_to_bytearray(base64_decode(value))
 
 
 def bytearray_b64encode(byte_array):

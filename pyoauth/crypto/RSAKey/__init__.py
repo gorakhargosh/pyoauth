@@ -10,10 +10,10 @@ from pyoauth.crypto.utils.number import *
 from pyoauth.crypto.utils.bytearray import \
     bytearray_create, \
     bytearray_to_bytes, \
-    bytearray_from_bytes, \
+    bytes_to_bytearray, \
     bytearray_random, \
     bytearray_to_long, \
-    bytearray_from_long
+    long_to_bytearray
 
 
 class RSAKey(object):
@@ -86,7 +86,7 @@ class RSAKey(object):
         """
         if not isinstance(bytes, type("")):
             bytes = bytearray_to_bytes(bytes)
-        hashBytes = bytearray_from_bytes(sha1_digest(bytes))
+        hashBytes = bytes_to_bytearray(sha1_digest(bytes))
         prefixedHashBytes = self._addPKCS1SHA1Prefix(hashBytes)
         sigBytes = self.sign(prefixedHashBytes)
         return sigBytes
@@ -107,7 +107,7 @@ class RSAKey(object):
         """
         if not isinstance(byte_string, type("")):
             byte_string = bytearray_to_bytes(byte_string)
-        hashBytes = bytearray_from_bytes(sha1_digest(byte_string))
+        hashBytes = bytes_to_bytearray(sha1_digest(byte_string))
         prefixedHashBytes = self._addPKCS1SHA1Prefix(hashBytes)
         return self.verify(signature_bytestring, prefixedHashBytes)
 
@@ -130,7 +130,7 @@ class RSAKey(object):
         if m >= self.n:
             raise ValueError()
         c = self._rawPrivateKeyOp(m)
-        sigBytes = bytearray_from_long(c)
+        sigBytes = long_to_bytearray(c)
         return sigBytes
 
     def verify(self, sigBytes, bytes):
@@ -152,7 +152,7 @@ class RSAKey(object):
         if c >= self.n:
             return False
         m = self._rawPublicKeyOp(c)
-        checkBytes = bytearray_from_long(m)
+        checkBytes = long_to_bytearray(m)
         return checkBytes == paddedBytes
 
     def encrypt(self, bytes):
@@ -171,7 +171,7 @@ class RSAKey(object):
         if m >= self.n:
             raise ValueError()
         c = self._rawPublicKeyOp(m)
-        encBytes = bytearray_from_long(c)
+        encBytes = long_to_bytearray(c)
         return encBytes
 
     def decrypt(self, encBytes):
@@ -193,7 +193,7 @@ class RSAKey(object):
         if c >= self.n:
             return None
         m = self._rawPrivateKeyOp(c)
-        decBytes = bytearray_from_long(m)
+        decBytes = long_to_bytearray(m)
         if len(decBytes) != byte_count(self.n)-1: #Check first byte
             return None
         if decBytes[0] != 2: #Check second byte

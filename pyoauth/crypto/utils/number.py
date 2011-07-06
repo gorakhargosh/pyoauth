@@ -34,9 +34,9 @@ from pyoauth.crypto.utils import bit_count, byte_count
 from pyoauth.crypto.utils.bytearray import \
     bytearray_concat, \
     bytearray_create_zeros, \
-    bytearray_from_bytes, \
+    bytes_to_bytearray, \
     bytearray_to_bytes, \
-    bytearray_from_long, \
+    long_to_bytearray, \
     bytearray_to_long, \
     bytearray_b64decode, \
     bytearray_b64encode
@@ -118,7 +118,7 @@ def long_to_bytes_original(num):
     :returns:
         Byte string.
     """
-    byte_array = bytearray_from_long(num)
+    byte_array = long_to_bytearray(num)
     return bytearray_to_bytes(byte_array)
 
 
@@ -135,7 +135,7 @@ def bytes_to_long_original(byte_string):
     :returns:
         Long.
     """
-    byte_array = bytearray_from_bytes(byte_string)
+    byte_array = bytes_to_bytearray(byte_string)
     return bytearray_to_long(byte_array)
 
 
@@ -148,7 +148,7 @@ def long_b64encode(num):
     :returns:
         Base-64 encoded byte string.
     """
-    byte_array = bytearray_from_long(num)
+    byte_array = long_to_bytearray(num)
     return bytearray_b64encode(byte_array)
 
 
@@ -177,7 +177,7 @@ def mpi_to_long(mpi_byte_string):
     #Make sure this is a positive number
     assert (ord(mpi_byte_string[4]) & 0x80) == 0
 
-    byte_array = bytearray_from_bytes(mpi_byte_string[4:])
+    byte_array = bytes_to_bytearray(mpi_byte_string[4:])
     return bytearray_to_long(byte_array)
 
 
@@ -190,7 +190,7 @@ def long_to_mpi(num):
     :returns:
         OpenSSL-format MPI Bignum byte string.
     """
-    byte_array = bytearray_from_long(num)
+    byte_array = long_to_bytearray(num)
     ext = 0
     #If the high-order bit is going to be set,
     #add an extra byte of zeros
