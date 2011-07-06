@@ -77,17 +77,17 @@ def bytearray_to_bytes(byte_array):
     return byte_array.tostring()
 
 
-def bytes_to_bytearray(value):
+def bytes_to_bytearray(byte_string):
     """
     Converts a string into a byte array.
 
-    :param value:
+    :param byte_string:
         String value.
     :returns:
         Byte array.
     """
     byte_array = bytearray_create_zeros(0)
-    byte_array.fromstring(value)
+    byte_array.fromstring(byte_string)
     return byte_array
 
 
@@ -121,33 +121,33 @@ def bytearray_to_long(byte_array):
     return total
 
 
-def long_to_bytearray(n):
+def long_to_bytearray(num):
     """
     Converts a long into a byte array.
 
-    :param n:
+    :param num:
         Long value
     :returns:
         Long.
     """
-    bytes_count = byte_count(n)
+    bytes_count = byte_count(num)
     byte_array = bytearray_create_zeros(bytes_count)
     for count in range(bytes_count - 1, -1, -1):
-        byte_array[count] = int(n % 256)
-        n >>= 8
+        byte_array[count] = int(num % 256)
+        num >>= 8
     return byte_array
 
 
-def bytearray_b64decode(value):
+def bytearray_b64decode(encoded):
     """
     Converts a base-64 encoded value into a byte array.
 
-    :param value:
+    :param encoded:
         The base-64 encoded value.
     :returns:
         Byte array.
     """
-    return bytes_to_bytearray(base64_decode(value))
+    return bytes_to_bytearray(base64_decode(encoded))
 
 
 def bytearray_b64encode(byte_array):
