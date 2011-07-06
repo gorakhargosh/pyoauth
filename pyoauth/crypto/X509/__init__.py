@@ -7,6 +7,7 @@
 
 import array
 
+from pyoauth.crypto.codec.pemder import pem_to_der_certificate
 from pyoauth.crypto.utils import sha1_hex_digest
 from pyoauth.crypto.utils.bytearray import \
     bytearray_create, bytearray_from_bytes, bytearray_b64decode
@@ -29,39 +30,30 @@ class X509(object):
         self.bytes = bytearray_create([])
         self.publicKey = None
 
-    def parse(self, s):
+    def parse(self, cert):
         """Parse a PEM-encoded X.509 certificate.
 
-        @type s: str
-        @param s: A PEM-encoded X.509 certificate (i.e. a base64-encoded
+        @type cert: str
+        @param cert: A PEM-encoded X.509 certificate (i.e. a base64-encoded
         certificate wrapped with "-----BEGIN CERTIFICATE-----" and
         "-----END CERTIFICATE-----" tags).
         """
-
-        start = s.find("-----BEGIN CERTIFICATE-----")
-        end = s.find("-----END CERTIFICATE-----")
-        if start == -1:
-            raise SyntaxError("Missing PEM prefix")
-        if end == -1:
-            raise SyntaxError("Missing PEM postfix")
-        s = s[start+len("-----BEGIN CERTIFICATE-----") : end]
-
-        bytes = bytearray_b64decode(s)
-        self.parseBinary(bytes)
+        byte_array = bytearray_from_bytes(pem_to_der_certificate(cert))
+        self.parseBinary(byte_array)
         return self
 
-    def parseBinary(self, bytes):
+    def parseBinary(self, byte_array):
         """Parse a DER-encoded X.509 certificate.
 
-        @type bytes: str or L{array.array} of unsigned bytes
-        @param bytes: A DER-encoded X.509 certificate.
+        @type byte_array: str or L{array.array} of unsigned bytes
+        @param byte_array: A DER-encoded X.509 certificate.
         """
 
-        if isinstance(bytes, type("")):
-            bytes = bytearray_from_bytes(bytes)
+        if isinstance(byte_array, type("")):
+            byte_array = bytearray_from_bytes(byte_array)
 
-        self.bytes = bytes
-        p = ASN1Parser(bytes)
+        self.bytes = byte_array
+        p = ASN1Parser(byte_array)
 
         #Get the tbsCertificate
         tbsCertificateP = p.getChild(0)
