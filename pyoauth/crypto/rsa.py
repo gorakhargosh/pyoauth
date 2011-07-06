@@ -21,8 +21,8 @@ Functions
 #    os.path.join(PARENT_DIR_PATH, "tlslite"),
 #]
 
-import binascii
-from base64 import b64decode
+
+from pyoauth.crypto.utils import base64_encode, base64_decode
 from pyoauth.crypto.RSAKey import factory
 from pyoauth.crypto.X509 import X509
 
@@ -58,7 +58,7 @@ def sign(private_key, base_string):
     """
     private_key = factory.parsePrivateKey(private_key)
     signed = private_key.hashAndSign(base_string)
-    return binascii.b2a_base64(signed)[:-1]
+    return base64_encode(signed)
 
 
 def verify(public_certificate, signature, base_string):
@@ -86,7 +86,7 @@ def verify(public_certificate, signature, base_string):
     :returns:
         ``True`` if signature matches; ``False`` if verification fails.
     """
-    decoded_signature = b64decode(signature)
+    decoded_signature = base64_decode(signature)
 
     cert_parser = X509()
     cert_parser.parse(public_certificate)
