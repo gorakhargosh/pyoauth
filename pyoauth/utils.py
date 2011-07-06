@@ -56,7 +56,7 @@ except ImportError:
     # Python 2.5+
     from urlparse import urlunparse
 
-from pyoauth.unicode import to_utf8
+from pyoauth.types.unicode import to_utf8
 from pyoauth.error import InvalidHttpMethodError, \
     InvalidUrlError, \
     InvalidOAuthParametersError, \

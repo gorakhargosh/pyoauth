@@ -3,7 +3,7 @@
 
 from nose.tools import assert_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.unicode import is_bytes, is_bytes_or_unicode, is_unicode, \
+from pyoauth.types.unicode import is_bytes, is_bytes_or_unicode, is_unicode, \
     to_utf8_if_unicode, to_unicode_if_bytes, to_unicode, to_utf8
 
 import uuid

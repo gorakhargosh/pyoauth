@@ -3,18 +3,34 @@
 
 from nose.tools import assert_equal, assert_not_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.error import InvalidUrlError, InvalidQueryParametersError, InsecureOAuthUrlError, InvalidOAuthParametersError, InsecureOAuthParametersError
-from pyoauth.unicode import to_utf8_if_unicode
 
 try:
     from nose.tools import assert_dict_equal
 except ImportError:
     assert_dict_equal = assert_equal
-from pyoauth.url import percent_decode, percent_encode, parse_qs, \
-    urlencode_s, urlencode_sl, query_unflatten, \
-    query_add, urlparse_normalized, url_add_query, \
-    query_params_sanitize, request_protocol_params_sanitize, oauth_url_sanitize, \
-    url_append_query, query_append, is_valid_callback_url
+
+from pyoauth.error import InvalidUrlError, \
+    InvalidQueryParametersError, \
+    InsecureOAuthUrlError, \
+    InvalidOAuthParametersError, \
+    InsecureOAuthParametersError
+from pyoauth.types.unicode import to_utf8_if_unicode
+from pyoauth.url import \
+    percent_decode, \
+    percent_encode, \
+    parse_qs, \
+    urlencode_s, \
+    urlencode_sl, \
+    query_unflatten, \
+    query_add, \
+    urlparse_normalized, \
+    url_add_query, \
+    query_params_sanitize, \
+    request_protocol_params_sanitize, \
+    oauth_url_sanitize, \
+    url_append_query, \
+    query_append, \
+    is_valid_callback_url
 
 from urlparse import urlparse
 

@@ -53,8 +53,6 @@ Parameter sanitization
 
 """
 import logging
-from pyoauth.error import InvalidQueryParametersError, InsecureOAuthParametersError, InvalidOAuthParametersError, InsecureOAuthUrlError, InvalidUrlError
-from pyoauth.types import is_sequence
 
 try:
     # Python 3.
@@ -74,7 +72,13 @@ try:
 except Exception:
     bytes = str
 
-from pyoauth.unicode import to_utf8_if_unicode, to_utf8, is_bytes_or_unicode
+from pyoauth.error import InvalidQueryParametersError, \
+    InsecureOAuthParametersError, \
+    InvalidOAuthParametersError, \
+    InsecureOAuthUrlError, \
+    InvalidUrlError
+from pyoauth.types import is_sequence
+from pyoauth.types.unicode import to_utf8_if_unicode, to_utf8, is_bytes_or_unicode
 
 
 def parse_qs(query_string):
