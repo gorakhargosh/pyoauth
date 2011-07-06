@@ -12,18 +12,18 @@ Functions
 .. autofunction:: verify
 """
 
-import sys
-import os
-
-PARENT_DIR_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-sys.path[0:0] = [
-    os.path.join(PARENT_DIR_PATH, "tlslite"),
-]
+#import sys
+#import os
+#
+#PARENT_DIR_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+#sys.path[0:0] = [
+#    os.path.join(PARENT_DIR_PATH, "tlslite"),
+#]
 
 import binascii
 from base64 import b64decode
-from tlslite.utils import keyfactory
-from tlslite.X509 import X509
+from pyoauth.crypto.utils import keyfactory
+from pyoauth.crypto.X509 import X509
 
 
 def sign(private_key, base_string):
