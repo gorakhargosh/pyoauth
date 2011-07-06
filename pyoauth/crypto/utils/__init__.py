@@ -56,11 +56,6 @@ def generate_random_uint_string(bit_strength=64, decimal=True):
     Generates a random ASCII-encoded unsigned integral number in decimal
     or hexadecimal representation.
 
-    .. NOTE::
-        Why based on bit strength? See:
-        http://code.google.com/apis/accounts/docs/OAuth_ref.html#RequestToken
-
-    :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param bit_strength:
         Bit strength.
     :param decimal:

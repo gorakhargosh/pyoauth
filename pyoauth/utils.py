@@ -70,7 +70,7 @@ def generate_nonce(bit_strength=64, decimal=True):
     or hexadecimal representation.
 
     .. NOTE::
-        Why based on bit strength? See:
+        Google OAuth requires nonce based on bit-strength. See:
         http://code.google.com/apis/accounts/docs/OAuth_ref.html#RequestToken
 
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
