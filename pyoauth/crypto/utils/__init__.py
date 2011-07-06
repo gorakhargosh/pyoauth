@@ -4,6 +4,7 @@
 
 import math
 import binascii
+import hmac
 from hashlib import sha1, md5
 
 
@@ -37,6 +38,12 @@ def md5_digest(*inputs):
     for i in inputs:
         md.update(i)
     return md.digest()
+
+def hmac_sha1_digest(key, data):
+    return hmac.new(key, data, sha1).digest()
+
+def hmac_sha1_base64(key, data):
+    return binascii.b2a_base64(hmac_sha1_digest(key, data))[:-1]
 
 
 def bit_count(n):

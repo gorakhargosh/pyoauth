@@ -42,12 +42,10 @@ Authorization Header
 """
 
 import binascii
-import hmac
 import os
 import time
 import re
 
-from hashlib import sha1
 
 try:
     # Python 3.
@@ -56,6 +54,7 @@ except ImportError:
     # Python 2.5+
     from urlparse import urlunparse
 
+from pyoauth.crypto.utils import hmac_sha1_base64
 from pyoauth.types.unicode import to_utf8
 from pyoauth.error import InvalidHttpMethodError, \
     InvalidUrlError, \
@@ -164,8 +163,7 @@ def generate_hmac_sha1_signature(client_shared_secret,
     base_string = generate_signature_base_string(method, url, oauth_params)
     key = _generate_plaintext_signature(client_shared_secret,
                                    token_or_temporary_shared_secret)
-    digest = hmac.new(key, base_string, sha1).digest()
-    return binascii.b2a_base64(digest)[:-1]
+    return hmac_sha1_base64(key, base_string)
 
 
 def generate_rsa_sha1_signature(client_private_key,
