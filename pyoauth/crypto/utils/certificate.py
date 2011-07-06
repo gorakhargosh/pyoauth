@@ -14,6 +14,7 @@ Functions:
 """
 
 
+import time
 import base64
 import textwrap
 
@@ -26,6 +27,13 @@ PRIVATE_KEY_PEM_FOOTER = '-----END PRIVATE KEY-----'
 
 PUBLIC_KEY_PEM_HEADER = '-----BEGIN PUBLIC KEY-----'
 PUBLIC_KEY_PEM_FOOTER = '-----END PUBLIC KEY-----'
+
+
+def cert_time_to_seconds(cert_time):
+    """Takes a date-time string in standard ASN1_print form
+    ("MON DAY 24HOUR:MINUTE:SEC YEAR TIMEZONE") and return
+    a Python time value in seconds past the epoch."""
+    return time.mktime(time.strptime(cert_time, "%b %d %H:%M:%S %Y GMT"))
 
 
 def pem_to_der(pem_cert_string, pem_header, pem_footer):
