@@ -53,8 +53,8 @@ def long_to_bytes(num, blocksize=0):
     :param num:
         Long value
     :param blocksize:
-        If optional blocksize is given and greater than zero, pad the front of the
-        byte string with binary zeros so that the length is a multiple of
+        If optional blocksize is given and greater than zero, pad the front of
+        the byte string with binary zeros so that the length is a multiple of
         blocksize.
     :returns:
         Byte string.
@@ -65,7 +65,7 @@ def long_to_bytes(num, blocksize=0):
     pack = struct.pack
     while num > 0:
         s = pack('>I', num & 0xffffffffL) + s
-        num = num >> 32
+        num >>= 32
     # strip off leading zeros
     for i in range(len(s)):
         if s[i] != '\000':
@@ -194,7 +194,7 @@ def long_to_mpi(num):
     ext = 0
     #If the high-order bit is going to be set,
     #add an extra byte of zeros
-    if (bit_count(num) & 0x7)==0:
+    if not (bit_count(num) & 0x7):
         ext = 1
     length = byte_count(num) + ext
     byte_array = bytearray_concat(bytearray_create_zeros(4+ext), byte_array)
@@ -256,8 +256,8 @@ def inverse_mod(a, b):
     c, d = a, b
     uc, ud = 1, 0
     while c:
-        # TODO: This will break when python division changes, but we can't use //
-        # because of Jython
+        # TODO: This will break when python division changes, but we can't use
+        # // because of Jython
         q = d / c
         c, d = d-(q*c), c
         uc, ud = ud - (q * uc), uc
@@ -313,7 +313,7 @@ except ImportError:
 
         #TREV - Added support for negative exponents
         negativeResult = False
-        if (power < 0):
+        if power < 0:
             power *= -1
             negativeResult = True
 
@@ -325,7 +325,7 @@ except ImportError:
         nibbles = None
         while power:
             nibbles = int(power & mask), nibbles
-            power = power >> nBitScan
+            power >>= nBitScan
 
         # Make a table of powers of base up to 2**nBitScan - 1
         lowPowers = [1]
