@@ -52,7 +52,7 @@ except ImportError:
     # Python 2.5+
     from urlparse import urlunparse
 
-from pyoauth.crypto.utils import hmac_sha1_base64
+from pyoauth.crypto.utils import hmac_sha1_base64_digest
 from pyoauth.crypto.utils.random import \
     generate_random_uint_string, \
     generate_random_hex_string
@@ -151,7 +151,7 @@ def generate_hmac_sha1_signature(client_shared_secret,
     base_string = generate_signature_base_string(method, url, oauth_params)
     key = _generate_plaintext_signature(client_shared_secret,
                                    token_or_temporary_shared_secret)
-    return hmac_sha1_base64(key, base_string)
+    return hmac_sha1_base64_digest(key, base_string)
 
 
 def generate_rsa_sha1_signature(client_private_key,

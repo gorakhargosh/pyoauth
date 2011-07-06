@@ -8,15 +8,19 @@
 
 Functions:
 ----------
+.. autofunction:: base64_decode
+.. autofunction:: base64_encode
 .. autofunction:: sha1_digest
 .. autofunction:: sha1_hexdigest
+.. autofunction:: sha1_base64_digest
 .. autofunction:: md5_digest
 .. autofunction:: md5_hexdigest
 .. autofunction:: hmac_sha1_digest
-.. autofunction:: hmac_sha1_base64
+.. autofunction:: hmac_sha1_base64_digest
 .. autofunction:: generate_random_uint_string
 .. autofunction:: generate_random_hex_string
 .. autofunction:: bit_count
+.. autofunction:: byte_count
 """
 
 import struct
@@ -24,6 +28,7 @@ import math
 import binascii
 import hmac
 from hashlib import sha1, md5
+
 
 def base64_decode(encoded):
     """
@@ -132,7 +137,7 @@ def hmac_sha1_digest(key, data):
     return hmac.new(key, data, sha1).digest()
 
 
-def hmac_sha1_base64(key, data):
+def hmac_sha1_base64_digest(key, data):
     """
     Calculates a base64-encoded HMAC SHA-1 signature.
 
