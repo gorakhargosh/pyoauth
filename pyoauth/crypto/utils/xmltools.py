@@ -6,23 +6,14 @@
 This module has misc. helper functions for working with XML DOM nodes."""
 
 import re
-import os
 
-if os.name != "java":
-    from xml.dom import minidom
-    from xml.sax import saxutils
+from xml.dom import minidom
+from xml.sax import saxutils
 
-    def parseDocument(s):
-        return minidom.parseString(s)
-else:
-    from javax.xml.parsers import *
-    import java
 
-    builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+def parseDocument(s):
+    return minidom.parseString(s)
 
-    def parseDocument(s):
-        stream = java.io.ByteArrayInputStream(java.lang.String(s).getBytes())
-        return builder.parse(stream)
 
 def parseAndStripWhitespace(s):
     try:

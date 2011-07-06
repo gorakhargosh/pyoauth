@@ -3,7 +3,7 @@
 
 """Class for parsing ASN.1"""
 
-from pyoauth.crypto.utils.codec import *
+from pyoauth.crypto.utils.codec import Parser
 
 #Takes a byte array which has a DER TLV field at its head
 class ASN1Parser(object):
