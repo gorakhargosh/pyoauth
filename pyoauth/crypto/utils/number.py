@@ -8,10 +8,13 @@
 Functions:
 ----------
 .. autofunction:: bytes_to_long
-.. autofunction:: bytes_to_long_slow
+.. autofunction:: bytes_to_long_original
 .. autofunction:: long_to_bytes
-.. autofunction:: long_to_bytes_slow
-
+.. autofunction:: long_to_bytes_original
+.. autofunction:: long_b64encode
+.. autofunction:: long_b64decode
+.. autofunction:: mpi_to_long
+.. autofunction:: long_to_mpi
 """
 
 
@@ -32,13 +35,13 @@ from pyoauth.crypto.utils.bytearray import \
 
 # Improved conversion functions contributed by Barry Warsaw, after
 # careful benchmarking
-def long_to_bytes(n, blocksize=0):
+def long_to_bytes(num, blocksize=0):
     """
     Convert a long integer to a byte string::
 
         long_to_bytes(n:long, blocksize:int) : string
 
-    :param n:
+    :param num:
         Long value
     :param blocksize:
         If optional blocksize is given and greater than zero, pad the front of the
@@ -49,11 +52,11 @@ def long_to_bytes(n, blocksize=0):
     """
     # after much testing, this algorithm was deemed to be the fastest
     s = ''
-    n = long(n)
+    num = long(num)
     pack = struct.pack
-    while n > 0:
-        s = pack('>I', n & 0xffffffffL) + s
-        n = n >> 32
+    while num > 0:
+        s = pack('>I', num & 0xffffffffL) + s
+        num = num >> 32
     # strip off leading zeros
     for i in range(len(s)):
         if s[i] != '\000':
@@ -70,7 +73,7 @@ def long_to_bytes(n, blocksize=0):
     return s
 
 
-def bytes_to_long(s):
+def bytes_to_long(byte_string):
     """
     Convert a byte string to a long integer::
 
@@ -85,71 +88,106 @@ def bytes_to_long(s):
     """
     acc = 0L
     unpack = struct.unpack
-    length = len(s)
+    length = len(byte_string)
     if length % 4:
         extra = (4 - length % 4)
-        s = '\000' * extra + s
+        byte_string = '\000' * extra + byte_string
         length = length + extra
     for i in range(0, length, 4):
-        acc = (acc << 32) + unpack('>I', s[i:i+4])[0]
+        acc = (acc << 32) + unpack('>I', byte_string[i:i+4])[0]
     return acc
 
 
-def long_to_bytes_slow(s):
+def long_to_bytes_original(num):
     """
     Convert a long integer to a byte string::
 
         long_to_bytes(n:long) : string
 
-    :param n:
+    :param num:
         Long value
     :returns:
         Byte string.
     """
-    byte_array = bytearray_from_long(s)
+    byte_array = bytearray_from_long(num)
     return bytearray_to_bytes(byte_array)
 
 
-def bytes_to_long_slow(s):
+def bytes_to_long_original(byte_string):
     """
     Convert a byte string to a long integer::
 
-        bytes_to_long(bytestring) : long
+        bytes_to_long(byte_string) : long
 
     This is (essentially) the inverse of long_to_bytes().
 
-    :param bytestring:
+    :param byte_string:
         A byte string.
     :returns:
         Long.
     """
-    byte_array = bytearray_from_bytes(s)
+    byte_array = bytearray_from_bytes(byte_string)
     return bytearray_to_long(byte_array)
 
 
+def long_b64encode(num):
+    """
+    Base-64 encodes a long.
 
-def numberToBase64(n):
-    byte_array = bytearray_from_long(n)
+    :param num:
+        A long integer.
+    :returns:
+        Base-64 encoded byte string.
+    """
+    byte_array = bytearray_from_long(num)
     return bytearray_b64encode(byte_array)
 
-def base64ToNumber(s):
-    byte_array = bytearray_b64decode(s)
+
+def long_b64decode(encoded):
+    """
+    Base-64 decodes a string into a long.
+
+    :param encoded:
+        The encoded byte string.
+    :returns:
+        Long value.
+    """
+    byte_array = bytearray_b64decode(encoded)
     return bytearray_to_long(byte_array)
 
-def mpiToNumber(mpi): #mpi is an openssl-format bignum string
-    if (ord(mpi[4]) & 0x80) !=0: #Make sure this is a positive number
-        raise AssertionError()
-    byte_array = bytearray_from_bytes(mpi[4:])
+
+def mpi_to_long(mpi_byte_string):
+    """
+    Converts an OpenSSL-format MPI Bignum byte string into a long.
+
+    :param mpi_byte_string:
+        OpenSSL-format MPI Bignum byte string.
+    :returns:
+        Long value.
+    """
+    #Make sure this is a positive number
+    assert (ord(mpi_byte_string[4]) & 0x80) !=0
+
+    byte_array = bytearray_from_bytes(mpi_byte_string[4:])
     return bytearray_to_long(byte_array)
 
-def numberToMPI(n):
-    byte_array = bytearray_from_long(n)
+
+def long_to_mpi(num):
+    """
+    Converts a long value into an OpenSSL-format MPI Bignum byte string.
+
+    :param num:
+        Long value.
+    :returns:
+        OpenSSL-format MPI Bignum byte string.
+    """
+    byte_array = bytearray_from_long(num)
     ext = 0
     #If the high-order bit is going to be set,
     #add an extra byte of zeros
-    if (bit_count(n) & 0x7)==0:
+    if (bit_count(num) & 0x7)==0:
         ext = 1
-    length = byte_count(n) + ext
+    length = byte_count(num) + ext
     byte_array = bytearray_concat(bytearray_create_zeros(4+ext), byte_array)
     byte_array[0] = (length >> 24) & 0xFF
     byte_array[1] = (length >> 16) & 0xFF

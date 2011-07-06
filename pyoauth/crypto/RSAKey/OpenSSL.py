@@ -40,8 +40,8 @@ if is_m2crypto_available():
                 raise AssertionError()
             if n and e:
                 self.rsa = m2.rsa_new()
-                m2.rsa_set_n(self.rsa, numberToMPI(n))
-                m2.rsa_set_e(self.rsa, numberToMPI(e))
+                m2.rsa_set_n(self.rsa, long_to_mpi(n))
+                m2.rsa_set_e(self.rsa, long_to_mpi(e))
 
         def __del__(self):
             if self.rsa:
@@ -51,11 +51,11 @@ if is_m2crypto_available():
             if name == 'e':
                 if not self.rsa:
                     return 0
-                return mpiToNumber(m2.rsa_get_e(self.rsa))
+                return mpi_to_long(m2.rsa_get_e(self.rsa))
             elif name == 'n':
                 if not self.rsa:
                     return 0
-                return mpiToNumber(m2.rsa_get_n(self.rsa))
+                return mpi_to_long(m2.rsa_get_n(self.rsa))
             else:
                 raise AttributeError
 
