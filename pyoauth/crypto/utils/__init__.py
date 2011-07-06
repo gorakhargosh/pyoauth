@@ -31,7 +31,7 @@ from hashlib import sha1, md5
 
 def base64_decode(encoded):
     """
-    Decodes a base-64 encoded string into a bytestring.
+    Decodes a base-64 encoded string into a byte string.
 
     :param encoded:
         Base-64 encoded byte string.
@@ -41,16 +41,16 @@ def base64_decode(encoded):
     return binascii.a2b_base64(encoded)
 
 
-def base64_encode(bytestring):
+def base64_encode(byte_string):
     """
     Encodes a byte string using Base 64 and removes the last new line character.
 
-    :param bytestring:
+    :param byte_string:
         The byte string to encode.
     :returns:
         Base64 encoded string without newline characters.
     """
-    return binascii.b2a_base64(bytestring)[:-1]
+    return binascii.b2a_base64(byte_string)[:-1]
 
 
 def sha1_digest(*inputs):
