@@ -3,6 +3,7 @@
 # Cryptographic utility functions.
 
 import math
+import binascii
 from hashlib import sha1, md5
 
 
@@ -20,6 +21,8 @@ def sha1_digest(*inputs):
         md.update(i)
     return md.digest()
 
+def sha1_hexdigest(*inputs):
+    return binascii.b2a_hex(sha1_digest(*inputs))
 
 def md5_digest(*inputs):
     """
