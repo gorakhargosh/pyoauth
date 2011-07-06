@@ -3,14 +3,12 @@
 
 """Abstract class for RSA."""
 
-from pyoauth.crypto.utils import bit_count
+from pyoauth.crypto.utils import bit_count, sha1_hash
 from pyoauth.crypto.utils.cryptomath import *
 from pyoauth.crypto.utils.bytearray import \
     bytearray_create, \
     bytearray_to_string, \
     bytearray_from_string
-
-from hashlib import sha1
 
 class RSAKey(object):
     """This is an abstract base class for RSA keys.
@@ -82,7 +80,7 @@ class RSAKey(object):
         """
         if not isinstance(bytes, type("")):
             bytes = bytearray_to_string(bytes)
-        hashBytes = bytearray_from_string(sha1(bytes).digest())
+        hashBytes = bytearray_from_string(sha1_hash(bytes))
         prefixedHashBytes = self._addPKCS1SHA1Prefix(hashBytes)
         sigBytes = self.sign(prefixedHashBytes)
         return sigBytes
@@ -103,7 +101,7 @@ class RSAKey(object):
         """
         if not isinstance(bytes, type("")):
             bytes = bytearray_to_string(bytes)
-        hashBytes = bytearray_from_string(sha1(bytes).digest())
+        hashBytes = bytearray_from_string(sha1_hash(bytes))
         prefixedHashBytes = self._addPKCS1SHA1Prefix(hashBytes)
         return self.verify(sigBytes, prefixedHashBytes)
 
