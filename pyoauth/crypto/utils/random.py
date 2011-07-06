@@ -8,7 +8,7 @@
 
 Functions:
 ----------
-.. autofunction:: generate_random_number
+.. autofunction:: generate_random_long
 .. autofunction:: generate_random_uint_string
 .. autofunction:: generate_random_hex_string
 """
@@ -20,7 +20,7 @@ from pyoauth.crypto.utils import bit_count, byte_count, base64_encode
 from pyoauth.crypto.utils.bytearray import bytearray_random, bytearray_to_long
 
 
-def generate_random_number(low, high):
+def generate_random_long(low, high):
     if low >= high:
         raise ValueError("High must be greater than low.")
     num_bits = bit_count(high)

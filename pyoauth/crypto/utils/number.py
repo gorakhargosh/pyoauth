@@ -21,7 +21,7 @@ Functions:
 import math
 import struct
 
-from pyoauth.crypto.utils.random import generate_random_number
+from pyoauth.crypto.utils.random import generate_random_long
 from pyoauth.crypto.utils import bit_count, byte_count
 from pyoauth.crypto.utils.bytearray import \
     bytearray_concat, \
@@ -328,7 +328,7 @@ def isPrime(n, iterations=5, display=False):
                 return False
             else:
                 v, i = powMod(v, 2, n), i+1
-        a = generate_random_number(2, n)
+        a = generate_random_long(2, n)
     return True
 
 def getRandomPrime(bits, display=False):
@@ -341,13 +341,13 @@ def getRandomPrime(bits, display=False):
     #29 % 30 and keep them there
     low = (2L ** (bits-1)) * 3/2
     high = 2L ** bits - 30
-    p = generate_random_number(low, high)
+    p = generate_random_long(low, high)
     p += 29 - (p % 30)
     while 1:
         if display: print ".",
         p += 30
         if p >= high:
-            p = generate_random_number(low, high)
+            p = generate_random_long(low, high)
             p += 29 - (p % 30)
         if isPrime(p, display=display):
             return p
@@ -363,13 +363,13 @@ def getRandomSafePrime(bits, display=False):
     #29 % 30 and keep them there
     low = (2 ** (bits-2)) * 3/2
     high = (2 ** (bits-1)) - 30
-    q = generate_random_number(low, high)
+    q = generate_random_long(low, high)
     q += 29 - (q % 30)
     while 1:
         if display: print ".",
         q += 30
         if (q >= high):
-            q = generate_random_number(low, high)
+            q = generate_random_long(low, high)
             q += 29 - (q % 30)
         #Ideas from Tom Wu's SRP code
         #Do trial division on p and q before Rabin-Miller
