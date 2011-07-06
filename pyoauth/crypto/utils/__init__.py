@@ -25,6 +25,29 @@ import binascii
 import hmac
 from hashlib import sha1, md5
 
+def base64_decode(encoded):
+    """
+    Decodes a base-64 encoded string into a bytestring.
+
+    :param encoded:
+        Base-64 encoded byte string.
+    :returns:
+        byte string.
+    """
+    return binascii.a2b_base64(encoded)
+
+
+def base64_encode(bytestring):
+    """
+    Encodes a byte string using Base 64 and removes the last new line character.
+
+    :param bytestring:
+        The byte string to encode.
+    :returns:
+        Base64 encoded string without newline character.
+    """
+    return binascii.b2a_base64(bytestring)[:-1]
+
 
 def sha1_digest(*inputs):
     """
@@ -52,6 +75,19 @@ def sha1_hexdigest(*inputs):
         Hexadecimal representation of the SHA-1 digest.
     """
     return binascii.b2a_hex(sha1_digest(*inputs))
+
+
+def sha1_base64_digest(value):
+    """
+    Calculates Base-64-encoded SHA-1 digest of a variable
+    number of inputs.
+
+    :param inputs;
+        A variable number of inputs for which the digest will be calculated.
+    :returns:
+        Base-64-encoded SHA-1 digest.
+    """
+    return base64_encode(sha1_digest(value))
 
 
 def md5_digest(*inputs):
@@ -107,7 +143,7 @@ def hmac_sha1_base64(key, data):
     :returns:
         Base64-encoded HMAC SHA-1 signature.
     """
-    return binascii.b2a_base64(hmac_sha1_digest(key, data))[:-1]
+    return base64_encode(hmac_sha1_digest(key, data))
 
 
 def bit_count(n):

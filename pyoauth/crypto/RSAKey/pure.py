@@ -5,7 +5,7 @@
 
 from pyoauth.crypto.utils.random import generate_random_number
 from pyoauth.crypto.utils.cryptomath import *
-from pyoauth.crypto.utils import xmltools
+from pyoauth.crypto.utils import xmltools, sha1_base64_digest
 from pyoauth.crypto.utils.bytearray import bytearray_to_long
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
 from pyoauth.crypto.RSAKey import RSAKey
@@ -30,7 +30,7 @@ class Python_RSAKey(RSAKey):
 
     def hash(self):
         s = self.writeXMLPublicKey('\t\t')
-        return hashAndBase64(s.strip())
+        return sha1_base64_digest(s.strip())
 
     def _rawPrivateKeyOp(self, m):
         #Create blinding values, on the first pass:

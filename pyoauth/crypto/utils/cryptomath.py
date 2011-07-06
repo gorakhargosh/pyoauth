@@ -7,17 +7,17 @@ This module has basic math/crypto code."""
 
 
 import math
-import base64
-import binascii
 
-from pyoauth.crypto.utils import bit_count, sha1_digest, byte_count
+from pyoauth.crypto.utils import bit_count, sha1_digest, byte_count, base64_encode
 from pyoauth.crypto.utils.bytearray import \
     bytearray_concat, \
     bytearray_create_zeros, \
     bytearray_from_bytes, \
     bytearray_to_bytes, \
     bytearray_from_long, \
-    bytearray_to_long
+    bytearray_to_long, \
+    bytearray_b64decode, \
+    bytearray_b64encode
 
 # **************************************************************************
 # Load Optional Modules
@@ -54,13 +54,7 @@ except ImportError:
 # Converter Functions
 # **************************************************************************
 
-def bytearray_b64encode(byte_array):
-    s = bytearray_to_bytes(byte_array)
-    return stringToBase64(s)
 
-def bytearray_b64decode(s):
-    s = base64ToString(s)
-    return bytearray_from_bytes(s)
 
 def numberToBase64(n):
     byte_array = bytearray_from_long(n)
@@ -69,17 +63,6 @@ def numberToBase64(n):
 def base64ToNumber(s):
     byte_array = bytearray_b64decode(s)
     return bytearray_to_long(byte_array)
-
-def base64ToString(s):
-    try:
-        return base64.decodestring(s)
-    except binascii.Error, e:
-        raise SyntaxError(e)
-    except binascii.Incomplete, e:
-        raise SyntaxError(e)
-
-def stringToBase64(s):
-    return base64.encodestring(s).replace("\n", "")
 
 def mpiToNumber(mpi): #mpi is an openssl-format bignum string
     if (ord(mpi[4]) & 0x80) !=0: #Make sure this is a positive number
@@ -108,13 +91,12 @@ def numberToMPI(n):
 # Misc. Utility Functions
 # **************************************************************************
 
-def hashAndBase64(s):
-    return stringToBase64(sha1_digest(s))
+
 
 def getBase64Nonce(numChars=22): #defaults to an 132 bit nonce
     byte_array = generate_random_bytes(numChars)
     bytesStr = "".join([chr(b) for b in byte_array])
-    return stringToBase64(bytesStr)[:numChars]
+    return base64_encode(bytesStr)[:numChars]
 
 
 # **************************************************************************

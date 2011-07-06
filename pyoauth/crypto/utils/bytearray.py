@@ -18,7 +18,7 @@ Functions:
 """
 
 from array import array
-from pyoauth.crypto.utils import byte_count
+from pyoauth.crypto.utils import byte_count, base64_encode, base64_decode
 from pyoauth.crypto.utils.prng import generate_random_bytes
 
 
@@ -129,3 +129,11 @@ def bytearray_from_long(n):
         byte_array[count] = int(n % 256)
         n >>= 8
     return byte_array
+
+
+def bytearray_b64decode(value):
+    return bytearray_from_bytes(base64_decode(value))
+
+
+def bytearray_b64encode(byte_array):
+    return base64_encode(bytearray_to_bytes(byte_array))
