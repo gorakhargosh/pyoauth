@@ -34,7 +34,7 @@ class Python_RSAKey(RSAKey):
     def _rawPrivateKeyOp(self, m):
         #Create blinding values, on the first pass:
         if not self.blinder:
-            self.unblinder = getRandomNumber(2, self.n)
+            self.unblinder = generate_random_number(2, self.n)
             self.blinder = powMod(invMod(self.unblinder, self.n), self.e,
                                   self.n)
 

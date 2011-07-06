@@ -119,7 +119,7 @@ def getBase64Nonce(numChars=22): #defaults to an 132 bit nonce
 # Big Number Math
 # **************************************************************************
 
-def getRandomNumber(low, high):
+def generate_random_number(low, high):
     if low >= high:
         raise AssertionError()
     howManyBits = bit_count(high)
@@ -260,7 +260,7 @@ def isPrime(n, iterations=5, display=False):
                 return False
             else:
                 v, i = powMod(v, 2, n), i+1
-        a = getRandomNumber(2, n)
+        a = generate_random_number(2, n)
     return True
 
 def getRandomPrime(bits, display=False):
@@ -273,13 +273,13 @@ def getRandomPrime(bits, display=False):
     #29 % 30 and keep them there
     low = (2L ** (bits-1)) * 3/2
     high = 2L ** bits - 30
-    p = getRandomNumber(low, high)
+    p = generate_random_number(low, high)
     p += 29 - (p % 30)
     while 1:
         if display: print ".",
         p += 30
         if p >= high:
-            p = getRandomNumber(low, high)
+            p = generate_random_number(low, high)
             p += 29 - (p % 30)
         if isPrime(p, display=display):
             return p
@@ -295,13 +295,13 @@ def getRandomSafePrime(bits, display=False):
     #29 % 30 and keep them there
     low = (2 ** (bits-2)) * 3/2
     high = (2 ** (bits-1)) - 30
-    q = getRandomNumber(low, high)
+    q = generate_random_number(low, high)
     q += 29 - (q % 30)
     while 1:
         if display: print ".",
         q += 30
         if (q >= high):
-            q = getRandomNumber(low, high)
+            q = generate_random_number(low, high)
             q += 29 - (q % 30)
         #Ideas from Tom Wu's SRP code
         #Do trial division on p and q before Rabin-Miller
