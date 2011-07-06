@@ -17,6 +17,12 @@ Functions:
 .. autofunction:: long_b64decode
 .. autofunction:: mpi_to_long
 .. autofunction:: long_to_mpi
+.. autofunction:: pow_mod
+.. autofunction:: inverse_mod
+.. autofunction:: make_prime_sieve
+.. autofunction:: is_prime
+.. autofunction:: generate_random_prime
+.. autofunction:: generate_random_safe_prime
 """
 
 
@@ -34,6 +40,7 @@ from pyoauth.crypto.utils.bytearray import \
     bytearray_to_long, \
     bytearray_b64decode, \
     bytearray_b64encode
+
 
 # Improved conversion functions contributed by Barry Warsaw, after
 # careful benchmarking
@@ -272,16 +279,16 @@ try:
         return long(result)
 
 except ImportError:
-    #Copied from Bryan G. Olson's post to comp.lang.python
-    #Does left-to-right instead of pow()'s right-to-left,
-    #thus about 30% faster than the python built-in with small bases
     def pow_mod(base, power, modulus):
-        nBitScan = 5
         """
         Calculates:
             base**pow mod modulus
 
         Uses multi bit scanning with nBitScan bits at a time.
+        From Bryan G. Olson's post to comp.lang.python
+
+        Does left-to-right instead of pow()'s right-to-left,
+        thus about 30% faster than the python built-in with small bases
 
         :param base:
             Base
@@ -292,6 +299,8 @@ except ImportError:
         :returns:
             base**pow mod modulus
         """
+        nBitScan = 5
+
         #TREV - Added support for negative exponents
         negativeResult = False
         if (power < 0):
@@ -334,11 +343,20 @@ except ImportError:
         return prod
 
 
-#Pre-calculate a sieve of the ~100 primes < 1000:
+
 def make_prime_sieve(n):
+    """
+    Pre-calculate a sieve of the ~100 primes < 1000.
+
+    :param n:
+        Count
+    :returns:
+        Prime sieve.
+    """
     sieve = range(n)
     for count in range(2, int(math.sqrt(n))):
-        if sieve[count] == 0:
+        #if sieve[count] == 0:
+        if not sieve[count]:
             continue
         x = sieve[count] * 2
         while x < len(sieve):
@@ -349,17 +367,26 @@ def make_prime_sieve(n):
 
 sieve = make_prime_sieve(1000)
 
-def is_prime(n, iterations=5, display=False):
+
+def is_prime(n, iterations=5):
+    """
+    Determines whether a number is prime.
+
+    :param n:
+        Number
+    :param iterations:
+        Number of iterations.
+    :
+    """
     #Trial division with sieve
     for x in sieve:
         if x >= n: return True
-        if n % x == 0: return False
+        if not n % x: return False
     #Passed trial division, proceed to Rabin-Miller
     #Rabin-Miller implemented per Ferguson & Schneier
     #Compute s, t for Rabin-Miller
-    if display: print "*",
     s, t = n-1, 0
-    while s % 2 == 0:
+    while not s % 2:
         s, t = s/2, t+1
     #Repeat Rabin-Miller x times
     a = 2 #Use 2 as a base for first iteration speedup, per HAC
@@ -376,7 +403,16 @@ def is_prime(n, iterations=5, display=False):
         a = generate_random_long(2, n)
     return True
 
-def generate_random_prime(bits, display=False):
+
+def generate_random_prime(bits):
+    """
+    Generates a random prime number.
+
+    :param bits:
+        Number of bits.
+    :return:
+        Prime number long value.
+    """
     assert not bits < 10
 
     #The 1.5 ensures the 2 MSBs are set
@@ -389,17 +425,24 @@ def generate_random_prime(bits, display=False):
     p = generate_random_long(low, high)
     p += 29 - (p % 30)
     while 1:
-        if display: print ".",
         p += 30
         if p >= high:
             p = generate_random_long(low, high)
             p += 29 - (p % 30)
-        if is_prime(p, display=display):
+        if is_prime(p):
             return p
 
-def generate_random_safe_prime(bits, display=False):
+
+def generate_random_safe_prime(bits):
     """
     Unused at the moment.
+
+    Generates a random prime number.
+
+    :param bits:
+        Number of bits.
+    :return:
+        Prime number long value.
     """
     assert not bits < 10
 
@@ -413,15 +456,14 @@ def generate_random_safe_prime(bits, display=False):
     q = generate_random_long(low, high)
     q += 29 - (q % 30)
     while 1:
-        if display: print ".",
         q += 30
-        if (q >= high):
+        if q >= high:
             q = generate_random_long(low, high)
             q += 29 - (q % 30)
         #Ideas from Tom Wu's SRP code
         #Do trial division on p and q before Rabin-Miller
-        if is_prime(q, 0, display=display):
+        if is_prime(q, 0):
             p = (2 * q) + 1
-            if is_prime(p, display=display):
-                if is_prime(q, display=display):
+            if is_prime(p):
+                if is_prime(q):
                     return p
