@@ -150,18 +150,20 @@ def hmac_sha1_base64_digest(key, data):
     return base64_encode(hmac_sha1_digest(key, data))
 
 
-def bit_count(n):
+def bit_count(num):
     """
-    Determines the number of bits in a number.
+    Determines the number of bits in a long value.
 
-    :param n:
-        Number.
+    :param num:
+        Long value.
     :returns:
-        Returns the number of bits in the number.
+        Returns the number of bits in the long value.
     """
-    if n==0:
+    #if num == 0:
+    #    return 0
+    if not num:
         return 0
-    s = "%x" % n
+    s = "%x" % num
     return ((len(s)-1)*4) + \
     {'0':0, '1':1, '2':2, '3':2,
      '4':3, '5':3, '6':3, '7':3,
@@ -171,17 +173,19 @@ def bit_count(n):
     #return int(math.floor(math.log(n, 2))+1)
 
 
-def byte_count(n):
+def byte_count(num):
     """
-    Determines the number of bytes in a number.
+    Determines the number of bytes in a long.
 
-    :param n:
-        The number.
+    :param num:
+        Long value.
     :returns:
-        The number of bytes in the number.
+        The number of bytes in the long integer.
     """
-    if n == 0:
+    #if num == 0:
+    #    return 0
+    if not num:
         return 0
-    bits = bit_count(n)
+    bits = bit_count(num)
     return int(math.ceil(bits / 8.0))
 
