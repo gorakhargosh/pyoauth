@@ -91,25 +91,25 @@ class RSAKey(object):
         sigBytes = self.sign(prefixedHashBytes)
         return sigBytes
 
-    def hashAndVerify(self, sigBytes, bytes):
+    def hashAndVerify(self, signature_bytestring, byte_string):
         """Hash and verify the passed-in bytes with the signature.
 
         This verifies a PKCS1-SHA1 signature on the passed-in data.
 
-        @type sigBytes: L{array.array} of unsigned bytes
-        @param sigBytes: A PKCS1-SHA1 signature.
+        @type signature_bytestring: L{array.array} of unsigned bytes
+        @param signature_bytestring: A PKCS1-SHA1 signature.
 
-        @type bytes: str or L{array.array} of unsigned bytes
-        @param bytes: The value which will be hashed and verified.
+        @type byte_string: str or L{array.array} of unsigned bytes
+        @param byte_string: The value which will be hashed and verified.
 
         @rtype: bool
         @return: Whether the signature matches the passed-in data.
         """
-        if not isinstance(bytes, type("")):
-            bytes = bytearray_to_bytes(bytes)
-        hashBytes = bytearray_from_bytes(sha1_digest(bytes))
+        if not isinstance(byte_string, type("")):
+            byte_string = bytearray_to_bytes(byte_string)
+        hashBytes = bytearray_from_bytes(sha1_digest(byte_string))
         prefixedHashBytes = self._addPKCS1SHA1Prefix(hashBytes)
-        return self.verify(sigBytes, prefixedHashBytes)
+        return self.verify(signature_bytestring, prefixedHashBytes)
 
     def sign(self, bytes):
         """Sign the passed-in bytes.
@@ -194,12 +194,12 @@ class RSAKey(object):
             return None
         m = self._rawPrivateKeyOp(c)
         decBytes = bytearray_from_long(m)
-        if (len(decBytes) != byte_count(self.n)-1): #Check first byte
+        if len(decBytes) != byte_count(self.n)-1: #Check first byte
             return None
         if decBytes[0] != 2: #Check second byte
             return None
         for x in range(len(decBytes)-1): #Scan through for zero separator
-            if decBytes[x]== 0:
+            if decBytes[x] == 0:
                 break
         else:
             return None
@@ -257,9 +257,11 @@ class RSAKey(object):
 
     def _addPKCS1Padding(self, bytes, blockType):
         padLength = (byte_count(self.n) - (len(bytes)+3))
-        if blockType == 1: #Signature padding
+        if blockType == 1:
+            # Signature padding
             pad = [0xFF] * padLength
-        elif blockType == 2: #Encryption padding
+        elif blockType == 2:
+            # Encryption padding
             pad = bytearray_create([])
             while len(pad) < padLength:
                 padBytes = bytearray_random(padLength * 2)

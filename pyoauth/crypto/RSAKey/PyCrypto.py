@@ -3,12 +3,14 @@
 #
 # Released into public domain.
 
-"""PyCrypto RSA implementation."""
+"""
+:module: pyoauth.crypto.RSAKey.PyCrypto
+:synopsis:PyCrypto RSA key adapter.
 
-from pyoauth.crypto.utils.compat import is_pycrypto_available
-from pyoauth.crypto.utils.bytearray import bytearray_to_bytes, bytearray_random
-from pyoauth.crypto.utils.number import *
+"""
+
 from pyoauth.crypto.utils import byte_count
+from pyoauth.crypto.utils.compat import is_pycrypto_available
 from pyoauth.crypto.utils.number import bytes_to_long, long_to_bytes
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
@@ -35,10 +37,10 @@ if is_pycrypto_available():
 
         def _rawPrivateKeyOp(self, m):
             s = long_to_bytes(m)
-            byteLength = byte_count(self.n)
-            if len(s)== byteLength:
+            num_bytes = byte_count(self.n)
+            if len(s)== num_bytes:
                 pass
-            elif len(s) == byteLength-1:
+            elif len(s) == num_bytes - 1:
                 s = '\0' + s
             else:
                 raise AssertionError()
@@ -47,10 +49,10 @@ if is_pycrypto_available():
 
         def _rawPublicKeyOp(self, c):
             s = long_to_bytes(c)
-            byteLength = byte_count(self.n)
-            if len(s)== byteLength:
+            num_bytes = byte_count(self.n)
+            if len(s) == num_bytes:
                 pass
-            elif len(s) == byteLength-1:
+            elif len(s) == num_bytes-1:
                 s = '\0' + s
             else:
                 raise AssertionError()
@@ -60,10 +62,10 @@ if is_pycrypto_available():
         def writeXMLPublicKey(self, indent=''):
             return Python_RSAKey(self.n, self.e).write(indent)
 
+        @staticmethod
         def generate(bits):
             key = PyCrypto_RSAKey()
-            def f(numBytes):
-                return bytearray_to_bytes(bytearray_random(numBytes))
-            key.rsa = RSA.generate(bits, f)
+            #def f(num_bytes):
+            #    return bytearray_to_bytes(bytearray_random(num_bytes))
+            key.rsa = RSA.generate(bits, generate_random_bytes)
             return key
-        generate = staticmethod(generate)

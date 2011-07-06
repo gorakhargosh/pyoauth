@@ -19,6 +19,7 @@ from pyoauth.crypto.utils.bytearray import bytearray_to_long
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
 from pyoauth.crypto.RSAKey import RSAKey
 
+
 class Python_RSAKey(RSAKey):
     def __init__(self, n=0, e=0, d=0, p=0, q=0, dP=0, dQ=0, qInv=0):
         assert not ((n and not e) or (e and not n))
