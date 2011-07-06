@@ -4,6 +4,13 @@
 # Released into public domain.
 
 """Pure-Python RSA implementation."""
+import logging
+
+from pyoauth.crypto.utils.certificate import \
+    pem_to_der_private_key, \
+    pem_to_der_rsa_private_key, \
+    PRIVATE_KEY_PEM_HEADER, \
+    RSA_PRIVATE_KEY_PEM_HEADER
 
 from pyoauth.crypto.utils.random import generate_random_long
 from pyoauth.crypto.utils.number import *
@@ -101,6 +108,7 @@ class Python_RSAKey(RSAKey):
     def writeXMLPublicKey(self, indent=''):
         return Python_RSAKey(self.n, self.e).write(indent)
 
+    @staticmethod
     def generate(bits):
         key = Python_RSAKey()
         p = generate_random_prime(bits/2, False)
@@ -115,37 +123,29 @@ class Python_RSAKey(RSAKey):
         key.dQ = key.d % (q-1)
         key.qInv = inverse_mod(q, p)
         return key
-    generate = staticmethod(generate)
 
+    @staticmethod
     def parsePEM(s, passwordCallback=None):
         """Parse a string containing a <privateKey> or <publicKey>, or
         PEM-encoded key."""
 
-        start = s.find("-----BEGIN PRIVATE KEY-----")
-        if start != -1:
-            end = s.find("-----END PRIVATE KEY-----")
-            if end == -1:
-                raise SyntaxError("Missing PEM Postfix")
-            s = s[start+len("-----BEGIN PRIVATE KEY -----") : end]
-            bytes = bytearray_b64decode(s)
-            return Python_RSAKey._parsePKCS8(bytes)
-        else:
-            start = s.find("-----BEGIN RSA PRIVATE KEY-----")
-            if start != -1:
-                end = s.find("-----END RSA PRIVATE KEY-----")
-                if end == -1:
-                    raise SyntaxError("Missing PEM Postfix")
-                s = s[start+len("-----BEGIN RSA PRIVATE KEY -----") : end]
-                bytes = bytearray_b64decode(s)
-                return Python_RSAKey._parseSSLeay(bytes)
-        raise SyntaxError("Missing PEM Prefix")
-    parsePEM = staticmethod(parsePEM)
+        try:
+            byte_array = bytearray_from_bytes(pem_to_der_private_key(s))
+            return Python_RSAKey._parsePKCS8(byte_array)
+        except ValueError:
+            try:
+                byte_array = bytearray_from_bytes(pem_to_der_rsa_private_key(s))
+                return Python_RSAKey._parseSSLeay(byte_array)
+            except Exception, e:
+                logging.exception(e)
+                raise e
 
+    @staticmethod
     def parseXML(s):
         element = xmltools.parseAndStripWhitespace(s)
         return Python_RSAKey._parseXML(element)
-    parseXML = staticmethod(parseXML)
 
+    @staticmethod
     def _parsePKCS8(bytes):
         p = ASN1Parser(bytes)
 
@@ -164,13 +164,13 @@ class Python_RSAKey(RSAKey):
         privateKeyP = ASN1Parser(privateKeyP.value)
 
         return Python_RSAKey._parseASN1PrivateKey(privateKeyP)
-    _parsePKCS8 = staticmethod(_parsePKCS8)
 
+    @staticmethod
     def _parseSSLeay(bytes):
         privateKeyP = ASN1Parser(bytes)
         return Python_RSAKey._parseASN1PrivateKey(privateKeyP)
-    _parseSSLeay = staticmethod(_parseSSLeay)
 
+    @staticmethod
     def _parseASN1PrivateKey(privateKeyP):
         version = privateKeyP.getChild(0).value[0]
         if version != 0:
@@ -184,8 +184,8 @@ class Python_RSAKey(RSAKey):
         dQ = bytearray_to_long(privateKeyP.getChild(7).value)
         qInv = bytearray_to_long(privateKeyP.getChild(8).value)
         return Python_RSAKey(n, e, d, p, q, dP, dQ, qInv)
-    _parseASN1PrivateKey = staticmethod(_parseASN1PrivateKey)
 
+    @staticmethod
     def _parseXML(element):
         try:
             xmltools.checkName(element, "privateKey")
@@ -214,4 +214,3 @@ class Python_RSAKey(RSAKey):
             dQ = long_b64decode(xmltools.getText(xmltools.getChild(element, 6, "dQ"), xmltools.base64RegEx))
             qInv = long_b64decode(xmltools.getText(xmltools.getLastChild(element, 7, "qInv"), xmltools.base64RegEx))
         return Python_RSAKey(n, e, d, p, q, dP, dQ, qInv)
-    _parseXML = staticmethod(_parseXML)
