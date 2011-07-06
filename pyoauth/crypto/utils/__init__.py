@@ -21,6 +21,8 @@ Functions:
 .. autofunction:: generate_random_hex_string
 .. autofunction:: bit_count
 .. autofunction:: byte_count
+.. autofunction:: bytes_to_long
+.. autofunction:: long_to_bytes
 """
 
 import struct
