@@ -41,8 +41,6 @@ Authorization Header
 
 """
 
-import binascii
-import os
 import time
 import re
 
@@ -54,7 +52,7 @@ except ImportError:
     # Python 2.5+
     from urlparse import urlunparse
 
-from pyoauth.crypto.utils import hmac_sha1_base64
+from pyoauth.crypto.utils import hmac_sha1_base64, generate_random_uint_string, generate_random_hex_string
 from pyoauth.types.unicode import to_utf8
 from pyoauth.error import InvalidHttpMethodError, \
     InvalidUrlError, \
@@ -91,13 +89,7 @@ def generate_nonce(bit_strength=64, decimal=True):
         hexadecimal/decimal-representation unsigned integral number
         based on the bit strength specified.
     """
-    if bit_strength % 8 or bit_strength <= 0:
-        raise ValueError("This function expects a bit strength: got `%r`." % (bit_strength, ))
-    n_bytes = bit_strength / 8
-    value = binascii.b2a_hex(os.urandom(n_bytes))
-    if decimal:
-        value = bytes(int(value, 16))
-    return value
+    return generate_random_uint_string(bit_strength=bit_strength, decimal=decimal)
 
 
 def generate_verification_code(length=8):
@@ -120,9 +112,7 @@ def generate_verification_code(length=8):
         A string representation of a randomly-generated hexadecimal OAuth
         verification code.
     """
-    if length % 2 or length <= 0:
-        raise ValueError("This function expects a positive even number length: got length `%r`." % (length, ))
-    return binascii.b2a_hex(os.urandom(length/2))
+    return generate_random_hex_string(length)
 
 
 def generate_timestamp():
