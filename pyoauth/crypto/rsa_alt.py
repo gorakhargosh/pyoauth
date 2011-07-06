@@ -32,7 +32,7 @@
 # 2. http://tools.ietf.org/html/rfc5849#section-3.4.3
 
 import binascii
-from hashlib import sha1
+from pyoauth.crypto.utils import sha1_hash
 
 try:
     from Crypto.PublicKey import RSA
@@ -47,7 +47,7 @@ except ImportError:
 
 def pkcs1_v1_5_encode(key, data):
     """
-    Encodes a SHA1 digest using PKCS1's emsa-pkcs1-v1_5 encoding.
+    Encodes a key using PKCS1's emsa-pkcs1-v1_5 encoding.
 
     Adapted from paramiko.
 
@@ -104,7 +104,7 @@ def sign(private_key, base_string):
     signature = private_key.sign(
         pkcs1_v1_5_encode(
             private_key,
-            sha1(base_string).digest()
+            sha1_hash(base_string)
         ), ""
     )[0]
     signature_bytes = long_to_bytes(signature)

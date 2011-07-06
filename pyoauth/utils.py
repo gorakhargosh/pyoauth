@@ -189,8 +189,7 @@ def generate_rsa_sha1_signature(client_private_key,
     :returns:
         RSA-SHA1 signature.
     """
-    from pyoauth.rsa import sign
-    from pyoauth.rsa_alt import sign as sign2
+    from pyoauth.crypto.rsa import sign
 
     oauth_params = oauth_params or {}
     base_string = generate_signature_base_string(method, url, oauth_params)
@@ -221,7 +220,7 @@ def verify_rsa_sha1_signature(client_public_certificate,
     :returns:
         ``True`` if verified to be correct; ``False`` otherwise.
     """
-    from pyoauth.rsa import verify
+    from pyoauth.crypto.rsa import verify
 
     oauth_params = oauth_params or {}
     base_string = generate_signature_base_string(method, url, oauth_params)

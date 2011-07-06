@@ -1,26 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# RSA convenience wrapper functions.
-#
-# Copyright (C) 2009 Google Inc.
-# Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Placed under public domain.
 
 """
-:module: pyoauth.rsa
+:module: pyoauth.crypto.rsa
 :synopsis: RSA convenience wrapper functions.
-:see: http://code.google.com/p/gdata-python-client/source/browse/src/gdata/oauth/rsa.py
 
 Functions
 ---------
@@ -31,9 +15,9 @@ Functions
 import sys
 import os
 
-DIR_PATH = os.path.abspath(os.path.dirname(__file__))
+PARENT_DIR_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path[0:0] = [
-    os.path.join(DIR_PATH, "tlslite"),
+    os.path.join(PARENT_DIR_PATH, "tlslite"),
 ]
 
 import binascii
@@ -47,7 +31,7 @@ def sign(private_key, base_string):
     Signs a base string using your RSA private key.
 
     :param private_key:
-        Private key. Example private key::
+        Private key. Example private key from the OAuth test cases::
 
             -----BEGIN PRIVATE KEY-----
             MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
@@ -82,7 +66,7 @@ def verify(public_certificate, signature, base_string):
     public key.
 
     :param public_certificate:
-        Public certificate. Example certificate::
+        Public certificate. Example certificate from the OAuth test cases::
 
             -----BEGIN CERTIFICATE-----
             MIIBpjCCAQ+gAwIBAgIBATANBgkqhkiG9w0BAQUFADAZMRcwFQYDVQQDDA5UZXN0
