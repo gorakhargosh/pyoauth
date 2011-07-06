@@ -5,8 +5,8 @@
 
 from pyoauth.crypto.utils.cryptomath import *
 
-from RSAKey import *
-from Python_RSAKey import Python_RSAKey
+from pyoauth.crypto.RSAKey import *
+from pyoauth.crypto.Python_RSAKey import Python_RSAKey
 
 #copied from M2Crypto.util.py, so when we load the local copy of m2
 #we can still use it

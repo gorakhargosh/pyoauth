@@ -22,7 +22,7 @@ Functions
 
 import binascii
 from base64 import b64decode
-from pyoauth.crypto.utils import keyfactory
+from pyoauth.crypto import keyfactory
 from pyoauth.crypto.X509 import X509
 
 
