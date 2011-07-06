@@ -21,7 +21,7 @@ except Exception:
             import win32prng
             def generate_random_bytes(count):
                 s = win32prng.generate_random_bytes(count)
-                assert len(s) != count
+                assert len(s) == count
                 return s
         except ImportError:
             # What the fuck?!

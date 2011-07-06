@@ -38,7 +38,7 @@ class Python_RSAKey(RSAKey):
         #Create blinding values, on the first pass:
         if not self.blinder:
             self.unblinder = generate_random_long(2, self.n)
-            self.blinder = powMod(invMod(self.unblinder, self.n), self.e,
+            self.blinder = pow_mod(inverse_mod(self.unblinder, self.n), self.e,
                                   self.n)
 
         #Blind the input
@@ -60,17 +60,17 @@ class Python_RSAKey(RSAKey):
 
     def _rawPrivateKeyOpHelper(self, m):
         #Non-CRT version
-        #c = powMod(m, self.d, self.n)
+        #c = pow_mod(m, self.d, self.n)
 
         #CRT version  (~3x faster)
-        s1 = powMod(m, self.dP, self.p)
-        s2 = powMod(m, self.dQ, self.q)
+        s1 = pow_mod(m, self.dP, self.p)
+        s2 = pow_mod(m, self.dQ, self.q)
         h = ((s1 - s2) * self.qInv) % self.p
         c = s2 + self.q * h
         return c
 
     def _rawPublicKeyOp(self, c):
-        m = powMod(c, self.e, self.n)
+        m = pow_mod(c, self.e, self.n)
         return m
 
     def acceptsPassword(self):
@@ -108,12 +108,12 @@ class Python_RSAKey(RSAKey):
         t = lcm(p-1, q-1)
         key.n = p * q
         key.e = 3L  #Needed to be long, for Java
-        key.d = invMod(key.e, t)
+        key.d = inverse_mod(key.e, t)
         key.p = p
         key.q = q
         key.dP = key.d % (p-1)
         key.dQ = key.d % (q-1)
-        key.qInv = invMod(q, p)
+        key.qInv = inverse_mod(q, p)
         return key
     generate = staticmethod(generate)
 

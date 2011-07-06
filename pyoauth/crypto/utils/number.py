@@ -168,7 +168,7 @@ def mpi_to_long(mpi_byte_string):
         Long value.
     """
     #Make sure this is a positive number
-    assert (ord(mpi_byte_string[4]) & 0x80) !=0
+    assert (ord(mpi_byte_string[4]) & 0x80) == 0
 
     byte_array = bytearray_from_bytes(mpi_byte_string[4:])
     return bytearray_to_long(byte_array)
@@ -197,25 +197,44 @@ def long_to_mpi(num):
     byte_array[3] = length & 0xFF
     return bytearray_to_bytes(byte_array)
 
-
-# **************************************************************************
-# Big Number Math
-# **************************************************************************
-
 def gcd(a,b):
+    """
+    Calculates the greatest common divisor.
+
+    Non-recursive fast implementation.
+
+    :param a:
+        Long value.
+    :param b:
+        Long value.
+    :returns:
+        Greatest common divisor.
+    """
     a, b = max(a,b), min(a,b)
     while b:
-        a, b = b, a % b
+        a, b = b, (a % b)
     return a
 
+
 def lcm(a, b):
+    """
+    Least common multiple.
+
+    :param a:
+        Long value.
+    :param v:
+        Long value.
+    :returns:
+        Least common multiple.
+    """
     #This will break when python division changes, but we can't use // cause
     #of Jython
     return (a * b) / gcd(a, b)
 
+
 #Returns inverse of a mod b, zero if none
 #Uses Extended Euclidean Algorithm
-def invMod(a, b):
+def inverse_mod(a, b):
     c, d = a, b
     uc, ud = 1, 0
     while c != 0:
@@ -231,7 +250,20 @@ def invMod(a, b):
 
 try:
     import gmpy
-    def powMod(base, power, modulus):
+    def pow_mod(base, power, modulus):
+        """
+        Calculates:
+            base**pow mod modulus
+
+        :param base:
+            Base
+        :param power:
+            Power
+        :param modulus:
+            Modulus
+        :returns:
+            base**pow mod modulus
+        """
         base = gmpy.mpz(base)
         power = gmpy.mpz(power)
         modulus = gmpy.mpz(modulus)
@@ -242,12 +274,23 @@ except ImportError:
     #Copied from Bryan G. Olson's post to comp.lang.python
     #Does left-to-right instead of pow()'s right-to-left,
     #thus about 30% faster than the python built-in with small bases
-    def powMod(base, power, modulus):
+    def pow_mod(base, power, modulus):
         nBitScan = 5
+        """
+        Calculates:
+            base**pow mod modulus
 
-        """ Return base**power mod modulus, using multi bit scanning
-        with nBitScan bits at a time."""
+        Uses multi bit scanning with nBitScan bits at a time.
 
+        :param base:
+            Base
+        :param power:
+            Power
+        :param modulus:
+            Modulus
+        :returns:
+            base**pow mod modulus
+        """
         #TREV - Added support for negative exponents
         negativeResult = False
         if (power < 0):
@@ -283,10 +326,9 @@ except ImportError:
 
         #TREV - Added support for negative exponents
         if negativeResult:
-            prodInv = invMod(prod, modulus)
+            prodInv = inverse_mod(prod, modulus)
             #Check to make sure the inverse is correct
-            if (prod * prodInv) % modulus != 1:
-                raise AssertionError()
+            assert (prod * prodInv) % modulus == 1
             return prodInv
         return prod
 
@@ -321,7 +363,7 @@ def isPrime(n, iterations=5, display=False):
     #Repeat Rabin-Miller x times
     a = 2 #Use 2 as a base for first iteration speedup, per HAC
     for count in range(iterations):
-        v = powMod(a, s, n)
+        v = pow_mod(a, s, n)
         if v==1:
             continue
         i = 0
@@ -329,7 +371,7 @@ def isPrime(n, iterations=5, display=False):
             if i == t-1:
                 return False
             else:
-                v, i = powMod(v, 2, n), i+1
+                v, i = pow_mod(v, 2, n), i+1
         a = generate_random_long(2, n)
     return True
 
