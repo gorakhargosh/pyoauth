@@ -3,7 +3,7 @@
 
 """OpenSSL/M2Crypto RSA implementation."""
 
-from pyoauth.crypto.utils.cryptomath import *
+from pyoauth.crypto.utils.number import *
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
 from pyoauth.crypto.utils import byte_count, bytes_to_long, long_to_bytes

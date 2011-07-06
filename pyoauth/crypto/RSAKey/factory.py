@@ -10,10 +10,10 @@ parseAsPrivateKey
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
 
-from pyoauth.crypto.utils import cryptomath
-if cryptomath.m2cryptoLoaded:
+from pyoauth.crypto.utils import number
+if number.m2cryptoLoaded:
     from pyoauth.crypto.RSAKey.OpenSSL import OpenSSL_RSAKey
-if cryptomath.pycryptoLoaded:
+if number.pycryptoLoaded:
     from pyoauth.crypto.RSAKey.PyCrypto import PyCrypto_RSAKey
 
 
@@ -31,7 +31,7 @@ def generateRSAKey(bits, implementations=["openssl", "python"]):
     @return: A new RSA private key.
     """
     for implementation in implementations:
-        if implementation == "openssl" and cryptomath.m2cryptoLoaded:
+        if implementation == "openssl" and number.m2cryptoLoaded:
             return OpenSSL_RSAKey.generate(bits)
         elif implementation == "python":
             return Python_RSAKey.generate(bits)
@@ -144,7 +144,7 @@ def parsePEMKey(s, private=False, public=False, passwordCallback=None,
     @raise SyntaxError: If the key is not properly formatted.
     """
     for implementation in implementations:
-        if implementation == "openssl" and cryptomath.m2cryptoLoaded:
+        if implementation == "openssl" and number.m2cryptoLoaded:
             key = OpenSSL_RSAKey.parse(s, passwordCallback)
             break
         elif implementation == "python":
@@ -227,9 +227,9 @@ def _createPrivateKey(key):
 def _createPublicRSAKey(n, e, implementations = ["openssl", "pycrypto",
                                                 "python"]):
     for implementation in implementations:
-        if implementation == "openssl" and cryptomath.m2cryptoLoaded:
+        if implementation == "openssl" and number.m2cryptoLoaded:
             return OpenSSL_RSAKey(n, e)
-        elif implementation == "pycrypto" and cryptomath.pycryptoLoaded:
+        elif implementation == "pycrypto" and number.pycryptoLoaded:
             return PyCrypto_RSAKey(n, e)
         elif implementation == "python":
             return Python_RSAKey(n, e)
@@ -238,7 +238,7 @@ def _createPublicRSAKey(n, e, implementations = ["openssl", "pycrypto",
 def _createPrivateRSAKey(n, e, d, p, q, dP, dQ, qInv,
                         implementations = ["pycrypto", "python"]):
     for implementation in implementations:
-        if implementation == "pycrypto" and cryptomath.pycryptoLoaded:
+        if implementation == "pycrypto" and number.pycryptoLoaded:
             return PyCrypto_RSAKey(n, e, d, p, q, dP, dQ, qInv)
         elif implementation == "python":
             return Python_RSAKey(n, e, d, p, q, dP, dQ, qInv)

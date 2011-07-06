@@ -4,7 +4,7 @@
 """Pure-Python RSA implementation."""
 
 from pyoauth.crypto.utils.random import generate_random_number
-from pyoauth.crypto.utils.cryptomath import *
+from pyoauth.crypto.utils.number import *
 from pyoauth.crypto.utils import xmltools, sha1_base64_digest
 from pyoauth.crypto.utils.bytearray import bytearray_to_long
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser

@@ -4,7 +4,7 @@
 """PyCrypto RSA implementation."""
 
 from pyoauth.crypto.utils.bytearray import bytearray_to_bytes, bytearray_random
-from pyoauth.crypto.utils.cryptomath import *
+from pyoauth.crypto.utils.number import *
 from pyoauth.crypto.utils import byte_count, bytes_to_long, long_to_bytes
 
 from pyoauth.crypto.RSAKey import RSAKey
