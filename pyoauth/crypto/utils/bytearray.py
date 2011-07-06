@@ -17,8 +17,8 @@ Functions:
 .. autofunction:: generate_random_bytearray
 .. autofunction:: bytearray_to_long
 .. autofunction:: long_to_bytearray
-.. autofunction:: bytearray_b64decode
-.. autofunction:: bytearray_b64encode
+.. autofunction:: bytearray_base64_decode
+.. autofunction:: bytearray_base64_encode
 
 """
 
@@ -138,7 +138,7 @@ def long_to_bytearray(num):
     return byte_array
 
 
-def bytearray_b64decode(encoded):
+def bytearray_base64_decode(encoded):
     """
     Converts a base-64 encoded value into a byte array.
 
@@ -150,7 +150,7 @@ def bytearray_b64decode(encoded):
     return bytes_to_bytearray(base64_decode(encoded))
 
 
-def bytearray_b64encode(byte_array):
+def bytearray_base64_encode(byte_array):
     """
     Base-64 encodes a byte array.
 

@@ -10,7 +10,7 @@ import array
 from pyoauth.crypto.codec.pemder import pem_to_der_certificate
 from pyoauth.crypto.utils import sha1_hex_digest
 from pyoauth.crypto.utils.bytearray import \
-    bytearray_create, bytes_to_bytearray, bytearray_b64decode
+    bytearray_create, bytes_to_bytearray, bytearray_base64_decode
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
 from pyoauth.crypto.RSAKey.factory import _createPublicRSAKey
 from pyoauth.crypto.utils.number import  bytearray_to_long

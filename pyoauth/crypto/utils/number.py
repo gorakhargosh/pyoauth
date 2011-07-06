@@ -38,8 +38,8 @@ from pyoauth.crypto.utils.bytearray import \
     bytearray_to_bytes, \
     long_to_bytearray, \
     bytearray_to_long, \
-    bytearray_b64decode, \
-    bytearray_b64encode
+    bytearray_base64_decode, \
+    bytearray_base64_encode
 
 
 # Improved conversion functions contributed by Barry Warsaw, after
@@ -149,7 +149,7 @@ def long_b64encode(num):
         Base-64 encoded byte string.
     """
     byte_array = long_to_bytearray(num)
-    return bytearray_b64encode(byte_array)
+    return bytearray_base64_encode(byte_array)
 
 
 def long_b64decode(encoded):
@@ -161,7 +161,7 @@ def long_b64decode(encoded):
     :returns:
         Long value.
     """
-    byte_array = bytearray_b64decode(encoded)
+    byte_array = bytearray_base64_decode(encoded)
     return bytearray_to_long(byte_array)
 
 
