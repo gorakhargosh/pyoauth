@@ -13,8 +13,8 @@ Functions:
 .. autofunction:: bytes_to_long_original
 .. autofunction:: long_to_bytes
 .. autofunction:: long_to_bytes_original
-.. autofunction:: long_b64encode
-.. autofunction:: long_b64decode
+.. autofunction:: long_base64_encode
+.. autofunction:: long_base64_decode
 .. autofunction:: mpi_to_long
 .. autofunction:: long_to_mpi
 .. autofunction:: pow_mod
@@ -30,16 +30,14 @@ import math
 import struct
 
 from pyoauth.crypto.utils.random import generate_random_long
-from pyoauth.crypto.utils import bit_count, byte_count
+from pyoauth.crypto.utils import bit_count, byte_count, base64_decode, base64_encode
 from pyoauth.crypto.utils.bytearray import \
     bytearray_concat, \
     bytearray_create_zeros, \
     bytes_to_bytearray, \
     bytearray_to_bytes, \
     long_to_bytearray, \
-    bytearray_to_long, \
-    bytearray_base64_decode, \
-    bytearray_base64_encode
+    bytearray_to_long
 
 
 # Improved conversion functions contributed by Barry Warsaw, after
@@ -139,7 +137,7 @@ def bytes_to_long_original(byte_string):
     return bytearray_to_long(byte_array)
 
 
-def long_b64encode(num):
+def long_base64_encode(num):
     """
     Base-64 encodes a long.
 
@@ -148,11 +146,11 @@ def long_b64encode(num):
     :returns:
         Base-64 encoded byte string.
     """
-    byte_array = long_to_bytearray(num)
-    return bytearray_base64_encode(byte_array)
+    byte_string = long_to_bytes(num)
+    return base64_encode(byte_string)
 
 
-def long_b64decode(encoded):
+def long_base64_decode(encoded):
     """
     Base-64 decodes a string into a long.
 
@@ -161,8 +159,8 @@ def long_b64decode(encoded):
     :returns:
         Long value.
     """
-    byte_array = bytearray_base64_decode(encoded)
-    return bytearray_to_long(byte_array)
+    byte_string = base64_decode(encoded)
+    return bytes_to_long(byte_string)
 
 
 def mpi_to_long(mpi_byte_string):
