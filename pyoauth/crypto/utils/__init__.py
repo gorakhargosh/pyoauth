@@ -257,9 +257,9 @@ def bytes_to_long(s):
 # Old
 #def long_to_bytes(s):
 #    byte_array = bytearray_from_long(s)
-#    return bytearray_to_string(byte_array)
+#    return bytearray_to_bytes(byte_array)
 #
 #
 #def bytes_to_long(s):
-#    byte_array = bytearray_from_string(s)
+#    byte_array = bytearray_from_bytes(s)
 #    return bytearray_to_long(byte_array)

@@ -7,8 +7,8 @@ from pyoauth.crypto.utils import bit_count, byte_count, sha1_digest
 from pyoauth.crypto.utils.cryptomath import *
 from pyoauth.crypto.utils.bytearray import \
     bytearray_create, \
-    bytearray_to_string, \
-    bytearray_from_string, \
+    bytearray_to_bytes, \
+    bytearray_from_bytes, \
     bytearray_random, \
     bytearray_to_long, \
     bytearray_from_long
@@ -83,8 +83,8 @@ class RSAKey(object):
         @return: A PKCS1-SHA1 signature on the passed-in data.
         """
         if not isinstance(bytes, type("")):
-            bytes = bytearray_to_string(bytes)
-        hashBytes = bytearray_from_string(sha1_digest(bytes))
+            bytes = bytearray_to_bytes(bytes)
+        hashBytes = bytearray_from_bytes(sha1_digest(bytes))
         prefixedHashBytes = self._addPKCS1SHA1Prefix(hashBytes)
         sigBytes = self.sign(prefixedHashBytes)
         return sigBytes
@@ -104,8 +104,8 @@ class RSAKey(object):
         @return: Whether the signature matches the passed-in data.
         """
         if not isinstance(bytes, type("")):
-            bytes = bytearray_to_string(bytes)
-        hashBytes = bytearray_from_string(sha1_digest(bytes))
+            bytes = bytearray_to_bytes(bytes)
+        hashBytes = bytearray_from_bytes(sha1_digest(bytes))
         prefixedHashBytes = self._addPKCS1SHA1Prefix(hashBytes)
         return self.verify(sigBytes, prefixedHashBytes)
 

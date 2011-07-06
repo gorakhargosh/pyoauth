@@ -3,7 +3,7 @@
 
 """PyCrypto RSA implementation."""
 
-from pyoauth.crypto.utils.bytearray import bytearray_to_string, bytearray_random
+from pyoauth.crypto.utils.bytearray import bytearray_to_bytes, bytearray_random
 from pyoauth.crypto.utils.cryptomath import *
 from pyoauth.crypto.utils import byte_count, bytes_to_long, long_to_bytes
 
@@ -60,7 +60,7 @@ if pycryptoLoaded:
         def generate(bits):
             key = PyCrypto_RSAKey()
             def f(numBytes):
-                return bytearray_to_string(bytearray_random(numBytes))
+                return bytearray_to_bytes(bytearray_random(numBytes))
             key.rsa = RSA.generate(bits, f)
             return key
         generate = staticmethod(generate)

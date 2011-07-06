@@ -10,8 +10,8 @@ Functions:
 .. autofunction:: bytearray_create
 .. autofunction:: bytearray_create_zeros
 .. autofunction:: bytearray_concat
-.. autofunction:: bytearray_to_string
-.. autofunction:: bytearray_from_string
+.. autofunction:: bytearray_to_bytes
+.. autofunction:: bytearray_from_bytes
 .. autofunction:: bytearray_random
 .. autofunction:: bytearray_to_long
 .. autofunction:: bytearray_from_long
@@ -46,33 +46,33 @@ def bytearray_create_zeros(count):
     return array('B', [0] * count)
 
 
-def bytearray_concat(arr1, arr2):
+def bytearray_concat(byte_array1, byte_array2):
     """
     Concatenates two byte arrays.
 
-    :param arr1:
+    :param byte_array1:
         Byte array 1
-    :param arr2:
+    :param byte_array2:
         Byte array 2
     :returns:
         Concatenated byte array.
     """
-    return arr1 + arr2
+    return byte_array1 + byte_array2
 
 
-def bytearray_to_string(arr):
+def bytearray_to_bytes(byte_array):
     """
     Converts a byte array into a string.
 
-    :param arr:
+    :param byte_array:
         The byte array.
     :returns:
         String.
     """
-    return arr.tostring()
+    return byte_array.tostring()
 
 
-def bytearray_from_string(value):
+def bytearray_from_bytes(value):
     """
     Converts a string into a byte array.
 
@@ -93,7 +93,7 @@ def bytearray_random(count):
     :returns:
         A random byte array.
     """
-    return bytearray_from_string(generate_random_bytes(count))
+    return bytearray_from_bytes(generate_random_bytes(count))
 
 
 def bytearray_to_long(byte_array):

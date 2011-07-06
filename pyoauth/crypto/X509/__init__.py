@@ -7,7 +7,7 @@ import array
 
 from pyoauth.crypto.utils import sha1_hexdigest
 from pyoauth.crypto.utils.bytearray import \
-    bytearray_create, bytearray_from_string
+    bytearray_create, bytearray_from_bytes
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
 from pyoauth.crypto.RSAKey.factory import _createPublicRSAKey
 from pyoauth.crypto.utils.cryptomath import bytearray_b64decode, bytearray_to_long
@@ -56,7 +56,7 @@ class X509(object):
         """
 
         if isinstance(bytes, type("")):
-            bytes = bytearray_from_string(bytes)
+            bytes = bytearray_from_bytes(bytes)
 
         self.bytes = bytes
         p = ASN1Parser(bytes)

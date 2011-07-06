@@ -14,8 +14,8 @@ from pyoauth.crypto.utils import bit_count, sha1_digest, byte_count
 from pyoauth.crypto.utils.bytearray import \
     bytearray_concat, \
     bytearray_create_zeros, \
-    bytearray_from_string, \
-    bytearray_to_string, \
+    bytearray_from_bytes, \
+    bytearray_to_bytes, \
     bytearray_from_long, \
     bytearray_to_long
 
@@ -53,12 +53,12 @@ except ImportError:
 # **************************************************************************
 
 def bytearray_b64encode(byte_array):
-    s = bytearray_to_string(byte_array)
+    s = bytearray_to_bytes(byte_array)
     return stringToBase64(s)
 
 def bytearray_b64decode(s):
     s = base64ToString(s)
-    return bytearray_from_string(s)
+    return bytearray_from_bytes(s)
 
 def numberToBase64(n):
     byte_array = bytearray_from_long(n)
@@ -82,7 +82,7 @@ def stringToBase64(s):
 def mpiToNumber(mpi): #mpi is an openssl-format bignum string
     if (ord(mpi[4]) & 0x80) !=0: #Make sure this is a positive number
         raise AssertionError()
-    byte_array = bytearray_from_string(mpi[4:])
+    byte_array = bytearray_from_bytes(mpi[4:])
     return bytearray_to_long(byte_array)
 
 def numberToMPI(n):
@@ -98,7 +98,7 @@ def numberToMPI(n):
     byte_array[1] = (length >> 16) & 0xFF
     byte_array[2] = (length >> 8) & 0xFF
     byte_array[3] = length & 0xFF
-    return bytearray_to_string(byte_array)
+    return bytearray_to_bytes(byte_array)
 
 
 
