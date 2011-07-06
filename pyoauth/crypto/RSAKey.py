@@ -12,7 +12,7 @@ from pyoauth.crypto.utils.bytearray import \
 
 from hashlib import sha1
 
-class RSAKey:
+class RSAKey(object):
     """This is an abstract base class for RSA keys.
 
     Particular implementations of RSA keys, such as

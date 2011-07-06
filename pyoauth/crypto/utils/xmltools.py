@@ -98,7 +98,7 @@ def getChild(element, index, name=None):
     return child
 
 def getChildIter(element, index):
-    class ChildIter:
+    class ChildIter(object):
         def __init__(self, element, index):
             self.element = element
             self.index = index

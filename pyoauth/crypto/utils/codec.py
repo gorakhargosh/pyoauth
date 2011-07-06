@@ -13,7 +13,7 @@ Classes:
 
 from pyoauth.crypto.utils.bytearray import bytearray_create_zeros
 
-class Writer:
+class Writer(object):
     def __init__(self, length=0):
         #If length is zero, then this is just a "trial run" to determine length
         self.index = 0
@@ -44,7 +44,7 @@ class Writer:
             self.index += lengthLength + (len(seq)*length)
 
 
-class Parser:
+class Parser(object):
     def __init__(self, bytes):
         self.bytes = bytes
         self.index = 0

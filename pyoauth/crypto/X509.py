@@ -12,7 +12,7 @@ from pyoauth.crypto.utils.cryptomath import *
 from pyoauth.crypto.keyfactory import _createPublicRSAKey
 
 
-class X509:
+class X509(object):
     """This class represents an X.509 certificate.
 
     @type bytes: L{array.array} of unsigned bytes
