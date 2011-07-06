@@ -10,7 +10,7 @@ Functions:
 ----------
 .. autofunction:: pem_to_der
 .. autofunction:: der_to_pem
-
+.. autofunction:: cert_time_to_seconds
 """
 
 

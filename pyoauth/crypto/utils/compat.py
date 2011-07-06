@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# TODO: Remove this after we're done refactoring.
+
 try:
     from M2Crypto import m2
     def is_m2crypto_available():
