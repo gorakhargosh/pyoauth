@@ -2,6 +2,24 @@
 # -*- coding: utf-8 -*-
 # Cryptographic utility functions.
 
+"""
+:module: pyoauth.crypto.utils
+:synopsis: Cryptographic utility functions.
+
+Functions:
+----------
+.. autofunction:: sha1_digest
+.. autofunction:: sha1_hexdigest
+.. autofunction:: md5_digest
+.. autofunction:: md5_hexdigest
+.. autofunction:: hmac_sha1_digest
+.. autofunction:: hmac_sha1_base64
+.. autofunction:: generate_random_uint_string
+.. autofunction:: generate_random_hex_string
+.. autofunction:: bit_count
+"""
+
+
 import os
 import math
 import binascii
@@ -25,6 +43,15 @@ def sha1_digest(*inputs):
 
 
 def sha1_hexdigest(*inputs):
+    """
+    Calculates hexadecimal representation of the SHA-1 digest of a variable
+    number of inputs.
+
+    :param inputs;
+        A variable number of inputs for which the digest will be calculated.
+    :returns:
+        Hexadecimal representation of the SHA-1 digest.
+    """
     return binascii.b2a_hex(sha1_digest(*inputs))
 
 
@@ -43,11 +70,44 @@ def md5_digest(*inputs):
     return md.digest()
 
 
+def md5_hexdigest(*inputs):
+    """
+    Calculates hexadecimal representation of the MD5 digest of a variable
+    number of inputs.
+
+    :param inputs;
+        A variable number of inputs for which the digest will be calculated.
+    :returns:
+        Hexadecimal representation of the MD5 digest.
+    """
+    return binascii.b2a_hex(md5_digest(*inputs))
+
+
 def hmac_sha1_digest(key, data):
+    """
+    Calculates a HMAC SHA-1 digest.
+
+    :param key:
+        The key for the digest.
+    :param data:
+        The data for which the digest will be calculted.
+    :returns:
+        HMAC SHA-1 Digest.
+    """
     return hmac.new(key, data, sha1).digest()
 
 
 def hmac_sha1_base64(key, data):
+    """
+    Calculates a base64-encoded HMAC SHA-1 signature.
+
+    :param key:
+        The key for the signature.
+    :param data:
+        The data to be signed.
+    :returns:
+        Base64-encoded HMAC SHA-1 signature.
+    """
     return binascii.b2a_base64(hmac_sha1_digest(key, data))[:-1]
 
 
@@ -91,6 +151,14 @@ def generate_random_hex_string(length=8):
 
 
 def bit_count(n):
+    """
+    Determines the number of bits in a number.
+
+    :param n:
+        Number.
+    :returns:
+        Returns the number of bits in the number.
+    """
     if n==0:
         return 0
     s = "%x" % n
@@ -100,4 +168,4 @@ def bit_count(n):
      '8':4, '9':4, 'a':4, 'b':4,
      'c':4, 'd':4, 'e':4, 'f':4,
      }[s[0]]
-    return int(math.floor(math.log(n, 2))+1)
+    #return int(math.floor(math.log(n, 2))+1)
