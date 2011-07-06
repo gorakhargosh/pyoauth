@@ -14,10 +14,9 @@ Functions:
 """
 
 import time
-import base64
 import textwrap
 from functools import partial
-
+from pyoauth.crypto.utils import base64_encode, base64_decode
 
 CERT_PEM_HEADER = '-----BEGIN CERTIFICATE-----'
 CERT_PEM_FOOTER = '-----END CERTIFICATE-----'
@@ -69,7 +68,7 @@ def pem_to_der(pem_cert_string, pem_header, pem_footer):
         raise ValueError("Invalid PEM encoding; must end with %s"
                          % pem_footer)
     d = pem_cert_string[len(pem_header):-len(pem_footer)]
-    return base64.decodestring(d)
+    return base64_decode(d)
 
 
 def der_to_pem(der_cert_bytes, pem_header, pem_footer):
@@ -86,16 +85,11 @@ def der_to_pem(der_cert_bytes, pem_header, pem_footer):
     :param pem_footer:
         The PEM footer to use.
     """
-    if hasattr(base64, 'standard_b64encode'):
-        # preferred because older API gets line-length wrong
-        f = base64.standard_b64encode(der_cert_bytes)
-        return (pem_header + '\n' +
-                textwrap.fill(f, 64) + '\n' +
-                pem_footer + '\n')
-    else:
-        return (pem_header + '\n' +
-                base64.encodestring(der_cert_bytes) +
-                pem_footer + '\n')
+    # Does what base64.b64encode without the `altchars` argument does.
+    f = base64_encode(der_cert_bytes)
+    return (pem_header + '\n' +
+            textwrap.fill(f, 64) + '\n' +
+            pem_footer + '\n')
 
 
 # Helper functions. Use these instead of using der_to_per and per_to_der.
