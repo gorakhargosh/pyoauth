@@ -13,11 +13,11 @@ Functions:
 .. autofunction:: cert_time_to_seconds
 """
 
-
 import time
 import base64
 import textwrap
 from functools import partial
+
 
 CERT_PEM_HEADER = '-----BEGIN CERTIFICATE-----'
 CERT_PEM_FOOTER = '-----END CERTIFICATE-----'
