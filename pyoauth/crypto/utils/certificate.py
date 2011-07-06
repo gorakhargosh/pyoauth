@@ -28,6 +28,9 @@ PRIVATE_KEY_PEM_FOOTER = '-----END PRIVATE KEY-----'
 PUBLIC_KEY_PEM_HEADER = '-----BEGIN PUBLIC KEY-----'
 PUBLIC_KEY_PEM_FOOTER = '-----END PUBLIC KEY-----'
 
+RSA_PRIVATE_KEY_PEM_HEADER = '-----BEGIN RSA PRIVATE KEY-----'
+RSA_PRIVATE_KEY_PEM_FOOTER = '-----END RSA PRIVATE KEY-----'
+
 
 def cert_time_to_seconds(cert_time):
     """Takes a date-time string in standard ASN1_print form
