@@ -33,9 +33,16 @@ RSA_PRIVATE_KEY_PEM_FOOTER = '-----END RSA PRIVATE KEY-----'
 
 
 def cert_time_to_seconds(cert_time):
-    """Takes a date-time string in standard ASN1_print form
+    """
+    Takes a date-time string in standard ASN1_print form
     ("MON DAY 24HOUR:MINUTE:SEC YEAR TIMEZONE") and return
-    a Python time value in seconds past the epoch."""
+    a Python time value in seconds past the epoch.
+
+    :param cert_time:
+        Time value in the certificate.
+    :returns:
+        Python time value.
+    """
     return time.mktime(time.strptime(cert_time, "%b %d %H:%M:%S %Y GMT"))
 
 
