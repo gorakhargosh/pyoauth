@@ -7,7 +7,7 @@
 parseAsPrivateKey
 """
 
-from pyoauth.crypto.utils.compat import *
+from pyoauth.crypto.utils.bytearray import *
 
 from pyoauth.crypto.utils.RSAKey import RSAKey
 from pyoauth.crypto.utils.Python_RSAKey import Python_RSAKey

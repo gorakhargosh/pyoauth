@@ -4,7 +4,7 @@
 
 """Classes for reading/writing binary data (such as TLS records)."""
 
-from pyoauth.crypto.utils.compat import *
+from pyoauth.crypto.utils.bytearray import *
 
 class Writer:
     def __init__(self, length=0):

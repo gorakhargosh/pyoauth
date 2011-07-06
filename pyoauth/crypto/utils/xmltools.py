@@ -6,7 +6,7 @@
 This module has misc. helper functions for working with XML DOM nodes."""
 
 import re
-from pyoauth.crypto.utils.compat import *
+from pyoauth.crypto.utils.bytearray import *
 
 import os
 if os.name != "java":

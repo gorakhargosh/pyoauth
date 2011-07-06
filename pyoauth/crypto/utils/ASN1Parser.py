@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Class for parsing ASN.1"""
-from pyoauth.crypto.utils.compat import *
+
 from pyoauth.crypto.utils.codec import *
 
 #Takes a byte array which has a DER TLV field at its head

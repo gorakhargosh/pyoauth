@@ -11,7 +11,7 @@ import base64
 import binascii
 import hashlib
 
-from pyoauth.crypto.utils.compat import *
+from pyoauth.crypto.utils.bytearray import *
 
 
 # **************************************************************************
