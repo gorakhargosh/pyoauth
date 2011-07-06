@@ -1,5 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Written by Bill Janssen. Borrowed from the Python ``ssl`` module.
+
+"""
+:module: pyoauth.crypto.utils.certificate
+:synopsis: Certificate conversion utilities.
+
+Functions:
+----------
+.. autofunction:: pem_to_der
+.. autofunction:: der_to_pem
+
+"""
 
 
 import base64
