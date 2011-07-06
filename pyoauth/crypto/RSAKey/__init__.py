@@ -8,7 +8,8 @@ from pyoauth.crypto.utils.cryptomath import *
 from pyoauth.crypto.utils.bytearray import \
     bytearray_create, \
     bytearray_to_string, \
-    bytearray_from_string
+    bytearray_from_string, bytearray_random
+
 
 class RSAKey(object):
     """This is an abstract base class for RSA keys.
@@ -256,7 +257,7 @@ class RSAKey(object):
         elif blockType == 2: #Encryption padding
             pad = bytearray_create([])
             while len(pad) < padLength:
-                padBytes = getRandomBytes(padLength * 2)
+                padBytes = bytearray_random(padLength * 2)
                 pad = [b for b in padBytes if b != 0]
                 pad = pad[:padLength]
         else:

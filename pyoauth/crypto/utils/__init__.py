@@ -19,13 +19,11 @@ Functions:
 .. autofunction:: bit_count
 """
 
-
-import os
-#import math
 import binascii
 import hmac
 from hashlib import sha1, md5
 from pyoauth.types import bytes
+from pyoauth.crypto.utils.random import generate_random_bytes
 
 
 def sha1_digest(*inputs):
@@ -130,7 +128,7 @@ def generate_random_uint_string(bit_strength=64, decimal=True):
     if bit_strength % 8 or bit_strength <= 0:
         raise ValueError("This function expects a bit strength: got `%r`." % (bit_strength, ))
     n_bytes = bit_strength / 8
-    value = binascii.b2a_hex(os.urandom(n_bytes))
+    value = binascii.b2a_hex(generate_random_bytes(n_bytes))
     if decimal:
         value = bytes(int(value, 16))
     return value
@@ -148,7 +146,7 @@ def generate_random_hex_string(length=8):
     """
     if length % 2 or length <= 0:
         raise ValueError("This function expects a positive even number length: got length `%r`." % (length, ))
-    return binascii.b2a_hex(os.urandom(length/2))
+    return binascii.b2a_hex(generate_random_bytes(length/2))
 
 
 def bit_count(n):

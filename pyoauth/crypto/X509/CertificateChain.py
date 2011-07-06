@@ -107,7 +107,7 @@ class X509CertChain(object):
                                                  cryptlib_py.CRYPT_UNUSED)
                 try:
                     cryptlib_py.cryptCheckCert(c1, c2)
-                except:
+                except Exception:
                     return False
                 cryptlib_py.cryptDestroyCert(c1)
                 c1 = None
@@ -130,7 +130,7 @@ class X509CertChain(object):
                     try:
                         cryptlib_py.cryptCheckCert(lastC, rootC)
                         return True
-                    except:
+                    except Exception:
                         return False
             return False
         finally:

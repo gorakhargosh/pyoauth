@@ -185,7 +185,7 @@ def parseAsPublicKey(s):
     """
     try:
         return parsePEMKey(s, public=True)
-    except:
+    except Exception:
         return parseXMLKey(s, public=True)
 
 def parsePrivateKey(s):
@@ -201,7 +201,7 @@ def parsePrivateKey(s):
     """
     try:
         return parsePEMKey(s, private=True)
-    except:
+    except Exception:
         return parseXMLKey(s, private=True)
 
 def _createPublicKey(key):

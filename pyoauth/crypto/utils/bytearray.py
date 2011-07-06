@@ -12,10 +12,11 @@ Functions:
 .. autofunction:: bytearray_concat
 .. autofunction:: bytearray_to_string
 .. autofunction:: bytearray_from_string
-
+.. autofunction:: bytearray_random
 """
 
 from array import array
+from pyoauth.crypto.utils.random import generate_random_bytes
 
 
 def bytearray_create(sequence):
@@ -78,3 +79,16 @@ def bytearray_from_string(value):
         Byte array.
     """
     return bytearray_create_zeros(0).fromstring(value)
+
+
+def bytearray_random(count):
+    """
+    Generates a random byte array.
+
+    :param count:
+        The number of bytes.
+    :returns:
+        A random byte array.
+    """
+    bytearray_from_string(generate_random_bytes(count))
+

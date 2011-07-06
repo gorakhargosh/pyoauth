@@ -17,7 +17,6 @@ from pyoauth.crypto.utils.bytearray import \
     bytearray_from_string, \
     bytearray_to_string
 
-
 # **************************************************************************
 # Load Optional Modules
 # **************************************************************************
@@ -30,22 +29,6 @@ try:
 except ImportError:
     m2cryptoLoaded = False
 
-
-# Try to load cryptlib
-try:
-    import cryptlib_py
-    try:
-        cryptlib_py.cryptInit()
-    except cryptlib_py.CryptException, e:
-        #If tlslite and cryptoIDlib are both present,
-        #they might each try to re-initialize this,
-        #so we're tolerant of that.
-        if e[0] != cryptlib_py.CRYPT_ERROR_INITED:
-            raise
-    cryptlibpyLoaded = True
-
-except ImportError:
-    cryptlibpyLoaded = False
 
 #Try to load GMPY
 try:
@@ -62,55 +45,6 @@ except ImportError:
     pycryptoLoaded = False
 
 
-# **************************************************************************
-# PRNG Functions
-# **************************************************************************
-
-# Get os.urandom PRNG
-try:
-    os.urandom(1)
-    def getRandomBytes(howMany):
-        return bytearray_from_string(os.urandom(howMany))
-    prngName = "os.urandom"
-
-except:
-    # Else get cryptlib PRNG
-    if cryptlibpyLoaded:
-        def getRandomBytes(howMany):
-            randomKey = cryptlib_py.cryptCreateContext(cryptlib_py.CRYPT_UNUSED,
-                                                       cryptlib_py.CRYPT_ALGO_AES)
-            cryptlib_py.cryptSetAttribute(randomKey,
-                                          cryptlib_py.CRYPT_CTXINFO_MODE,
-                                          cryptlib_py.CRYPT_MODE_OFB)
-            cryptlib_py.cryptGenerateKey(randomKey)
-            bytes = bytearray_create_zeros(howMany)
-            cryptlib_py.cryptEncrypt(randomKey, bytes)
-            return bytes
-        prngName = "cryptlib"
-
-    else:
-        #Else get UNIX /dev/urandom PRNG
-        try:
-            devRandomFile = open("/dev/urandom", "rb")
-            def getRandomBytes(howMany):
-                return bytearray_from_string(devRandomFile.read(howMany))
-            prngName = "/dev/urandom"
-        except IOError:
-            #Else get Win32 CryptoAPI PRNG
-            try:
-                import win32prng
-                def getRandomBytes(howMany):
-                    s = win32prng.getRandomBytes(howMany)
-                    if len(s) != howMany:
-                        raise AssertionError()
-                    return bytearray_from_string(s)
-                prngName ="CryptoAPI"
-            except ImportError:
-                #Else no PRNG :-(
-                def getRandomBytes(howMany):
-                    raise NotImplementedError("No Random Number Generator "\
-                                              "available.")
-            prngName = "None"
 
 # **************************************************************************
 # Converter Functions
@@ -205,7 +139,7 @@ def hashAndBase64(s):
     return stringToBase64(sha1_digest(s))
 
 def getBase64Nonce(numChars=22): #defaults to an 132 bit nonce
-    bytes = getRandomBytes(numChars)
+    bytes = generate_random_bytes(numChars)
     bytesStr = "".join([chr(b) for b in bytes])
     return stringToBase64(bytesStr)[:numChars]
 
@@ -221,7 +155,7 @@ def getRandomNumber(low, high):
     howManyBytes = numBytes(high)
     lastBits = howManyBits % 8
     while 1:
-        bytes = getRandomBytes(howManyBytes)
+        bytes = generate_random_bytes(howManyBytes)
         if lastBits:
             bytes[0] = bytes[0] % (1 << lastBits)
         n = bytesToNumber(bytes)
