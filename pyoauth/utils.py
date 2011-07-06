@@ -67,7 +67,7 @@ from pyoauth.url import percent_encode, percent_decode, \
     request_protocol_params_sanitize, query_params_sanitize
 
 
-def generate_nonce(bit_strength=64, decimal=True):
+def generate_nonce(bit_strength=64, base=10):
     """
     Generates a random ASCII-encoded unsigned integral number in decimal
     or hexadecimal representation.
@@ -79,15 +79,17 @@ def generate_nonce(bit_strength=64, decimal=True):
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param bit_strength:
         Bit strength.
-    :param decimal:
-        ``True`` (default) if you want the decimal representation; ``False`` for
-        hexadecimal.
+    :param base:
+        One of:
+            1. 10
+            2. 16
+            3. 64
     :returns:
         A string representation of a randomly-generated ASCII-encoded
         hexadecimal/decimal-representation unsigned integral number
         based on the bit strength specified.
     """
-    return generate_random_uint_string(bit_strength=bit_strength, decimal=decimal)
+    return generate_random_uint_string(bit_strength=bit_strength, base=base)
 
 
 def generate_verification_code(length=8):

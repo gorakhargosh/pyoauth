@@ -31,26 +31,23 @@ from pyoauth.utils import parse_authorization_header_value, \
 
 class Test_generate_nonce(object):
     def test_uniqueness(self):
-        assert_not_equal(generate_nonce(64, False), generate_nonce(64, False))
-        assert_not_equal(generate_nonce(64, True), generate_nonce(64, True))
+        assert_not_equal(generate_nonce(), generate_nonce())
 
     def test_hex_length(self):
         for i in range(1, 1000):
-            assert_equal(len(generate_nonce(64, False)), 16)
+            assert_equal(len(generate_nonce(64, 16)), 16)
 
     def test_unsigned_integer(self):
-        assert_true(int(generate_nonce(64, True)) >= 0)
-        assert_true(int(generate_nonce(64, False), 16) >= 0)
+        assert_true(int(generate_nonce(64, 10)) >= 0)
+        assert_true(int(generate_nonce(64, 16), 16) >= 0)
 
     def test_raises_ValueError_when_invalid_bit_strength(self):
         assert_raises(ValueError, generate_nonce, 63)
         assert_raises(ValueError, generate_nonce, 0)
 
     def test_result_is_string(self):
-        assert_true(isinstance(generate_nonce(64, True), bytes))
-        assert_true(isinstance(generate_nonce(64, False), bytes))
-
-
+        assert_true(isinstance(generate_nonce(64, 10), bytes))
+        assert_true(isinstance(generate_nonce(64, 16), bytes))
 
 
 class Test_generate_verification_code(object):

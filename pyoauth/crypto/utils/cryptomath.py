@@ -8,7 +8,7 @@ This module has basic math/crypto code."""
 
 import math
 
-from pyoauth.crypto.utils import bit_count, sha1_digest, byte_count, base64_encode
+from pyoauth.crypto.utils import bit_count, byte_count
 from pyoauth.crypto.utils.bytearray import \
     bytearray_concat, \
     bytearray_create_zeros, \
@@ -84,19 +84,6 @@ def numberToMPI(n):
     byte_array[2] = (length >> 8) & 0xFF
     byte_array[3] = length & 0xFF
     return bytearray_to_bytes(byte_array)
-
-
-
-# **************************************************************************
-# Misc. Utility Functions
-# **************************************************************************
-
-
-
-def getBase64Nonce(numChars=22): #defaults to an 132 bit nonce
-    byte_array = generate_random_bytes(numChars)
-    bytesStr = "".join([chr(b) for b in byte_array])
-    return base64_encode(bytesStr)[:numChars]
 
 
 # **************************************************************************

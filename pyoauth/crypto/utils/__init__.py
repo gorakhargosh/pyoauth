@@ -17,8 +17,6 @@ Functions:
 .. autofunction:: md5_hexdigest
 .. autofunction:: hmac_sha1_digest
 .. autofunction:: hmac_sha1_base64_digest
-.. autofunction:: generate_random_uint_string
-.. autofunction:: generate_random_hex_string
 .. autofunction:: bit_count
 .. autofunction:: byte_count
 .. autofunction:: bytes_to_long
