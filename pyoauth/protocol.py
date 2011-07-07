@@ -43,6 +43,7 @@ Authorization Header
 
 import time
 import re
+from pyoauth.types.codec import base64_encode, base64_decode
 
 try:
     # Python 3.
@@ -60,7 +61,7 @@ from pyoauth.error import InvalidHttpMethodError, \
 from pyoauth.url import percent_encode, percent_decode, \
     urlencode_sl, urlencode_s, urlparse_normalized, \
     request_protocol_params_sanitize, query_params_sanitize
-from pyoauth.crypto.hash import hmac_sha1_base64_digest
+from pyoauth.crypto.hash import hmac_sha1_base64_digest, sha1_digest
 from pyoauth.crypto.random import \
     generate_random_uint_string, \
     generate_random_hex_string
@@ -180,10 +181,12 @@ def generate_rsa_sha1_signature(client_private_key,
 
     oauth_params = oauth_params or {}
     base_string = generate_signature_base_string(method, url, oauth_params)
-    return sign(client_private_key, base_string)
+
+    data = sha1_digest(base_string)
+    return base64_encode(sign(client_private_key, data))
 
 
-def verify_rsa_sha1_signature(client_public_certificate,
+def verify_rsa_sha1_signature(client_public_key_or_certificate,
                               signature,
                               method, url, oauth_params=None,
                               *args, **kwargs):
@@ -192,7 +195,7 @@ def verify_rsa_sha1_signature(client_public_certificate,
 
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
 
-    :param client_public_certificate:
+    :param client_public_key_or_certificate:
         Client (consumer) public key (certificate).
     :param signature:
         RSA-SHA1 OAuth signature.
@@ -207,11 +210,14 @@ def verify_rsa_sha1_signature(client_public_certificate,
     :returns:
         ``True`` if verified to be correct; ``False`` otherwise.
     """
-    from pyoauth.crypto.rsa import verify
+    from pyoauth.crypto.rsa import pkcs1_v1_5_verify as verify
 
     oauth_params = oauth_params or {}
     base_string = generate_signature_base_string(method, url, oauth_params)
-    return verify(client_public_certificate, signature, base_string)
+
+    signature_bytes = base64_decode(signature)
+    data = sha1_digest(base_string)
+    return verify(client_public_key_or_certificate, signature_bytes, data)
 
 
 def generate_plaintext_signature(client_shared_secret,

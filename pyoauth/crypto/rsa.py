@@ -14,11 +14,71 @@ Functions
 """
 #from pyoauth.crypto.RSAKey import factory
 
-from pyoauth.types.number import long_to_bytes
-from pyoauth.types.codec import base64_encode, base64_decode
-from pyoauth.crypto.hash import sha1_digest
+from pyoauth.types.number import long_to_bytes, bytes_to_long
 from pyoauth.crypto.codec import public_key_pem_decode, private_key_pem_decode
 from Crypto.PublicKey import RSA
+
+
+def pkcs1_v1_5_sign(private_pem_key, data):
+    """
+    Signs a base string using your RSA private key.
+
+    :param private_pem_key:
+        Private key. Example private key from the OAuth test cases::
+
+            -----BEGIN PRIVATE KEY-----
+            MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
+            A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d
+            7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ
+            hI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H
+            X9u2AC2ry8vD/l7cqedtwMPp9k7TubgNFo+NGvKsl2ynyprOZR1xjQ7WgrgVB+mm
+            uScOM/5HVceFuGRDhYTCObE+y1kxRloNYXnx3ei1zbeYLPCHdhxRYW7T0qcynNmw
+            rn05/KO2RLjgQNalsQJBANeA3Q4Nugqy4QBUCEC09SqylT2K9FrrItqL2QKc9v0Z
+            zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn
+            qkMsDmzt0EfNaAOwHOmVJ2RVBspPcxt5iN4HI7HNeG6U5YsFBb+/GZbgfBT3kpNG
+            WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno
+            cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
+            3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8
+            AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
+            Lw03eHTNQghS0A==
+            -----END PRIVATE KEY-----
+
+    :param data:
+        Data byte string.
+    :returns:
+        Signature.
+    """
+    private_key = PrivateKey(private_pem_key)
+    return private_key.sign(data)
+
+
+def pkcs1_v1_5_verify(public_key_or_certificate, signature_bytes, data):
+    """
+    Verifies the signature against a given base string using your
+    public key.
+
+    :param public_key_or_certificate:
+        Public certificate. Example certificate from the OAuth test cases::
+
+            -----BEGIN CERTIFICATE-----
+            MIIBpjCCAQ+gAwIBAgIBATANBgkqhkiG9w0BAQUFADAZMRcwFQYDVQQDDA5UZXN0
+            IFByaW5jaXBhbDAeFw03MDAxMDEwODAwMDBaFw0zODEyMzEwODAwMDBaMBkxFzAV
+            BgNVBAMMDlRlc3QgUHJpbmNpcGFsMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB
+            gQC0YjCwIfYoprq/FQO6lb3asXrxLlJFuCvtinTF5p0GxvQGu5O3gYytUvtC2JlY
+            zypSRjVxwxrsuRcP3e641SdASwfrmzyvIgP08N4S0IFzEURkV1wp/IpH7kH41Etb
+            mUmrXSwfNZsnQRE5SYSOhh+LcK2wyQkdgcMv11l4KoBkcwIDAQABMA0GCSqGSIb3
+            DQEBBQUAA4GBAGZLPEuJ5SiJ2ryq+CmEGOXfvlTtEL2nuGtr9PewxkgnOjZpUy+d
+            4TvuXJbNQc8f4AMWL/tO9w0Fk80rWKp9ea8/df4qMq5qlFWlx6yOLQxumNOmECKb
+            WpkUQDIDJEoFUzKMVuJf4KO/FJ345+BNLGgbJ6WujreoM1X/gYfdnJ/J
+            -----END CERTIFICATE-----
+
+    :param data:
+        The data to be signed.
+    :returns:
+        ``True`` if signature matches; ``False`` if verification fails.
+    """
+    public_key = PublicKey(public_key_or_certificate)
+    return public_key.verify(signature_bytes, data)
 
 
 def pkcs1_v1_5_encode(key, data):
@@ -59,111 +119,48 @@ class PrivateKey(object):
           coefficient INTEGER -- (inverse of q) mod p }
 
         """
-        ki = private_key_pem_decode(pem_key)
-        ki_tuple = (
-            ki["modulus"],
-            ki["publicExponent"],
-            ki["privateExponent"],
-            ki["prime1"],
-            ki["prime2"],
-            #ki["exponent1"],
-            #ki["exponent2"],
-            #ki["coefficient"],
+        key_info = private_key_pem_decode(pem_key)
+        key_info_args = (
+            key_info["modulus"],
+            key_info["publicExponent"],
+            key_info["privateExponent"],
+            key_info["prime1"],
+            key_info["prime2"],
+            #key_info["exponent1"],
+            #key_info["exponent2"],
+            #key_info["coefficient"],
         )
-        self._key = RSA.construct(ki_tuple)
+        self._key = RSA.construct(key_info_args)
 
     def sign(self, data, encoder=pkcs1_v1_5_encode):
         signature = self._key.sign(
             encoder(
                 self._key,
-                sha1_digest(data)
+                data
             ), ""
         )[0]
         signature_bytes = long_to_bytes(signature)
-        return base64_encode(signature_bytes)
+        return signature_bytes
 
-    def verify(self, signature, data, encoder=pkcs1_v1_5_encode):
+    def verify(self, signature_bytes, data, encoder=pkcs1_v1_5_encode):
         pass
 
 
 class PublicKey(object):
     def __init__(self, pem_key):
-        self._key_info = public_key_pem_decode(pem_key)
-        self._rsa = RSA.construct((0, ))
+        key_info = public_key_pem_decode(pem_key)
+        key_info_args = (
+            key_info["modulus"],
+            key_info["exponent"],
+        )
+        self._key = RSA.construct(key_info_args)
 
     def sign(self, data, encoder=pkcs1_v1_5_encode):
         pass
 
-    def verify(self, signature, data, encoder=pkcs1_v1_5_encode):
-        pass
+    def verify(self, signature_bytes, data, encoder=pkcs1_v1_5_encode):
+        signature_long = bytes_to_long(signature_bytes)
+        data = encoder(self._key, data)
+        public_key = self._key.publickey()
+        return public_key.verify(data, (signature_long,))
 
-
-def pkcs1_v1_5_sign(private_pem_key, data):
-    """
-    Signs a base string using your RSA private key.
-
-    :param private_pem_key:
-        Private key. Example private key from the OAuth test cases::
-
-            -----BEGIN PRIVATE KEY-----
-            MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
-            A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d
-            7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ
-            hI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H
-            X9u2AC2ry8vD/l7cqedtwMPp9k7TubgNFo+NGvKsl2ynyprOZR1xjQ7WgrgVB+mm
-            uScOM/5HVceFuGRDhYTCObE+y1kxRloNYXnx3ei1zbeYLPCHdhxRYW7T0qcynNmw
-            rn05/KO2RLjgQNalsQJBANeA3Q4Nugqy4QBUCEC09SqylT2K9FrrItqL2QKc9v0Z
-            zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn
-            qkMsDmzt0EfNaAOwHOmVJ2RVBspPcxt5iN4HI7HNeG6U5YsFBb+/GZbgfBT3kpNG
-            WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno
-            cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
-            3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8
-            AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
-            Lw03eHTNQghS0A==
-            -----END PRIVATE KEY-----
-
-    :param data:
-        Data byte string.
-    :returns:
-        Signature.
-    """
-    #private_key = factory.parsePrivateKey(private_key)
-    #signed = private_key.hashAndSign(base_string)
-    #return base64_encode(signed)
-    private_key = PrivateKey(private_pem_key)
-    return private_key.sign(data)
-
-
-def verify(public_certificate, signature, base_string):
-    """
-    Verifies the signature against a given base string using your
-    public key.
-
-    :param public_certificate:
-        Public certificate. Example certificate from the OAuth test cases::
-
-            -----BEGIN CERTIFICATE-----
-            MIIBpjCCAQ+gAwIBAgIBATANBgkqhkiG9w0BAQUFADAZMRcwFQYDVQQDDA5UZXN0
-            IFByaW5jaXBhbDAeFw03MDAxMDEwODAwMDBaFw0zODEyMzEwODAwMDBaMBkxFzAV
-            BgNVBAMMDlRlc3QgUHJpbmNpcGFsMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB
-            gQC0YjCwIfYoprq/FQO6lb3asXrxLlJFuCvtinTF5p0GxvQGu5O3gYytUvtC2JlY
-            zypSRjVxwxrsuRcP3e641SdASwfrmzyvIgP08N4S0IFzEURkV1wp/IpH7kH41Etb
-            mUmrXSwfNZsnQRE5SYSOhh+LcK2wyQkdgcMv11l4KoBkcwIDAQABMA0GCSqGSIb3
-            DQEBBQUAA4GBAGZLPEuJ5SiJ2ryq+CmEGOXfvlTtEL2nuGtr9PewxkgnOjZpUy+d
-            4TvuXJbNQc8f4AMWL/tO9w0Fk80rWKp9ea8/df4qMq5qlFWlx6yOLQxumNOmECKb
-            WpkUQDIDJEoFUzKMVuJf4KO/FJ345+BNLGgbJ6WujreoM1X/gYfdnJ/J
-            -----END CERTIFICATE-----
-
-    :param base_string:
-        The OAuth base string.
-    :returns:
-        ``True`` if signature matches; ``False`` if verification fails.
-    """
-    decoded_signature = base64_decode(signature)
-    return False
-    #cert_parser = X509()
-    #cert_parser.parse(public_certificate)
-    #public_key = cert_parser.publicKey
-
-    ##public_key = factory.parsePEMKey(public_certificate, public=True)
-    #return public_key.hashAndVerify(decoded_signature, base_string)

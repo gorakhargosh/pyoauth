@@ -233,9 +233,9 @@ yF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE=",
                                                  oauth_params=oauth_params
                                                  )
             )
-            #assert_true(verify_rsa_sha1_signature(
-            #    client_certificate, expected_signature,
-            #    method, url, oauth_params))
+            assert_true(verify_rsa_sha1_signature(
+                client_certificate, expected_signature,
+                method, url, oauth_params))
 
 
 class Test_generate_plaintext_signature(object):
