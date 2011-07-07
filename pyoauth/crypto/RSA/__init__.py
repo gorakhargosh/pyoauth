@@ -26,12 +26,81 @@ Classes:
 --------
 .. autoclass:: RSAPublicKey
 """
+import logging
 
 from pyasn1.type import univ
 from pyasn1.codec.der import decoder, encoder
-from pyoauth.crypto.codec.pemder import pem_to_der_public_key, der_to_pem_public_key
+from pyoauth.crypto.codec.pemder import pem_to_der_public_key, der_to_pem_public_key, der_to_pem_rsa_private_key, pem_to_der_rsa_private_key, pem_to_der_private_key
 from pyoauth.crypto.codec.x509 import SubjectPublicKeyInfo
 from pyoauth.crypto.X509 import X509Certificate
+from pyoauth.crypto.codec import rsadsa
+
+class RSAPrivateKey(object):
+    # http://tools.ietf.org/html/rfc3279 - Section 2.3.1
+    _RSA_OID = univ.ObjectIdentifier('1.2.840.113549.1.1.1')
+
+    def __init__(self, key):
+        self._key = key
+        self._key_asn1, self._private_key_asn1 = self.decode_from_pem_key(key)
+
+    def encode(self):
+        return self.encode_to_pem_private_key(self._key_asn1)
+
+    @property
+    def private_key(self):
+        asn = self._private_key_asn1
+        """
+        ASN.1 Syntax::
+
+            RSAPrivateKey ::= SEQUENCE {
+              version Version,
+              modulus INTEGER, -- n
+              publicExponent INTEGER, -- e
+              privateExponent INTEGER, -- d
+              prime1 INTEGER, -- p
+              prime2 INTEGER, -- q
+              exponent1 INTEGER, -- d mod (p-1)
+              exponent2 INTEGER, -- d mod (q-1)
+              coefficient INTEGER -- (inverse of q) mod p }
+
+            Version ::= INTEGER
+        """
+        return dict(
+            version          = long(asn.getComponentByName('version')),
+            modulus          = long(asn.getComponentByName('modulus')),
+            public_exponent  = long(asn.getComponentByName('publicExponent')),
+            private_exponent = long(asn.getComponentByName('privateExponent')),
+            prime1           = long(asn.getComponentByName('prime1')),
+            prime2           = long(asn.getComponentByName('prime2')),
+            exponent1        = long(asn.getComponentByName('exponent1')),
+            exponent2        = long(asn.getComponentByName('exponent2')),
+            coefficient      = long(asn.getComponentByName('coefficient')),
+        )
+
+
+    @classmethod
+    def decode_from_pem_key(cls, key):
+        keyType = rsadsa.RSAPrivateKey()
+        try:
+            der = pem_to_der_rsa_private_key(key)
+        except Exception, e:
+            logging.exception(e)
+            der = pem_to_der_private_key(key)
+
+        cover_asn1 = decoder.decode(der)[0]
+        if len(cover_asn1) < 1:
+            raise ValueError("No RSA private key found after ASN.1 decoding.")
+
+        algorithm = cover_asn1[1][0]
+        if algorithm != cls._RSA_OID:
+            raise ValueError("Only RSA encryption is currently supported: got algorithm `%r`" % algorithm)
+        key_der = bytes(cover_asn1[2])
+        key_asn1 = decoder.decode(key_der, asn1Spec=keyType)[0]
+        return cover_asn1, key_asn1
+
+    @classmethod
+    def encode_to_pem_private_key(cls, key_asn1):
+        return der_to_pem_rsa_private_key(encoder.encode(key_asn1))
 
 
 class RSAPublicKey(object):
