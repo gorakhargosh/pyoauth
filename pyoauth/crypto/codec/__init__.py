@@ -31,6 +31,7 @@ Classes:
 """
 import logging
 
+from pyoauth.types import bytes
 from pyasn1.type import univ
 from pyasn1.codec.der import decoder, encoder
 from pyoauth.crypto.codec.pemder import \
