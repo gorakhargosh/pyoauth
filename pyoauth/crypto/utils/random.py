@@ -47,6 +47,20 @@ def generate_random_long(low, high):
             return n
 
 
+def bytes_to_hex(byte_string):
+    return binascii.b2a_hex(byte_string)
+
+def bytes_to_base64(byte_string):
+    return base64_encode(byte_string)
+
+def bytes_to_decimal(byte_string):
+    return bytes(int(bytes_to_hex(byte_string), 16))
+
+_byte_base_encoding_map = {
+    16: bytes_to_hex,
+    10: bytes_to_decimal,
+    64: bytes_to_base64
+}
 def generate_random_uint_string(bit_strength=64, base=10):
     """
     Generates a random ASCII-encoded unsigned integral number in decimal
@@ -56,7 +70,7 @@ def generate_random_uint_string(bit_strength=64, base=10):
         Bit strength.
     :param base:
         One of:
-            1. 10
+            1. 10 (default)
             2. 16
             3. 64
     :returns:
@@ -67,16 +81,13 @@ def generate_random_uint_string(bit_strength=64, base=10):
     allowed_bases = (10, 16, 64)
     if bit_strength % 8 or bit_strength <= 0:
         raise ValueError("This function expects a bit strength: got `%r`." % (bit_strength, ))
-    num_bytes = bit_strength / 8
+    #num_bytes = bit_strength / 8
+    num_bytes = bit_strength >> 3
 
     random_bytes = generate_random_bytes(num_bytes)
-    if base == 16:
-        return binascii.b2a_hex(random_bytes)
-    elif base == 64:
-        return base64_encode(random_bytes)
-    elif base == 10:
-        return bytes(int(binascii.b2a_hex(random_bytes), 16))
-    else:
+    try:
+        return _byte_base_encoding_map[base](random_bytes)
+    except KeyError:
         raise ValueError("Base must be one of %r" % (allowed_bases, ))
 
 
