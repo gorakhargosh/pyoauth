@@ -8,7 +8,7 @@ from pyoauth.error import InvalidOAuthParametersError, \
     InvalidSignatureMethodError, \
     InvalidHttpResponseError, HttpError, InvalidContentTypeError, IllegalArgumentError
 from pyoauth.http import RequestProxy, ResponseProxy
-from pyoauth.utils import parse_authorization_header_value
+from pyoauth.protocol import parse_authorization_header_value
 
 try:
     from nose.tools import assert_dict_equal

@@ -17,7 +17,7 @@
 # under the License.
 
 """
-:module: pyoauth.utils
+:module: pyoauth.protocol
 :synopsis: Protocol-specific utility functions.
 
 Functions

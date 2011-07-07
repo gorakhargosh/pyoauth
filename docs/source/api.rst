@@ -14,9 +14,9 @@ API Reference
 =======================
 .. automodule:: pyoauth.oauth1.client
 
-`pyoauth.utils`
-===============
-.. automodule:: pyoauth.utils
+`pyoauth.protocol`
+==================
+.. automodule:: pyoauth.protocol
 
 `pyoauth.url`
 =============

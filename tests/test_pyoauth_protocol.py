@@ -14,7 +14,7 @@ try:
 except ImportError:
     assert_dict_equal = assert_equal
 from nose import SkipTest
-from pyoauth.utils import parse_authorization_header_value, \
+from pyoauth.protocol import parse_authorization_header_value, \
     _generate_signature_base_string_query, \
     generate_normalized_authorization_header_value, \
     percent_decode, \

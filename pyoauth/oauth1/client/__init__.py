@@ -49,7 +49,7 @@ from pyoauth.url import \
     url_add_query, \
     url_append_query, \
     parse_qs, query_append, is_valid_callback_url
-from pyoauth.utils import generate_nonce, \
+from pyoauth.protocol import generate_nonce, \
     generate_timestamp, \
     generate_hmac_sha1_signature, \
     generate_rsa_sha1_signature, \
