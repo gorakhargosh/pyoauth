@@ -44,7 +44,6 @@ Authorization Header
 import time
 import re
 
-
 try:
     # Python 3.
     from urllib.parse import urlunparse
@@ -52,10 +51,6 @@ except ImportError:
     # Python 2.5+
     from urlparse import urlunparse
 
-from pyoauth.crypto.hash import hmac_sha1_base64_digest
-from pyoauth.crypto.utils.random import \
-    generate_random_uint_string, \
-    generate_random_hex_string
 from pyoauth.types.unicode import unicode_to_utf8
 from pyoauth.types import bytes
 from pyoauth.error import InvalidHttpMethodError, \
@@ -65,6 +60,10 @@ from pyoauth.error import InvalidHttpMethodError, \
 from pyoauth.url import percent_encode, percent_decode, \
     urlencode_sl, urlencode_s, urlparse_normalized, \
     request_protocol_params_sanitize, query_params_sanitize
+from pyoauth.crypto.hash import hmac_sha1_base64_digest
+from pyoauth.crypto.utils.random import \
+    generate_random_uint_string, \
+    generate_random_hex_string
 
 
 def generate_nonce(bit_strength=64, base=10):
