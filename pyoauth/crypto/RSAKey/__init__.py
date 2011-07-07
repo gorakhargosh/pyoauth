@@ -13,7 +13,7 @@ from pyoauth.types.bytearray import \
     long_to_bytearray
 from pyoauth.types import byte_count, bit_count
 from pyoauth.crypto.hash import sha1_digest
-from pyoauth.crypto.utils.random import generate_random_bytearray
+from pyoauth.crypto.random import generate_random_bytearray
 
 
 class RSAKey(object):

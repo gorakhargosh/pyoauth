@@ -4,7 +4,7 @@
 # Released into public domain.
 
 """
-:module: pyoauth.crypto.utils.primes
+:module: pyoauth.crypto.primes
 :synopsis: Cryptographic prime number routines.
 
 Functions:
@@ -16,7 +16,7 @@ Functions:
 """
 
 import math
-from pyoauth.crypto.utils.random import generate_random_long
+from pyoauth.crypto.random import generate_random_long
 from pyoauth.types.number import pow_mod
 
 

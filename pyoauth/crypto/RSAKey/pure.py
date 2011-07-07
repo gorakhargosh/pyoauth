@@ -11,8 +11,8 @@ from pyoauth.types.number import inverse_mod, pow_mod, lcm
 from pyoauth.types.bytearray import bytearray_to_long, bytes_to_bytearray
 from pyoauth.types.codec import long_to_base64, base64_to_long
 from pyoauth.crypto.hash import sha1_base64_digest
-from pyoauth.crypto.utils.primes import generate_random_prime
-from pyoauth.crypto.utils.random import generate_random_long
+from pyoauth.crypto.primes import generate_random_prime
+from pyoauth.crypto.random import generate_random_long
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
 from pyoauth.crypto.utils import xmltools
 from pyoauth.crypto.RSAKey import RSAKey

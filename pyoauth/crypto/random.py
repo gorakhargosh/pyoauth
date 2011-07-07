@@ -5,7 +5,7 @@
 # Released into public domain.
 
 """
-:module: pyoauth.crypto.utils.random
+:module: pyoauth.crypto.random
 :synopsis: Random number and string generation utilities.
 
 Functions:
@@ -17,7 +17,7 @@ Functions:
 """
 
 from pyoauth.types import byte_count, bit_count
-from pyoauth.crypto.utils.prng import generate_random_bytes
+from pyoauth.crypto.prng import generate_random_bytes
 from pyoauth.types.bytearray import \
     bytearray_to_long, bytes_to_bytearray
 from pyoauth.types.codec import\

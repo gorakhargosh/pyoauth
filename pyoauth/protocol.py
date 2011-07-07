@@ -61,7 +61,7 @@ from pyoauth.url import percent_encode, percent_decode, \
     urlencode_sl, urlencode_s, urlparse_normalized, \
     request_protocol_params_sanitize, query_params_sanitize
 from pyoauth.crypto.hash import hmac_sha1_base64_digest
-from pyoauth.crypto.utils.random import \
+from pyoauth.crypto.random import \
     generate_random_uint_string, \
     generate_random_hex_string
 

@@ -4,7 +4,7 @@
 # Released into public domain.
 
 """
-:module: pyoauth.crypto.utils.prng
+:module: pyoauth.crypto.prng
 :synopsis: OS-dependent pseudo-random number generator that occasionally swears.
 
 Functions:
