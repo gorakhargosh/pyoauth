@@ -39,70 +39,80 @@ from pyoauth.crypto.utils.bytearray import \
     long_to_bytearray, \
     bytearray_to_long
 
+try:
+    # If the PyCrypto routines are available use those.
+    from Crypto.Util.number import long_to_bytes as _ltob, bytes_to_long as _btol
 
-# Improved conversion functions contributed by Barry Warsaw, after
-# careful benchmarking
-def long_to_bytes(num, blocksize=0):
-    """
-    Convert a long integer to a byte string::
+    def long_to_bytes(num, blocksize=0):
+        return _ltob(num, blocksize)
 
-        long_to_bytes(n:long, blocksize:int) : string
+    def bytes_to_long(byte_string):
+        return _btol(byte_string)
 
-    :param num:
-        Long value
-    :param blocksize:
-        If optional blocksize is given and greater than zero, pad the front of
-        the byte string with binary zeros so that the length is a multiple of
-        blocksize.
-    :returns:
-        Byte string.
-    """
-    # after much testing, this algorithm was deemed to be the fastest
-    s = ''
-    num = long(num)
-    pack = struct.pack
-    while num > 0:
-        s = pack('>I', num & 0xffffffffL) + s
-        num >>= 32
-    # strip off leading zeros
-    for i in range(len(s)):
-        if s[i] != '\000':
-            break
-    else:
-        # only happens when n == 0
-        s = '\000'
-        i = 0
-    s = s[i:]
-    # add back some pad bytes.  this could be done more efficiently w.r.t. the
-    # de-padding being done above, but sigh...
-    if blocksize > 0 and len(s) % blocksize:
-        s = (blocksize - len(s) % blocksize) * '\000' + s
-    return s
+except ImportError:
+    # Improved conversion functions contributed by Barry Warsaw, after
+    # careful benchmarking
+    def long_to_bytes(num, blocksize=0):
+        """
+        Convert a long integer to a byte string::
+
+            long_to_bytes(n:long, blocksize:int) : string
+
+        :param num:
+            Long value
+        :param blocksize:
+            If optional blocksize is given and greater than zero, pad the front of
+            the byte string with binary zeros so that the length is a multiple of
+            blocksize.
+        :returns:
+            Byte string.
+        """
+        # after much testing, this algorithm was deemed to be the fastest
+        s = ''
+        num = long(num)
+        pack = struct.pack
+        while num > 0:
+            s = pack('>I', num & 0xffffffffL) + s
+            num >>= 32
+        # strip off leading zeros
+        for i in range(len(s)):
+            if s[i] != '\000':
+                break
+        else:
+            # only happens when n == 0
+            s = '\000'
+            i = 0
+        s = s[i:]
+        # add back some pad bytes.  this could be done more efficiently w.r.t. the
+        # de-padding being done above, but sigh...
+        if blocksize > 0 and len(s) % blocksize:
+            s = (blocksize - len(s) % blocksize) * '\000' + s
+        return s
 
 
-def bytes_to_long(byte_string):
-    """
-    Convert a byte string to a long integer::
+    def bytes_to_long(byte_string):
+        """
+        Convert a byte string to a long integer::
 
-        bytes_to_long(bytestring) : long
+            bytes_to_long(bytestring) : long
 
-    This is (essentially) the inverse of long_to_bytes().
+        This is (essentially) the inverse of long_to_bytes().
 
-    :param bytestring:
-        A byte string.
-    :returns:
-        Long.
-    """
-    acc = 0L
-    unpack = struct.unpack
-    length = len(byte_string)
-    if length % 4:
-        extra = (4 - length % 4)
-        byte_string = '\000' * extra + byte_string
-        length = length + extra
-    for i in range(0, length, 4):
-        acc = (acc << 32) + unpack('>I', byte_string[i:i+4])[0]
-    return acc
+        :param bytestring:
+            A byte string.
+        :returns:
+            Long.
+        """
+        acc = 0L
+        unpack = struct.unpack
+        length = len(byte_string)
+        if length % 4:
+            extra = (4 - length % 4)
+            byte_string = '\000' * extra + byte_string
+            length = length + extra
+        for i in range(0, length, 4):
+            acc = (acc << 32) + unpack('>I', byte_string[i:i+4])[0]
+        return acc
 
 
 def long_to_bytes_original(num):
