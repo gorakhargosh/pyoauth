@@ -1,5 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# Placed into public domain.
+
+"""
+:module: pyoauth.crypto.codec
+:synopsis: Codecs to encode and decode keys and certificates in various formats.
+
+Functions:
+----------
+.. autofunction:: pem_public_key_decode
+.. autofunction:: pem_private_key_decode
+
+"""
 
 from pyoauth.crypto.codec.pem import \
     CERT_PEM_HEADER, PUBLIC_KEY_PEM_HEADER, \
