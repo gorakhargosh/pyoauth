@@ -43,7 +43,7 @@ from pyoauth.crypto.codec.pem import \
     pem_to_der_private_key
 from pyoauth.crypto.codec.asn1.x509 import SubjectPublicKeyInfo
 from pyoauth.crypto.codec.asn1 import rsadsa
-
+from pyoauth.crypto.codec.pem.x509 import X509Certificate
 
 class RSAPrivateKey(object):
     """
