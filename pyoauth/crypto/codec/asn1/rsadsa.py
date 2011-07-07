@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-:module: pyoauth.crypto.codec.rsadsa
+:module: pyoauth.crypto.codec.asn1.rsadsa
 :synopsis: ASN.1/DER decoding and encoding for RSA and DSA private keys.
 
 ASN.1 Syntax::

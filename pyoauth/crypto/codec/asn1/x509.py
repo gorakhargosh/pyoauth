@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-:module: pyoauth.crypto.codec.x509
+:module: pyoauth.crypto.codec.asn1.x509
 :synopsis: ASN.1/DER decoding & encoding for X.509 certificates and public keys.
 
 X.509 Certificate parser.
