@@ -32,7 +32,7 @@
 # 2. http://tools.ietf.org/html/rfc5849#section-3.4.3
 
 import binascii
-from pyoauth.crypto.utils import sha1_digest
+from pyoauth.crypto.hash import sha1_digest
 
 try:
     from Crypto.PublicKey import RSA

@@ -7,6 +7,8 @@
 
 This module has misc. helper functions for working with XML DOM nodes."""
 
+# TODO: Remove this entirely.
+
 import re
 
 from xml.dom import minidom

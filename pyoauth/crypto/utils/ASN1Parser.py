@@ -5,6 +5,8 @@
 
 """Class for parsing ASN.1"""
 
+# TODO: Remove this entirely.
+
 from pyoauth.crypto.utils.codec import Parser
 
 #Takes a byte array which has a DER TLV field at its head

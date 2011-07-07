@@ -12,7 +12,7 @@ from pyoauth.types.bytearray import \
     bytearray_to_long, \
     long_to_bytearray
 from pyoauth.types import byte_count, bit_count
-from pyoauth.crypto.utils import sha1_digest
+from pyoauth.crypto.hash import sha1_digest
 from pyoauth.crypto.utils.random import generate_random_bytearray
 
 

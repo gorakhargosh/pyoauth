@@ -12,6 +12,7 @@ Classes:
 .. autoclass:: Parser
 """
 
+# TODO: Remove this entirely.
 
 class Parser(object):
     def __init__(self, bytes):

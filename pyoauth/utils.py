@@ -52,7 +52,7 @@ except ImportError:
     # Python 2.5+
     from urlparse import urlunparse
 
-from pyoauth.crypto.utils import hmac_sha1_base64_digest
+from pyoauth.crypto.hash import hmac_sha1_base64_digest
 from pyoauth.crypto.utils.random import \
     generate_random_uint_string, \
     generate_random_hex_string
