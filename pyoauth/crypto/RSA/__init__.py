@@ -62,7 +62,7 @@ class RSAPublicKey(object):
         :returns:
             Tuple of (modulus, exponent)
         """
-        X509Certificate.parse_public_rsa_key_bits(public_key_bitstring)
+        return X509Certificate.parse_public_rsa_key_bits(public_key_bitstring)
 
     @classmethod
     def decode_from_pem_key(cls, key):
