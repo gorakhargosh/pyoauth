@@ -16,12 +16,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+:module: pyoauth.crypto.RSA
+:synopsis: RSA keys parsing.
+:author: Arne Roomann-Kurrik <kurrik@gmail.com>
+:author: Yesudeep Mangalapilly <yesudeep@gmail.com>
 
-from pyasn1.type import univ, namedtype
+Classes:
+--------
+.. autoclass:: RSAPublicKey
+"""
+
+from pyasn1.type import univ
 from pyasn1.codec.der import decoder, encoder
 from pyoauth.crypto.codec.pemder import pem_to_der_public_key, der_to_pem_public_key
 from pyoauth.crypto.codec.x509 import SubjectPublicKeyInfo
 from pyoauth.crypto.X509 import X509Certificate
+
 
 class RSAPublicKey(object):
     # http://tools.ietf.org/html/rfc3279 - Section 2.3.1
@@ -67,7 +78,7 @@ class RSAPublicKey(object):
         return der_to_pem_public_key(encoder.encode(key_asn1))
 
 
-TEST_KEYS = ("""
+TEST_PUBLIC_PEM_KEYS = ("""
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC0YjCwIfYoprq/FQO6lb3asXrx
 LlJFuCvtinTF5p0GxvQGu5O3gYytUvtC2JlYzypSRjVxwxrsuRcP3e641SdASwfr
