@@ -11,7 +11,7 @@
 from pyoauth.types import byte_count
 from pyoauth.types.number import bytes_to_long, long_to_bytes
 from pyoauth.crypto.utils.compat import is_pycrypto_available
-from pyoauth.crypto.prng import generate_random_bytes
+from pyoauth.crypto.random import generate_random_bytes
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
 

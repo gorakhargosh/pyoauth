@@ -10,20 +10,78 @@
 
 Functions:
 ----------
+.. autofunction:: generate_random_bytes
 .. autofunction:: generate_random_long
 .. autofunction:: generate_random_uint_string
 .. autofunction:: generate_random_hex_string
 .. autofunction:: generate_random_bytearray
 """
 
+import os
 from pyoauth.types import byte_count, bit_count
-from pyoauth.crypto.prng import generate_random_bytes
 from pyoauth.types.bytearray import \
     bytearray_to_long, bytes_to_bytearray
 from pyoauth.types.codec import\
     bytes_to_base64, \
     bytes_to_decimal, \
     bytes_to_hex
+
+
+try:
+    # Operating system unsigned random.
+    os.urandom(1)
+    def generate_random_bytes(count):
+        """
+        Generates a random byte string with ``count`` bytes.
+
+        :param count:
+            Number of bytes.
+        :returns:
+            Random byte string.
+        """
+        return os.urandom(count)
+except Exception:
+    try:
+        urandom_device = open("/dev/urandom", "rb")
+        def generate_random_bytes(count):
+            """
+            Generates a random byte string with ``count`` bytes.
+
+            :param count:
+                Number of bytes.
+            :returns:
+                Random byte string.
+            """
+            return urandom_device.read(count)
+    except IOError:
+        #Else get Win32 CryptoAPI PRNG
+        try:
+            import win32prng
+            def generate_random_bytes(count):
+                """
+                Generates a random byte string with ``count`` bytes.
+
+                :param count:
+                    Number of bytes.
+                :returns:
+                    Random byte string.
+                """
+                s = win32prng.generate_random_bytes(count)
+                assert len(s) == count
+                return s
+        except ImportError:
+            # What the fuck?!
+            def generate_random_bytes(count):
+                """
+                Should generate a random byte string with ``count`` bytes
+                but barfs instead.
+
+                :param count:
+                    Number of bytes.
+                :returns:
+                    WTF.
+                """
+                raise NotImplementedError("What the fuck?! No PRNG available.")
 
 
 def generate_random_long(low, high):
