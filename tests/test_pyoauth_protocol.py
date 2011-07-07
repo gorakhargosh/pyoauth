@@ -222,10 +222,12 @@ yF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE=",
         for example in self._examples:
             client_shared_secret = example["private_key"]
             client_certificate = example["certificate"]
+            public_key = example["public_key"]
             url = example["url"]
             method = example["method"]
             oauth_params = example["oauth_params"]
             expected_signature = example["oauth_signature"]
+            # Using the RSA private key.
             assert_equal(expected_signature,
                          generate_rsa_sha1_signature(client_shared_secret,
                                                  method=method,
@@ -233,8 +235,13 @@ yF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE=",
                                                  oauth_params=oauth_params
                                                  )
             )
+            # Using the X.509 certificate.
             assert_true(verify_rsa_sha1_signature(
                 client_certificate, expected_signature,
+                method, url, oauth_params))
+            # Using the RSA public key.
+            assert_true(verify_rsa_sha1_signature(
+                public_key, expected_signature,
                 method, url, oauth_params))
 
 
