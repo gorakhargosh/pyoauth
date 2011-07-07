@@ -21,7 +21,7 @@ from pyoauth.crypto.codec.pem.x509 import X509Certificate
 from pyoauth.crypto.codec.pem.rsa import RSAPrivateKey, RSAPublicKey
 
 
-def pem_public_key_decode(pem_key):
+def public_key_pem_decode(pem_key):
     """
     Decodes a PEM-encoded public key/X.509 certificate string into internal representation.
 
@@ -42,7 +42,7 @@ def pem_public_key_decode(pem_key):
     return key
 
 
-def pem_private_key_decode(pem_key):
+def private_key_pem_decode(pem_key):
     """
     Decodes a PEM-encoded private key string into internal representation.
 
