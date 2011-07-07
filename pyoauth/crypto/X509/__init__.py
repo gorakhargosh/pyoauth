@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009 Google, Inc.
+# Copyright (C) 2009 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,17 @@
 #
 # From:
 # http://code.google.com/p/kurrik-resources/source/browse/trunk/src/x509/x509.py?r=14
+
+"""
+:module: pyoauth.crypto.X509
+:synopsis: X.509 certificate parsing.
+:author: Arne Roomann-Kurrik <kurrik@gmail.com>
+:author: Yesudeep Mangalapilly <yesudeep@gmail.com>
+
+Classes:
+--------
+.. autoclass:: X509Certificate
+"""
 
 
 from pyasn1.type import univ
