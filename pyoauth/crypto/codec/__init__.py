@@ -22,6 +22,7 @@
 :author: Arne Roomann-Kurrik <kurrik@gmail.com>
 :author: Yesudeep Mangalapilly <yesudeep@gmail.com>
 :see: http://code.google.com/p/kurrik-resources/source/browse/trunk/src/x509/x509.py?r=14
+:see: http://blog.roomanna.com/12-12-2010/packaging-chrome-extensions
 
 Classes:
 --------
