@@ -16,7 +16,7 @@
 # limitations under the License.
 
 """
-:module: pyoauth.crypto.utils.bitstring
+:module: pyoauth.types.bitstring
 :synopsis: Utilities for working with bit strings.
 :author: Arne Roomann-Kurrik <kurrik@gmail.com>
 
@@ -24,12 +24,10 @@ Functions:
 ----------
 .. autofunction:: bits_to_long
 .. autofunction:: long_to_bitstring
-
 """
 
-
 try:
-    reduce(lambda a, b: a + b, [1, 2, 3, 4])
+    a = reduce((lambda a, b: a + b), [1, 2, 3, 4])
 except Exception:
     # Python 3k
     from functools import reduce
@@ -44,7 +42,7 @@ def bits_to_long(bits):
     :returns:
         Long value.
     """
-    return reduce(lambda x, y: (x << 1) + y, bits)
+    return reduce((lambda x, y: (x << 1) + y), bits)
 
 
 def long_to_bitstring(num):

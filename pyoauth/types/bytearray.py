@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Released into public domain.
+# Placed into public domain.
 
 """
-:module: pyoauth.crypto.utils.bytearray
+:module: pyoauth.types.bytearray
 :synopsis: Byte arrays.
 
 Functions:
@@ -14,17 +14,12 @@ Functions:
 .. autofunction:: bytearray_concat
 .. autofunction:: bytearray_to_bytes
 .. autofunction:: bytes_to_bytearray
-.. autofunction:: generate_random_bytearray
 .. autofunction:: bytearray_to_long
 .. autofunction:: long_to_bytearray
-.. autofunction:: bytearray_base64_decode
-.. autofunction:: bytearray_base64_encode
-
 """
 
 from array import array
-from pyoauth.crypto.utils import byte_count, base64_encode, base64_decode
-from pyoauth.crypto.utils.prng import generate_random_bytes
+from pyoauth.types import byte_count
 
 
 def bytearray_create(sequence):
@@ -91,18 +86,6 @@ def bytes_to_bytearray(byte_string):
     return byte_array
 
 
-def generate_random_bytearray(count):
-    """
-    Generates a random byte array.
-
-    :param count:
-        The number of bytes.
-    :returns:
-        A random byte array.
-    """
-    return bytes_to_bytearray(generate_random_bytes(count))
-
-
 def bytearray_to_long(byte_array):
     """
     Converts a byte array to long.
@@ -138,25 +121,3 @@ def long_to_bytearray(num):
     return byte_array
 
 
-def bytearray_base64_decode(encoded):
-    """
-    Converts a base-64 encoded value into a byte array.
-
-    :param encoded:
-        The base-64 encoded value.
-    :returns:
-        Byte array.
-    """
-    return bytes_to_bytearray(base64_decode(encoded))
-
-
-def bytearray_base64_encode(byte_array):
-    """
-    Base-64 encodes a byte array.
-
-    :param byte_array:
-        The byte array.
-    :returns:
-        Base-64 encoded byte array without newlines.
-    """
-    return base64_encode(bytearray_to_bytes(byte_array))

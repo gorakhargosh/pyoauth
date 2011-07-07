@@ -22,9 +22,9 @@ Functions
 #]
 
 
-from pyoauth.crypto.utils import base64_encode, base64_decode
+from pyoauth.types.codec import base64_encode, base64_decode
 from pyoauth.crypto.RSAKey import factory
-from pyoauth.crypto.X509 import X509
+#from pyoauth.crypto.X509 import X509
 
 
 def sign(private_key, base_string):
@@ -87,10 +87,10 @@ def verify(public_certificate, signature, base_string):
         ``True`` if signature matches; ``False`` if verification fails.
     """
     decoded_signature = base64_decode(signature)
+    return False
+    #cert_parser = X509()
+    #cert_parser.parse(public_certificate)
+    #public_key = cert_parser.publicKey
 
-    cert_parser = X509()
-    cert_parser.parse(public_certificate)
-    public_key = cert_parser.publicKey
-
-    #public_key = factory.parsePEMKey(public_certificate, public=True)
-    return public_key.hashAndVerify(decoded_signature, base_string)
+    ##public_key = factory.parsePEMKey(public_certificate, public=True)
+    #return public_key.hashAndVerify(decoded_signature, base_string)

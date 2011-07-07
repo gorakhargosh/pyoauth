@@ -3,8 +3,8 @@
 # Written by Bill Janssen. Borrowed from the Python ``ssl`` module.
 
 """
-:module: pyoauth.crypto.utils.certificate
-:synopsis: Certificate conversion utilities.
+:module: pyoauth.crypto.codec.pem
+:synopsis: PEM/DER conversion utilities.
 
 Functions:
 ----------
@@ -16,7 +16,8 @@ Functions:
 import time
 import textwrap
 from functools import partial
-from pyoauth.crypto.utils import base64_encode, base64_decode
+from pyoauth.types.codec import base64_decode, base64_encode
+
 
 CERT_PEM_HEADER = '-----BEGIN CERTIFICATE-----'
 CERT_PEM_FOOTER = '-----END CERTIFICATE-----'
@@ -93,13 +94,29 @@ def der_to_pem(der_cert_bytes, pem_header, pem_footer):
 
 
 # Helper functions. Use these instead of using der_to_per and per_to_der.
-pem_to_der_private_key = partial(pem_to_der, pem_header=PRIVATE_KEY_PEM_HEADER, pem_footer=PRIVATE_KEY_PEM_FOOTER)
-pem_to_der_rsa_private_key = partial(pem_to_der, pem_header=RSA_PRIVATE_KEY_PEM_HEADER, pem_footer=RSA_PRIVATE_KEY_PEM_FOOTER)
-pem_to_der_public_key = partial(pem_to_der, pem_header=PUBLIC_KEY_PEM_HEADER, pem_footer=PUBLIC_KEY_PEM_FOOTER)
-pem_to_der_certificate = partial(pem_to_der, pem_header=CERT_PEM_HEADER, pem_footer=CERT_PEM_FOOTER)
+pem_to_der_private_key = partial(pem_to_der,
+                                 pem_header=PRIVATE_KEY_PEM_HEADER,
+                                 pem_footer=PRIVATE_KEY_PEM_FOOTER)
+pem_to_der_rsa_private_key = partial(pem_to_der,
+                                     pem_header=RSA_PRIVATE_KEY_PEM_HEADER,
+                                     pem_footer=RSA_PRIVATE_KEY_PEM_FOOTER)
+pem_to_der_public_key = partial(pem_to_der,
+                                pem_header=PUBLIC_KEY_PEM_HEADER,
+                                pem_footer=PUBLIC_KEY_PEM_FOOTER)
+pem_to_der_certificate = partial(pem_to_der,
+                                 pem_header=CERT_PEM_HEADER,
+                                 pem_footer=CERT_PEM_FOOTER)
 
-der_to_pem_private_key = partial(der_to_pem, pem_header=PRIVATE_KEY_PEM_HEADER, pem_footer=PRIVATE_KEY_PEM_FOOTER)
-der_to_pem_rsa_private_key = partial(der_to_pem, pem_header=RSA_PRIVATE_KEY_PEM_HEADER, pem_footer=RSA_PRIVATE_KEY_PEM_FOOTER)
-der_to_pem_public_key = partial(der_to_pem, pem_header=PUBLIC_KEY_PEM_HEADER, pem_footer=PUBLIC_KEY_PEM_FOOTER)
-der_to_pem_certificate = partial(der_to_pem, pem_header=CERT_PEM_HEADER, pem_footer=CERT_PEM_FOOTER)
+der_to_pem_private_key = partial(der_to_pem,
+                                 pem_header=PRIVATE_KEY_PEM_HEADER,
+                                 pem_footer=PRIVATE_KEY_PEM_FOOTER)
+der_to_pem_rsa_private_key = partial(der_to_pem,
+                                     pem_header=RSA_PRIVATE_KEY_PEM_HEADER,
+                                     pem_footer=RSA_PRIVATE_KEY_PEM_FOOTER)
+der_to_pem_public_key = partial(der_to_pem,
+                                pem_header=PUBLIC_KEY_PEM_HEADER,
+                                pem_footer=PUBLIC_KEY_PEM_FOOTER)
+der_to_pem_certificate = partial(der_to_pem,
+                                 pem_header=CERT_PEM_HEADER,
+                                 pem_footer=CERT_PEM_FOOTER)
 

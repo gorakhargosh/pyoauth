@@ -13,13 +13,17 @@ Functions:
 .. autofunction:: generate_random_long
 .. autofunction:: generate_random_uint_string
 .. autofunction:: generate_random_hex_string
+.. autofunction:: generate_random_bytearray
 """
 
-import binascii
-from pyoauth.types import bytes
+from pyoauth.types import byte_count, bit_count
 from pyoauth.crypto.utils.prng import generate_random_bytes
-from pyoauth.crypto.utils import bit_count, byte_count, base64_encode
-from pyoauth.crypto.utils.bytearray import generate_random_bytearray, bytearray_to_long
+from pyoauth.types.bytearray import \
+    bytearray_to_long, bytes_to_bytearray
+from pyoauth.types.codec import\
+    bytes_to_base64, \
+    bytes_to_decimal, \
+    bytes_to_hex
 
 
 def generate_random_long(low, high):
@@ -47,18 +51,9 @@ def generate_random_long(low, high):
             return n
 
 
-def bytes_to_hex(byte_string):
-    return binascii.b2a_hex(byte_string)
-
-def bytes_to_base64(byte_string):
-    return base64_encode(byte_string)
-
-def bytes_to_decimal(byte_string):
-    return bytes(int(bytes_to_hex(byte_string), 16))
-
-_byte_base_encoding_map = {
-    16: bytes_to_hex,
+_BYTE_BASE_ENCODING_MAP = {
     10: bytes_to_decimal,
+    16: bytes_to_hex,
     64: bytes_to_base64
 }
 def generate_random_uint_string(bit_strength=64, base=10):
@@ -78,7 +73,6 @@ def generate_random_uint_string(bit_strength=64, base=10):
         hexadecimal/decimal-representation unsigned integral number
         based on the bit strength specified.
     """
-    allowed_bases = (10, 16, 64)
     if bit_strength % 8 or bit_strength <= 0:
         raise ValueError("This function expects a bit strength: got `%r`." % (bit_strength, ))
     #num_bytes = bit_strength / 8
@@ -86,9 +80,9 @@ def generate_random_uint_string(bit_strength=64, base=10):
 
     random_bytes = generate_random_bytes(num_bytes)
     try:
-        return _byte_base_encoding_map[base](random_bytes)
+        return _BYTE_BASE_ENCODING_MAP[base](random_bytes)
     except KeyError:
-        raise ValueError("Base must be one of %r" % (allowed_bases, ))
+        raise ValueError("Base must be one of %r" % (_BYTE_BASE_ENCODING_MAP.keys(), ))
 
 
 def generate_random_hex_string(length=8):
@@ -103,5 +97,16 @@ def generate_random_hex_string(length=8):
     """
     if length % 2 or length <= 0:
         raise ValueError("This function expects a positive even number length: got length `%r`." % (length, ))
-    return binascii.b2a_hex(generate_random_bytes(length/2))
+    return bytes_to_hex(generate_random_bytes(length/2))
 
+
+def generate_random_bytearray(count):
+    """
+    Generates a random byte array.
+
+    :param count:
+        The number of bytes.
+    :returns:
+        A random byte array.
+    """
+    return bytes_to_bytearray(generate_random_bytes(count))

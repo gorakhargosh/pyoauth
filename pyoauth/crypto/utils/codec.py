@@ -12,7 +12,6 @@ Classes:
 .. autoclass:: Parser
 """
 
-from pyoauth.crypto.utils.bytearray import bytearray_create_zeros
 
 class Parser(object):
     def __init__(self, bytes):

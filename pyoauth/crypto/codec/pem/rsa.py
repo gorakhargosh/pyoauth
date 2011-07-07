@@ -32,9 +32,9 @@ Classes:
 
 import logging
 
-from pyoauth.types import bytes
 from pyasn1.type import univ
 from pyasn1.codec.der import decoder, encoder
+from pyoauth.types import bytes
 from pyoauth.crypto.codec.pem import \
     pem_to_der_public_key, \
     der_to_pem_public_key, \
@@ -44,6 +44,7 @@ from pyoauth.crypto.codec.pem import \
 from pyoauth.crypto.codec.asn1.x509 import SubjectPublicKeyInfo
 from pyoauth.crypto.codec.asn1 import rsadsa
 from pyoauth.crypto.codec.pem.x509 import X509Certificate
+
 
 class RSAPrivateKey(object):
     """

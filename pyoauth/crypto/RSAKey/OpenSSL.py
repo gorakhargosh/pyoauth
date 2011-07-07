@@ -5,12 +5,11 @@
 
 """OpenSSL/M2Crypto RSA implementation."""
 
+from pyoauth.types import byte_count
+from pyoauth.types.number import bytes_to_long, long_to_bytes, long_to_mpi, mpi_to_long
 from pyoauth.crypto.utils.compat import is_m2crypto_available
-from pyoauth.crypto.utils.number import *
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
-from pyoauth.crypto.utils import byte_count
-from pyoauth.crypto.utils.number import bytes_to_long, long_to_bytes
 
 #copied from M2Crypto.util.py, so when we load the local copy of m2
 #we can still use it
@@ -115,17 +114,18 @@ if is_m2crypto_available():
         def writeXMLPublicKey(self, indent=''):
             return Python_RSAKey(self.n, self.e).write(indent)
 
+        @staticmethod
         def generate(bits):
             key = OpenSSL_RSAKey()
             def f():pass
             key.rsa = m2.rsa_generate_key(bits, 3, f)
             key._hasPrivateKey = True
             return key
-        generate = staticmethod(generate)
 
+        @staticmethod
         def parse(s, passwordCallback=None):
             if s.startswith("-----BEGIN "):
-                if passwordCallback==None:
+                if not passwordCallback:
                     callback = password_callback
                 else:
                     def f(v, prompt1=None, prompt2=None):
@@ -136,14 +136,15 @@ if is_m2crypto_available():
                     m2.bio_write(bio, s)
                     key = OpenSSL_RSAKey()
                     if s.startswith("-----BEGIN RSA PRIVATE KEY-----"):
-                        def f():pass
+                        def f():
+                            pass
                         key.rsa = m2.rsa_read_key(bio, callback)
-                        if key.rsa == None:
+                        if key.rsa is None:
                             raise SyntaxError()
                         key._hasPrivateKey = True
                     elif s.startswith("-----BEGIN PUBLIC KEY-----"):
                         key.rsa = m2.rsa_read_pub_key(bio)
-                        if key.rsa == None:
+                        if key.rsa is None:
                             raise SyntaxError()
                         key._hasPrivateKey = False
                     else:
@@ -154,4 +155,3 @@ if is_m2crypto_available():
             else:
                 raise SyntaxError()
 
-        parse = staticmethod(parse)

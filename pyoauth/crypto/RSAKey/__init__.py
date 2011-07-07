@@ -5,15 +5,15 @@
 
 """Abstract class for RSA."""
 
-from pyoauth.crypto.utils import bit_count, byte_count, sha1_digest
-from pyoauth.crypto.utils.number import *
-from pyoauth.crypto.utils.bytearray import \
+from pyoauth.types.bytearray import \
     bytearray_create, \
     bytearray_to_bytes, \
     bytes_to_bytearray, \
-    generate_random_bytearray, \
     bytearray_to_long, \
     long_to_bytearray
+from pyoauth.types import byte_count, bit_count
+from pyoauth.crypto.utils import sha1_digest
+from pyoauth.crypto.utils.random import generate_random_bytearray
 
 
 class RSAKey(object):

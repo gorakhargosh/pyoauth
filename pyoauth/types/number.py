@@ -4,8 +4,8 @@
 # Released into public domain.
 
 """
-:module: pyoauth.crypto.utils.number
-:synopsis: Cryptography number routines.
+:module: pyoauth.types.number
+:synopsis: Number routines.
 
 Functions:
 ----------
@@ -13,25 +13,16 @@ Functions:
 .. autofunction:: bytes_to_long_original
 .. autofunction:: long_to_bytes
 .. autofunction:: long_to_bytes_original
-.. autofunction:: long_base64_encode
-.. autofunction:: long_base64_decode
 .. autofunction:: mpi_to_long
 .. autofunction:: long_to_mpi
 .. autofunction:: pow_mod
 .. autofunction:: inverse_mod
-.. autofunction:: make_prime_sieve
-.. autofunction:: is_prime
-.. autofunction:: generate_random_prime
-.. autofunction:: generate_random_safe_prime
 """
 
 
-import math
 import struct
 
-from pyoauth.crypto.utils.random import generate_random_long
-from pyoauth.crypto.utils import bit_count, byte_count, base64_decode, base64_encode
-from pyoauth.crypto.utils.bytearray import \
+from pyoauth.types.bytearray import \
     bytearray_concat, \
     bytearray_create_zeros, \
     bytes_to_bytearray, \
@@ -39,80 +30,71 @@ from pyoauth.crypto.utils.bytearray import \
     long_to_bytearray, \
     bytearray_to_long
 
-try:
-    # If the PyCrypto routines are available use those.
-    from Crypto.Util.number import long_to_bytes as _ltob, bytes_to_long as _btol
 
-    def long_to_bytes(num, blocksize=0):
-        return _ltob(num, blocksize)
+# Improved conversion functions contributed by Barry Warsaw, after
+# careful benchmarking
 
-    def bytes_to_long(byte_string):
-        return _btol(byte_string)
+def long_to_bytes(num, blocksize=0):
+    """
+    Convert a long integer to a byte string::
 
-except ImportError:
-    # Improved conversion functions contributed by Barry Warsaw, after
-    # careful benchmarking
-    def long_to_bytes(num, blocksize=0):
-        """
-        Convert a long integer to a byte string::
+        long_to_bytes(n:long, blocksize:int) : string
 
-            long_to_bytes(n:long, blocksize:int) : string
-
-        :param num:
-            Long value
-        :param blocksize:
-            If optional blocksize is given and greater than zero, pad the front of
-            the byte string with binary zeros so that the length is a multiple of
-            blocksize.
-        :returns:
-            Byte string.
-        """
-        # after much testing, this algorithm was deemed to be the fastest
-        s = ''
-        num = long(num)
-        pack = struct.pack
-        while num > 0:
-            s = pack('>I', num & 0xffffffffL) + s
-            num >>= 32
-        # strip off leading zeros
-        for i in range(len(s)):
-            if s[i] != '\000':
-                break
-        else:
-            # only happens when n == 0
-            s = '\000'
-            i = 0
-        s = s[i:]
-        # add back some pad bytes.  this could be done more efficiently w.r.t. the
-        # de-padding being done above, but sigh...
-        if blocksize > 0 and len(s) % blocksize:
-            s = (blocksize - len(s) % blocksize) * '\000' + s
-        return s
+    :param num:
+        Long value
+    :param blocksize:
+        If optional blocksize is given and greater than zero, pad the front of
+        the byte string with binary zeros so that the length is a multiple of
+        blocksize.
+    :returns:
+        Byte string.
+    """
+    # after much testing, this algorithm was deemed to be the fastest
+    s = ''
+    num = long(num)
+    pack = struct.pack
+    while num > 0:
+        s = pack('>I', num & 0xffffffffL) + s
+        num >>= 32
+    # strip off leading zeros
+    for i in range(len(s)):
+        if s[i] != '\000':
+            break
+    else:
+        # only happens when n == 0
+        s = '\000'
+        i = 0
+    s = s[i:]
+    # add back some pad bytes.  this could be done more efficiently w.r.t. the
+    # de-padding being done above, but sigh...
+    if blocksize > 0 and len(s) % blocksize:
+        s = (blocksize - len(s) % blocksize) * '\000' + s
+    return s
 
 
-    def bytes_to_long(byte_string):
-        """
-        Convert a byte string to a long integer::
+def bytes_to_long(byte_string):
+    """
+    Convert a byte string to a long integer::
 
-            bytes_to_long(bytestring) : long
+        bytes_to_long(bytestring) : long
 
-        This is (essentially) the inverse of long_to_bytes().
+    This is (essentially) the inverse of long_to_bytes().
 
-        :param bytestring:
-            A byte string.
-        :returns:
-            Long.
-        """
-        acc = 0L
-        unpack = struct.unpack
-        length = len(byte_string)
-        if length % 4:
-            extra = (4 - length % 4)
-            byte_string = '\000' * extra + byte_string
-            length = length + extra
-        for i in range(0, length, 4):
-            acc = (acc << 32) + unpack('>I', byte_string[i:i+4])[0]
-        return acc
+    :param bytestring:
+        A byte string.
+    :returns:
+        Long.
+    """
+    acc = 0L
+    unpack = struct.unpack
+    length = len(byte_string)
+    if length % 4:
+        extra = (4 - length % 4)
+        byte_string = '\000' * extra + byte_string
+        length = length + extra
+    for i in range(0, length, 4):
+        acc = (acc << 32) + unpack('>I', byte_string[i:i+4])[0]
+    return acc
 
 
 def long_to_bytes_original(num):
@@ -145,32 +127,6 @@ def bytes_to_long_original(byte_string):
     """
     byte_array = bytes_to_bytearray(byte_string)
     return bytearray_to_long(byte_array)
-
-
-def long_base64_encode(num):
-    """
-    Base-64 encodes a long.
-
-    :param num:
-        A long integer.
-    :returns:
-        Base-64 encoded byte string.
-    """
-    byte_string = long_to_bytes(num)
-    return base64_encode(byte_string)
-
-
-def long_base64_decode(encoded):
-    """
-    Base-64 decodes a string into a long.
-
-    :param encoded:
-        The encoded byte string.
-    :returns:
-        Long value.
-    """
-    byte_string = base64_decode(encoded)
-    return bytes_to_long(byte_string)
 
 
 def mpi_to_long(mpi_byte_string):
@@ -360,127 +316,3 @@ except ImportError:
             return prodInv
         return prod
 
-
-def make_prime_sieve(n):
-    """
-    Pre-calculate a sieve of the ~100 primes < 1000.
-
-    :param n:
-        Count
-    :returns:
-        Prime sieve.
-    """
-    sieve = range(n)
-    for count in range(2, int(math.sqrt(n))):
-        #if sieve[count] == 0:
-        if not sieve[count]:
-            continue
-        x = sieve[count] * 2
-        while x < len(sieve):
-            sieve[x] = 0
-            x += sieve[count]
-    sieve = [x for x in sieve[2:] if x]
-    return sieve
-
-sieve = make_prime_sieve(1000)
-
-
-def is_prime(n, iterations=5):
-    """
-    Determines whether a number is prime.
-
-    :param n:
-        Number
-    :param iterations:
-        Number of iterations.
-    :
-    """
-    #Trial division with sieve
-    for x in sieve:
-        if x >= n: return True
-        if not n % x: return False
-    #Passed trial division, proceed to Rabin-Miller
-    #Rabin-Miller implemented per Ferguson & Schneier
-    #Compute s, t for Rabin-Miller
-    s, t = n-1, 0
-    while not s % 2:
-        s, t = s/2, t+1
-    #Repeat Rabin-Miller x times
-    a = 2 #Use 2 as a base for first iteration speedup, per HAC
-    for count in range(iterations):
-        v = pow_mod(a, s, n)
-        if v==1:
-            continue
-        i = 0
-        while v != n-1:
-            if i == t-1:
-                return False
-            else:
-                v, i = pow_mod(v, 2, n), i+1
-        a = generate_random_long(2, n)
-    return True
-
-
-def generate_random_prime(bits):
-    """
-    Generates a random prime number.
-
-    :param bits:
-        Number of bits.
-    :return:
-        Prime number long value.
-    """
-    assert not bits < 10
-
-    #The 1.5 ensures the 2 MSBs are set
-    #Thus, when used for p,q in RSA, n will have its MSB set
-    #
-    #Since 30 is lcm(2,3,5), we'll set our test numbers to
-    #29 % 30 and keep them there
-    low = (2L ** (bits-1)) * 3/2
-    high = 2L ** bits - 30
-    p = generate_random_long(low, high)
-    p += 29 - (p % 30)
-    while 1:
-        p += 30
-        if p >= high:
-            p = generate_random_long(low, high)
-            p += 29 - (p % 30)
-        if is_prime(p):
-            return p
-
-
-def generate_random_safe_prime(bits):
-    """
-    Unused at the moment.
-
-    Generates a random prime number.
-
-    :param bits:
-        Number of bits.
-    :return:
-        Prime number long value.
-    """
-    assert not bits < 10
-
-    #The 1.5 ensures the 2 MSBs are set
-    #Thus, when used for p,q in RSA, n will have its MSB set
-    #
-    #Since 30 is lcm(2,3,5), we'll set our test numbers to
-    #29 % 30 and keep them there
-    low = (2 ** (bits-2)) * 3/2
-    high = (2 ** (bits-1)) - 30
-    q = generate_random_long(low, high)
-    q += 29 - (q % 30)
-    while 1:
-        q += 30
-        if q >= high:
-            q = generate_random_long(low, high)
-            q += 29 - (q % 30)
-        #Ideas from Tom Wu's SRP code
-        #Do trial division on p and q before Rabin-Miller
-        if is_prime(q, 0):
-            p = (2 * q) + 1
-            if is_prime(p):
-                if is_prime(q):
-                    return p

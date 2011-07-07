@@ -56,7 +56,7 @@ from pyoauth.crypto.utils import hmac_sha1_base64_digest
 from pyoauth.crypto.utils.random import \
     generate_random_uint_string, \
     generate_random_hex_string
-from pyoauth.types.unicode import to_utf8
+from pyoauth.types.unicode import unicode_to_utf8
 from pyoauth.types import bytes
 from pyoauth.error import InvalidHttpMethodError, \
     InvalidUrlError, \
@@ -361,7 +361,7 @@ def generate_normalized_authorization_header_value(oauth_params,
         A properly formatted Authorization header value.
     """
     if realm:
-        s = 'OAuth realm="' + to_utf8(realm) + '"' + param_delimiter
+        s = 'OAuth realm="' + unicode_to_utf8(realm) + '"' + param_delimiter
     else:
         s = 'OAuth '
     oauth_params = request_protocol_params_sanitize(oauth_params)
@@ -440,7 +440,7 @@ def _parse_authorization_header_value_l(header_value, param_delimiter=",", stric
         a realm parameter.
     """
     # Remove the auth-scheme from the value.
-    header_value = to_utf8(header_value)
+    header_value = unicode_to_utf8(header_value)
     if strict:
         if "\n" in header_value:
             raise ValueError("Header value must be on a single line: got `%r`" % (header_value, ))

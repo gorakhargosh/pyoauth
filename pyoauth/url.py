@@ -73,7 +73,7 @@ from pyoauth.error import InvalidQueryParametersError, \
     InsecureOAuthUrlError, \
     InvalidUrlError
 from pyoauth.types import is_sequence, bytes, is_bytes_or_unicode
-from pyoauth.types.unicode import to_utf8_if_unicode, to_utf8
+from pyoauth.types.unicode import to_utf8_if_unicode, unicode_to_utf8
 
 
 def parse_qs(query_string):
@@ -125,7 +125,7 @@ def percent_decode(value):
     :returns:
         Percent-decoded value.
     """
-    return unquote_plus(to_utf8(value))
+    return unquote_plus(unicode_to_utf8(value))
 
 
 def urlencode_s(query_params, allow_func=None):
@@ -183,7 +183,7 @@ def urlencode_sl(query_params, allow_func=None):
     encoded_pairs = []
     for k, v in query_params.items():
         # Keys are also percent-encoded according to OAuth spec.
-        k = percent_encode(to_utf8(k))
+        k = percent_encode(unicode_to_utf8(k))
         if allow_func and not allow_func(k, v):
             continue
         elif is_bytes_or_unicode(v):

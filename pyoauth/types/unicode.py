@@ -18,25 +18,21 @@
 # under the License.
 
 """
-:module: pyoauth.unicode
+:module: pyoauth.types.unicode
 :synopsis: Unicode encoding utility functions.
 
 Functions
 ---------
-.. autofunction:: to_utf8
-.. autofunction:: to_unicode
+.. autofunction:: unicode_to_utf8
+.. autofunction:: bytes_to_unicode
 .. autofunction:: to_utf8_if_unicode
 .. autofunction:: to_unicode_if_bytes
-.. autofunction:: is_unicode
-.. autofunction:: is_bytes
-.. autofunction:: is_bytes_or_unicode
 """
-
 
 from pyoauth.types import is_unicode, is_bytes
 
 
-def to_utf8(value):
+def unicode_to_utf8(value):
     """
     Converts a string argument to a UTF-8 encoded byte string if it is a
     Unicode string.
@@ -51,7 +47,7 @@ def to_utf8(value):
     return value.encode("utf-8")
 
 
-def to_unicode(value, encoding="utf-8"):
+def bytes_to_unicode(value, encoding="utf-8"):
     """
     Converts bytes to a Unicode string decoding it according to the encoding
     specified.
@@ -79,7 +75,7 @@ def to_utf8_if_unicode(value):
         UTF-8 encoded byte string if the argument is a Unicode string; otherwise
         the value is returned unchanged.
     """
-    return to_utf8(value) if is_unicode(value) else value
+    return unicode_to_utf8(value) if is_unicode(value) else value
 
 
 def to_unicode_if_bytes(value, encoding="utf-8"):
@@ -95,4 +91,4 @@ def to_unicode_if_bytes(value, encoding="utf-8"):
         Unicode string if the argument is a byte string. Otherwise the value
         is returned unchanged.
     """
-    return to_unicode(value, encoding) if is_bytes(value) else value
+    return bytes_to_unicode(value, encoding) if is_bytes(value) else value

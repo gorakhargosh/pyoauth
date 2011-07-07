@@ -29,11 +29,10 @@ Classes:
 .. autoclass:: X509Certificate
 """
 
-
 from pyasn1.type import univ
 from pyasn1.codec.der import encoder, decoder
+from pyoauth.types.bitstring import bits_to_long
 from pyoauth.crypto.codec.pem import der_to_pem_certificate, pem_to_der_certificate
-from pyoauth.crypto.utils.bitstring import bits_to_long
 from pyoauth.crypto.codec.asn1.x509 import Certificate
 
 
