@@ -5,7 +5,7 @@
 
 """
 :module: pyoauth.crypto.utils.prng
-:synopsis: PRNG
+:synopsis: OS-dependent pseudo-random number generator that occasionally swears.
 
 Functions:
 ----------
