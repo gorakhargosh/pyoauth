@@ -34,9 +34,7 @@ def pem_private_key_decode(pem_key):
     Decodes a PEM-encoded private key string into internal representation.
 
     :param pem_key:
-        The PEM-encoded key. Must be one of:
-        1. RSA public key.
-        2. X.509 certificate.
+        The PEM-encoded RSA private key.
     :returns:
         A dictionary of key information.
     """
