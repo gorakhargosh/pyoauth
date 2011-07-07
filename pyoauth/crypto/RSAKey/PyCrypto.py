@@ -5,7 +5,7 @@
 
 """
 :module: pyoauth.crypto.RSAKey.PyCrypto
-:synopsis:PyCrypto RSA key adapter.
+:synopsis: PyCrypto RSA key adapter.
 """
 
 from pyoauth.types import byte_count

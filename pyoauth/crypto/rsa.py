@@ -12,26 +12,97 @@ Functions
 .. autofunction:: sign
 .. autofunction:: verify
 """
+#from pyoauth.crypto.RSAKey import factory
 
-#import sys
-#import os
-#
-#PARENT_DIR_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-#sys.path[0:0] = [
-#    os.path.join(PARENT_DIR_PATH, "tlslite"),
-#]
-
-
+from pyoauth.types.number import long_to_bytes
 from pyoauth.types.codec import base64_encode, base64_decode
-from pyoauth.crypto.RSAKey import factory
-#from pyoauth.crypto.X509 import X509
+from pyoauth.crypto.hash import sha1_digest
+from pyoauth.crypto.codec import public_key_pem_decode, private_key_pem_decode
+from Crypto.PublicKey import RSA
 
 
-def sign(private_key, base_string):
+def pkcs1_v1_5_encode(key, data):
+    """
+    Encodes a key using PKCS1's emsa-pkcs1-v1_5 encoding.
+
+    Adapted from paramiko.
+
+    :author:
+        Rick Copeland <rcopeland@geek.net>
+
+    :param key:
+        RSA Key.
+    :param data:
+        Data
+    :returns:
+        A blob of data as large as the key's N, using PKCS1's
+        "emsa-pkcs1-v1_5" encoding.
+    """
+    SHA1_DIGESTINFO = '\x30\x21\x30\x09\x06\x05\x2b\x0e\x03\x02\x1a\x05\x00\x04\x14'
+    size = len(long_to_bytes(key.n))
+    filler = '\xff' * (size - len(SHA1_DIGESTINFO) - len(data) - 3)
+    return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + data
+
+
+class PrivateKey(object):
+    def __init__(self, pem_key):
+        """
+        RSAPrivateKey ::= SEQUENCE {
+          version Version,
+          modulus INTEGER, -- n
+          publicExponent INTEGER, -- e
+          privateExponent INTEGER, -- d
+          prime1 INTEGER, -- p
+          prime2 INTEGER, -- q
+          exponent1 INTEGER, -- d mod (p-1)
+          exponent2 INTEGER, -- d mod (q-1)
+          coefficient INTEGER -- (inverse of q) mod p }
+
+        """
+        ki = private_key_pem_decode(pem_key)
+        ki_tuple = (
+            ki["modulus"],
+            ki["publicExponent"],
+            ki["privateExponent"],
+            ki["prime1"],
+            ki["prime2"],
+            #ki["exponent1"],
+            #ki["exponent2"],
+            #ki["coefficient"],
+        )
+        self._key = RSA.construct(ki_tuple)
+
+    def sign(self, data, encoder=pkcs1_v1_5_encode):
+        signature = self._key.sign(
+            encoder(
+                self._key,
+                sha1_digest(data)
+            ), ""
+        )[0]
+        signature_bytes = long_to_bytes(signature)
+        return base64_encode(signature_bytes)
+
+    def verify(self, signature, data, encoder=pkcs1_v1_5_encode):
+        pass
+
+
+class PublicKey(object):
+    def __init__(self, pem_key):
+        self._key_info = public_key_pem_decode(pem_key)
+        self._rsa = RSA.construct((0, ))
+
+    def sign(self, data, encoder=pkcs1_v1_5_encode):
+        pass
+
+    def verify(self, signature, data, encoder=pkcs1_v1_5_encode):
+        pass
+
+
+def pkcs1_v1_5_sign(private_pem_key, data):
     """
     Signs a base string using your RSA private key.
 
-    :param private_key:
+    :param private_pem_key:
         Private key. Example private key from the OAuth test cases::
 
             -----BEGIN PRIVATE KEY-----
@@ -51,14 +122,16 @@ def sign(private_key, base_string):
             Lw03eHTNQghS0A==
             -----END PRIVATE KEY-----
 
-    :param base_string:
-        The OAuth base string.
+    :param data:
+        Data byte string.
     :returns:
         Signature.
     """
-    private_key = factory.parsePrivateKey(private_key)
-    signed = private_key.hashAndSign(base_string)
-    return base64_encode(signed)
+    #private_key = factory.parsePrivateKey(private_key)
+    #signed = private_key.hashAndSign(base_string)
+    #return base64_encode(signed)
+    private_key = PrivateKey(private_pem_key)
+    return private_key.sign(data)
 
 
 def verify(public_certificate, signature, base_string):

@@ -176,7 +176,7 @@ def generate_rsa_sha1_signature(client_private_key,
     :returns:
         RSA-SHA1 signature.
     """
-    from pyoauth.crypto.rsa import sign
+    from pyoauth.crypto.rsa import pkcs1_v1_5_sign as sign
 
     oauth_params = oauth_params or {}
     base_string = generate_signature_base_string(method, url, oauth_params)
