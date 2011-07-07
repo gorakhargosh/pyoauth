@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009 Google Inc.
+# Copyright (C) 2011 Yesudeep Mangalapilly
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +47,7 @@ class X509Certificate(object):
         self._certificate_asn1 = self.decode_from_pem_certificate(certificate)
 
     def encode(self):
-        self.encode_to_pem_certificate(self._certificate_asn1)
+        return self.encode_to_pem_certificate(self._certificate_asn1)
 
     @property
     def public_key(self):
@@ -96,7 +97,7 @@ class X509Certificate(object):
 
     @classmethod
     def encode_to_pem_certificate(cls, certificate_asn1):
-        return der_to_pem_certificate(encoder.encoder(certificate_asn1))
+        return der_to_pem_certificate(encoder.encode(certificate_asn1))
 
 
 TEST_CERTIFICATES = ("""
