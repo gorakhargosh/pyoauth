@@ -8,9 +8,7 @@ import logging
 
 from pyoauth.crypto.codec.pemder import \
     pem_to_der_private_key, \
-    pem_to_der_rsa_private_key, \
-    PRIVATE_KEY_PEM_HEADER, \
-    RSA_PRIVATE_KEY_PEM_HEADER
+    pem_to_der_rsa_private_key
 
 from pyoauth.crypto.utils.random import generate_random_long
 from pyoauth.crypto.utils.number import *
