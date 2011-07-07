@@ -134,9 +134,7 @@ def generate_random_uint_string(bit_strength=64, base=10):
     if bit_strength % 8 or bit_strength <= 0:
         raise ValueError("This function expects a bit strength: got `%r`." % (bit_strength, ))
     #num_bytes = bit_strength / 8
-    num_bytes = bit_strength >> 3
-
-    random_bytes = generate_random_bytes(num_bytes)
+    random_bytes = generate_random_bytes(bit_strength >> 3)
     try:
         return _BYTE_BASE_ENCODING_MAP[base](random_bytes)
     except KeyError:

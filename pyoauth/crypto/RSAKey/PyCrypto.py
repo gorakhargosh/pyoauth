@@ -15,6 +15,7 @@ from pyoauth.crypto.random import generate_random_bytes
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.RSAKey.pure import Python_RSAKey
 
+
 if is_pycrypto_available():
 
     from Crypto.PublicKey import RSA
