@@ -30,7 +30,7 @@ from pyoauth.types.bytearray import \
     long_to_bytearray, \
     bytearray_to_long
 
-
+# Taken from PyCrypto "as is".
 # Improved conversion functions contributed by Barry Warsaw, after
 # careful benchmarking
 
