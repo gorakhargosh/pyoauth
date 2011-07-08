@@ -75,10 +75,10 @@ def generate_nonce(bit_strength=64, base=10):
 
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param bit_strength:
-        Bit strength.
+        Bit strength. Default 64.
     :param base:
         One of:
-            1. 10
+            1. 10 (default)
             2. 16
             3. 64
     :returns:
