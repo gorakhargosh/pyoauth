@@ -25,6 +25,7 @@ Nonce, verification code, and timestamp
 .. autofunction:: generate_nonce
 .. autofunction:: generate_verification_code
 .. autofunction:: generate_timestamp
+.. autofunction:: generate_client_secret
 
 OAuth Signature and Base String
 -------------------------------
@@ -86,6 +87,24 @@ def generate_nonce(bit_strength=64, base=10):
         based on the bit strength specified.
     """
     return generate_random_uint_string(bit_strength=bit_strength, base=base)
+
+
+def generate_client_secret(bit_strength=144):
+    """
+    Generates a random Base-64-encoded client secret to assign to a
+    registered client application.
+
+    Consumer secrets are base64-encoded but not URL-safe. This is done to
+    enforce the user into properly percent-encoding values according to the
+    OAuth percent-encoding rules.
+
+    :param bit_strength:
+        Bit strength. 144 is default.
+    :returns:
+        A base-64-encoded random unsigned-integral consumer secret based
+        on the bit strength specified.
+    """
+    return generate_random_uint_string(bit_strength=bit_strength, base=64)
 
 
 def generate_verification_code(length=8):
