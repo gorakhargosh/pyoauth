@@ -357,8 +357,8 @@ def _generate_signature_base_string_query(url_query_params, oauth_params):
 
 
 def generate_normalized_authorization_header_value(oauth_params,
-                                              realm=None,
-                                              param_delimiter=","):
+                                                   realm=None,
+                                                   param_delimiter=","):
     """
     Builds the Authorization header value.
 
@@ -390,7 +390,9 @@ def generate_normalized_authorization_header_value(oauth_params,
     return s
 
 
-def parse_authorization_header_value(header_value, param_delimiter=",", strict=True):
+def parse_authorization_header_value(header_value,
+                                     param_delimiter=",",
+                                     strict=True):
     """
     Parses the OAuth Authorization header.
 
@@ -431,7 +433,9 @@ def parse_authorization_header_value(header_value, param_delimiter=",", strict=T
     return d, realm
 
 
-def _parse_authorization_header_value_l(header_value, param_delimiter=",", strict=True):
+def _parse_authorization_header_value_l(header_value,
+                                        param_delimiter=",",
+                                        strict=True):
     """
     Parses the OAuth Authorization header preserving the order of the
     parameters as in the header value.
@@ -478,8 +482,9 @@ def _parse_authorization_header_value_l(header_value, param_delimiter=",", stric
         if not param:
             if header_value.endswith(param_delimiter):
                 raise InvalidAuthorizationHeaderError("Malformed `Authorization` header value -- found trailing `%r` character" % param_delimiter)
-            #else:
-            #    continue
+            else:
+                # Blank param?
+                continue
         nv = param.split("=", 1)
         if len(nv) != 2:
             raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" % (param, ))
