@@ -130,7 +130,7 @@ class Key(object):
     def _sign(self, digest):
         raise NotImplementedError("Override this method.")
 
-    def _verify(self, signature, digest):
+    def _verify(self, digest, signature):
         raise NotImplementedError("Override this method.")
 
 
