@@ -121,7 +121,7 @@ def generate_verification_code(length=8):
         Resource Owner Authorization
         (http://tools.ietf.org/html/rfc5849#section-2.2)
     :param length:
-        Length of the verification code to be returned. Default 32.
+        Length of the verification code to be returned. Default 8.
         The length MUST be a positive even number.
     :returns:
         A string representation of a randomly-generated hexadecimal OAuth
