@@ -82,7 +82,7 @@ def generate_nonce(bit_strength=64, base=10):
             3. 64
     :returns:
         A string representation of a randomly-generated ASCII-encoded
-        hexadecimal/decimal-representation unsigned integral number
+        hexadecimal/decimal/base64-representation unsigned integral number
         based on the bit strength specified.
     """
     return generate_random_uint_string(bit_strength=bit_strength, base=base)
@@ -90,7 +90,7 @@ def generate_nonce(bit_strength=64, base=10):
 
 def generate_verification_code(length=8):
     """
-    Calculates an OAuth verification code.
+    Generates an OAuth verification code.
 
     The verification code will be displayed by the server if a callback URL
     is not provided by the client. The resource owner (the end-user) may

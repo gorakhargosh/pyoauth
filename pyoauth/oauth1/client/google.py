@@ -16,6 +16,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""
+:module: pyoauth.oauth1.client.google
+:synopsis: Google OAuth 1.0 client implementation.
+
+.. autoclass:: GoogleClient
+   :members:
+   :show-inheritance:
+"""
 
 from pyoauth.error import SignatureMethodNotSupportedError
 from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, SIGNATURE_METHOD_PLAINTEXT
@@ -59,6 +67,13 @@ class GoogleClient(Client):
                                             oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
                                             oauth_callback="oob",
                                             **extra_oauth_params):
+        """
+
+        :param scopes:
+            A list of scopes to use with the credential request.
+        :param xoauth_displayname:
+            The display name of the application.
+        """
         payload_params = payload_params or {}
 
         scope = scopes if is_bytes_or_unicode(scopes) else " ".join(scopes)

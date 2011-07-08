@@ -10,6 +10,22 @@ PyOAuth
 
 A Python library that implements the OAuth protocol for clients and servers.
 
+Getting the library
+---------------------
+
+::
+
+    $ pip install pyoauth
+
+or
+
+::
+
+    $ git clone git://github.com/gorakhargosh/pyoauth.git
+    $ cd pyoauth
+    $ python setup.py install
+
+
 About the implementation
 ------------------------
 This library implements version 1.0 of the OAuth protocol as per
@@ -19,7 +35,6 @@ protocol.
 Client classes do not send HTTP requests but implement enough of the
 OAuth protocol to help you build request proxies that can be used to send actual
 HTTP requests. In essence, it implements OAuth 1.0 and nothing else.
-
 This is a very conscious decision by the library authors. It allows
 framework authors and API users to use the library without pulling in
 unnecessary dependencies which may not work on their platform of choice.
@@ -28,10 +43,11 @@ send HTTP requests built with this library.
 
 Wherever possible the implementation tries to warn you about problems you may
 encounter when processing or building OAuth requests by using a fail-fast
-approach. For example, OAuth relies on the availability of SSL to communicate
-securely, and therefore, the library does check whether the OAuth endpoint URLs
-you specify use SSL. Of course, we won't stop you from forcing otherwise, but
-we have taken great care to ensure that you will be warned.
+approach—we try to tell you as much about the problem as possible. For
+example, OAuth relies on the availability of SSL to communicate securely, and
+therefore, the library checks whether the OAuth endpoint URLs you specify
+use SSL. By default, the library prohibits you from using non https URLs
+for OAuth endpoint URLs, but you can change this behavior to suit your needs.
 
 Signature methods
 ~~~~~~~~~~~~~~~~~
@@ -49,67 +65,33 @@ RSA-SHA1 requirements
 *********************
 The RSA-SHA1 signature methods accept PEM-encoded X.509 certificates,
 RSA public keys, and RSA private keys. The validity of the X.509 certificates
-will not be verified by any of these routines. You must ensure the validity of
-certificates you accept by using other utility methods provided by this
-library.
+will not be verified by any of those routines. You must ensure the validity of
+certificates when you accept them by using other utility methods provided by
+this library or by other means.
 
 For a quick rundown about these certificates and keys, please read
 :ref:`using-rsa-sha1`.
 
-Easy explanation of an OAuth flow in simple words
--------------------------------------------------
 
-1. Construct a client with its client credentials.
-
-2. Send an HTTPS request for temporary credentials with a callback URL
-   which the server will call with an OAuth verification code after
-   authorizing the resource owner (end-user).
-
-3. Obtain temporary credentials from a successful server response.
-
-4. Use the temporary credentials to build an authorization URL and
-   redirect the resource owner (end-user) to the generated URL.
-
-5. If a callback URL is not provided when requesting temporary credentials,
-   the server displays the OAuth verification code to the resource owner
-   (end-user), which she then types into your application.
-
-   OR
-
-   If a callback URL is provided, the server redirects the resource owner
-   (end-user) after authorization to your callback URL attaching the
-   OAuth verification code as a query parameter.
-
-6. Using the obtained OAuth verification code from step 5 and the
-   temporary credentials obtained in step 3, send an HTTPS request for
-   token credentials.
-
-7. Obtain token credentials from a successful server response.
-
-8. Save the token credentials for future use (say, in a database).
-
-
-Accessing a resource
---------------------
-
-1. Construct a client with its client credentials.
-
-2. Using the token credentials that you have saved (say, in a database),
-   send an HTTP request to a resource URL.
-
-3. Obtain the response and deal with it.
-
-
-
-User's Guide:
-=============
+User Guides
+===========
 
 .. toctree::
    :maxdepth: 2
 
-   api
-   hacking
-   rsa_sha1
+   guides/oauth1
+   guides/rsa_sha1
+
+API Documentation
+=================
+
+.. toctree::
+   :maxdepth: 2
+
+   api/protocol
+   api/oauth1
+
+
 
 Contribute
 ==========
@@ -118,6 +100,10 @@ You can fork the official `code repository`_ or file an issue ticket
 at the `issue tracker`_. You may also want to refer to :ref:`hacking` for
 information about contributing code or documentation to |project_name|.
 
+.. toctree::
+   :maxdepth: 2
+
+   hacking
 
 Indices and tables
 ==================

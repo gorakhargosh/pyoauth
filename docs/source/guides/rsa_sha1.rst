@@ -1,9 +1,9 @@
 
-.. include:: global.rst.inc
+.. include:: ../global.rst.inc
 
 .. _using-rsa-sha1:
 
-=========================
+
 Using RSA-SHA1 signatures
 =========================
 
@@ -48,7 +48,7 @@ Using RSA-SHA1 signatures
 
 
 Whoa?!
-======
+------
 Betchyoo weren't expecting that. Ha!
 
     "What's up with all that gibberish up there, man?" you ask.
@@ -91,3 +91,9 @@ yourself.
     "Oh, yeah. I get it. Somethin' to do with opensll yeah?"
 
 Kinda. And that's "OpenSSL," by the way.
+
+
+
+
+.. toctree::
+   :maxdepth: 2

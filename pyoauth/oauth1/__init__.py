@@ -20,8 +20,6 @@
 :module: pyoauth.oauth1
 :synopsis: Implements OAuth 1.0.
 
-Classes
--------
 .. autoclass:: Credentials
    :members:
    :show-inheritance:

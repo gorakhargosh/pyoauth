@@ -20,12 +20,9 @@
 :module: pyoauth.oauth1.client
 :synopsis: Implements an OAuth 1.0 client.
 
-Classes
--------
 .. autoclass:: Client
    :members:
    :show-inheritance:
-
 """
 
 import logging
