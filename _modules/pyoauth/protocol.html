@@ -1,0 +1,592 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.protocol &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.protocol</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># Protocol-specific utility functions.</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2011 Yesudeep Mangalapilly &lt;yesudeep@gmail.com&gt;</span>
+<span class="c">#</span>
+<span class="c"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may</span>
+<span class="c"># not use this file except in compliance with the License. You may obtain</span>
+<span class="c"># a copy of the License at</span>
+<span class="c">#</span>
+<span class="c">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c">#</span>
+<span class="c"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT</span>
+<span class="c"># WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the</span>
+<span class="c"># License for the specific language governing permissions and limitations</span>
+<span class="c"># under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.protocol</span>
+<span class="sd">:synopsis: Protocol-specific utility functions.</span>
+
+<span class="sd">Nonce, verification code, and timestamp</span>
+<span class="sd">---------------------------------------</span>
+<span class="sd">.. autofunction:: generate_nonce</span>
+<span class="sd">.. autofunction:: generate_verification_code</span>
+<span class="sd">.. autofunction:: generate_timestamp</span>
+<span class="sd">.. autofunction:: generate_client_secret</span>
+
+<span class="sd">OAuth signature and base string</span>
+<span class="sd">-------------------------------</span>
+<span class="sd">.. autofunction:: generate_hmac_sha1_signature</span>
+<span class="sd">.. autofunction:: generate_rsa_sha1_signature</span>
+<span class="sd">.. autofunction:: verify_rsa_sha1_signature</span>
+<span class="sd">.. autofunction:: generate_plaintext_signature</span>
+<span class="sd">.. autofunction:: generate_signature_base_string</span>
+
+<span class="sd">Authorization HTTP header creation and parsing</span>
+<span class="sd">----------------------------------------------</span>
+<span class="sd">.. autofunction:: generate_normalized_authorization_header_value</span>
+<span class="sd">.. autofunction:: parse_authorization_header_value</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types.codec</span> <span class="kn">import</span> <span class="n">base64_encode</span><span class="p">,</span> <span class="n">base64_decode</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c"># Python 3.</span>
+    <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlunparse</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c"># Python 2.5+</span>
+    <span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urlunparse</span>
+
+<span class="kn">from</span> <span class="nn">pyoauth.types.unicode</span> <span class="kn">import</span> <span class="n">unicode_to_utf8</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types</span> <span class="kn">import</span> <span class="nb">bytes</span>
+<span class="kn">from</span> <span class="nn">pyoauth.error</span> <span class="kn">import</span> <span class="n">InvalidHttpMethodError</span><span class="p">,</span> \
+    <span class="n">InvalidUrlError</span><span class="p">,</span> \
+    <span class="n">InvalidOAuthParametersError</span><span class="p">,</span> \
+    <span class="n">InvalidAuthorizationHeaderError</span>
+<span class="kn">from</span> <span class="nn">pyoauth.url</span> <span class="kn">import</span> <span class="n">percent_encode</span><span class="p">,</span> <span class="n">percent_decode</span><span class="p">,</span> \
+    <span class="n">urlencode_sl</span><span class="p">,</span> <span class="n">urlencode_s</span><span class="p">,</span> <span class="n">urlparse_normalized</span><span class="p">,</span> \
+    <span class="n">request_protocol_params_sanitize</span><span class="p">,</span> <span class="n">query_params_sanitize</span>
+<span class="kn">from</span> <span class="nn">pyoauth.crypto.hash</span> <span class="kn">import</span> <span class="n">hmac_sha1_base64_digest</span><span class="p">,</span> <span class="n">sha1_digest</span>
+<span class="kn">from</span> <span class="nn">pyoauth.crypto.random</span> <span class="kn">import</span> \
+    <span class="n">generate_random_uint_string</span><span class="p">,</span> \
+    <span class="n">generate_random_hex_string</span>
+
+
+<div class="viewcode-block" id="generate_nonce"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_nonce">[docs]</a><span class="k">def</span> <span class="nf">generate_nonce</span><span class="p">(</span><span class="n">bit_strength</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a random ASCII-encoded unsigned integral number in decimal</span>
+<span class="sd">    hexadecimal, or base-64 representation.</span>
+
+<span class="sd">    :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)</span>
+<span class="sd">    :param bit_strength:</span>
+<span class="sd">        Bit strength. Default 64.</span>
+<span class="sd">    :param base:</span>
+<span class="sd">        One of:</span>
+<span class="sd">            1. 10 (default)</span>
+<span class="sd">            2. 16</span>
+<span class="sd">            3. 64</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A string representation of a randomly-generated ASCII-encoded</span>
+<span class="sd">        hexadecimal/decimal/base64-representation unsigned integral number</span>
+<span class="sd">        based on the bit strength specified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">generate_random_uint_string</span><span class="p">(</span><span class="n">bit_strength</span><span class="o">=</span><span class="n">bit_strength</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="generate_client_secret"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_client_secret">[docs]</a><span class="k">def</span> <span class="nf">generate_client_secret</span><span class="p">(</span><span class="n">bit_strength</span><span class="o">=</span><span class="mi">144</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a random Base-64-encoded client secret to assign to a</span>
+<span class="sd">    registered client application.</span>
+
+<span class="sd">    Consumer secrets are base64-encoded but not URL-safe. This is done to</span>
+<span class="sd">    force the user into properly percent-encoding values according to the</span>
+<span class="sd">    OAuth percent-encoding rules.</span>
+
+<span class="sd">    :param bit_strength:</span>
+<span class="sd">        Bit strength. 144 is default.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A base-64-encoded random unsigned-integral consumer secret based</span>
+<span class="sd">        on the bit strength specified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">generate_random_uint_string</span><span class="p">(</span><span class="n">bit_strength</span><span class="o">=</span><span class="n">bit_strength</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="generate_verification_code"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_verification_code">[docs]</a><span class="k">def</span> <span class="nf">generate_verification_code</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates an OAuth verification code.</span>
+
+<span class="sd">    The verification code will be displayed by the server if a callback URL</span>
+<span class="sd">    is not provided by the client. The resource owner (the end-user) may</span>
+<span class="sd">    need to enter this verification code on a limited device. Therefore,</span>
+<span class="sd">    we limit the length of this code to 8 characters to keep it suitable</span>
+<span class="sd">    for manual entry.</span>
+
+<span class="sd">    :see:</span>
+<span class="sd">        Resource Owner Authorization</span>
+<span class="sd">        (http://tools.ietf.org/html/rfc5849#section-2.2)</span>
+<span class="sd">    :param length:</span>
+<span class="sd">        Length of the verification code to be returned. Default 8.</span>
+<span class="sd">        The length MUST be a positive even number.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A string representation of a randomly-generated hexadecimal OAuth</span>
+<span class="sd">        verification code.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">generate_random_hex_string</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="generate_timestamp"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_timestamp">[docs]</a><span class="k">def</span> <span class="nf">generate_timestamp</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates an OAuth timestamp.</span>
+
+<span class="sd">    :see:</span>
+<span class="sd">        Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A string containing a positive integer representing time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span>
+
+</div>
+<div class="viewcode-block" id="generate_hmac_sha1_signature"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_hmac_sha1_signature">[docs]</a><span class="k">def</span> <span class="nf">generate_hmac_sha1_signature</span><span class="p">(</span><span class="n">client_shared_secret</span><span class="p">,</span>
+                            <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">token_or_temporary_shared_secret</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates an HMAC-SHA1 signature for a base string.</span>
+
+<span class="sd">    :see: HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)</span>
+<span class="sd">    :param client_shared_secret:</span>
+<span class="sd">        Client (consumer) shared secret.</span>
+<span class="sd">    :param method:</span>
+<span class="sd">        Base string HTTP method.</span>
+<span class="sd">    :param url:</span>
+<span class="sd">        Base string URL that may include a query string.</span>
+<span class="sd">        All protocol-specific parameters will be ignored from the query string.</span>
+<span class="sd">    :param oauth_params:</span>
+<span class="sd">        Base string protocol-specific query parameters.</span>
+<span class="sd">        All non-protocol parameters will be ignored.</span>
+<span class="sd">    :param token_or_temporary_shared_secret:</span>
+<span class="sd">        Token/temporary credentials shared secret if available.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        HMAC-SHA1 signature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">oauth_params</span> <span class="o">=</span> <span class="n">oauth_params</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">base_string</span> <span class="o">=</span> <span class="n">generate_signature_base_string</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="p">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">_generate_plaintext_signature</span><span class="p">(</span><span class="n">client_shared_secret</span><span class="p">,</span>
+                                   <span class="n">token_or_temporary_shared_secret</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hmac_sha1_base64_digest</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">base_string</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="generate_rsa_sha1_signature"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_rsa_sha1_signature">[docs]</a><span class="k">def</span> <span class="nf">generate_rsa_sha1_signature</span><span class="p">(</span><span class="n">client_private_key</span><span class="p">,</span>
+                                <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates an RSA-SHA1 OAuth signature.</span>
+
+<span class="sd">    :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)</span>
+
+<span class="sd">    :param client_private_key:</span>
+<span class="sd">        PEM-encoded RSA private key.</span>
+<span class="sd">    :param method:</span>
+<span class="sd">        Base string HTTP method.</span>
+<span class="sd">    :param url:</span>
+<span class="sd">        Base string URL that may include a query string.</span>
+<span class="sd">        All protocol-specific paramters will be ignored from the query string.</span>
+<span class="sd">    :param oauth_params:</span>
+<span class="sd">        Base string protocol-specific query parameters.</span>
+<span class="sd">        All non-protocol parameters will be ignored.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        RSA-SHA1 signature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pyoauth.crypto.rsa</span> <span class="kn">import</span> <span class="n">parse_private_key</span>
+
+    <span class="n">oauth_params</span> <span class="o">=</span> <span class="n">oauth_params</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">base_string</span> <span class="o">=</span> <span class="n">generate_signature_base_string</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="p">)</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">parse_private_key</span><span class="p">(</span><span class="n">client_private_key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">base64_encode</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">pkcs1_v1_5_sign</span><span class="p">(</span><span class="n">sha1_digest</span><span class="p">(</span><span class="n">base_string</span><span class="p">)))</span>
+
+</div>
+<div class="viewcode-block" id="verify_rsa_sha1_signature"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.verify_rsa_sha1_signature">[docs]</a><span class="k">def</span> <span class="nf">verify_rsa_sha1_signature</span><span class="p">(</span><span class="n">client_certificate</span><span class="p">,</span>
+                              <span class="n">signature</span><span class="p">,</span>
+                              <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Verifies a RSA-SHA1 OAuth signature.</span>
+
+<span class="sd">    :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)</span>
+
+<span class="sd">    :param client_certificate:</span>
+<span class="sd">        PEM-encoded X.509 certificate or RSA public key.</span>
+<span class="sd">    :param signature:</span>
+<span class="sd">        RSA-SHA1 OAuth signature.</span>
+<span class="sd">    :param method:</span>
+<span class="sd">        Base string HTTP method.</span>
+<span class="sd">    :param url:</span>
+<span class="sd">        Base string URL that may include a query string.</span>
+<span class="sd">        All protocol-specific parameters will be ignored from the query string.</span>
+<span class="sd">    :param oauth_params:</span>
+<span class="sd">        Base string protocol-specific query parameters.</span>
+<span class="sd">        All non-protocol parameters will be ignored.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        ``True`` if verified to be correct; ``False`` otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pyoauth.crypto.rsa</span> <span class="kn">import</span> <span class="n">parse_public_key</span>
+
+    <span class="n">oauth_params</span> <span class="o">=</span> <span class="n">oauth_params</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">base_string</span> <span class="o">=</span> <span class="n">generate_signature_base_string</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="p">)</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">parse_public_key</span><span class="p">(</span><span class="n">client_certificate</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">key</span><span class="o">.</span><span class="n">pkcs1_v1_5_verify</span><span class="p">(</span><span class="n">sha1_digest</span><span class="p">(</span><span class="n">base_string</span><span class="p">),</span>
+                                 <span class="n">base64_decode</span><span class="p">(</span><span class="n">signature</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="generate_plaintext_signature"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_plaintext_signature">[docs]</a><span class="k">def</span> <span class="nf">generate_plaintext_signature</span><span class="p">(</span><span class="n">client_shared_secret</span><span class="p">,</span>
+                            <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">token_or_temporary_shared_secret</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates a PLAINTEXT signature for a base string.</span>
+
+<span class="sd">    :see: PLAINTEXT (http://tools.ietf.org/html/rfc5849#section-3.4.4)</span>
+<span class="sd">    :param client_shared_secret:</span>
+<span class="sd">        Client (consumer) shared secret.</span>
+<span class="sd">    :param method:</span>
+<span class="sd">        (Not used). Base string HTTP method.</span>
+<span class="sd">    :param url:</span>
+<span class="sd">        (Not used). Base string URL that may include query string.</span>
+<span class="sd">        All protocol-specific parameters will be ignored from the query string.</span>
+<span class="sd">    :param oauth_params:</span>
+<span class="sd">        (Not used). Base string protocol-specific query parameters.</span>
+<span class="sd">        All non-protocol parameters will be ignored.</span>
+<span class="sd">    :param token_or_temporary_shared_secret:</span>
+<span class="sd">        Token/temporary credentials shared secret if available.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        PLAINTEXT signature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_generate_plaintext_signature</span><span class="p">(</span><span class="n">client_shared_secret</span><span class="p">,</span>
+                                    <span class="n">token_or_temporary_shared_secret</span><span class="p">)</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_generate_plaintext_signature</span><span class="p">(</span><span class="n">client_shared_secret</span><span class="p">,</span>
+                             <span class="n">token_or_temporary_shared_secret</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the PLAINTEXT signature.</span>
+
+<span class="sd">    :param client_shared_secret:</span>
+<span class="sd">        Client (consumer) shared secret.</span>
+<span class="sd">    :param token_or_temporary_shared_secret:</span>
+<span class="sd">        Token/temporary credentials shared secret if available.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        PLAINTEXT signature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">client_shared_secret</span> <span class="o">=</span> <span class="n">client_shared_secret</span> <span class="ow">or</span> <span class="s">&quot;&quot;</span>
+    <span class="n">token_or_temporary_shared_secret</span> <span class="o">=</span> <span class="n">token_or_temporary_shared_secret</span> <span class="ow">or</span> <span class="s">&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+        <span class="n">percent_encode</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="n">client_shared_secret</span><span class="p">,</span> <span class="n">token_or_temporary_shared_secret</span><span class="p">]])</span>
+
+
+<div class="viewcode-block" id="generate_signature_base_string"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_signature_base_string">[docs]</a><span class="k">def</span> <span class="nf">generate_signature_base_string</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates a signature base string based on the URL, method, and</span>
+<span class="sd">    oauth parameters.</span>
+
+<span class="sd">    Any query parameter by the name &quot;oauth_signature&quot; will be excluded</span>
+<span class="sd">    from the base string.</span>
+
+<span class="sd">    :see: Signature base string (http://tools.ietf.org/html/rfc5849#section-3.4.1)</span>
+
+<span class="sd">    :param method:</span>
+<span class="sd">        HTTP request method.</span>
+<span class="sd">    :param url:</span>
+<span class="sd">        The URL. If this includes a query string, query parameters are first</span>
+<span class="sd">        extracted and encoded as well. All protocol-specific parameters</span>
+<span class="sd">        will be ignored from the query string.</span>
+<span class="sd">    :param oauth_params:</span>
+<span class="sd">        Protocol-specific parameters must be specified in this dictionary.</span>
+<span class="sd">        All non-protocol parameters will be ignored.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Base string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">allowed_methods</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;POST&quot;</span><span class="p">,</span> <span class="s">&quot;GET&quot;</span><span class="p">,</span> <span class="s">&quot;PUT&quot;</span><span class="p">,</span> <span class="s">&quot;DELETE&quot;</span><span class="p">,</span>
+                       <span class="s">&quot;OPTIONS&quot;</span><span class="p">,</span> <span class="s">&quot;TRACE&quot;</span><span class="p">,</span> <span class="s">&quot;HEAD&quot;</span><span class="p">,</span> <span class="s">&quot;CONNECT&quot;</span><span class="p">,</span>
+                       <span class="s">&quot;PATCH&quot;</span><span class="p">)</span>
+    <span class="n">method_normalized</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">method_normalized</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_methods</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidHttpMethodError</span><span class="p">(</span><span class="s">&quot;Method must be one of the HTTP methods </span><span class="si">%s</span><span class="s">: got `</span><span class="si">%s</span><span class="s">` instead&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">allowed_methods</span><span class="p">,</span> <span class="n">method</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidUrlError</span><span class="p">(</span><span class="s">&quot;URL must be specified: got `</span><span class="si">%r</span><span class="s">`&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">oauth_params</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidOAuthParametersError</span><span class="p">(</span><span class="s">&quot;Dictionary required: got `</span><span class="si">%r</span><span class="s">`&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">oauth_params</span><span class="p">,</span> <span class="p">))</span>
+
+    <span class="n">scheme</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">matrix_params</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">fragment</span> <span class="o">=</span> <span class="n">urlparse_normalized</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">query_string</span> <span class="o">=</span> <span class="n">_generate_signature_base_string_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">oauth_params</span><span class="p">)</span>
+    <span class="n">normalized_url</span> <span class="o">=</span> <span class="n">urlunparse</span><span class="p">((</span><span class="n">scheme</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">matrix_params</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+    <span class="k">return</span> <span class="s">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+        <span class="n">percent_encode</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="n">method_normalized</span><span class="p">,</span> <span class="n">normalized_url</span><span class="p">,</span> <span class="n">query_string</span><span class="p">]])</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_generate_signature_base_string_query</span><span class="p">(</span><span class="n">url_query_params</span><span class="p">,</span> <span class="n">oauth_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializes URL query parameters and OAuth protocol parameters into a valid</span>
+<span class="sd">    OAuth base string URI query string.</span>
+
+<span class="sd">    :see: Parameter Normalization (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)</span>
+<span class="sd">    :param url_query_params:</span>
+<span class="sd">        A dictionary or string of URL query parameters. Any parameters starting</span>
+<span class="sd">        with ``oauth_`` will be ignored.</span>
+<span class="sd">    :param oauth_params:</span>
+<span class="sd">        A dictionary or string of protocol-specific query parameters. Any parameter</span>
+<span class="sd">        names that do not begin with ``oauth_`` will be excluded from the</span>
+<span class="sd">        normalized query string. ``oauth_signature``, ``oauth_consumer_secret``,</span>
+<span class="sd">        and ``oauth_token_secret`` are also specifically excluded.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Normalized string of query parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">url_query_params</span> <span class="o">=</span> <span class="n">query_params_sanitize</span><span class="p">(</span><span class="n">url_query_params</span><span class="p">)</span>
+    <span class="n">oauth_params</span> <span class="o">=</span> <span class="n">request_protocol_params_sanitize</span><span class="p">(</span><span class="n">oauth_params</span><span class="p">)</span>
+
+    <span class="n">query_params</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">query_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">url_query_params</span><span class="p">)</span>
+    <span class="n">query_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">oauth_params</span><span class="p">)</span>
+
+    <span class="c"># Now encode the parameters, while ignoring &#39;oauth_signature&#39; and obviously,</span>
+    <span class="c"># the secrets from the entire list of parameters.</span>
+    <span class="k">def</span> <span class="nf">allow_func</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;oauth_signature&quot;</span><span class="p">,</span>
+                            <span class="c">#&quot;oauth_consumer_secret&quot;,    # Already filtered by protocol parameter sanitization above.</span>
+                            <span class="c">#&quot;oauth_token_secret&quot;,       # Already filtered by protocol parameter sanitization above.</span>
+                            <span class="p">)</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">urlencode_s</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="n">allow_func</span><span class="o">=</span><span class="n">allow_func</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">query</span>
+
+
+<div class="viewcode-block" id="generate_normalized_authorization_header_value"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_normalized_authorization_header_value">[docs]</a><span class="k">def</span> <span class="nf">generate_normalized_authorization_header_value</span><span class="p">(</span><span class="n">oauth_params</span><span class="p">,</span>
+                                                   <span class="n">realm</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                                   <span class="n">param_delimiter</span><span class="o">=</span><span class="s">&quot;,&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Builds the Authorization header value.</span>
+
+<span class="sd">    Please note that the generated authorization header value MUST be</span>
+<span class="sd">    on a SINGLE line.</span>
+
+<span class="sd">    :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1</span>
+<span class="sd">    :param oauth_params:</span>
+<span class="sd">        Protocol-specific parameters excluding the ``realm`` parameter.</span>
+<span class="sd">    :param realm:</span>
+<span class="sd">        If specified, the realm is included into the Authorization header.</span>
+<span class="sd">        The realm is never percent-encoded according to the OAuth spec.</span>
+<span class="sd">    :param param_delimiter:</span>
+<span class="sd">        The delimiter used to separate header value parameters.</span>
+<span class="sd">        According to the Specification, this must be a comma &quot;,&quot;. However,</span>
+<span class="sd">        certain services like Yahoo! use &quot;&amp;&quot; instead. Comma is default.</span>
+
+<span class="sd">        See https://github.com/oauth/oauth-ruby/pull/12</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A properly formatted Authorization header value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">realm</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s">&#39;OAuth realm=&quot;&#39;</span> <span class="o">+</span> <span class="n">unicode_to_utf8</span><span class="p">(</span><span class="n">realm</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">param_delimiter</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s">&#39;OAuth &#39;</span>
+    <span class="n">oauth_params</span> <span class="o">=</span> <span class="n">request_protocol_params_sanitize</span><span class="p">(</span><span class="n">oauth_params</span><span class="p">)</span>
+    <span class="n">normalized_param_pairs</span> <span class="o">=</span> <span class="n">urlencode_sl</span><span class="p">(</span><span class="n">oauth_params</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">+=</span> <span class="n">param_delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">k</span> <span class="o">+</span> <span class="s">&#39;=&quot;&#39;</span> <span class="o">+</span> <span class="n">v</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">normalized_param_pairs</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">s</span>
+
+</div>
+<div class="viewcode-block" id="parse_authorization_header_value"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.parse_authorization_header_value">[docs]</a><span class="k">def</span> <span class="nf">parse_authorization_header_value</span><span class="p">(</span><span class="n">header_value</span><span class="p">,</span>
+                                     <span class="n">param_delimiter</span><span class="o">=</span><span class="s">&quot;,&quot;</span><span class="p">,</span>
+                                     <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the OAuth Authorization header.</span>
+
+<span class="sd">    :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1</span>
+<span class="sd">    :param header_value:</span>
+<span class="sd">        Header value.</span>
+<span class="sd">    :param param_delimiter:</span>
+<span class="sd">        The delimiter used to separate header value parameters.</span>
+<span class="sd">        According to the Specification, this must be a comma &quot;,&quot;. However,</span>
+<span class="sd">        certain services like Yahoo! use &quot;&amp;&quot; instead. Comma is default.</span>
+
+<span class="sd">        If you want to use another delimiter character, the ``strict``</span>
+<span class="sd">        argument to this function must also be set to ``False``.</span>
+<span class="sd">        See https://github.com/oauth/oauth-ruby/pull/12</span>
+<span class="sd">    :param strict:</span>
+<span class="sd">        When ``True``, more strict checking will be performed.</span>
+<span class="sd">        The authorization header value must be on a single line.</span>
+<span class="sd">        The param delimiter MUST be a comma.</span>
+<span class="sd">        When ``False``, the parser is a bit lenient.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Dictionary of parameter name value pairs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">param_list</span><span class="p">,</span> <span class="n">realm</span> <span class="o">=</span> \
+        <span class="n">_parse_authorization_header_value_l</span><span class="p">(</span><span class="n">header_value</span><span class="p">,</span>
+                                            <span class="n">param_delimiter</span><span class="o">=</span><span class="n">param_delimiter</span><span class="p">,</span>
+                                            <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">param_list</span><span class="p">:</span>
+        <span class="c"># We do keep track of multiple values because they will be</span>
+        <span class="c"># detected by the sanitization below and flagged as an error</span>
+        <span class="c"># in the Authorization header value.</span>
+        <span class="c">#</span>
+        <span class="c">#d[name] = [value]</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">request_protocol_params_sanitize</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">realm</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_parse_authorization_header_value_l</span><span class="p">(</span><span class="n">header_value</span><span class="p">,</span>
+                                        <span class="n">param_delimiter</span><span class="o">=</span><span class="s">&quot;,&quot;</span><span class="p">,</span>
+                                        <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the OAuth Authorization header preserving the order of the</span>
+<span class="sd">    parameters as in the header value.</span>
+
+<span class="sd">    :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1</span>
+<span class="sd">    :param header_value:</span>
+<span class="sd">        Header value. Non protocol parameters will be ignored.</span>
+<span class="sd">    :param param_delimiter:</span>
+<span class="sd">        The delimiter used to separate header value parameters.</span>
+<span class="sd">        According to the Specification, this must be a comma &quot;,&quot;. However,</span>
+<span class="sd">        certain services like Yahoo! use &quot;&amp;&quot; instead. Comma is default.</span>
+
+<span class="sd">        If you want to use another delimiter character, the ``strict``</span>
+<span class="sd">        argument to this function must also be set to ``False``.</span>
+<span class="sd">        See https://github.com/oauth/oauth-ruby/pull/12</span>
+<span class="sd">    :param strict:</span>
+<span class="sd">        When ``True`` (default), strict checking will be performed.</span>
+<span class="sd">        The authorization header value must be on a single line.</span>
+<span class="sd">        The param delimiter MUST be a comma.</span>
+<span class="sd">        When ``False``, the parser is a bit lenient.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Tuple:</span>
+<span class="sd">        (list of parameter name value pairs in order or appearance, realm)</span>
+
+<span class="sd">        realm will be ``None`` if the authorization header does not have</span>
+<span class="sd">        a realm parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Remove the auth-scheme from the value.</span>
+    <span class="n">header_value</span> <span class="o">=</span> <span class="n">unicode_to_utf8</span><span class="p">(</span><span class="n">header_value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="ow">in</span> <span class="n">header_value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Header value must be on a single line: got `</span><span class="si">%r</span><span class="s">`&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">header_value</span><span class="p">,</span> <span class="p">))</span>
+        <span class="k">if</span> <span class="n">param_delimiter</span> <span class="o">!=</span> <span class="s">&quot;,&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;The param delimiter must be a comma: got `</span><span class="si">%r</span><span class="s">`&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param_delimiter</span><span class="p">,</span> <span class="p">))</span>
+
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&quot;(^OAuth[\s]+)&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+    <span class="n">header_value</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">header_value</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">realm</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">pairs</span> <span class="o">=</span> <span class="p">[</span><span class="n">param_pair</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+             <span class="k">for</span> <span class="n">param_pair</span> <span class="ow">in</span> <span class="n">header_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">param_delimiter</span><span class="p">)]</span>
+    <span class="n">decoded_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">param</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">header_value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">param_delimiter</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">InvalidAuthorizationHeaderError</span><span class="p">(</span><span class="s">&quot;Malformed `Authorization` header value -- found trailing `</span><span class="si">%r</span><span class="s">` character&quot;</span> <span class="o">%</span> <span class="n">param_delimiter</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Blank param?</span>
+                <span class="k">continue</span>
+        <span class="n">nv</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nv</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidAuthorizationHeaderError</span><span class="p">(</span><span class="s">&quot;bad parameter field: `</span><span class="si">%r</span><span class="s">`&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">nv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">nv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidAuthorizationHeaderError</span><span class="p">(</span><span class="s">&quot;bad parameter value: `</span><span class="si">%r</span><span class="s">` -- missing quotes?&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="p">))</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;&quot;&#39;</span> <span class="ow">or</span> <span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;&quot;&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidAuthorizationHeaderError</span><span class="p">(</span><span class="s">&quot;missing quotes around parameter value: `</span><span class="si">%r</span><span class="s">` -- values must be quoted using (</span><span class="se">\&quot;</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="p">))</span>
+
+        <span class="c"># We only need to remove a single pair of quotes. Do not use str.strip(&#39;&quot;&#39;).</span>
+        <span class="c"># We need to be able to detect problems with the values too.</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">percent_decode</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;realm&quot;</span><span class="p">:</span>
+            <span class="c"># &quot;realm&quot; is case-insensitive.</span>
+            <span class="c"># The realm parameter value is a simple quoted string.</span>
+            <span class="c"># It is neither percent-encoded nor percent-decoded in OAuth.</span>
+            <span class="c"># realm is ignored from the protocol parameters list.</span>
+            <span class="n">realm</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">percent_decode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">decoded_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">decoded_pairs</span><span class="p">,</span> <span class="n">realm</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

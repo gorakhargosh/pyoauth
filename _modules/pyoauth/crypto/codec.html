@@ -1,0 +1,140 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.crypto.codec &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.crypto.codec</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c"># Placed into public domain.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.crypto.codec</span>
+<span class="sd">:synopsis: Codecs to encode and decode keys and certificates in various formats.</span>
+
+<span class="sd">PEM key decoders</span>
+<span class="sd">----------------</span>
+<span class="sd">.. autofunction:: public_key_pem_decode</span>
+<span class="sd">.. autofunction:: private_key_pem_decode</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pyoauth.crypto.codec.pem</span> <span class="kn">import</span> \
+    <span class="n">CERT_PEM_HEADER</span><span class="p">,</span> <span class="n">PUBLIC_KEY_PEM_HEADER</span><span class="p">,</span> \
+    <span class="n">PRIVATE_KEY_PEM_HEADER</span><span class="p">,</span> <span class="n">RSA_PRIVATE_KEY_PEM_HEADER</span>
+<span class="kn">from</span> <span class="nn">pyoauth.crypto.codec.pem.x509</span> <span class="kn">import</span> <span class="n">X509Certificate</span>
+<span class="kn">from</span> <span class="nn">pyoauth.crypto.codec.pem.rsa</span> <span class="kn">import</span> <span class="n">RSAPrivateKey</span><span class="p">,</span> <span class="n">RSAPublicKey</span>
+
+
+<div class="viewcode-block" id="public_key_pem_decode"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.codec.public_key_pem_decode">[docs]</a><span class="k">def</span> <span class="nf">public_key_pem_decode</span><span class="p">(</span><span class="n">pem_key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decodes a PEM-encoded public key/X.509 certificate string into internal representation.</span>
+
+<span class="sd">    :param pem_key:</span>
+<span class="sd">        The PEM-encoded key. Must be one of:</span>
+<span class="sd">        1. RSA public key.</span>
+<span class="sd">        2. X.509 certificate.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A dictionary of key information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pem_key</span> <span class="o">=</span> <span class="n">pem_key</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">pem_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">CERT_PEM_HEADER</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">X509Certificate</span><span class="p">(</span><span class="n">pem_key</span><span class="p">)</span><span class="o">.</span><span class="n">public_key</span>
+    <span class="k">elif</span> <span class="n">pem_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">PUBLIC_KEY_PEM_HEADER</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">RSAPublicKey</span><span class="p">(</span><span class="n">pem_key</span><span class="p">)</span><span class="o">.</span><span class="n">public_key</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Only PEM-encoded X.509 certificates and public RSA keys can be read.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">key</span>
+
+</div>
+<div class="viewcode-block" id="private_key_pem_decode"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.codec.private_key_pem_decode">[docs]</a><span class="k">def</span> <span class="nf">private_key_pem_decode</span><span class="p">(</span><span class="n">pem_key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decodes a PEM-encoded private key string into internal representation.</span>
+
+<span class="sd">    :param pem_key:</span>
+<span class="sd">        The PEM-encoded RSA private key.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A dictionary of key information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pem_key</span> <span class="o">=</span> <span class="n">pem_key</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">pem_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">PRIVATE_KEY_PEM_HEADER</span><span class="p">)</span> <span class="ow">or</span> <span class="n">pem_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">RSA_PRIVATE_KEY_PEM_HEADER</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">RSAPrivateKey</span><span class="p">(</span><span class="n">pem_key</span><span class="p">)</span><span class="o">.</span><span class="n">private_key</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Only PEM-encoded private RSA keys can be read.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">key</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,255 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.crypto.random &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.crypto.random</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># Random number and string generation utilities.</span>
+<span class="c">#</span>
+<span class="c"># Released into public domain.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.crypto.random</span>
+<span class="sd">:synopsis: Random number and string generation utilities.</span>
+
+<span class="sd">Bytes and byte arrays</span>
+<span class="sd">---------------------</span>
+<span class="sd">.. autofunction:: generate_random_bytes</span>
+<span class="sd">.. autofunction:: generate_random_bytearray</span>
+
+<span class="sd">Numbers</span>
+<span class="sd">-------</span>
+<span class="sd">.. autofunction:: generate_random_long</span>
+
+<span class="sd">Strings</span>
+<span class="sd">-------</span>
+<span class="sd">.. autofunction:: generate_random_uint_string</span>
+<span class="sd">.. autofunction:: generate_random_hex_string</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types</span> <span class="kn">import</span> <span class="n">byte_count</span><span class="p">,</span> <span class="n">bit_count</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types.bytearray</span> <span class="kn">import</span> \
+    <span class="n">bytearray_to_long</span><span class="p">,</span> <span class="n">bytes_to_bytearray</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types.codec</span> <span class="kn">import</span>\
+    <span class="n">bytes_to_base64</span><span class="p">,</span> \
+    <span class="n">bytes_to_decimal</span><span class="p">,</span> \
+    <span class="n">bytes_to_hex</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c"># Operating system unsigned random.</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">generate_random_bytes</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a random byte string with ``count`` bytes.</span>
+
+<span class="sd">        :param count:</span>
+<span class="sd">            Number of bytes.</span>
+<span class="sd">        :returns:</span>
+<span class="sd">            Random byte string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">urandom_device</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;/dev/urandom&quot;</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">generate_random_bytes</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Generates a random byte string with ``count`` bytes.</span>
+
+<span class="sd">            :param count:</span>
+<span class="sd">                Number of bytes.</span>
+<span class="sd">            :returns:</span>
+<span class="sd">                Random byte string.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">urandom_device</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="c">#Else get Win32 CryptoAPI PRNG</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">win32prng</span>
+            <span class="k">def</span> <span class="nf">generate_random_bytes</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Generates a random byte string with ``count`` bytes.</span>
+
+<span class="sd">                :param count:</span>
+<span class="sd">                    Number of bytes.</span>
+<span class="sd">                :returns:</span>
+<span class="sd">                    Random byte string.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">win32prng</span><span class="o">.</span><span class="n">generate_random_bytes</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="n">count</span>
+                <span class="k">return</span> <span class="n">s</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="c"># What the fuck?!</span>
+<div class="viewcode-block" id="generate_random_bytes"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.random.generate_random_bytes">[docs]</a>            <span class="k">def</span> <span class="nf">generate_random_bytes</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Should generate a random byte string with ``count`` bytes</span>
+<span class="sd">                but barfs instead.</span>
+
+<span class="sd">                :param count:</span>
+<span class="sd">                    Number of bytes.</span>
+<span class="sd">                :returns:</span>
+<span class="sd">                    WTF.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;What the fuck?! No PRNG available.&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="generate_random_long"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.random.generate_random_long">[docs]</a><span class="k">def</span> <span class="nf">generate_random_long</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a random long integer.</span>
+
+<span class="sd">    :param low:</span>
+<span class="sd">        Low</span>
+<span class="sd">    :param high:</span>
+<span class="sd">        High</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Random long integer value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">low</span> <span class="o">&gt;=</span> <span class="n">high</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;High must be greater than low.&quot;</span><span class="p">)</span>
+    <span class="n">num_bits</span> <span class="o">=</span> <span class="n">bit_count</span><span class="p">(</span><span class="n">high</span><span class="p">)</span>
+    <span class="n">num_bytes</span> <span class="o">=</span> <span class="n">byte_count</span><span class="p">(</span><span class="n">high</span><span class="p">)</span>
+    <span class="n">last_bits</span> <span class="o">=</span> <span class="n">num_bits</span> <span class="o">%</span> <span class="mi">8</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">byte_array</span> <span class="o">=</span> <span class="n">generate_random_bytearray</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">last_bits</span><span class="p">:</span>
+            <span class="n">byte_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">last_bits</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">bytearray_to_long</span><span class="p">(</span><span class="n">byte_array</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="n">low</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">high</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">n</span>
+
+</div>
+<span class="n">_BYTE_BASE_ENCODING_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">10</span><span class="p">:</span> <span class="n">bytes_to_decimal</span><span class="p">,</span>
+    <span class="mi">16</span><span class="p">:</span> <span class="n">bytes_to_hex</span><span class="p">,</span>
+    <span class="mi">64</span><span class="p">:</span> <span class="n">bytes_to_base64</span>
+<span class="p">}</span>
+<div class="viewcode-block" id="generate_random_uint_string"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.random.generate_random_uint_string">[docs]</a><span class="k">def</span> <span class="nf">generate_random_uint_string</span><span class="p">(</span><span class="n">bit_strength</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a random ASCII-encoded unsigned integral number in decimal</span>
+<span class="sd">    or hexadecimal representation.</span>
+
+<span class="sd">    :param bit_strength:</span>
+<span class="sd">        Bit strength.</span>
+<span class="sd">    :param base:</span>
+<span class="sd">        One of:</span>
+<span class="sd">            1. 10 (default)</span>
+<span class="sd">            2. 16</span>
+<span class="sd">            3. 64</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A string representation of a randomly-generated ASCII-encoded</span>
+<span class="sd">        hexadecimal/decimal-representation unsigned integral number</span>
+<span class="sd">        based on the bit strength specified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">bit_strength</span> <span class="o">%</span> <span class="mi">8</span> <span class="ow">or</span> <span class="n">bit_strength</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;This function expects a bit strength: got `</span><span class="si">%r</span><span class="s">`.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bit_strength</span><span class="p">,</span> <span class="p">))</span>
+    <span class="c">#num_bytes = bit_strength / 8</span>
+    <span class="n">random_bytes</span> <span class="o">=</span> <span class="n">generate_random_bytes</span><span class="p">(</span><span class="n">bit_strength</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_BYTE_BASE_ENCODING_MAP</span><span class="p">[</span><span class="n">base</span><span class="p">](</span><span class="n">random_bytes</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Base must be one of </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_BYTE_BASE_ENCODING_MAP</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="generate_random_hex_string"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.random.generate_random_hex_string">[docs]</a><span class="k">def</span> <span class="nf">generate_random_hex_string</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a random ASCII-encoded hexadecimal string of an even length.</span>
+
+<span class="sd">    :param length:</span>
+<span class="sd">        Length of the string to be returned. Default 32.</span>
+<span class="sd">        The length MUST be a positive even number.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A string representation of a randomly-generated hexadecimal string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">%</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;This function expects a positive even number length: got length `</span><span class="si">%r</span><span class="s">`.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="p">))</span>
+    <span class="k">return</span> <span class="n">bytes_to_hex</span><span class="p">(</span><span class="n">generate_random_bytes</span><span class="p">(</span><span class="n">length</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="generate_random_bytearray"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.random.generate_random_bytearray">[docs]</a><span class="k">def</span> <span class="nf">generate_random_bytearray</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a random byte array.</span>
+
+<span class="sd">    :param count:</span>
+<span class="sd">        The number of bytes.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A random byte array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">bytes_to_bytearray</span><span class="p">(</span><span class="n">generate_random_bytes</span><span class="p">(</span><span class="n">count</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,497 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Client implementations &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="Protocol-specific utilities" href="protocol.html" />
+    <link rel="prev" title="Contributing" href="../guides/hacking.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="client-implementations">
+<h1>Client implementations<a class="headerlink" href="#client-implementations" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pyoauth.oauth1.client">
+<span id="pyoauth-oauth1-client"></span><h2><cite>pyoauth.oauth1.client</cite><a class="headerlink" href="#module-pyoauth.oauth1.client" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.oauth1.client</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Implements an OAuth 1.0 client.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyoauth.oauth1.client.Client">
+<em class="property">class </em><tt class="descclassname">pyoauth.oauth1.client.</tt><tt class="descname">Client</tt><big>(</big><em>client_credentials</em>, <em>temporary_credentials_request_uri</em>, <em>token_credentials_request_uri</em>, <em>resource_owner_authorization_uri</em>, <em>resource_owner_authentication_uri=None</em>, <em>use_authorization_header=True</em>, <em>authorization_header_param_delimiter='</em>, <em>'</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.Client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>OAuth 1.0 Client.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>client_credentials</strong> &#8211; Client (consumer) credentials.</li>
+<li><strong>temporary_credentials_request_uri</strong> &#8211; <p>OAuth request token URI.</p>
+<p>Any query parameters starting with <tt class="docutils literal"><span class="pre">oauth_</span></tt> will be excluded from
+the URL. All OAuth parameters must be specified in their respective
+requests.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Must use SSL/TLS.</p>
+<p class="last">See <a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-2.1">http://tools.ietf.org/html/rfc5849#section-2.1</a></p>
+</div>
+</li>
+<li><strong>resource_owner_authorization_uri</strong> &#8211; <p>OAuth authorization URI.</p>
+<p>Any query parameters starting with <tt class="docutils literal"><span class="pre">oauth_</span></tt> will be excluded from
+the URL. All OAuth parameters must be specified in their respective
+requests.</p>
+</li>
+<li><strong>token_request_uri</strong> &#8211; <p>OAuth access token request URI.</p>
+<p>Any query parameters starting with <tt class="docutils literal"><span class="pre">oauth_</span></tt> will be excluded from
+the URL. All OAuth parameters must be specified in their respective
+requests.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Must use SSL/TLS.</p>
+<p class="last">See <a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-2.3">http://tools.ietf.org/html/rfc5849#section-2.3</a></p>
+</div>
+</li>
+<li><strong>use_authorization_header</strong> &#8211; <p><tt class="xref docutils literal"><span class="pre">True</span></tt> (default) to use the HTTP Authorization header to pass OAuth
+parameters; <tt class="xref docutils literal"><span class="pre">False</span></tt> will force using the URL query string or
+the entity-body of a request.</p>
+<p>Using the HTTP Authorization header is preferable for many reasons
+including:</p>
+<ol class="arabic">
+<li>Keeps your server request logs clean and readable.</li>
+<li>Separates any protocol-specific parameters from server or
+application-specific parameters.</li>
+<li>Debugging OAuth problems is easier.</li>
+</ol>
+<p>However, not all OAuth servers may support this feature. Therefore,
+you can set this to <tt class="xref docutils literal"><span class="pre">False</span></tt> for use with such services.</p>
+</li>
+<li><strong>authorization_header_param_delimiter</strong> &#8211; <p>The delimiter used to separate header value parameters.
+According to the Specification, this must be a comma <tt class="docutils literal"><span class="pre">,</span></tt>. However,
+certain services like Yahoo! use <tt class="docutils literal"><span class="pre">&amp;</span></tt> instead. Comma is default.</p>
+<blockquote>
+<div>See <a class="reference external" href="https://github.com/oauth/oauth-ruby/pull/12">https://github.com/oauth/oauth-ruby/pull/12</a></div></blockquote>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyoauth.oauth1.client.Client.build_resource_request">
+<tt class="descname">build_resource_request</tt><big>(</big><em>token_credentials</em>, <em>method</em>, <em>url</em>, <em>payload_params=None</em>, <em>headers=None</em>, <em>realm=None</em>, <em>oauth_signature_method='HMAC-SHA1'</em>, <em>**extra_oauth_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client.html#Client.build_resource_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.Client.build_resource_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds an OAuth request instance for token credentials from the OAuth
+server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>token_credentials</strong> &#8211; Temporary credentials obtained from the response to the
+request built by
+<a class="reference internal" href="#pyoauth.oauth1.client.Client.build_temporary_credentials_request" title="pyoauth.oauth1.client.Client.build_temporary_credentials_request"><tt class="xref py py-func docutils literal"><span class="pre">Client.build_temporary_credentials_request()</span></tt></a>.</li>
+<li><strong>method</strong> &#8211; The HTTP method to use.</li>
+<li><strong>url</strong> &#8211; The HTTP URL to which the resource request must be sent.</li>
+<li><strong>payload_params</strong> &#8211; A dictionary of payload parameters. These will be serialized
+into the URL or the entity-body depending on the HTTP request method.
+These must not include any parameters starting with <tt class="docutils literal"><span class="pre">oauth_</span></tt>. Any
+of these parameters with names starting with the <tt class="docutils literal"><span class="pre">oauth_</span></tt> prefix
+will be ignored.</li>
+<li><strong>headers</strong> &#8211; A dictionary of headers that will be passed along with the request.
+Must not include the &#8220;Authorization&#8221; header.</li>
+<li><strong>realm</strong> &#8211; The value to use for the realm parameter in the Authorization HTTP
+header. It will be excluded from the base string, however.</li>
+<li><strong>oauth_signature_method</strong> &#8211; One of:
+1. <tt class="xref py py-attr docutils literal"><span class="pre">pyoauth.oauth1.SIGNATURE_METHOD_HMAC_SHA1</span></tt>
+2. <tt class="xref py py-attr docutils literal"><span class="pre">pyoauth.oauth1.SIGNATURE_METHOD_RSA_SHA1</span></tt>
+3. <tt class="xref py py-attr docutils literal"><span class="pre">pyoauth.oauth1.SIGNATURE_METHOD_PLAINTEXT</span></tt></li>
+<li><strong>extra_oauth_params</strong> &#8211; Any additional oauth parameters you would like to include.
+The parameter names must begin with <tt class="docutils literal"><span class="pre">oauth_</span></tt>. Any other parameters
+with names that do not begin with this prefix will be ignored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An instance of <a class="reference internal" href="protocol.html#pyoauth.http.RequestProxy" title="pyoauth.http.RequestProxy"><tt class="xref py py-class docutils literal"><span class="pre">pyoauth.http.RequestProxy</span></tt></a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyoauth.oauth1.client.Client.build_temporary_credentials_request">
+<tt class="descname">build_temporary_credentials_request</tt><big>(</big><em>method='POST'</em>, <em>payload_params=None</em>, <em>headers=None</em>, <em>realm=None</em>, <em>oauth_signature_method='HMAC-SHA1'</em>, <em>oauth_callback='oob'</em>, <em>**extra_oauth_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client.html#Client.build_temporary_credentials_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.Client.build_temporary_credentials_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds an OAuth request for temporary credentials.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>method</strong> &#8211; HTTP request method. Default POST.</li>
+<li><strong>payload_params</strong> &#8211; A dictionary of payload parameters. These will be serialized
+into the URL or the entity-body depending on the HTTP request method.
+These must not include any parameters starting with <tt class="docutils literal"><span class="pre">oauth_</span></tt>. Any
+of these parameters with names starting with the <tt class="docutils literal"><span class="pre">oauth_</span></tt> prefix
+will be ignored.</li>
+<li><strong>headers</strong> &#8211; A dictionary of headers that will be passed along with the request.
+Must not include the &#8220;Authorization&#8221; header.</li>
+<li><strong>realm</strong> &#8211; The value to use for the realm parameter in the Authorization HTTP
+header. It will be excluded from the base string, however.</li>
+<li><strong>oauth_signature_method</strong> &#8211; One of:
+1. <tt class="xref py py-attr docutils literal"><span class="pre">pyoauth.oauth1.SIGNATURE_METHOD_HMAC_SHA1</span></tt>
+2. <tt class="xref py py-attr docutils literal"><span class="pre">pyoauth.oauth1.SIGNATURE_METHOD_RSA_SHA1</span></tt>
+3. <tt class="xref py py-attr docutils literal"><span class="pre">pyoauth.oauth1.SIGNATURE_METHOD_PLAINTEXT</span></tt></li>
+<li><strong>oauth_callback</strong> &#8211; A callback URL that you want the server to call when done
+with your requests.</li>
+<li><strong>extra_oauth_params</strong> &#8211; Any additional oauth parameters you would like to include.
+The parameter names must begin with <tt class="docutils literal"><span class="pre">oauth_</span></tt>. Any other parameters
+with names that do not begin with this prefix will be ignored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An instance of <a class="reference internal" href="protocol.html#pyoauth.http.RequestProxy" title="pyoauth.http.RequestProxy"><tt class="xref py py-class docutils literal"><span class="pre">pyoauth.http.RequestProxy</span></tt></a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyoauth.oauth1.client.Client.build_token_credentials_request">
+<tt class="descname">build_token_credentials_request</tt><big>(</big><em>temporary_credentials</em>, <em>oauth_verifier</em>, <em>method='POST'</em>, <em>payload_params=None</em>, <em>headers=None</em>, <em>realm=None</em>, <em>oauth_signature_method='HMAC-SHA1'</em>, <em>**extra_oauth_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client.html#Client.build_token_credentials_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.Client.build_token_credentials_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds an OAuth request instance for token credentials from the OAuth
+server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>temporary_credentials</strong> &#8211; Temporary credentials obtained from the response to the
+request built by
+<a class="reference internal" href="#pyoauth.oauth1.client.Client.build_temporary_credentials_request" title="pyoauth.oauth1.client.Client.build_temporary_credentials_request"><tt class="xref py py-func docutils literal"><span class="pre">Client.build_temporary_credentials_request()</span></tt></a>.</li>
+<li><strong>oauth_verifier</strong> &#8211; OAuth verification string sent by the server to your callback URI
+or input by the user into your application.</li>
+<li><strong>method</strong> &#8211; The HTTP method to use. Default POST.</li>
+<li><strong>payload_params</strong> &#8211; A dictionary of payload parameters. These will be serialized
+into the URL or the entity-body depending on the HTTP request method.
+These must not include any parameters starting with <tt class="docutils literal"><span class="pre">oauth_</span></tt>. Any
+of these parameters with names starting with the <tt class="docutils literal"><span class="pre">oauth_</span></tt> prefix
+will be ignored.</li>
+<li><strong>headers</strong> &#8211; A dictionary of headers that will be passed along with the request.
+Must not include the &#8220;Authorization&#8221; header.</li>
+<li><strong>realm</strong> &#8211; The value to use for the realm parameter in the Authorization HTTP
+header. It will be excluded from the base string, however.</li>
+<li><strong>oauth_signature_method</strong> &#8211; One of:
+1. <tt class="xref py py-attr docutils literal"><span class="pre">pyoauth.oauth1.SIGNATURE_METHOD_HMAC_SHA1</span></tt>
+2. <tt class="xref py py-attr docutils literal"><span class="pre">pyoauth.oauth1.SIGNATURE_METHOD_RSA_SHA1</span></tt>
+3. <tt class="xref py py-attr docutils literal"><span class="pre">pyoauth.oauth1.SIGNATURE_METHOD_PLAINTEXT</span></tt></li>
+<li><strong>extra_oauth_params</strong> &#8211; Any additional oauth parameters you would like to include.
+The parameter names must begin with <tt class="docutils literal"><span class="pre">oauth_</span></tt>. Any other parameters
+with names that do not begin with this prefix will be ignored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An instance of <a class="reference internal" href="protocol.html#pyoauth.http.RequestProxy" title="pyoauth.http.RequestProxy"><tt class="xref py py-class docutils literal"><span class="pre">pyoauth.http.RequestProxy</span></tt></a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyoauth.oauth1.client.Client.check_verification_code">
+<tt class="descname">check_verification_code</tt><big>(</big><em>temporary_credentials</em>, <em>oauth_token</em>, <em>oauth_verifier</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client.html#Client.check_verification_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.Client.check_verification_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>When the OAuth 1.0 server redirects the resource owner to your
+callback URL, it will attach two parameters to the query string.</p>
+<ol class="arabic simple">
+<li><tt class="docutils literal"><span class="pre">oauth_token</span></tt>: Must match your temporary credentials identifier.</li>
+<li><tt class="docutils literal"><span class="pre">oauth_verifier</span></tt>: Server-generated verification code that you will
+use in the next step&#8211;that is requesting token credentials.</li>
+</ol>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>temporary_credentials</strong> &#8211; Temporary credentials</li>
+<li><strong>oauth_token</strong> &#8211; The value of the <tt class="docutils literal"><span class="pre">oauth_token</span></tt> parameter as obtained
+from the server redirect.</li>
+<li><strong>oauth_verifier</strong> &#8211; The value of the <tt class="docutils literal"><span class="pre">oauth_verifier</span></tt> parameter as obtained
+from the server redirect.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyoauth.oauth1.client.Client.get_authentication_url">
+<tt class="descname">get_authentication_url</tt><big>(</big><em>temporary_credentials</em>, <em>**query_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client.html#Client.get_authentication_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.Client.get_authentication_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the automatic authentication redirect URL to which the
+user will be (re)directed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>temporary_credentials</strong> &#8211; Temporary credentials obtained after parsing the response to
+the temporary credentials request.</li>
+<li><strong>query_params</strong> &#8211; Additional query parameters that you would like to include
+into the authorization URL. Parameters beginning with the <tt class="docutils literal"><span class="pre">oauth_</span></tt>
+prefix will be ignored.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyoauth.oauth1.client.Client.get_authorization_url">
+<tt class="descname">get_authorization_url</tt><big>(</big><em>temporary_credentials</em>, <em>**query_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client.html#Client.get_authorization_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.Client.get_authorization_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the authorization URL to which the user will be (re)directed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>temporary_credentials</strong> &#8211; Temporary credentials obtained after parsing the response to
+the temporary credentials request.</li>
+<li><strong>query_params</strong> &#8211; Additional query parameters that you would like to include
+into the authorization URL. Parameters beginning with the <tt class="docutils literal"><span class="pre">oauth_</span></tt>
+prefix will be ignored.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyoauth.oauth1.client.Client.oauth_version">
+<tt class="descname">oauth_version</tt><a class="reference internal" href="../_modules/pyoauth/oauth1/client.html#Client.oauth_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.Client.oauth_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Must return <tt class="docutils literal"><span class="pre">&quot;1.0&quot;</span></tt> (unless for compatibility, in which case,
+you are all by yourself.)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyoauth.oauth1.client.Client.parse_temporary_credentials_response">
+<tt class="descname">parse_temporary_credentials_response</tt><big>(</big><em>response</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client.html#Client.parse_temporary_credentials_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.Client.parse_temporary_credentials_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the entity-body of the OAuth server response to an OAuth
+temporary credentials request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>response</strong> &#8211; An instance of <a class="reference internal" href="protocol.html#pyoauth.http.ResponseProxy" title="pyoauth.http.ResponseProxy"><tt class="xref py py-class docutils literal"><span class="pre">pyoauth.http.ResponseProxy</span></tt></a>.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A tuple of the form:<div class="highlight-python"><pre>(parameter dictionary, pyoauth.oauth1.Credentials instance)</pre>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyoauth.oauth1.client.Client.parse_token_credentials_response">
+<tt class="descname">parse_token_credentials_response</tt><big>(</big><em>response</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client.html#Client.parse_token_credentials_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.Client.parse_token_credentials_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the entity-body of the OAuth server response to an OAuth
+token credentials request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>response</strong> &#8211; An instance of <a class="reference internal" href="protocol.html#pyoauth.http.ResponseProxy" title="pyoauth.http.ResponseProxy"><tt class="xref py py-class docutils literal"><span class="pre">pyoauth.http.ResponseProxy</span></tt></a>.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A tuple of the form:<div class="highlight-python"><pre>(parameter dictionary, pyoauth.oauth1.Credentials instance)</pre>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyoauth.oauth1.client.google">
+<span id="pyoauth-oauth1-client-google"></span><h2><cite>pyoauth.oauth1.client.google</cite><a class="headerlink" href="#module-pyoauth.oauth1.client.google" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.oauth1.client.google</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Google OAuth 1.0 client implementation.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyoauth.oauth1.client.google.GoogleClient">
+<em class="property">class </em><tt class="descclassname">pyoauth.oauth1.client.google.</tt><tt class="descname">GoogleClient</tt><big>(</big><em>client_credentials</em>, <em>use_authorization_header=True</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client/google.html#GoogleClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.google.GoogleClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyoauth.oauth1.client.Client" title="pyoauth.oauth1.client.Client"><tt class="xref py py-class docutils literal"><span class="pre">pyoauth.oauth1.client.Client</span></tt></a></p>
+<p>Creates an instance of a Google OAuth 1.0 client.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body"><a class="reference external" href="http://code.google.com/apis/accounts/docs/OAuth_ref.html">http://code.google.com/apis/accounts/docs/OAuth_ref.html</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyoauth.oauth1.client.google.GoogleClient.build_temporary_credentials_request">
+<tt class="descname">build_temporary_credentials_request</tt><big>(</big><em>scopes</em>, <em>xoauth_displayname=None</em>, <em>method='POST'</em>, <em>payload_params=None</em>, <em>headers=None</em>, <em>realm=None</em>, <em>oauth_signature_method='HMAC-SHA1'</em>, <em>oauth_callback='oob'</em>, <em>**extra_oauth_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1/client/google.html#GoogleClient.build_temporary_credentials_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.client.google.GoogleClient.build_temporary_credentials_request" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>scopes</strong> &#8211; A list of scopes to use with the credential request.</li>
+<li><strong>xoauth_displayname</strong> &#8211; The display name of the application.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="oauth-1-0-specific-utilities">
+<h1>OAuth 1.0-specific utilities<a class="headerlink" href="#oauth-1-0-specific-utilities" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pyoauth.oauth1">
+<span id="pyoauth-oauth1"></span><h2><cite>pyoauth.oauth1</cite><a class="headerlink" href="#module-pyoauth.oauth1" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.oauth1</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Implements OAuth 1.0.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyoauth.oauth1.Credentials">
+<em class="property">class </em><tt class="descclassname">pyoauth.oauth1.</tt><tt class="descname">Credentials</tt><big>(</big><em>identifier</em>, <em>shared_secret</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/oauth1.html#Credentials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.oauth1.Credentials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Convenience wrapper for a pair of OAuth 1.0 credentials.</p>
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Client implementations</a><ul>
+<li><a class="reference internal" href="#module-pyoauth.oauth1.client"><cite>pyoauth.oauth1.client</cite></a></li>
+<li><a class="reference internal" href="#module-pyoauth.oauth1.client.google"><cite>pyoauth.oauth1.client.google</cite></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#oauth-1-0-specific-utilities">OAuth 1.0-specific utilities</a><ul>
+<li><a class="reference internal" href="#module-pyoauth.oauth1"><cite>pyoauth.oauth1</cite></a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Navigation</h3>
+<p>
+  <a href="../index.html">Documentation overview</a>
+</p>
+<ul>
+    <li>Previous: <a
+      href="../guides/hacking.html"
+      title="previous chapter"
+    >Contributing</a>
+    </li>
+    <li>Next: <a
+      href="protocol.html"
+      title="next chapter"
+    >Protocol-specific utilities</a>
+    </li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/oauth1.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

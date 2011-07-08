@@ -1,0 +1,185 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Contributing &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../index.html" />
+    <link rel="prev" title="Cryptography primitives" href="../api/crypto.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="contributing">
+<span id="hacking"></span><h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
+<p>Welcome hackeratti! So you have got something you would like to see in
+<tt class="docutils literal"><span class="pre">pyoauth</span></tt>? Whee. This document will help you get started.</p>
+<div class="section" id="important-urls">
+<h2>Important URLs<a class="headerlink" href="#important-urls" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">pyoauth</span></tt> uses <a class="reference external" href="http://git-scm.org/">git</a> to track code history and hosts its <a class="reference external" href="http://github.com/gorakhargosh/pyoauth">code repository</a>
+at <a class="reference external" href="http://github.com/">github</a>. The <a class="reference external" href="http://github.com/gorakhargosh/pyoauth/issues">issue tracker</a> is where you can file bug reports and request
+features or enhancements to <tt class="docutils literal"><span class="pre">pyoauth</span></tt>.</p>
+</div>
+<div class="section" id="oauth-test-server-information-for-testing-clients">
+<h2>OAuth Test server information for testing clients<a class="headerlink" href="#oauth-test-server-information-for-testing-clients" title="Permalink to this headline">¶</a></h2>
+<p>Sandbox URL: <tt class="docutils literal"><span class="pre">http://oauth-sandbox.sevengoslings.net/</span></tt>
+Username: <tt class="docutils literal"><span class="pre">pyoauth</span></tt>
+Password (Guard Kitten): <tt class="docutils literal"><span class="pre">Kitty-Agent</span> <span class="pre">&quot;Able&quot;</span></tt></p>
+<div class="section" id="urls">
+<h3>URLs<a class="headerlink" href="#urls" title="Permalink to this headline">¶</a></h3>
+<p>Request token URL: <tt class="docutils literal"><span class="pre">http://oauth-sandbox.sevengoslings.net/request_token</span></tt>
+User authorization URL: <tt class="docutils literal"><span class="pre">http://oauth-sandbox.sevengoslings.net/authorize</span></tt>
+Access token URL: <tt class="docutils literal"><span class="pre">http://oauth-sandbox.sevengoslings.net/access_token</span></tt></p>
+<p>Two-legged resource URL: <tt class="docutils literal"><span class="pre">http://oauth-sandbox.sevengoslings.net/two_legged</span></tt>
+Three-legged resource URL: <tt class="docutils literal"><span class="pre">http://oauth-sandbox.sevengoslings.net/three_legged</span></tt></p>
+</div>
+<div class="section" id="consumer-keys">
+<h3>Consumer keys:<a class="headerlink" href="#consumer-keys" title="Permalink to this headline">¶</a></h3>
+<p>Consumer key: <tt class="docutils literal"><span class="pre">ac19e45c6b01a767</span></tt>
+Consumer secret: <tt class="docutils literal"><span class="pre">59806917a29a94ee77190ec06c50</span></tt></p>
+<p>Nonce checking is enabled.</p>
+</div>
+</div>
+<div class="section" id="before-you-start">
+<h2>Before you start<a class="headerlink" href="#before-you-start" title="Permalink to this headline">¶</a></h2>
+<p>Ensure your system has the following programs and libraries installed before
+beginning to hack:</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://python.org">Python</a></li>
+<li><a class="reference external" href="http://git-scm.org/">git</a></li>
+<li>ssh</li>
+</ol>
+</div>
+<div class="section" id="setting-up-the-work-environment">
+<h2>Setting up the Work Environment<a class="headerlink" href="#setting-up-the-work-environment" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">pyoauth</span></tt> makes extensive use of <a class="reference external" href="http://www.buildout.org/">zc.buildout</a> to set up its work
+environment. You should get familiar with it.</p>
+<p>Steps to setting up a clean environment:</p>
+<ol class="arabic">
+<li><p class="first">Fork the <a class="reference external" href="http://github.com/gorakhargosh/pyoauth">code repository</a> into your <a class="reference external" href="http://github.com/">github</a> account. Let us call you
+<tt class="docutils literal"><span class="pre">hackeratti</span></tt>. That <em>is</em> your name innit? Replace <tt class="docutils literal"><span class="pre">hackeratti</span></tt>
+with your own username below if it isn&#8217;t.</p>
+</li>
+<li><p class="first">Clone your fork and setup your environment:</p>
+<div class="highlight-python"><pre>$ git clone --recursive git@github.com:hackeratti/pyoauth.git
+$ cd pyoauth
+$ python bootstrap.py --distribute
+$ bin/buildout</pre>
+</div>
+</li>
+</ol>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">Re-run <tt class="docutils literal"><span class="pre">bin/buildout</span></tt> every time you make a change to the
+<tt class="docutils literal"><span class="pre">buildout.cfg</span></tt> file.</p>
+</div>
+<p>That&#8217;s it with the setup. Now you&#8217;re ready to hack on <tt class="docutils literal"><span class="pre">pyoauth</span></tt>.</p>
+</div>
+<div class="section" id="enabling-continuous-integration">
+<h2>Enabling Continuous Integration<a class="headerlink" href="#enabling-continuous-integration" title="Permalink to this headline">¶</a></h2>
+<p>The repository checkout contains a script called <tt class="docutils literal"><span class="pre">autobuild.sh</span></tt>
+which you should run prior to making changes. It will detect changes to
+Python source code or restructuredText documentation files anywhere
+in the directory tree and rebuild <a class="reference external" href="http://sphinx.pocoo.org/">sphinx</a> documentation, run all tests using
+<a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/0.11.2/">nose</a>, and generate <a class="reference external" href="http://nedbatchelder.com/code/coverage/">coverage</a> reports.</p>
+<p>Start it by issuing this command in the <tt class="docutils literal"><span class="pre">pyoauth</span></tt> directory
+checked out earlier:</p>
+<div class="highlight-python"><pre>$ tools/autobuild.sh
+...</pre>
+</div>
+<p>Happy hacking!</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Contributing</a><ul>
+<li><a class="reference internal" href="#important-urls">Important URLs</a></li>
+<li><a class="reference internal" href="#oauth-test-server-information-for-testing-clients">OAuth Test server information for testing clients</a><ul>
+<li><a class="reference internal" href="#urls">URLs</a></li>
+<li><a class="reference internal" href="#consumer-keys">Consumer keys:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#before-you-start">Before you start</a></li>
+<li><a class="reference internal" href="#setting-up-the-work-environment">Setting up the Work Environment</a></li>
+<li><a class="reference internal" href="#enabling-continuous-integration">Enabling Continuous Integration</a></li>
+</ul>
+</li>
+</ul>
+<h3>Navigation</h3>
+<p>
+  <a href="../index.html">Documentation overview</a>
+</p>
+<ul>
+    <li>Previous: <a
+      href="../api/crypto.html"
+      title="previous chapter"
+    >Cryptography primitives</a>
+    </li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/guides/hacking.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

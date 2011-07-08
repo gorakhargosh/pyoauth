@@ -1,0 +1,266 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyOAuth &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="#" />
+    <link rel="next" title="A typical OAuth 1.0 flow in simple words" href="guides/oauth1.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pyoauth">
+<h1>PyOAuth<a class="headerlink" href="#pyoauth" title="Permalink to this headline">¶</a></h1>
+<p>A Python library that implements the OAuth protocol for clients and servers.</p>
+<div class="section" id="getting-the-library">
+<h2>Getting the library<a class="headerlink" href="#getting-the-library" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>$ pip install pyoauth</pre>
+</div>
+<p>or</p>
+<div class="highlight-python"><pre>$ git clone git://github.com/gorakhargosh/pyoauth.git
+$ cd pyoauth
+$ python setup.py install</pre>
+</div>
+</div>
+<div class="section" id="about-the-implementation">
+<h2>About the implementation<a class="headerlink" href="#about-the-implementation" title="Permalink to this headline">¶</a></h2>
+<p>This library implements version 1.0 of the OAuth protocol as per
+the <a class="reference external" href="http://tools.ietf.org/html/rfc5849">RFC5849</a> specification, which supersedes any previous versions of the
+protocol.</p>
+<p>Client classes do not send HTTP requests but implement enough of the
+OAuth protocol to help you build request proxies that can be used to send actual
+HTTP requests. In essence, it implements OAuth 1.0 and nothing else.
+This is a very conscious decision by the library authors. It allows
+framework authors and API users to use the library without pulling in
+unnecessary dependencies which may not work on their platform of choice.
+For example, you can use any of <a class="reference external" href="http://code.google.com/p/httplib2/">httplib2</a>, <a class="reference external" href="http://www.tornadoweb.org/">tornado</a>, <a class="reference external" href="http://code.google.com/p/webapp-improved/">webapp2</a>, or <a class="reference external" href="http://djangoproject.com/">django</a> to
+send HTTP requests built with this library.</p>
+<p>Wherever possible the implementation tries to warn you about problems you may
+encounter when processing or building OAuth requests by using a fail-fast
+approach—we try to tell you as much about the problem as possible. For
+example, OAuth relies on the availability of SSL to communicate securely, and
+therefore, the library checks whether the OAuth endpoint URLs you specify
+use SSL and prohibits you from using them if they do not begin with
+<tt class="docutils literal"><span class="pre">https://</span></tt>. You can change this behavior to suit your needs, but the library
+will warn you.</p>
+<div class="section" id="signature-methods">
+<h3>Signature methods<a class="headerlink" href="#signature-methods" title="Permalink to this headline">¶</a></h3>
+<p>All the signature methods mentioned in the OAuth specification have been
+implemented by this library, namely:</p>
+<ol class="arabic simple">
+<li>PLAINTEXT</li>
+<li>HMAC-SHA1</li>
+<li>RSA-SHA1</li>
+</ol>
+<div class="section" id="rsa-sha1-requirements">
+<h4>RSA-SHA1 requirements<a class="headerlink" href="#rsa-sha1-requirements" title="Permalink to this headline">¶</a></h4>
+<p>The RSA-SHA1 signature method relies on the availability of third-party
+libraries like <a class="reference external" href="http://pycrypto.org/">PyCrypto</a> or <a class="reference external" href="http://chandlerproject.org/Projects/MeTooCrypto">M2Crypto</a>.</p>
+<p>The library accepts PEM-encoded X.509 certificates, RSA public keys, and RSA
+private keys. The validity of the X.509 certificates will not be verified by
+the signing functions. You must ensure the validity of certificates when you
+accept them by using other utility methods provided by this library or any
+other suitable means. It is also a good idea to periodically remind your
+clients about their certificate expiration dates—human beings forget after all.</p>
+<p>For a quick rundown about these certificates and keys, please read
+<a class="reference internal" href="guides/rsa_sha1.html#using-rsa-sha1"><em>Using RSA-SHA1 signatures</em></a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="user-guides">
+<h1>User Guides<a class="headerlink" href="#user-guides" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guides/oauth1.html">A typical OAuth 1.0 flow in simple words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/oauth1.html#accessing-a-resource">Accessing a resource</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guides/rsa_sha1.html">Using RSA-SHA1 signatures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/rsa_sha1.html#whoa">Whoa?!</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guides/hacking.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/hacking.html#important-urls">Important URLs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/hacking.html#oauth-test-server-information-for-testing-clients">OAuth Test server information for testing clients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/hacking.html#before-you-start">Before you start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/hacking.html#setting-up-the-work-environment">Setting up the Work Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/hacking.html#enabling-continuous-integration">Enabling Continuous Integration</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="api-documentation">
+<h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/oauth1.html">Client implementations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/oauth1.html#module-pyoauth.oauth1.client"><cite>pyoauth.oauth1.client</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/oauth1.html#module-pyoauth.oauth1.client.google"><cite>pyoauth.oauth1.client.google</cite></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/oauth1.html#oauth-1-0-specific-utilities">OAuth 1.0-specific utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/oauth1.html#module-pyoauth.oauth1"><cite>pyoauth.oauth1</cite></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/protocol.html">Protocol-specific utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/protocol.html#module-pyoauth.protocol"><cite>pyoauth.protocol</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/protocol.html#module-pyoauth.url"><cite>pyoauth.url</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/protocol.html#module-pyoauth.http"><cite>pyoauth.http</cite></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/types.html">Type detection, encoding, and conversion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#module-pyoauth.types"><cite>pyoauth.types</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#module-pyoauth.types.bitstring"><cite>pyoauth.types.bitstring</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#module-pyoauth.types.bytearray"><cite>pyoauth.types.bytearray</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#module-pyoauth.types.codec"><cite>pyoauth.types.codec</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#module-pyoauth.types.json"><cite>pyoauth.types.json</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#module-pyoauth.types.number"><cite>pyoauth.types.number</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#module-pyoauth.types.unicode"><cite>pyoauth.types.unicode</cite></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/crypto.html">Cryptography primitives</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/crypto.html#module-pyoauth.crypto.hash"><cite>pyoauth.crypto.hash</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/crypto.html#module-pyoauth.crypto.primes"><cite>pyoauth.crypto.primes</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/crypto.html#module-pyoauth.crypto.random"><cite>pyoauth.crypto.random</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/crypto.html#module-pyoauth.crypto.codec"><cite>pyoauth.crypto.codec</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/crypto.html#module-pyoauth.crypto.codec.pem"><cite>pyoauth.crypto.codec.pem</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/crypto.html#module-pyoauth.crypto.rsa"><cite>pyoauth.crypto.rsa</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/crypto.html#module-pyoauth.crypto.rsa.keys"><cite>pyoauth.crypto.rsa.keys</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/crypto.html#module-pyoauth.crypto.rsa.pycrypto"><cite>pyoauth.crypto.rsa.pycrypto</cite></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="contribute">
+<h1>Contribute<a class="headerlink" href="#contribute" title="Permalink to this headline">¶</a></h1>
+<p>Found a bug in or want a feature added to <tt class="docutils literal"><span class="pre">pyoauth</span></tt>?
+You can fork the official <a class="reference external" href="http://github.com/gorakhargosh/pyoauth">code repository</a> or file an issue ticket
+at the <a class="reference external" href="http://github.com/gorakhargosh/pyoauth/issues">issue tracker</a>. You may also want to refer to <a class="reference internal" href="guides/hacking.html#hacking"><em>Contributing</em></a> for
+information about contributing code or documentation to <tt class="docutils literal"><span class="pre">pyoauth</span></tt>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guides/hacking.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/hacking.html#important-urls">Important URLs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/hacking.html#oauth-test-server-information-for-testing-clients">OAuth Test server information for testing clients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/hacking.html#before-you-start">Before you start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/hacking.html#setting-up-the-work-environment">Setting up the Work Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/hacking.html#enabling-continuous-integration">Enabling Continuous Integration</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">PyOAuth</a><ul>
+<li><a class="reference internal" href="#getting-the-library">Getting the library</a></li>
+<li><a class="reference internal" href="#about-the-implementation">About the implementation</a><ul>
+<li><a class="reference internal" href="#signature-methods">Signature methods</a><ul>
+<li><a class="reference internal" href="#rsa-sha1-requirements">RSA-SHA1 requirements</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#user-guides">User Guides</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#api-documentation">API Documentation</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#contribute">Contribute</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+<h3>Navigation</h3>
+<p>
+  <a href="#">Documentation overview</a>
+</p>
+<ul>
+    <li>Next: <a
+      href="guides/oauth1.html"
+      title="next chapter"
+    >A typical OAuth 1.0 flow in simple words</a>
+    </li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
