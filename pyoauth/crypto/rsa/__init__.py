@@ -18,6 +18,8 @@ from pyoauth.crypto.codec import private_key_pem_decode, public_key_pem_decode
 try:
     from pyoauth.crypto.rsa.pycrypto import PrivateKey, PublicKey
 except ImportError:
+    PrivateKey = None
+    PublicKey = None
     raise NotImplementedError("RSA implementation not found.")
 
 
