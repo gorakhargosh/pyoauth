@@ -69,7 +69,8 @@ The library accepts PEM-encoded X.509 certificates, RSA public keys, and RSA
 private keys. The validity of the X.509 certificates will not be verified by
 the signing functions. You must ensure the validity of certificates when you
 accept them by using other utility methods provided by this library or any
-other suitable means.
+other suitable means. It is also a good idea to periodically remind your
+clients about their certificate expiration dates—human beings forget after all.
 
 For a quick rundown about these certificates and keys, please read
 :ref:`using-rsa-sha1`.
