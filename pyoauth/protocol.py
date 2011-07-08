@@ -421,10 +421,11 @@ def parse_authorization_header_value(header_value,
                                             param_delimiter=param_delimiter,
                                             strict=strict)
     for name, value in param_list:
-        #d[name] = [value]
         # We do keep track of multiple values because they will be
         # detected by the sanitization below and flagged as an error
         # in the Authorization header value.
+        #
+        #d[name] = [value]
         if name in d:
             d[name].append(value)
         else:
