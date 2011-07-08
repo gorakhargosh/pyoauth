@@ -5,19 +5,21 @@
 
 """
 :module: pyoauth.crypto.rsa
-:synopsis: RSA convenience wrapper functions.
+:synopsis: Factory functions for RSA public and private keys.
 
 Functions
 ---------
-.. autofunction:: sign
-.. autofunction:: verify
+.. autofunction:: create_private_key
+.. autofunction:: create_public_key
 """
+
 from pyoauth.crypto.codec import private_key_pem_decode, public_key_pem_decode
 
 try:
     from pyoauth.crypto.rsa.pycrypto import PrivateKey, PublicKey
 except ImportError:
     raise NotImplementedError("RSA implementation not found.")
+
 
 def create_private_key(encoded_key, encoding="PEM"):
     encoding = encoding.upper()
@@ -27,6 +29,7 @@ def create_private_key(encoded_key, encoding="PEM"):
         raise NotImplementedError("Key encoding not supported.")
     key = PrivateKey(key_info, encoded_key, encoding)
     return key
+
 
 def create_public_key(encoded_key, encoding="PEM"):
     encoding = encoding.upper()

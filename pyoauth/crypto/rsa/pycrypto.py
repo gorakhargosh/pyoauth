@@ -3,7 +3,12 @@
 
 """
 :module: pyoauth.crypto.rsa.PyCrypto
+:synopsis: PyCrypto RSA implementation wrapper.
 
+Classes:
+--------
+.. autoclass:: PrivateKey
+.. autoclass:: PublicKey
 """
 
 from Crypto.PublicKey import RSA
