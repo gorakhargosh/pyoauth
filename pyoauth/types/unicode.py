@@ -21,8 +21,6 @@
 :module: pyoauth.types.unicode
 :synopsis: Unicode encoding utility functions.
 
-Functions
----------
 .. autofunction:: unicode_to_utf8
 .. autofunction:: bytes_to_unicode
 .. autofunction:: to_utf8_if_unicode

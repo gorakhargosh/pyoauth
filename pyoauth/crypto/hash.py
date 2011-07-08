@@ -8,13 +8,19 @@
 :module: pyoauth.crypto.hash
 :synopsis: Convenient hashing functions.
 
-Functions:
-----------
+SHA-1 digests
+-------------
 .. autofunction:: sha1_digest
 .. autofunction:: sha1_hex_digest
 .. autofunction:: sha1_base64_digest
+
+MD5 digests
+-----------
 .. autofunction:: md5_digest
 .. autofunction:: md5_hex_digest
+
+HMAC-SHA-1 digests
+------------------
 .. autofunction:: hmac_sha1_digest
 .. autofunction:: hmac_sha1_base64_digest
 

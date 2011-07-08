@@ -13,7 +13,7 @@ Creation and manipulation
 .. autofunction:: bytearray_create_zeros
 .. autofunction:: bytearray_concat
 
-Type Conversion
+Type conversion
 ---------------
 .. autofunction:: bytearray_to_bytes
 .. autofunction:: bytes_to_bytearray

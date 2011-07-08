@@ -8,13 +8,19 @@
 :module: pyoauth.crypto.random
 :synopsis: Random number and string generation utilities.
 
-Functions:
-----------
+Bytes and byte arrays
+---------------------
 .. autofunction:: generate_random_bytes
+.. autofunction:: generate_random_bytearray
+
+Numbers
+-------
 .. autofunction:: generate_random_long
+
+Strings
+-------
 .. autofunction:: generate_random_uint_string
 .. autofunction:: generate_random_hex_string
-.. autofunction:: generate_random_bytearray
 """
 
 import os

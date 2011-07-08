@@ -7,14 +7,18 @@
 :module: pyoauth.types.number
 :synopsis: Number routines.
 
-Functions:
-----------
+Type conversion
+---------------
 .. autofunction:: bytes_to_long
-.. autofunction:: bytes_to_long_original
 .. autofunction:: long_to_bytes
-.. autofunction:: long_to_bytes_original
+
+BigNum
+------
 .. autofunction:: mpi_to_long
 .. autofunction:: long_to_mpi
+
+Math
+----
 .. autofunction:: pow_mod
 .. autofunction:: inverse_mod
 """

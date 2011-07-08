@@ -27,7 +27,7 @@ Nonce, verification code, and timestamp
 .. autofunction:: generate_timestamp
 .. autofunction:: generate_client_secret
 
-OAuth Signature and Base String
+OAuth signature and base string
 -------------------------------
 .. autofunction:: generate_hmac_sha1_signature
 .. autofunction:: generate_rsa_sha1_signature
@@ -35,8 +35,8 @@ OAuth Signature and Base String
 .. autofunction:: generate_plaintext_signature
 .. autofunction:: generate_signature_base_string
 
-Authorization Header
---------------------
+Authorization HTTP header creation and parsing
+----------------------------------------------
 .. autofunction:: generate_normalized_authorization_header_value
 .. autofunction:: parse_authorization_header_value
 
@@ -192,12 +192,12 @@ def generate_rsa_sha1_signature(client_private_key,
     :returns:
         RSA-SHA1 signature.
     """
-    from pyoauth.crypto.rsa import create_private_key
+    from pyoauth.crypto.rsa import parse_private_key
 
     oauth_params = oauth_params or {}
     base_string = generate_signature_base_string(method, url, oauth_params)
 
-    key = create_private_key(client_private_key)
+    key = parse_private_key(client_private_key)
     return base64_encode(key.pkcs1_v1_5_sign(sha1_digest(base_string)))
 
 
@@ -225,12 +225,12 @@ def verify_rsa_sha1_signature(client_certificate,
     :returns:
         ``True`` if verified to be correct; ``False`` otherwise.
     """
-    from pyoauth.crypto.rsa import create_public_key
+    from pyoauth.crypto.rsa import parse_public_key
 
     oauth_params = oauth_params or {}
     base_string = generate_signature_base_string(method, url, oauth_params)
 
-    key = create_public_key(client_certificate)
+    key = parse_public_key(client_certificate)
     return key.pkcs1_v1_5_verify(sha1_digest(base_string),
                                  base64_decode(signature))
 

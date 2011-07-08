@@ -92,8 +92,11 @@ API Documentation
 .. toctree::
    :maxdepth: 2
 
-   api/protocol
    api/oauth1
+   api/protocol
+   api/types
+   api/crypto
+
 
 
 Contribute

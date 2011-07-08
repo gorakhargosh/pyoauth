@@ -20,8 +20,6 @@
 :module: pyoauth.types.json
 :synopsis: JSON codec.
 
-Functions:
-----------
 .. autofunction:: json_decode
 .. autofunction:: json_encode
 """

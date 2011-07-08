@@ -7,10 +7,10 @@
 :module: pyoauth.crypto.rsa
 :synopsis: Factory functions for RSA public and private keys.
 
-Functions
----------
-.. autofunction:: create_private_key
-.. autofunction:: create_public_key
+Encoded key parsing
+-------------------
+.. autofunction:: parse_private_key
+.. autofunction:: parse_public_key
 """
 
 from pyoauth.crypto.codec import private_key_pem_decode, public_key_pem_decode
@@ -23,7 +23,7 @@ except ImportError:
     raise NotImplementedError("RSA implementation not found.")
 
 
-def create_private_key(encoded_key, encoding="PEM"):
+def parse_private_key(encoded_key, encoding="PEM"):
     encoding = encoding.upper()
     if encoding == "PEM":
         key_info = private_key_pem_decode(encoded_key)
@@ -33,7 +33,7 @@ def create_private_key(encoded_key, encoding="PEM"):
     return key
 
 
-def create_public_key(encoded_key, encoding="PEM"):
+def parse_public_key(encoded_key, encoding="PEM"):
     encoding = encoding.upper()
     if encoding == "PEM":
         key_info = public_key_pem_decode(encoded_key)

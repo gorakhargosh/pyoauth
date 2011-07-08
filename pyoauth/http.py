@@ -20,8 +20,8 @@
 :module: pyoauth.http
 :synopsis: Adaptor functionality for HTTP.
 
-Classes
--------
+Request and Response Proxies
+----------------------------
 .. autoclass:: RequestProxy
 .. autoclass:: ResponseProxy
 

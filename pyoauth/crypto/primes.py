@@ -7,10 +7,12 @@
 :module: pyoauth.crypto.primes
 :synopsis: Cryptographic prime number routines.
 
-Functions:
-----------
-.. autofunction:: make_prime_sieve
+Verification
+------------
 .. autofunction:: is_prime
+
+Random
+------
 .. autofunction:: generate_random_prime
 .. autofunction:: generate_random_safe_prime
 """

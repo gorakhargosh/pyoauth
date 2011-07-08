@@ -7,8 +7,8 @@
 :module: pyoauth.crypto.codec
 :synopsis: Codecs to encode and decode keys and certificates in various formats.
 
-Functions:
-----------
+PEM key decoders
+----------------
 .. autofunction:: public_key_pem_decode
 .. autofunction:: private_key_pem_decode
 

@@ -6,10 +6,13 @@
 :module: pyoauth.crypto.codec.pem
 :synopsis: PEM/DER conversion utilities.
 
-Functions:
-----------
+PEM/DER codec
+-------------
 .. autofunction:: pem_to_der
 .. autofunction:: der_to_pem
+
+Miscellaneous
+-------------
 .. autofunction:: cert_time_to_seconds
 """
 

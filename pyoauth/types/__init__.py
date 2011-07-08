@@ -8,8 +8,8 @@
 :module: pyoauth.types
 :synopsis: Common portable Python type conversion and detection.
 
-Functions:
-----------
+Type detection
+--------------
 .. autofunction:: is_sequence
 .. autofunction:: is_unicode
 .. autofunction:: is_bytes
