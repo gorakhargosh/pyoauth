@@ -100,31 +100,31 @@ class Key(object):
         """
         return self._verify(digest, bytes_to_long(signature_bytes))
 
-    def pkcs1_v1_5_sign(self, data):
+    def pkcs1_v1_5_sign(self, digest):
         """
         Signs a base string using your RSA private key.
 
-        :param data:
-            Data byte string.
+        :param digest:
+            Data digest byte string.
         :returns:
             Signature.
         """
-        digest = pkcs1_v1_5_encode(self.size, data)
+        digest = pkcs1_v1_5_encode(self.size, digest)
         return self.sign(digest)
 
-    def pkcs1_v1_5_verify(self, data, signature_bytes):
+    def pkcs1_v1_5_verify(self, digest, signature_bytes):
         """
         Verifies the signature against a given base string using your
         public key.
 
-        :param data:
-            The data to be signed.
+        :param digest:
+            The data digest to be signed.
         :param signature_bytes:
             Signature to be verified.
         :returns:
             ``True`` if signature matches; ``False`` if verification fails.
         """
-        digest = pkcs1_v1_5_encode(self.size, data)
+        digest = pkcs1_v1_5_encode(self.size, digest)
         return self.verify(digest, signature_bytes)
 
     def _sign(self, digest):
