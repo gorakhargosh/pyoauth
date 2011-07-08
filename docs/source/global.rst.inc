@@ -17,3 +17,11 @@
 .. _Python: http://python.org
 .. _sphinx: http://sphinx.pocoo.org/
 .. _zc.buildout: http://www.buildout.org/
+.. _httplib2: http://code.google.com/p/httplib2/
+.. _tornado: http://www.tornadoweb.org/
+.. _webapp2: http://code.google.com/p/webapp-improved/
+.. _django: http://djangoproject.com/
+.. _PyCrypto: http://pycrypto.org/
+.. _M2Crypto: http://chandlerproject.org/Projects/MeTooCrypto
+.. _RFC5849: http://tools.ietf.org/html/rfc5849
+.. _specification: http://tools.ietf.org/html/rfc5849
