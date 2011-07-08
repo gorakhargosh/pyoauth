@@ -541,7 +541,7 @@ def oauth_url_sanitize(url, force_secure=True):
 
 def is_valid_callback_url(url):
     """
-    Determines whether a specified URl is a valid oauth_callback callback
+    Determines whether a specified URL is a valid oauth_callback callback
     absolute URL as required by http://tools.ietf.org/html/rfc5849#section-2.1
     (Temporary Credentials) in the OAuth specification.
 
