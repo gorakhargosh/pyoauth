@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from pyoauth.types.number import long_to_bytes, bytes_to_long
-from pyoauth.crypto.codec import private_key_pem_decode, public_key_pem_decode
 
 
 def pkcs1_v1_5_encode(key_size, data):
@@ -32,7 +31,7 @@ class Key(object):
     """
     Abstract class representing an encryption key.
     """
-    def __init__(self, encoded_key, encoding, key_info, *args, **kwargs):
+    def __init__(self, key_info, encoded_key, encoding, *args, **kwargs):
         self._key_info = key_info
         self._encoded_key = encoded_key
         self._encoding = encoding
@@ -183,23 +182,11 @@ class PrivateKey(Key):
           exponent2 INTEGER, -- d mod (q-1)
           coefficient INTEGER -- (inverse of q) mod p }
     """
-    def __init__(self, encoded_key, encoding="PEM", *args, **kwargs):
-        encoding = encoding.upper()
-        if encoding == "PEM":
-            key_info = private_key_pem_decode(encoded_key)
-        else:
-            raise NotImplementedError("Key encoding not supported.")
-        super(PrivateKey, self).__init__(encoded_key, encoding, key_info)
+    pass
 
 
 class PublicKey(Key):
     """
     Abstract public key class.
     """
-    def __init__(self, encoded_key, encoding="PEM", *args, **kwargs):
-        encoding = encoding.upper()
-        if encoding == "PEM":
-            key_info = public_key_pem_decode(encoded_key)
-        else:
-            raise NotImplementedError("Key encoding not supported.")
-        super(PublicKey, self).__init__(encoded_key, encoding, key_info)
+    pass

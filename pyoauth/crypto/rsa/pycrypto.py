@@ -21,8 +21,8 @@ class PrivateKey(_PrivateKey):
     :param encoding:
         The encoding method of the key. Default PEM.
     """
-    def __init__(self, encoded_key, encoding="PEM"):
-        super(PrivateKey, self).__init__(encoded_key, encoding)
+    def __init__(self, key_info, encoded_key, encoding):
+        super(PrivateKey, self).__init__(key_info, encoded_key, encoding)
         key_info_args = (
             self.key_info["modulus"],
             self.key_info["publicExponent"],
@@ -67,8 +67,8 @@ class PublicKey(_PublicKey):
     :param encoding:
         The encoding method of the key. Default PEM.
     """
-    def __init__(self, encoded_key, encoding="PEM"):
-        super(PublicKey, self).__init__(encoded_key, encoding)
+    def __init__(self, key_info, encoded_key, encoding):
+        super(PublicKey, self).__init__(key_info, encoded_key, encoding)
         key_info_args = (
             self.key_info["modulus"],
             self.key_info["exponent"],
