@@ -1,4 +1,4 @@
-.. include:: global.rst.inc
+.. include:: ../global.rst.inc
 
 .. _hacking:
 

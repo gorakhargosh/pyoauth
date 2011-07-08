@@ -46,8 +46,9 @@ encounter when processing or building OAuth requests by using a fail-fast
 approach—we try to tell you as much about the problem as possible. For
 example, OAuth relies on the availability of SSL to communicate securely, and
 therefore, the library checks whether the OAuth endpoint URLs you specify
-use SSL. By default, the library prohibits you from using non https URLs
-for OAuth endpoint URLs, but you can change this behavior to suit your needs.
+use SSL and prohibits you from using them if they do not begin with
+``https://``. You can change this behavior to suit your needs, but the library
+will warn you.
 
 Signature methods
 ~~~~~~~~~~~~~~~~~
@@ -58,16 +59,17 @@ implemented by this library, namely:
 2. HMAC-SHA1
 3. RSA-SHA1
 
-However, the RSA-SHA1 signature method relies on the availability of
-third-party libraries like PyCrypto_ or M2Crypto_.
 
 RSA-SHA1 requirements
 *********************
-The RSA-SHA1 signature methods accept PEM-encoded X.509 certificates,
-RSA public keys, and RSA private keys. The validity of the X.509 certificates
-will not be verified by any of those routines. You must ensure the validity of
-certificates when you accept them by using other utility methods provided by
-this library or by other means.
+The RSA-SHA1 signature method relies on the availability of third-party
+libraries like PyCrypto_ or M2Crypto_.
+
+The library accepts PEM-encoded X.509 certificates, RSA public keys, and RSA
+private keys. The validity of the X.509 certificates will not be verified by
+the signing functions. You must ensure the validity of certificates when you
+accept them by using other utility methods provided by this library or any
+other suitable means.
 
 For a quick rundown about these certificates and keys, please read
 :ref:`using-rsa-sha1`.
@@ -81,6 +83,7 @@ User Guides
 
    guides/oauth1
    guides/rsa_sha1
+   guides/hacking
 
 API Documentation
 =================
@@ -90,7 +93,6 @@ API Documentation
 
    api/protocol
    api/oauth1
-
 
 
 Contribute
@@ -103,7 +105,7 @@ information about contributing code or documentation to |project_name|.
 .. toctree::
    :maxdepth: 2
 
-   hacking
+   guides/hacking
 
 Indices and tables
 ==================
