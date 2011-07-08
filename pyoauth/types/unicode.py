@@ -27,6 +27,7 @@ Functions
 .. autofunction:: bytes_to_unicode
 .. autofunction:: to_utf8_if_unicode
 .. autofunction:: to_unicode_if_bytes
+.. autofunction:: to_unicode_recursively
 """
 
 from pyoauth.types import is_unicode, is_bytes
@@ -92,3 +93,21 @@ def to_unicode_if_bytes(value, encoding="utf-8"):
         is returned unchanged.
     """
     return bytes_to_unicode(value, encoding) if is_bytes(value) else value
+
+
+def to_unicode_recursively(obj):
+    """
+    Walks a simple data structure, converting byte strings to unicode.
+
+    Supports lists, tuples, and dictionaries.
+    """
+    if isinstance(obj, dict):
+        return dict((to_unicode_recursively(k), to_unicode_recursively(v)) for (k,v) in obj.iteritems())
+    elif isinstance(obj, list):
+        return list(to_unicode_recursively(i) for i in obj)
+    elif isinstance(obj, tuple):
+        return tuple(to_unicode_recursively(i) for i in obj)
+    elif is_bytes(obj):
+        return bytes_to_unicode(obj)
+    else:
+        return obj

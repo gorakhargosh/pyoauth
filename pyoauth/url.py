@@ -18,7 +18,7 @@
 
 """
 :module: pyoauth.url
-:synopsis: URL utility functions.
+:synopsis: Protocol-specific URL utility functions.
 
 Percent-encoding
 ----------------
@@ -201,6 +201,7 @@ def urlencode_sl(query_params, allow_func=None):
                 encoded_pairs.append((k, percent_encode(v),))
     # Sort after encoding according to the OAuth spec.
     return sorted(encoded_pairs)
+
 
 def urlparse_normalized(url):
     """
