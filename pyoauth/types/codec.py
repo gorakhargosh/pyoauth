@@ -7,8 +7,8 @@
 :module: pyoauth.types.codec
 :synopsis: Number representation codecs.
 
-Functions:
-----------
+Encoding
+--------
 .. autofunction:: base64_decode
 .. autofunction:: base64_encode
 .. autofunction:: bytes_to_hex

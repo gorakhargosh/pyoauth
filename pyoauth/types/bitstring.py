@@ -20,8 +20,8 @@
 :synopsis: Utilities for working with bit strings.
 :author: Arne Roomann-Kurrik <kurrik@gmail.com>
 
-Functions:
-----------
+Type conversion
+---------------
 .. autofunction:: bits_to_long
 .. autofunction:: long_to_bitstring
 """

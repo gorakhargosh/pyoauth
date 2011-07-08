@@ -52,7 +52,8 @@ def is_prime(n, iterations=5):
         Number
     :param iterations:
         Number of iterations.
-    :
+    :returns:
+        ``True`` if prime; ``False`` otherwise.
     """
     #Trial division with sieve
     for x in sieve:

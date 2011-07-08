@@ -9,8 +9,8 @@
 
 Functions:
 ----------
-.. autofunction:: pem_public_key_decode
-.. autofunction:: pem_private_key_decode
+.. autofunction:: public_key_pem_decode
+.. autofunction:: private_key_pem_decode
 
 """
 

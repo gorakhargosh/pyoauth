@@ -20,14 +20,14 @@
 :module: pyoauth.protocol
 :synopsis: Protocol-specific utility functions.
 
-Functions
----------
+Nonce, verification code, and timestamp
+---------------------------------------
 .. autofunction:: generate_nonce
 .. autofunction:: generate_verification_code
 .. autofunction:: generate_timestamp
 
 OAuth Signature and Base String
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 .. autofunction:: generate_hmac_sha1_signature
 .. autofunction:: generate_rsa_sha1_signature
 .. autofunction:: verify_rsa_sha1_signature
@@ -35,7 +35,7 @@ OAuth Signature and Base String
 .. autofunction:: generate_signature_base_string
 
 Authorization Header
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 .. autofunction:: generate_normalized_authorization_header_value
 .. autofunction:: parse_authorization_header_value
 
@@ -70,11 +70,7 @@ from pyoauth.crypto.random import \
 def generate_nonce(bit_strength=64, base=10):
     """
     Generates a random ASCII-encoded unsigned integral number in decimal
-    or hexadecimal representation.
-
-    .. NOTE::
-        Google OAuth requires nonce based on bit-strength. See:
-        http://code.google.com/apis/accounts/docs/OAuth_ref.html#RequestToken
+    hexadecimal, or base-64 representation.
 
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param bit_strength:
@@ -165,7 +161,7 @@ def generate_rsa_sha1_signature(client_private_key,
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
 
     :param client_private_key:
-        Client (consumer) secret (private key).
+        PEM-encoded RSA private key.
     :param method:
         Base string HTTP method.
     :param url:
@@ -196,7 +192,7 @@ def verify_rsa_sha1_signature(client_certificate,
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
 
     :param client_certificate:
-        Client (consumer) X.509 certificate or PEM public key.
+        PEM-encoded X.509 certificate or RSA public key.
     :param signature:
         RSA-SHA1 OAuth signature.
     :param method:

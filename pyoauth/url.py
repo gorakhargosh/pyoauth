@@ -20,34 +20,32 @@
 :module: pyoauth.url
 :synopsis: URL utility functions.
 
-Functions
----------
 Percent-encoding
-~~~~~~~~~~~~~~~~
+----------------
 .. autofunction:: percent_encode
 .. autofunction:: percent_decode
 
 Query string parsing and construction
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 .. autofunction:: parse_qs
 .. autofunction:: urlencode_s
 .. autofunction:: urlencode_sl
 
 URL parsing and convenience utilities
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 .. autofunction:: urlparse_normalized
 .. autofunction:: url_append_query
 .. autofunction:: url_add_query
 .. autofunction:: oauth_url_sanitize
 
 Query parameters
-~~~~~~~~~~~~~~~~
+----------------
 .. autofunction:: query_add
 .. autofunction:: query_filter
 .. autofunction:: query_unflatten
 
 Parameter sanitization
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 .. autofunction:: request_protocol_params_sanitize
 .. autofunction:: query_params_sanitize
 

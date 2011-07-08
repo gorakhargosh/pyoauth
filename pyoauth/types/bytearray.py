@@ -7,11 +7,14 @@
 :module: pyoauth.types.bytearray
 :synopsis: Byte arrays.
 
-Functions:
-----------
+Creation and manipulation
+-------------------------
 .. autofunction:: bytearray_create
 .. autofunction:: bytearray_create_zeros
 .. autofunction:: bytearray_concat
+
+Type Conversion
+---------------
 .. autofunction:: bytearray_to_bytes
 .. autofunction:: bytes_to_bytearray
 .. autofunction:: bytearray_to_long
