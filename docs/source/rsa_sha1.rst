@@ -72,7 +72,7 @@ That, my friend, is three friends. Wait, my grammar has left with the wind.
 Yep, three friends. They keep your privates private and your publics... err,
 they're not really worried about your publics.
 
-    "Do these friends have a name, man?"
+    "Do these friends have names, man?"
 
 Yeah. They're:
 
