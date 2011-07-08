@@ -95,7 +95,7 @@ def generate_client_secret(bit_strength=144):
     registered client application.
 
     Consumer secrets are base64-encoded but not URL-safe. This is done to
-    enforce the user into properly percent-encoding values according to the
+    force the user into properly percent-encoding values according to the
     OAuth percent-encoding rules.
 
     :param bit_strength:
