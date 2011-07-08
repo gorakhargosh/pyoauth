@@ -12,7 +12,6 @@ Functions
 .. autofunction:: sign
 .. autofunction:: verify
 """
-#from pyoauth.crypto.RSAKey import factory
 
 from pyoauth.types.number import long_to_bytes, bytes_to_long
 from pyoauth.crypto.codec import public_key_pem_decode, private_key_pem_decode
@@ -104,9 +103,52 @@ def pkcs1_v1_5_encode(key, data):
     return '\x00\x01' + filler + '\x00' + SHA1_DIGESTINFO + data
 
 
-class PrivateKey(object):
-    def __init__(self, pem_key):
+class Key(object):
+    @property
+    def key(self):
+        raise NotImplementedError("This property must be overridden by the subclass.")
+
+
+    def sign(self, digest, encoder=pkcs1_v1_5_encode):
         """
+        Signs a digest with the key.
+
+        :param digest:
+            The SHA-1 digest of the data.
+        :param encoder:
+            The encoding method to use. Default EMSA-PKCS1-v1.5
+        :returns:
+            Signature byte string.
+        """
+        signature = self.key.sign(encoder(self.key, digest), "")[0]
+        signature_bytes = long_to_bytes(signature)
+        return signature_bytes
+
+
+    def verify(self, signature_bytes, digest, encoder=pkcs1_v1_5_encode):
+        """
+        Verifies a signature against that computed by signing the provided
+        data.
+
+        :param signature_bytes:
+            The signature raw byte string.
+        :param digest:
+            The SHA-1 digest of the data.
+        :param encoder:
+            The encoding method to use. Default EMSA-PKCS1-v1.5
+        :returns:
+            ``True`` if the signature matches; ``False`` otherwise.
+        """
+        signature_long = bytes_to_long(signature_bytes)
+        digest = encoder(self.key, digest)
+        public_key = self.key.publickey()
+        return public_key.verify(digest, (signature_long,))
+
+
+class PrivateKey(Key):
+    """
+    Represents a RSA private key.
+
         RSAPrivateKey ::= SEQUENCE {
           version Version,
           modulus INTEGER, -- n
@@ -118,6 +160,11 @@ class PrivateKey(object):
           exponent2 INTEGER, -- d mod (q-1)
           coefficient INTEGER -- (inverse of q) mod p }
 
+    :param pem_key:
+        The PEM-encoded key string.
+    """
+    def __init__(self, pem_key):
+        """
         """
         key_info = private_key_pem_decode(pem_key)
         key_info_args = (
@@ -132,21 +179,18 @@ class PrivateKey(object):
         )
         self._key = RSA.construct(key_info_args)
 
-    def sign(self, data, encoder=pkcs1_v1_5_encode):
-        signature = self._key.sign(
-            encoder(
-                self._key,
-                data
-            ), ""
-        )[0]
-        signature_bytes = long_to_bytes(signature)
-        return signature_bytes
-
-    def verify(self, signature_bytes, data, encoder=pkcs1_v1_5_encode):
-        pass
+    @property
+    def key(self):
+        return self._key
 
 
-class PublicKey(object):
+class PublicKey(Key):
+    """
+    Represents a RSA public key.
+
+    :param pem_key:
+        The PEM-encoded key string.
+    """
     def __init__(self, pem_key):
         key_info = public_key_pem_decode(pem_key)
         key_info_args = (
@@ -155,12 +199,6 @@ class PublicKey(object):
         )
         self._key = RSA.construct(key_info_args)
 
-    def sign(self, data, encoder=pkcs1_v1_5_encode):
-        pass
-
-    def verify(self, signature_bytes, data, encoder=pkcs1_v1_5_encode):
-        signature_long = bytes_to_long(signature_bytes)
-        data = encoder(self._key, data)
-        public_key = self._key.publickey()
-        return public_key.verify(data, (signature_long,))
-
+    @property
+    def key(self):
+        return self._key
