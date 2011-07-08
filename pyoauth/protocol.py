@@ -177,16 +177,16 @@ def generate_rsa_sha1_signature(client_private_key,
     :returns:
         RSA-SHA1 signature.
     """
-    from pyoauth.crypto.rsa import pkcs1_v1_5_sign as sign
+    from pyoauth.crypto.rsa import create_private_key
 
     oauth_params = oauth_params or {}
     base_string = generate_signature_base_string(method, url, oauth_params)
 
-    data = sha1_digest(base_string)
-    return base64_encode(sign(client_private_key, data))
+    key = create_private_key(client_private_key)
+    return base64_encode(key.pkcs1_v1_5_sign(sha1_digest(base_string)))
 
 
-def verify_rsa_sha1_signature(client_public_key_or_certificate,
+def verify_rsa_sha1_signature(client_certificate,
                               signature,
                               method, url, oauth_params=None,
                               *args, **kwargs):
@@ -195,8 +195,8 @@ def verify_rsa_sha1_signature(client_public_key_or_certificate,
 
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
 
-    :param client_public_key_or_certificate:
-        Client (consumer) public key (certificate).
+    :param client_certificate:
+        Client (consumer) X.509 certificate or PEM public key.
     :param signature:
         RSA-SHA1 OAuth signature.
     :param method:
@@ -210,14 +210,14 @@ def verify_rsa_sha1_signature(client_public_key_or_certificate,
     :returns:
         ``True`` if verified to be correct; ``False`` otherwise.
     """
-    from pyoauth.crypto.rsa import pkcs1_v1_5_verify as verify
+    from pyoauth.crypto.rsa import create_public_key
 
     oauth_params = oauth_params or {}
     base_string = generate_signature_base_string(method, url, oauth_params)
 
-    signature_bytes = base64_decode(signature)
-    data = sha1_digest(base_string)
-    return verify(client_public_key_or_certificate, signature_bytes, data)
+    key = create_public_key(client_certificate)
+    return key.pkcs1_v1_5_verify(sha1_digest(base_string),
+                                 base64_decode(signature))
 
 
 def generate_plaintext_signature(client_shared_secret,
