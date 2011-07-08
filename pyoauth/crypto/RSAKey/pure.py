@@ -4,17 +4,13 @@
 # Released into public domain.
 
 """Pure-Python RSA implementation."""
-
 import logging
 
 from pyoauth.types.number import inverse_mod, pow_mod, lcm
 from pyoauth.types.bytearray import bytearray_to_long, bytes_to_bytearray
-from pyoauth.types.codec import long_to_base64, base64_to_long
-from pyoauth.crypto.hash import sha1_base64_digest
 from pyoauth.crypto.primes import generate_random_prime
 from pyoauth.crypto.random import generate_random_long
 from pyoauth.crypto.utils.ASN1Parser import ASN1Parser
-from pyoauth.crypto.utils import xmltools
 from pyoauth.crypto.RSAKey import RSAKey
 from pyoauth.crypto.codec.pem import \
     pem_to_der_private_key, \
@@ -39,10 +35,6 @@ class Python_RSAKey(RSAKey):
     def hasPrivateKey(self):
         return self.d != 0
 
-    def hash(self):
-        s = self.writeXMLPublicKey('\t\t')
-        return sha1_base64_digest(s.strip())
-
     def _rawPrivateKeyOp(self, m):
         #Create blinding values, on the first pass:
         if not self.blinder:
@@ -66,7 +58,6 @@ class Python_RSAKey(RSAKey):
         #Return the output
         return c
 
-
     def _rawPrivateKeyOpHelper(self, m):
         #Non-CRT version
         #c = pow_mod(m, self.d, self.n)
@@ -84,31 +75,6 @@ class Python_RSAKey(RSAKey):
 
     def acceptsPassword(self):
         return False
-
-    def write(self, indent=''):
-        if self.d:
-            s = indent+'<privateKey xmlns="http://trevp.net/rsa">\n'
-        else:
-            s = indent+'<publicKey xmlns="http://trevp.net/rsa">\n'
-        s += indent+'\t<n>%s</n>\n' % long_to_base64(self.n)
-        s += indent+'\t<e>%s</e>\n' % long_to_base64(self.e)
-        if self.d:
-            s += indent+'\t<d>%s</d>\n' % long_to_base64(self.d)
-            s += indent+'\t<p>%s</p>\n' % long_to_base64(self.p)
-            s += indent+'\t<q>%s</q>\n' % long_to_base64(self.q)
-            s += indent+'\t<dP>%s</dP>\n' % long_to_base64(self.dP)
-            s += indent+'\t<dQ>%s</dQ>\n' % long_to_base64(self.dQ)
-            s += indent+'\t<qInv>%s</qInv>\n' % long_to_base64(self.qInv)
-            s += indent+'</privateKey>'
-        else:
-            s += indent+'</publicKey>'
-        #Only add \n if part of a larger structure
-        if indent != '':
-            s += '\n'
-        return s
-
-    def writeXMLPublicKey(self, indent=''):
-        return Python_RSAKey(self.n, self.e).write(indent)
 
     @staticmethod
     def generate(bits):
@@ -141,11 +107,6 @@ class Python_RSAKey(RSAKey):
             except Exception, e:
                 logging.exception(e)
                 raise e
-
-    @staticmethod
-    def parseXML(s):
-        element = xmltools.parseAndStripWhitespace(s)
-        return Python_RSAKey._parseXML(element)
 
     @staticmethod
     def _parsePKCS8(bytes):
@@ -185,34 +146,4 @@ class Python_RSAKey(RSAKey):
         dP = bytearray_to_long(privateKeyP.getChild(6).value)
         dQ = bytearray_to_long(privateKeyP.getChild(7).value)
         qInv = bytearray_to_long(privateKeyP.getChild(8).value)
-        return Python_RSAKey(n, e, d, p, q, dP, dQ, qInv)
-
-    @staticmethod
-    def _parseXML(element):
-        try:
-            xmltools.checkName(element, "privateKey")
-        except SyntaxError:
-            xmltools.checkName(element, "publicKey")
-
-        #Parse attributes
-        xmltools.getReqAttribute(element, "xmlns", "http://trevp.net/rsa\Z")
-        xmltools.checkNoMoreAttributes(element)
-
-        #Parse public values (<n> and <e>)
-        n = base64_to_long(xmltools.getText(xmltools.getChild(element, 0, "n"), xmltools.base64RegEx))
-        e = base64_to_long(xmltools.getText(xmltools.getChild(element, 1, "e"), xmltools.base64RegEx))
-        d = 0
-        p = 0
-        q = 0
-        dP = 0
-        dQ = 0
-        qInv = 0
-        #Parse private values, if present
-        if element.childNodes.length>=3:
-            d = base64_to_long(xmltools.getText(xmltools.getChild(element, 2, "d"), xmltools.base64RegEx))
-            p = base64_to_long(xmltools.getText(xmltools.getChild(element, 3, "p"), xmltools.base64RegEx))
-            q = base64_to_long(xmltools.getText(xmltools.getChild(element, 4, "q"), xmltools.base64RegEx))
-            dP = base64_to_long(xmltools.getText(xmltools.getChild(element, 5, "dP"), xmltools.base64RegEx))
-            dQ = base64_to_long(xmltools.getText(xmltools.getChild(element, 6, "dQ"), xmltools.base64RegEx))
-            qInv = base64_to_long(xmltools.getText(xmltools.getLastChild(element, 7, "qInv"), xmltools.base64RegEx))
         return Python_RSAKey(n, e, d, p, q, dP, dQ, qInv)

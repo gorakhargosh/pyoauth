@@ -228,21 +228,14 @@ class RSAKey(object):
         """
         raise NotImplementedError()
 
-    def writeXMLPublicKey(self, indent=''):
-        """Return a string containing the key.
 
-        @rtype: str
-        @return: A string describing the public key, in XML format.
-        """
-        return Python_RSAKey(self.n, self.e).write(indent)
-
+    @staticmethod
     def generate(bits):
         """Generate a new key with the specified bit length.
 
         @rtype: L{tlslite.utils.RSAKey.RSAKey}
         """
         raise NotImplementedError()
-    generate = staticmethod(generate)
 
 
     # **************************************************************************
