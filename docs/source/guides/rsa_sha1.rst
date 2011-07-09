@@ -116,16 +116,16 @@ other key can open it. So, RSA public-key encryption uses the notion of these
 two keys to secure your messages. Here is what you have to do to use
 these keys with OAuth:
 
-1. You share your public key (an RSA public key or an X.509 public-key
-   certificate) with the OAuth provider.
+1. You **share your public key** (an RSA public key or an X.509 public-key
+   certificate) **with the OAuth provider**.
 
 2. Sign your messages with your RSA private key (which you keep safe and don't
    share with anybody else including the OAuth provider) by telling the
-   request building methods to use ``"RSA-SHA1"`` as the signature method.
-   Easy, huh?
+   request building methods to **use** ``"RSA-SHA1"`` **as the signature
+   method**. Easy, huh?
 
-3. The OAuth provider can now use the public key that you shared with it
-   to verify the messages that you sent to it signed with your private key.
+The OAuth provider can now use the public key that you shared with it
+to verify the messages that you sent to it signed with your private key.
 
 That's essentially it.
 
