@@ -1,6 +1,8 @@
 RM = rm -rf
 
-.PHONY: all clean distclean develop test upload-doc view-doc doc docs build dist release auto submodules
+PKG_NAME=pyoauth
+
+.PHONY: all clean distclean develop lint test upload-doc view-doc doc docs build dist release auto submodules
 
 all: build
 
@@ -39,6 +41,9 @@ test: docs
 	@bin/coverage erase
 	@bin/python-tests tests/run_tests.py
 	@bin/coverage html
+
+lint:
+	@pylint $(PKG_NAME)
 
 auto: tools/nosy.py
 	@bin/python tools/nosy.py .
