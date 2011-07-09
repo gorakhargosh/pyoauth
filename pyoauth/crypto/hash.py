@@ -76,7 +76,7 @@ def sha1_hex_digest(*inputs):
     return bytes_to_hex(sha1_digest(*inputs))
 
 
-def sha1_base64_digest(value):
+def sha1_base64_digest(*value):
     """
     Calculates Base-64-encoded SHA-1 digest of a variable
     number of inputs.
@@ -86,7 +86,7 @@ def sha1_base64_digest(value):
     :returns:
         Base-64-encoded SHA-1 digest.
     """
-    return bytes_to_base64(sha1_digest(value))
+    return bytes_to_base64(sha1_digest(*value))
 
 
 def md5_digest(*inputs):
