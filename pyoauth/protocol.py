@@ -211,22 +211,48 @@ def verify_hmac_sha1_signature(signature, client_shared_secret,
     key = _generate_plaintext_signature(client_shared_secret,
                                         token_or_temporary_shared_secret)
     ok = (signature == hmac_sha1_base64_digest(key, base_string))
-    err = "Invalid signature"
+    if ok:
+        err = None
+    else:
+        err = "Invalid signature"
 
     if not ok and debug:
         # Try to find out why it didn't match.
         # We need to help the poor human souls on the other
-        # side of this mess who are trying to debug their OAuth protocol.
+        # side of this mess who are trying to debug their OAuth clients.
+        # This is not going to detect 100% of the cases, because it is
+        # too easy to screw up on the client side. Anything could be wrong.
+        # We're just trying to find out some common problems.
 
-        # Correct base string but incorrect signature encoding?
+        # Assume correct base string but detect incorrect signature encoding.
         key = _generate_plaintext_signature(client_shared_secret,
                                             token_or_temporary_shared_secret,
                                             _percent_encode=False)
         if signature == hmac_sha1_base64_digest(key, base_string):
-            err = "Invalid signature: signature elements are not percent-encoded properly"
+            return ok, "Invalid signature: signature elements are not percent-encoded properly"
+
+        # Assume correct base string but detect missing ampersands in signature.
+        if client_shared_secret and not token_or_temporary_shared_secret:
+            key = percent_encode(client_shared_secret) + "&"
+            if signature == hmac_sha1_base64_digest(key, base_string):
+                return ok, "Invalid signature: missing ampersand `&` after client shared secret"
+        elif not client_shared_secret and token_or_temporary_shared_secret:
+            key = "&" + percent_encode(token_or_temporary_shared_secret)
+            if signature == hmac_sha1_base64_digest(key, base_string):
+                return ok, "Invalid signature: missing ampersand `&` before token secret"
+        elif not client_shared_secret and not token_or_temporary_shared_secret:
+            key = "&"
+            if signature == hmac_sha1_base64_digest(key, base_string):
+                return ok, "Invalid signature: missing ampersand `&` without secrets"
+        elif client_shared_secret and token_or_temporary_shared_secret:
+            key = percent_encode(client_shared_secret) + "&" + percent_encode(token_or_temporary_shared_secret)
+            if signature == hmac_sha1_base64_digest(key, base_string):
+                return ok, "Invalid signature: missing ampersand between signature secrets"
+
+        # Assume incorrect base string
+        return ok, "Invalid signature: check base string?"
 
     return ok, err
-
 
 
 def generate_rsa_sha1_signature(client_private_key,
