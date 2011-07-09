@@ -235,19 +235,19 @@ def verify_hmac_sha1_signature(signature, client_shared_secret,
         if client_shared_secret and not token_or_temporary_shared_secret:
             key = percent_encode(client_shared_secret) + "&"
             if signature == hmac_sha1_base64_digest(key, base_string):
-                return ok, "Invalid signature: missing ampersand `&` after client shared secret"
+                return ok, "Invalid signature: missing ampersand `&` after client shared secret in signature"
         elif not client_shared_secret and token_or_temporary_shared_secret:
             key = "&" + percent_encode(token_or_temporary_shared_secret)
             if signature == hmac_sha1_base64_digest(key, base_string):
-                return ok, "Invalid signature: missing ampersand `&` before token secret"
+                return ok, "Invalid signature: missing ampersand `&` before token secret in signature"
         elif not client_shared_secret and not token_or_temporary_shared_secret:
             key = "&"
             if signature == hmac_sha1_base64_digest(key, base_string):
-                return ok, "Invalid signature: missing ampersand `&` without secrets"
+                return ok, "Invalid signature: missing ampersand `&` without secrets in signature"
         elif client_shared_secret and token_or_temporary_shared_secret:
             key = percent_encode(client_shared_secret) + "&" + percent_encode(token_or_temporary_shared_secret)
             if signature == hmac_sha1_base64_digest(key, base_string):
-                return ok, "Invalid signature: missing ampersand between signature secrets"
+                return ok, "Invalid signature: missing ampersand `&` between signature secrets"
 
         # Assume incorrect base string
         return ok, "Invalid signature: check base string?"
