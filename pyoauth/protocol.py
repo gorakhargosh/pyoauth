@@ -95,8 +95,14 @@ def generate_client_secret(bit_strength=144):
     registered client application.
 
     Consumer secrets are base64-encoded but not URL-safe. This is done to
-    force the user into properly percent-encoding values according to the
-    OAuth percent-encoding rules.
+    force the user into properly percent-encoding the secrets before generating
+    OAuth signatures for base strings.
+
+    As a side note, Google OAuth generates client secrets with similar encoding
+    and this problem is a little hard to trace for the client, but it is a
+    problem that should be fixed by the client after all. OAuth protocol
+    version 1.0a requires percent-encoding the secrets before generating
+    signatures. (See, :func:``generate_plaintext_signature``).
 
     :param bit_strength:
         Bit strength. 144 is default.
@@ -171,6 +177,58 @@ def generate_hmac_sha1_signature(client_shared_secret,
     return hmac_sha1_base64_digest(key, base_string)
 
 
+def verify_hmac_sha1_signature(signature, client_shared_secret,
+                               method, url, oauth_params=None,
+                               token_or_temporary_shared_secret=None,
+                               debug=False):
+    """
+    Verifies an HMAC-SHA1 signature for a base string.
+
+    :see: HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)
+    :param
+    :param client_shared_secret:
+        Client (consumer) shared secret.
+    :param method:
+        Base string HTTP method.
+    :param url:
+        Base string URL that may include a query string.
+        All protocol-specific parameters will be ignored from the query string.
+    :param oauth_params:
+        Base string protocol-specific query parameters.
+        All non-protocol parameters will be ignored.
+    :param token_or_temporary_shared_secret:
+        Token/temporary credentials shared secret if available.
+    :param debug:
+        Default ``False``.
+
+        ``True`` to turn on debugging mode, which attempts to find out
+        why signature verification fails, if it does; ``False`` otherwise.
+    :returns:
+        A tuple of (whether signature matches (boolean), error message (None if it succeeded)).
+    """
+    oauth_params = oauth_params or {}
+    base_string = generate_signature_base_string(method, url, oauth_params)
+    key = _generate_plaintext_signature(client_shared_secret,
+                                        token_or_temporary_shared_secret)
+    ok = (signature == hmac_sha1_base64_digest(key, base_string))
+    err = "Invalid signature"
+
+    if not ok and debug:
+        # Try to find out why it didn't match.
+        # We need to help the poor human souls on the other
+        # side of this mess who are trying to debug their OAuth protocol.
+
+        # Correct base string but incorrect signature encoding?
+        key = _generate_plaintext_signature(client_shared_secret,
+                                            token_or_temporary_shared_secret,
+                                            _percent_encode=False)
+        if signature == hmac_sha1_base64_digest(key, base_string):
+            err = "Invalid signature: signature elements are not percent-encoded properly"
+
+    return ok, err
+
+
+
 def generate_rsa_sha1_signature(client_private_key,
                                 method, url, oauth_params=None,
                                 *args, **kwargs):
@@ -201,8 +259,8 @@ def generate_rsa_sha1_signature(client_private_key,
     return base64_encode(key.pkcs1_v1_5_sign(sha1_digest(base_string)))
 
 
-def verify_rsa_sha1_signature(client_certificate,
-                              signature,
+def verify_rsa_sha1_signature(signature,
+                              client_certificate,
                               method, url, oauth_params=None,
                               *args, **kwargs):
     """
@@ -210,10 +268,10 @@ def verify_rsa_sha1_signature(client_certificate,
 
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
 
-    :param client_certificate:
-        PEM-encoded X.509 certificate or RSA public key.
     :param signature:
         RSA-SHA1 OAuth signature.
+    :param client_certificate:
+        PEM-encoded X.509 certificate or RSA public key.
     :param method:
         Base string HTTP method.
     :param url:
@@ -262,7 +320,8 @@ def generate_plaintext_signature(client_shared_secret,
 
 
 def _generate_plaintext_signature(client_shared_secret,
-                             token_or_temporary_shared_secret=None):
+                                  token_or_temporary_shared_secret=None,
+                                  _percent_encode=True):
     """
     Calculates the PLAINTEXT signature.
 
@@ -270,14 +329,28 @@ def _generate_plaintext_signature(client_shared_secret,
         Client (consumer) shared secret.
     :param token_or_temporary_shared_secret:
         Token/temporary credentials shared secret if available.
+    :param _percent_encode:
+        (DEBUG)
+
+        Must be ``True`` to be compatible with OAuth 1.0 RFC5849 & OAuth 1.0a;
+        We have added this parameter to enable better debugging by the
+        signature verification routines. If this is set to ``False``, the
+        signature elements will not be percent-encoded before the plaintext
+        signature is generated.
     :returns:
         PLAINTEXT signature.
     """
     client_shared_secret = client_shared_secret or ""
     token_or_temporary_shared_secret = token_or_temporary_shared_secret or ""
-    return "&".join([
-        percent_encode(a) for a in [
-            client_shared_secret, token_or_temporary_shared_secret]])
+    if _percent_encode:
+        return "&".join([percent_encode(a) for a in [
+                client_shared_secret, token_or_temporary_shared_secret]])
+    else:
+        # User clients can forget to do this and this has been fixed
+        # by OAuth 1.0a, so we use this piece of code to detect whether
+        # the user's OAuth client library complies with the specification
+        # when in debugging mode.
+        return "&".join([client_shared_secret, token_or_temporary_shared_secret])
 
 
 def generate_signature_base_string(method, url, oauth_params):

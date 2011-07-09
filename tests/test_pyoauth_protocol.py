@@ -237,11 +237,13 @@ yF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE=",
             )
             # Using the X.509 certificate.
             assert_true(verify_rsa_sha1_signature(
-                client_certificate, expected_signature,
+                expected_signature,
+                client_certificate,
                 method, url, oauth_params))
             # Using the RSA public key.
             assert_true(verify_rsa_sha1_signature(
-                public_key, expected_signature,
+                expected_signature,
+                public_key,
                 method, url, oauth_params))
 
 
