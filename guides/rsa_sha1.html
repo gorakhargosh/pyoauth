@@ -105,38 +105,51 @@ work? Somethin&#8217; to do with opensll yeah?&#8221;</div></blockquote>
 </div>
 <div class="section" id="why-should-you-use-public-key-encryption">
 <h2>Why should you use public-key encryption?<a class="headerlink" href="#why-should-you-use-public-key-encryption" title="Permalink to this headline">¶</a></h2>
-<p>Because it&#8217;s harder—it&#8217;s harder for an attacker to snoop into your privacy.
-Consider two people, say A and B, trying to communicate securely with each
-other. What they need to communicate securely are these guarantees:</p>
+<blockquote>
+<div>Because it&#8217;s harder.</div></blockquote>
+<p>No, I mean it&#8217;s harder for you to work with. And it also allows attackers
+to snoop into everything you&#8217;re saying <em>after they&#8217;re long dead and gone</em>.</p>
+<p>Consider a series of love letters Mr. Bunny sends to Mrs. Bunny. But the
+postman, Mr. Fox, however, is a very cunning fox. He doesn&#8217;t like Mr. Bunny,
+so he opens all of Mr. Bunny&#8217;s letters and changes all the words of love
+into those of hatred. Mrs. Bunny is furious and scolds Mr. Bunny about all
+those letters of hatred, but Mr. Bunny never sent them! So, Mr. Bunny rubs
+Aladdin&#8217;s lamp and asks the genie for a magical lock.</p>
+<blockquote>
+<div>A magical lock with two keys: one to lock it and the other to open it.</div></blockquote>
+<p>He gives the second key to Mrs. Bunny and only she can now open the envelopes
+that Mr. Bunny sends to her. Poor Mr. Fox tries his best to open Mr. Bunny&#8217;s
+letters, but can&#8217;t anymore. Hooray!</p>
+<p>Imagine public-key encryption to be the equivalent of having a lock with two
+complementary keys—that is, if you lock something with one key, only the
+other key can open it. So, RSA public-key encryption uses the notion of these
+two keys to secure your messages in a way that:</p>
 <ol class="arabic simple">
-<li>Ensure that the messages that A and B exchange are <strong>confidential</strong>.</li>
-<li>Ensure that the message that B receives from A were <strong>actually sent by A</strong>
+<li>Ensures the messages that A and B exchange are <strong>confidential</strong>.</li>
+<li>Ensures the message that B receives from A were <strong>actually sent by A</strong>
 and vice versa.</li>
-<li>Ensure that the messages that A and B exchange <strong>aren&#8217;t tampered with while
+<li>Ensures the messages that A and B exchange <strong>aren&#8217;t tampered with while
 in transit</strong>.</li>
 </ol>
-<p>Using public-key encryption provides those guarantees. Now, using RSA-SHA-1
-signatures shouldn&#8217;t be as difficult as they are to use with OAuth. Therefore,
-we have tried to take the burden of implementing it away from you and made
-it as easy as possible for you to use this signature method.</p>
+<p>Now, using RSA-SHA-1 signatures shouldn&#8217;t be as difficult as they are to use
+with OAuth. Therefore, we have tried to take the burden of implementing it away
+from you and made it as easy as possible for you to use this signature method.</p>
 <div class="section" id="so-how-does-oauth-use-public-key-encryption">
 <h3>So how does OAuth use public-key encryption?<a class="headerlink" href="#so-how-does-oauth-use-public-key-encryption" title="Permalink to this headline">¶</a></h3>
 <p>OAuth requires the use of SSL by the clients when requesting token secrets
 from OAuth servers. This takes care of the confidential part. The other two
 are handled by RSA-SHA-1 signatures.</p>
-<p>Imagine public-key encryption as equivalent to having a lock with two
-complementary keys—that is, if you lock something with one key, only the
-other key can open it. So, RSA public-key encryption uses the notion of these
-two keys to secure your messages. Here is what you have to do to use
-these keys with OAuth:</p>
+<p>Here is what you have to do to use your RSA key-pair with OAuth:</p>
 <ol class="arabic simple">
-<li>You share your public key (an RSA public key or an X.509 public-key
-certificate) with the OAuth provider.</li>
+<li>You <strong>share your public key</strong> (an RSA public key or an X.509 public-key
+certificate) <strong>with the OAuth provider</strong>.</li>
 <li>Sign your messages with your RSA private key (which you keep safe and don&#8217;t
-share with anybody else including the OAuth provider).</li>
-<li>The OAuth provider can now use the public key that you shared with it
-to verify the messages that you sent to it signed with your private key.</li>
+share with anybody else including the OAuth provider) by telling the
+request building methods to <strong>use</strong> <tt class="docutils literal"><span class="pre">&quot;RSA-SHA1&quot;</span></tt> <strong>as the signature
+method</strong> and your <strong>RSA private key as the client secret</strong>. Easy, huh?</li>
 </ol>
+<p>The OAuth provider can now use the public key that you shared with it
+to verify the messages that you sent to it signed with your private key.</p>
 <p>That&#8217;s essentially it.</p>
 </div>
 </div>

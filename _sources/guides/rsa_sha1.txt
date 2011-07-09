@@ -89,20 +89,40 @@ We'll get to this in a bit. Kinda, yes, and that's "OpenSSL," by the way.
 
 Why should you use public-key encryption?
 -----------------------------------------
-Because it's harder—it's harder for an attacker to snoop into your privacy.
-Consider two people, say A and B, trying to communicate securely with each
-other. What they need to communicate securely are these guarantees:
 
-1. Ensure that the messages that A and B exchange are **confidential**.
-2. Ensure that the message that B receives from A were **actually sent by A**
+    Because it's harder.
+
+No, I mean it's harder for you to work with. And it also allows attackers
+to snoop into everything you're saying *after they're long dead and gone*.
+
+Consider a series of love letters Mr. Bunny sends to Mrs. Bunny. But the
+postman, Mr. Fox, however, is a very cunning fox. He doesn't like Mr. Bunny,
+so he opens all of Mr. Bunny's letters and changes all the words of love
+into those of hatred. Mrs. Bunny is furious and scolds Mr. Bunny about all
+those letters of hatred, but Mr. Bunny never sent them! So, Mr. Bunny rubs
+Aladdin's lamp and asks the genie for a magical lock.
+
+    A magical lock with two keys: one to lock it and the other to open it.
+
+He gives the second key to Mrs. Bunny and only she can now open the envelopes
+that Mr. Bunny sends to her. Poor Mr. Fox tries his best to open Mr. Bunny's
+letters, but can't anymore. Hooray!
+
+Imagine public-key encryption to be the equivalent of having a lock with two
+complementary keys—that is, if you lock something with one key, only the
+other key can open it. So, RSA public-key encryption uses the notion of these
+two keys to secure your messages in a way that:
+
+1. Ensures the messages that A and B exchange are **confidential**.
+2. Ensures the message that B receives from A were **actually sent by A**
    and vice versa.
-3. Ensure that the messages that A and B exchange **aren't tampered with while
+3. Ensures the messages that A and B exchange **aren't tampered with while
    in transit**.
 
-Using public-key encryption provides those guarantees. Now, using RSA-SHA-1
-signatures shouldn't be as difficult as they are to use with OAuth. Therefore,
-we have tried to take the burden of implementing it away from you and made
-it as easy as possible for you to use this signature method.
+Now, using RSA-SHA-1 signatures shouldn't be as difficult as they are to use
+with OAuth. Therefore, we have tried to take the burden of implementing it away
+from you and made it as easy as possible for you to use this signature method.
+
 
 So how does OAuth use public-key encryption?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -110,20 +130,18 @@ OAuth requires the use of SSL by the clients when requesting token secrets
 from OAuth servers. This takes care of the confidential part. The other two
 are handled by RSA-SHA-1 signatures.
 
-Imagine public-key encryption as equivalent to having a lock with two
-complementary keys—that is, if you lock something with one key, only the
-other key can open it. So, RSA public-key encryption uses the notion of these
-two keys to secure your messages. Here is what you have to do to use
-these keys with OAuth:
+Here is what you have to do to use your RSA key-pair with OAuth:
 
-1. You share your public key (an RSA public key or an X.509 public-key
-   certificate) with the OAuth provider.
+1. You **share your public key** (an RSA public key or an X.509 public-key
+   certificate) **with the OAuth provider**.
 
 2. Sign your messages with your RSA private key (which you keep safe and don't
-   share with anybody else including the OAuth provider).
+   share with anybody else including the OAuth provider) by telling the
+   request building methods to **use** ``"RSA-SHA1"`` **as the signature
+   method** and your **RSA private key as the client secret**. Easy, huh?
 
-3. The OAuth provider can now use the public key that you shared with it
-   to verify the messages that you sent to it signed with your private key.
+The OAuth provider can now use the public key that you shared with it
+to verify the messages that you sent to it signed with your private key.
 
 That's essentially it.
 
