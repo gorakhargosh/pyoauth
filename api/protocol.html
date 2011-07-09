@@ -132,8 +132,13 @@ verification code.</td>
 <dd><p>Generates a random Base-64-encoded client secret to assign to a
 registered client application.</p>
 <p>Consumer secrets are base64-encoded but not URL-safe. This is done to
-force the user into properly percent-encoding values according to the
-OAuth percent-encoding rules.</p>
+force the user into properly percent-encoding the secrets before generating
+OAuth signatures for base strings.</p>
+<p>As a side note, Google OAuth generates client secrets with similar encoding
+and this problem is a little hard to trace for the client, but it is a
+problem that should be fixed by the client after all. OAuth protocol
+version 1.0a requires percent-encoding the secrets before generating
+signatures. (See, :func:<tt class="docutils literal"><span class="pre">generate_plaintext_signature</span></tt>).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -209,7 +214,7 @@ All non-protocol parameters will be ignored.</li>
 
 <dl class="function">
 <dt id="pyoauth.protocol.verify_rsa_sha1_signature">
-<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">verify_rsa_sha1_signature</tt><big>(</big><em>client_certificate</em>, <em>signature</em>, <em>method</em>, <em>url</em>, <em>oauth_params=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#verify_rsa_sha1_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.verify_rsa_sha1_signature" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">verify_rsa_sha1_signature</tt><big>(</big><em>signature</em>, <em>client_certificate</em>, <em>method</em>, <em>url</em>, <em>oauth_params=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#verify_rsa_sha1_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.verify_rsa_sha1_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verifies a RSA-SHA1 OAuth signature.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -219,8 +224,8 @@ All non-protocol parameters will be ignored.</li>
 </td>
 </tr>
 <tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>client_certificate</strong> &#8211; PEM-encoded X.509 certificate or RSA public key.</li>
 <li><strong>signature</strong> &#8211; RSA-SHA1 OAuth signature.</li>
+<li><strong>client_certificate</strong> &#8211; PEM-encoded X.509 certificate or RSA public key.</li>
 <li><strong>method</strong> &#8211; Base string HTTP method.</li>
 <li><strong>url</strong> &#8211; Base string URL that may include a query string.
 All protocol-specific parameters will be ignored from the query string.</li>

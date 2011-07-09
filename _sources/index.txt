@@ -63,7 +63,7 @@ implemented by this library, namely:
 RSA-SHA1 requirements
 *********************
 The RSA-SHA1 signature method relies on the availability of third-party
-libraries like PyCrypto_ or M2Crypto_.
+libraries like pyasn1_, and PyCrypto_ or M2Crypto_.
 
 The library accepts PEM-encoded X.509 certificates, RSA public keys, and RSA
 private keys. The validity of the X.509 certificates will not be verified by

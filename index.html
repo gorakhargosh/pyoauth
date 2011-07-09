@@ -77,7 +77,7 @@ implemented by this library, namely:</p>
 <div class="section" id="rsa-sha1-requirements">
 <h4>RSA-SHA1 requirements<a class="headerlink" href="#rsa-sha1-requirements" title="Permalink to this headline">¶</a></h4>
 <p>The RSA-SHA1 signature method relies on the availability of third-party
-libraries like <a class="reference external" href="http://pycrypto.org/">PyCrypto</a> or <a class="reference external" href="http://chandlerproject.org/Projects/MeTooCrypto">M2Crypto</a>.</p>
+libraries like <a class="reference external" href="http://pypi.python.org/pypi/pyasn1">pyasn1</a>, and <a class="reference external" href="http://pycrypto.org/">PyCrypto</a> or <a class="reference external" href="http://chandlerproject.org/Projects/MeTooCrypto">M2Crypto</a>.</p>
 <p>The library accepts PEM-encoded X.509 certificates, RSA public keys, and RSA
 private keys. The validity of the X.509 certificates will not be verified by
 the signing functions. You must ensure the validity of certificates when you
@@ -100,6 +100,9 @@ clients about their certificate expiration dates—human beings forget after all
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guides/rsa_sha1.html">Using RSA-SHA1 signatures</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="guides/rsa_sha1.html#whoa">Whoa?!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/rsa_sha1.html#why-should-you-use-public-key-encryption">Why should you use public-key encryption?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/rsa_sha1.html#what-does-a-key-look-like">What does a key look like?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/rsa_sha1.html#making-your-own-key-pair">Making your own key-pair</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guides/hacking.html">Contributing</a><ul>

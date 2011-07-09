@@ -1,0 +1,9 @@
+*.py[co]
+htmlcov/
+.idea/
+.coverage
+*.swp
+.installed.cfg
+bin/
+develop-eggs/
+parts/

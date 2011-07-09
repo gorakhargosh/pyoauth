@@ -129,8 +129,14 @@
 <span class="sd">    registered client application.</span>
 
 <span class="sd">    Consumer secrets are base64-encoded but not URL-safe. This is done to</span>
-<span class="sd">    force the user into properly percent-encoding values according to the</span>
-<span class="sd">    OAuth percent-encoding rules.</span>
+<span class="sd">    force the user into properly percent-encoding the secrets before generating</span>
+<span class="sd">    OAuth signatures for base strings.</span>
+
+<span class="sd">    As a side note, Google OAuth generates client secrets with similar encoding</span>
+<span class="sd">    and this problem is a little hard to trace for the client, but it is a</span>
+<span class="sd">    problem that should be fixed by the client after all. OAuth protocol</span>
+<span class="sd">    version 1.0a requires percent-encoding the secrets before generating</span>
+<span class="sd">    signatures. (See, :func:``generate_plaintext_signature``).</span>
 
 <span class="sd">    :param bit_strength:</span>
 <span class="sd">        Bit strength. 144 is default.</span>
@@ -205,6 +211,84 @@
     <span class="k">return</span> <span class="n">hmac_sha1_base64_digest</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">base_string</span><span class="p">)</span>
 
 </div>
+<span class="k">def</span> <span class="nf">verify_hmac_sha1_signature</span><span class="p">(</span><span class="n">signature</span><span class="p">,</span> <span class="n">client_shared_secret</span><span class="p">,</span>
+                               <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">token_or_temporary_shared_secret</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Verifies an HMAC-SHA1 signature for a base string.</span>
+
+<span class="sd">    :see: HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)</span>
+<span class="sd">    :param</span>
+<span class="sd">    :param client_shared_secret:</span>
+<span class="sd">        Client (consumer) shared secret.</span>
+<span class="sd">    :param method:</span>
+<span class="sd">        Base string HTTP method.</span>
+<span class="sd">    :param url:</span>
+<span class="sd">        Base string URL that may include a query string.</span>
+<span class="sd">        All protocol-specific parameters will be ignored from the query string.</span>
+<span class="sd">    :param oauth_params:</span>
+<span class="sd">        Base string protocol-specific query parameters.</span>
+<span class="sd">        All non-protocol parameters will be ignored.</span>
+<span class="sd">    :param token_or_temporary_shared_secret:</span>
+<span class="sd">        Token/temporary credentials shared secret if available.</span>
+<span class="sd">    :param debug:</span>
+<span class="sd">        Default ``False``.</span>
+
+<span class="sd">        ``True`` to turn on debugging mode, which attempts to find out</span>
+<span class="sd">        why signature verification fails, if it does; ``False`` otherwise.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A tuple of (whether signature matches (boolean), error message (None if it succeeded)).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">oauth_params</span> <span class="o">=</span> <span class="n">oauth_params</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">base_string</span> <span class="o">=</span> <span class="n">generate_signature_base_string</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="p">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">_generate_plaintext_signature</span><span class="p">(</span><span class="n">client_shared_secret</span><span class="p">,</span>
+                                        <span class="n">token_or_temporary_shared_secret</span><span class="p">)</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="p">(</span><span class="n">signature</span> <span class="o">==</span> <span class="n">hmac_sha1_base64_digest</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">base_string</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="s">&quot;Invalid signature&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="c"># Try to find out why it didn&#39;t match.</span>
+        <span class="c"># We need to help the poor human souls on the other</span>
+        <span class="c"># side of this mess who are trying to debug their OAuth clients.</span>
+        <span class="c"># This is not going to detect 100% of the cases, because it is</span>
+        <span class="c"># too easy to screw up on the client side. Anything could be wrong.</span>
+        <span class="c"># We&#39;re just trying to find out some common problems.</span>
+
+        <span class="c"># Assume correct base string but detect incorrect signature encoding.</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">_generate_plaintext_signature</span><span class="p">(</span><span class="n">client_shared_secret</span><span class="p">,</span>
+                                            <span class="n">token_or_temporary_shared_secret</span><span class="p">,</span>
+                                            <span class="n">_percent_encode</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">signature</span> <span class="o">==</span> <span class="n">hmac_sha1_base64_digest</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">base_string</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ok</span><span class="p">,</span> <span class="s">&quot;Invalid signature: signature elements are not percent-encoded properly&quot;</span>
+
+        <span class="c"># Assume correct base string but detect missing ampersands in signature.</span>
+        <span class="k">if</span> <span class="n">client_shared_secret</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">token_or_temporary_shared_secret</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">percent_encode</span><span class="p">(</span><span class="n">client_shared_secret</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;&amp;&quot;</span>
+            <span class="k">if</span> <span class="n">signature</span> <span class="o">==</span> <span class="n">hmac_sha1_base64_digest</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">base_string</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">ok</span><span class="p">,</span> <span class="s">&quot;Invalid signature: missing ampersand `&amp;` after client shared secret in signature&quot;</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">client_shared_secret</span> <span class="ow">and</span> <span class="n">token_or_temporary_shared_secret</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s">&quot;&amp;&quot;</span> <span class="o">+</span> <span class="n">percent_encode</span><span class="p">(</span><span class="n">token_or_temporary_shared_secret</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">signature</span> <span class="o">==</span> <span class="n">hmac_sha1_base64_digest</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">base_string</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">ok</span><span class="p">,</span> <span class="s">&quot;Invalid signature: missing ampersand `&amp;` before token secret in signature&quot;</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">client_shared_secret</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">token_or_temporary_shared_secret</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s">&quot;&amp;&quot;</span>
+            <span class="k">if</span> <span class="n">signature</span> <span class="o">==</span> <span class="n">hmac_sha1_base64_digest</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">base_string</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">ok</span><span class="p">,</span> <span class="s">&quot;Invalid signature: missing ampersand `&amp;` without secrets in signature&quot;</span>
+        <span class="k">elif</span> <span class="n">client_shared_secret</span> <span class="ow">and</span> <span class="n">token_or_temporary_shared_secret</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">percent_encode</span><span class="p">(</span><span class="n">client_shared_secret</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;&amp;&quot;</span> <span class="o">+</span> <span class="n">percent_encode</span><span class="p">(</span><span class="n">token_or_temporary_shared_secret</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">signature</span> <span class="o">==</span> <span class="n">hmac_sha1_base64_digest</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">base_string</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">ok</span><span class="p">,</span> <span class="s">&quot;Invalid signature: missing ampersand `&amp;` between signature secrets&quot;</span>
+
+        <span class="c"># Assume incorrect base string</span>
+        <span class="k">return</span> <span class="n">ok</span><span class="p">,</span> <span class="s">&quot;Invalid signature: check base string?&quot;</span>
+
+    <span class="k">return</span> <span class="n">ok</span><span class="p">,</span> <span class="n">err</span>
+
+
 <div class="viewcode-block" id="generate_rsa_sha1_signature"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_rsa_sha1_signature">[docs]</a><span class="k">def</span> <span class="nf">generate_rsa_sha1_signature</span><span class="p">(</span><span class="n">client_private_key</span><span class="p">,</span>
                                 <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                                 <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -235,8 +319,8 @@
     <span class="k">return</span> <span class="n">base64_encode</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">pkcs1_v1_5_sign</span><span class="p">(</span><span class="n">sha1_digest</span><span class="p">(</span><span class="n">base_string</span><span class="p">)))</span>
 
 </div>
-<div class="viewcode-block" id="verify_rsa_sha1_signature"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.verify_rsa_sha1_signature">[docs]</a><span class="k">def</span> <span class="nf">verify_rsa_sha1_signature</span><span class="p">(</span><span class="n">client_certificate</span><span class="p">,</span>
-                              <span class="n">signature</span><span class="p">,</span>
+<div class="viewcode-block" id="verify_rsa_sha1_signature"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.verify_rsa_sha1_signature">[docs]</a><span class="k">def</span> <span class="nf">verify_rsa_sha1_signature</span><span class="p">(</span><span class="n">signature</span><span class="p">,</span>
+                              <span class="n">client_certificate</span><span class="p">,</span>
                               <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                               <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -244,10 +328,10 @@
 
 <span class="sd">    :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)</span>
 
-<span class="sd">    :param client_certificate:</span>
-<span class="sd">        PEM-encoded X.509 certificate or RSA public key.</span>
 <span class="sd">    :param signature:</span>
 <span class="sd">        RSA-SHA1 OAuth signature.</span>
+<span class="sd">    :param client_certificate:</span>
+<span class="sd">        PEM-encoded X.509 certificate or RSA public key.</span>
 <span class="sd">    :param method:</span>
 <span class="sd">        Base string HTTP method.</span>
 <span class="sd">    :param url:</span>
@@ -296,7 +380,8 @@
 
 </div>
 <span class="k">def</span> <span class="nf">_generate_plaintext_signature</span><span class="p">(</span><span class="n">client_shared_secret</span><span class="p">,</span>
-                             <span class="n">token_or_temporary_shared_secret</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                                  <span class="n">token_or_temporary_shared_secret</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                  <span class="n">_percent_encode</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the PLAINTEXT signature.</span>
 
@@ -304,14 +389,28 @@
 <span class="sd">        Client (consumer) shared secret.</span>
 <span class="sd">    :param token_or_temporary_shared_secret:</span>
 <span class="sd">        Token/temporary credentials shared secret if available.</span>
+<span class="sd">    :param _percent_encode:</span>
+<span class="sd">        (DEBUG)</span>
+
+<span class="sd">        Must be ``True`` to be compatible with OAuth 1.0 RFC5849 &amp; OAuth 1.0a;</span>
+<span class="sd">        We have added this parameter to enable better debugging by the</span>
+<span class="sd">        signature verification routines. If this is set to ``False``, the</span>
+<span class="sd">        signature elements will not be percent-encoded before the plaintext</span>
+<span class="sd">        signature is generated.</span>
 <span class="sd">    :returns:</span>
 <span class="sd">        PLAINTEXT signature.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">client_shared_secret</span> <span class="o">=</span> <span class="n">client_shared_secret</span> <span class="ow">or</span> <span class="s">&quot;&quot;</span>
     <span class="n">token_or_temporary_shared_secret</span> <span class="o">=</span> <span class="n">token_or_temporary_shared_secret</span> <span class="ow">or</span> <span class="s">&quot;&quot;</span>
-    <span class="k">return</span> <span class="s">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
-        <span class="n">percent_encode</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="n">client_shared_secret</span><span class="p">,</span> <span class="n">token_or_temporary_shared_secret</span><span class="p">]])</span>
+    <span class="k">if</span> <span class="n">_percent_encode</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">percent_encode</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="n">client_shared_secret</span><span class="p">,</span> <span class="n">token_or_temporary_shared_secret</span><span class="p">]])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># User clients can forget to do this and this has been fixed</span>
+        <span class="c"># by OAuth 1.0a, so we use this piece of code to detect whether</span>
+        <span class="c"># the user&#39;s OAuth client library complies with the specification</span>
+        <span class="c"># when in debugging mode.</span>
+        <span class="k">return</span> <span class="s">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">client_shared_secret</span><span class="p">,</span> <span class="n">token_or_temporary_shared_secret</span><span class="p">])</span>
 
 
 <div class="viewcode-block" id="generate_signature_base_string"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.protocol.generate_signature_base_string">[docs]</a><span class="k">def</span> <span class="nf">generate_signature_base_string</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">oauth_params</span><span class="p">):</span>

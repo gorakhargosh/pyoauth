@@ -100,12 +100,124 @@ they&#8217;re not really worried about your publics.</p>
 <p>They&#8217;re a happy couple.</p>
 <blockquote>
 <div>&#8220;One. Two. Three. Hmm. Oye, that&#8217;s 3 of them. Couple? So, umm... how do they
-work?&#8221;</div></blockquote>
-<p>We&#8217;ll get to that in a bit. But first, let&#8217;s show you how to make one of these
-yourself.</p>
+work? Somethin&#8217; to do with opensll yeah?&#8221;</div></blockquote>
+<p>We&#8217;ll get to this in a bit. Kinda, yes, and that&#8217;s &#8220;OpenSSL,&#8221; by the way.</p>
+</div>
+<div class="section" id="why-should-you-use-public-key-encryption">
+<h2>Why should you use public-key encryption?<a class="headerlink" href="#why-should-you-use-public-key-encryption" title="Permalink to this headline">¶</a></h2>
+<p>Because it&#8217;s harder—it&#8217;s harder for an attacker to snoop into your privacy.
+Consider two people, say A and B, trying to communicate securely with each
+other. What they need to communicate securely are these guarantees:</p>
+<ol class="arabic simple">
+<li>Ensure that the messages that A and B exchange are <strong>confidential</strong>.</li>
+<li>Ensure that the message that B receives from A were <strong>actually sent by A</strong>
+and vice versa.</li>
+<li>Ensure that the messages that A and B exchange <strong>aren&#8217;t tampered with while
+in transit</strong>.</li>
+</ol>
+<p>Using public-key encryption provides those guarantees. Now, using RSA-SHA-1
+signatures shouldn&#8217;t be as difficult as they are to use with OAuth. Therefore,
+we have tried to take the burden of implementing it away from you and made
+it as easy as possible for you to use this signature method.</p>
+<div class="section" id="so-how-does-oauth-use-public-key-encryption">
+<h3>So how does OAuth use public-key encryption?<a class="headerlink" href="#so-how-does-oauth-use-public-key-encryption" title="Permalink to this headline">¶</a></h3>
+<p>OAuth requires the use of SSL by the clients when requesting token secrets
+from OAuth servers. This takes care of the confidential part. The other two
+are handled by RSA-SHA-1 signatures.</p>
+<p>Imagine public-key encryption as equivalent to having a lock with two
+complementary keys—that is, if you lock something with one key, only the
+other key can open it. So, RSA public-key encryption uses the notion of these
+two keys to secure your messages. Here is what you have to do to use
+these keys with OAuth:</p>
+<ol class="arabic simple">
+<li>You share your public key (an RSA public key or an X.509 public-key
+certificate) with the OAuth provider.</li>
+<li>Sign your messages with your RSA private key (which you keep safe and don&#8217;t
+share with anybody else including the OAuth provider).</li>
+<li>The OAuth provider can now use the public key that you shared with it
+to verify the messages that you sent to it signed with your private key.</li>
+</ol>
+<p>That&#8217;s essentially it.</p>
+</div>
+</div>
+<div class="section" id="what-does-a-key-look-like">
+<h2>What does a key look like?<a class="headerlink" href="#what-does-a-key-look-like" title="Permalink to this headline">¶</a></h2>
+<p>A key can come in multiple formats. The <a class="reference external" href="http://en.wikipedia.org/wiki/Privacy_Enhanced_Mail">PEM</a>, or Privacy Enhanced
+electronic-Mail, format is a commonly accepted format, and that is the one
+preferred by this library. Keys can be also stored in JSON formats as the one
+used by the <a class="reference external" href="http://www.keyczar.org/">Keyczar</a> library. Have a look at the
+<a class="reference external" href="http://code.google.com/p/keyczar/wiki/RsaPrivateKey">Keyczar RSA private key format</a>. Public keys that you generate are
+generally encoded into something called an X.509 public-key certificate.
+You can share either an RSA public key or an X.509 public-key certificate
+with your OAuth provider. Providers usually ask for an X.509 public-key
+certificate.</p>
+<div class="section" id="rsa-private-key">
+<h3>RSA Private Key<a class="headerlink" href="#rsa-private-key" title="Permalink to this headline">¶</a></h3>
+<p>An example:</p>
+<div class="highlight-python"><pre>-----BEGIN RSA PRIVATE KEY-----
+MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
+A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d
+7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ
+hI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H
+X9u2AC2ry8vD/l7cqedtwMPp9k7TubgNFo+NGvKsl2ynyprOZR1xjQ7WgrgVB+mm
+uScOM/5HVceFuGRDhYTCObE+y1kxRloNYXnx3ei1zbeYLPCHdhxRYW7T0qcynNmw
+rn05/KO2RLjgQNalsQJBANeA3Q4Nugqy4QBUCEC09SqylT2K9FrrItqL2QKc9v0Z
+zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn
+qkMsDmzt0EfNaAOwHOmVJ2RVBspPcxt5iN4HI7HNeG6U5YsFBb+/GZbgfBT3kpNG
+WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno
+cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
+3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8
+AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
+Lw03eHTNQghS0A==
+-----END RSA PRIVATE KEY-----</pre>
+</div>
+</div>
+<div class="section" id="rsa-public-key">
+<h3>RSA Public Key<a class="headerlink" href="#rsa-public-key" title="Permalink to this headline">¶</a></h3>
+<p>An example:</p>
+<div class="highlight-python"><pre>-----BEGIN PUBLIC KEY-----
+ MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC0YjCwIfYoprq/FQO6lb3asXrx
+ LlJFuCvtinTF5p0GxvQGu5O3gYytUvtC2JlYzypSRjVxwxrsuRcP3e641SdASwfr
+ mzyvIgP08N4S0IFzEURkV1wp/IpH7kH41EtbmUmrXSwfNZsnQRE5SYSOhh+LcK2w
+ yQkdgcMv11l4KoBkcwIDAQAB
+ -----END PUBLIC KEY-----</pre>
+</div>
+</div>
+<div class="section" id="x-509-public-key-certificate">
+<h3>X.509 Public-key Certificate<a class="headerlink" href="#x-509-public-key-certificate" title="Permalink to this headline">¶</a></h3>
+<p>An example:</p>
+<div class="highlight-python"><pre>-----BEGIN CERTIFICATE-----
+MIIBpjCCAQ+gAwIBAgIBATANBgkqhkiG9w0BAQUFADAZMRcwFQYDVQQDDA5UZXN0
+IFByaW5jaXBhbDAeFw03MDAxMDEwODAwMDBaFw0zODEyMzEwODAwMDBaMBkxFzAV
+BgNVBAMMDlRlc3QgUHJpbmNpcGFsMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB
+gQC0YjCwIfYoprq/FQO6lb3asXrxLlJFuCvtinTF5p0GxvQGu5O3gYytUvtC2JlY
+zypSRjVxwxrsuRcP3e641SdASwfrmzyvIgP08N4S0IFzEURkV1wp/IpH7kH41Etb
+mUmrXSwfNZsnQRE5SYSOhh+LcK2wyQkdgcMv11l4KoBkcwIDAQABMA0GCSqGSIb3
+DQEBBQUAA4GBAGZLPEuJ5SiJ2ryq+CmEGOXfvlTtEL2nuGtr9PewxkgnOjZpUy+d
+4TvuXJbNQc8f4AMWL/tO9w0Fk80rWKp9ea8/df4qMq5qlFWlx6yOLQxumNOmECKb
+WpkUQDIDJEoFUzKMVuJf4KO/FJ345+BNLGgbJ6WujreoM1X/gYfdnJ/J
+-----END CERTIFICATE-----</pre>
+</div>
+</div>
+</div>
+<div class="section" id="making-your-own-key-pair">
+<h2>Making your own key-pair<a class="headerlink" href="#making-your-own-key-pair" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div>&#8220;Oh, yeah. I get it. Somethin&#8217; to do with opensll yeah?&#8221;</div></blockquote>
-<p>Kinda. And that&#8217;s &#8220;OpenSSL,&#8221; by the way.</p>
+<div>&#8220;Alright. I get it Sherlock. Now, how do I make my pair of keys
+to use with an OAuth provider?&#8221;</div></blockquote>
+<p>You can generate your own self-signed X.509 certificate and private RSA key
+using the tools OpenSSL provides. You&#8217;ll need <a class="reference external" href="http://www.openssl.org/">OpenSSL</a> installed for the
+following command to work at the terminal:</p>
+<div class="highlight-python"><pre>$ openssl req -x509 -nodes -days 365 -newkey rsa:1024 -sha1 -keyout \
+    rsa_private_key.pem -out x509_public_certificate.pem</pre>
+</div>
+<p>Answer all the questions that the tool asks and you should be good to go.
+For more detailed information about generating X.509 public-key certificates,
+read:</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://www.ipsec-howto.org/x595.html">http://www.ipsec-howto.org/x595.html</a></li>
+<li><a class="reference external" href="http://www.imacat.idv.tw/tech/sslcerts.html#reqform">http://www.imacat.idv.tw/tech/sslcerts.html#reqform</a></li>
+</ol>
 <div class="toctree-wrapper compound">
 <ul class="simple">
 </ul>
@@ -124,7 +236,18 @@ yourself.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Using RSA-SHA1 signatures</a><ul>
-<li><a class="reference internal" href="#whoa">Whoa?!</a><ul>
+<li><a class="reference internal" href="#whoa">Whoa?!</a></li>
+<li><a class="reference internal" href="#why-should-you-use-public-key-encryption">Why should you use public-key encryption?</a><ul>
+<li><a class="reference internal" href="#so-how-does-oauth-use-public-key-encryption">So how does OAuth use public-key encryption?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#what-does-a-key-look-like">What does a key look like?</a><ul>
+<li><a class="reference internal" href="#rsa-private-key">RSA Private Key</a></li>
+<li><a class="reference internal" href="#rsa-public-key">RSA Public Key</a></li>
+<li><a class="reference internal" href="#x-509-public-key-certificate">X.509 Public-key Certificate</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#making-your-own-key-pair">Making your own key-pair</a><ul>
 </ul>
 </li>
 </ul>
