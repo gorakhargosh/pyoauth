@@ -1,0 +1,193 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.types.unicode &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="pyoauth.types" href="../types.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.types.unicode</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># Unicode utilities.</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2009 Facebook</span>
+<span class="c"># Copyright (C) 2011 Yesudeep Mangalapilly &lt;yesudeep@gmail.com&gt;</span>
+<span class="c">#</span>
+<span class="c"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may</span>
+<span class="c"># not use this file except in compliance with the License. You may obtain</span>
+<span class="c"># a copy of the License at</span>
+<span class="c">#</span>
+<span class="c">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c">#</span>
+<span class="c"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT</span>
+<span class="c"># WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the</span>
+<span class="c"># License for the specific language governing permissions and limitations</span>
+<span class="c"># under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.types.unicode</span>
+<span class="sd">:synopsis: Unicode encoding utility functions.</span>
+
+<span class="sd">.. autofunction:: unicode_to_utf8</span>
+<span class="sd">.. autofunction:: bytes_to_unicode</span>
+<span class="sd">.. autofunction:: to_utf8_if_unicode</span>
+<span class="sd">.. autofunction:: to_unicode_if_bytes</span>
+<span class="sd">.. autofunction:: to_unicode_recursively</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pyoauth.types</span> <span class="kn">import</span> <span class="n">is_unicode</span><span class="p">,</span> <span class="n">is_bytes</span>
+
+
+<div class="viewcode-block" id="unicode_to_utf8"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.unicode.unicode_to_utf8">[docs]</a><span class="k">def</span> <span class="nf">unicode_to_utf8</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a string argument to a UTF-8 encoded byte string if it is a</span>
+<span class="sd">    Unicode string.</span>
+
+<span class="sd">    :param value:</span>
+<span class="sd">        If already a byte string or None, it is returned unchanged.</span>
+<span class="sd">        Otherwise it must be a Unicode string and is encoded as UTF-8.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">is_bytes</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">assert</span> <span class="n">is_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;utf-8&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="bytes_to_unicode"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.unicode.bytes_to_unicode">[docs]</a><span class="k">def</span> <span class="nf">bytes_to_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts bytes to a Unicode string decoding it according to the encoding</span>
+<span class="sd">    specified.</span>
+
+<span class="sd">    :param value:</span>
+<span class="sd">        If already a Unicode string or None, it is returned unchanged.</span>
+<span class="sd">        Otherwise it must be a byte string.</span>
+<span class="sd">    :param encoding:</span>
+<span class="sd">        The encoding used to decode bytes. Defaults to UTF-8</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">is_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">assert</span> <span class="n">is_bytes</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="to_utf8_if_unicode"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.unicode.to_utf8_if_unicode">[docs]</a><span class="k">def</span> <span class="nf">to_utf8_if_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts an argument to a UTF-8 encoded byte string if the argument</span>
+<span class="sd">    is a Unicode string.</span>
+
+<span class="sd">    :param value:</span>
+<span class="sd">        The value that will be UTF-8 encoded if it is a string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        UTF-8 encoded byte string if the argument is a Unicode string; otherwise</span>
+<span class="sd">        the value is returned unchanged.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">unicode_to_utf8</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">else</span> <span class="n">value</span>
+
+</div>
+<div class="viewcode-block" id="to_unicode_if_bytes"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.unicode.to_unicode_if_bytes">[docs]</a><span class="k">def</span> <span class="nf">to_unicode_if_bytes</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts an argument to Unicode string if the argument is a byte string</span>
+<span class="sd">    decoding it as specified by the encoding.</span>
+
+<span class="sd">    :param value:</span>
+<span class="sd">        The value that will be converted to a Unicode string.</span>
+<span class="sd">    :param encoding:</span>
+<span class="sd">        The encoding used to decode bytes. Defaults to UTF-8.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Unicode string if the argument is a byte string. Otherwise the value</span>
+<span class="sd">        is returned unchanged.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">bytes_to_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_bytes</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">else</span> <span class="n">value</span>
+
+</div>
+<div class="viewcode-block" id="to_unicode_recursively"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.unicode.to_unicode_recursively">[docs]</a><span class="k">def</span> <span class="nf">to_unicode_recursively</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Walks a simple data structure, converting byte strings to unicode.</span>
+
+<span class="sd">    Supports lists, tuples, and dictionaries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">to_unicode_recursively</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">to_unicode_recursively</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">to_unicode_recursively</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">to_unicode_recursively</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">is_bytes</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">bytes_to_unicode</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

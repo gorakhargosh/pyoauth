@@ -1,0 +1,165 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.types.json &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="pyoauth.types" href="../types.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.types.json</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># JSON utilities.</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2009 Facebook.</span>
+<span class="c">#</span>
+<span class="c"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may</span>
+<span class="c"># not use this file except in compliance with the License. You may obtain</span>
+<span class="c"># a copy of the License at</span>
+<span class="c">#</span>
+<span class="c"># http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c">#</span>
+<span class="c"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT</span>
+<span class="c"># WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the</span>
+<span class="c"># License for the specific language governing permissions and limitations</span>
+<span class="c"># under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.types.json</span>
+<span class="sd">:synopsis: JSON codec.</span>
+
+<span class="sd">.. autofunction:: json_decode</span>
+<span class="sd">.. autofunction:: json_encode</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pyoauth.types.unicode</span> <span class="kn">import</span> <span class="n">bytes_to_unicode</span><span class="p">,</span> <span class="n">to_unicode_recursively</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c"># Built-in JSON library.</span>
+    <span class="kn">import</span> <span class="nn">json</span>
+    <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="s">&quot;loads&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="s">&quot;dumps&quot;</span><span class="p">)</span>
+    <span class="n">_json_decode</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span>
+    <span class="n">_json_encode</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># Try to use the simplejson library.</span>
+        <span class="kn">import</span> <span class="nn">simplejson</span> <span class="kn">as</span> <span class="nn">json</span>
+        <span class="n">_json_decode</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bytes_to_unicode</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="n">_json_encode</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># For Google App Engine.</span>
+            <span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">simplejson</span> <span class="k">as</span> <span class="n">json</span>
+            <span class="n">_json_decode</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bytes_to_unicode</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+            <span class="n">_json_encode</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">_json_decode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s">&quot;A JSON parser is required, e.g., simplejson at &quot;</span>
+                    <span class="s">&quot;http://pypi.python.org/pypi/simplejson/&quot;</span><span class="p">)</span>
+            <span class="n">_json_encode</span> <span class="o">=</span> <span class="n">_json_decode</span>
+
+
+<div class="viewcode-block" id="json_encode"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.json.json_encode">[docs]</a><span class="k">def</span> <span class="nf">json_encode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encodes a Python value into its equivalent JSON string.</span>
+
+<span class="sd">    JSON permits but does not require forward slashes to be escaped.</span>
+<span class="sd">    This is useful when json data is emitted in a &lt;script&gt; tag</span>
+<span class="sd">    in HTML, as it prevents &lt;/script&gt; tags from prematurely terminating</span>
+<span class="sd">    the javscript. Some json libraries do this escaping by default,</span>
+<span class="sd">    although python&#39;s standard library does not, so we do it here.</span>
+
+<span class="sd">    :see: http://stackoverflow.com/questions/1580647/json-why-are-forward-slashes-escaped</span>
+<span class="sd">    :param value:</span>
+<span class="sd">        Python value.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        JSON string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_json_encode</span><span class="p">(</span><span class="n">to_unicode_recursively</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;/&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;</span><span class="se">\\</span><span class="s">/&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="json_decode"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.json.json_decode">[docs]</a><span class="k">def</span> <span class="nf">json_decode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decodes a JSON string into its equivalent Python value.</span>
+
+<span class="sd">    :param value:</span>
+<span class="sd">        JSON string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Decoded Python value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_json_decode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

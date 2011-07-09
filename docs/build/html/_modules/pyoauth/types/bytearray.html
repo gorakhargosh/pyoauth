@@ -1,0 +1,206 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.types.bytearray &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="pyoauth.types" href="../types.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.types.bytearray</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c"># Placed into public domain.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.types.bytearray</span>
+<span class="sd">:synopsis: Byte arrays.</span>
+
+<span class="sd">Creation and manipulation</span>
+<span class="sd">-------------------------</span>
+<span class="sd">.. autofunction:: bytearray_create</span>
+<span class="sd">.. autofunction:: bytearray_create_zeros</span>
+<span class="sd">.. autofunction:: bytearray_concat</span>
+
+<span class="sd">Type conversion</span>
+<span class="sd">---------------</span>
+<span class="sd">.. autofunction:: bytearray_to_bytes</span>
+<span class="sd">.. autofunction:: bytes_to_bytearray</span>
+<span class="sd">.. autofunction:: bytearray_to_long</span>
+<span class="sd">.. autofunction:: long_to_bytearray</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">array</span> <span class="kn">import</span> <span class="n">array</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types</span> <span class="kn">import</span> <span class="n">byte_count</span>
+
+
+<div class="viewcode-block" id="bytearray_create"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.bytearray.bytearray_create">[docs]</a><span class="k">def</span> <span class="nf">bytearray_create</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a byte array from a given sequence.</span>
+
+<span class="sd">    :param sequence:</span>
+<span class="sd">        The sequence from which a byte array will be created.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A byte array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">array</span><span class="p">(</span><span class="s">&#39;B&#39;</span><span class="p">,</span> <span class="n">sequence</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="bytearray_create_zeros"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.bytearray.bytearray_create_zeros">[docs]</a><span class="k">def</span> <span class="nf">bytearray_create_zeros</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a zero-filled byte array of with ``count`` bytes.</span>
+
+<span class="sd">    :param count:</span>
+<span class="sd">        The number of zero bytes.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Zero-filled byte array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">array</span><span class="p">(</span><span class="s">&#39;B&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">count</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="bytearray_concat"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.bytearray.bytearray_concat">[docs]</a><span class="k">def</span> <span class="nf">bytearray_concat</span><span class="p">(</span><span class="n">byte_array1</span><span class="p">,</span> <span class="n">byte_array2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Concatenates two byte arrays.</span>
+
+<span class="sd">    :param byte_array1:</span>
+<span class="sd">        Byte array 1</span>
+<span class="sd">    :param byte_array2:</span>
+<span class="sd">        Byte array 2</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Concatenated byte array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">byte_array1</span> <span class="o">+</span> <span class="n">byte_array2</span>
+
+</div>
+<div class="viewcode-block" id="bytearray_to_bytes"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.bytearray.bytearray_to_bytes">[docs]</a><span class="k">def</span> <span class="nf">bytearray_to_bytes</span><span class="p">(</span><span class="n">byte_array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a byte array into a string.</span>
+
+<span class="sd">    :param byte_array:</span>
+<span class="sd">        The byte array.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        String.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">byte_array</span><span class="o">.</span><span class="n">tostring</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="bytes_to_bytearray"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.bytearray.bytes_to_bytearray">[docs]</a><span class="k">def</span> <span class="nf">bytes_to_bytearray</span><span class="p">(</span><span class="n">byte_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a string into a byte array.</span>
+
+<span class="sd">    :param byte_string:</span>
+<span class="sd">        String value.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Byte array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">byte_array</span> <span class="o">=</span> <span class="n">bytearray_create_zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">byte_array</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">byte_string</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">byte_array</span>
+
+</div>
+<div class="viewcode-block" id="bytearray_to_long"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.bytearray.bytearray_to_long">[docs]</a><span class="k">def</span> <span class="nf">bytearray_to_long</span><span class="p">(</span><span class="n">byte_array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a byte array to long.</span>
+
+<span class="sd">    :param byte_array:</span>
+<span class="sd">        The byte array.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Long.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="il">0L</span>
+    <span class="n">multiplier</span> <span class="o">=</span> <span class="il">1L</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">byte_array</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">byte_val</span> <span class="o">=</span> <span class="n">byte_array</span><span class="p">[</span><span class="n">count</span><span class="p">]</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">multiplier</span> <span class="o">*</span> <span class="n">byte_val</span>
+        <span class="n">multiplier</span> <span class="o">*=</span> <span class="mi">256</span>
+    <span class="k">return</span> <span class="n">total</span>
+
+</div>
+<div class="viewcode-block" id="long_to_bytearray"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.bytearray.long_to_bytearray">[docs]</a><span class="k">def</span> <span class="nf">long_to_bytearray</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a long into a byte array.</span>
+
+<span class="sd">    :param num:</span>
+<span class="sd">        Long value</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Long.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bytes_count</span> <span class="o">=</span> <span class="n">byte_count</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">byte_array</span> <span class="o">=</span> <span class="n">bytearray_create_zeros</span><span class="p">(</span><span class="n">bytes_count</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bytes_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">byte_array</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num</span> <span class="o">%</span> <span class="mi">256</span><span class="p">)</span>
+        <span class="n">num</span> <span class="o">&gt;&gt;=</span> <span class="mi">8</span>
+    <span class="k">return</span> <span class="n">byte_array</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

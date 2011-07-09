@@ -1,0 +1,229 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.crypto.primes &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.crypto.primes</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c"># Released into public domain.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.crypto.primes</span>
+<span class="sd">:synopsis: Cryptographic prime number routines.</span>
+
+<span class="sd">Verification</span>
+<span class="sd">------------</span>
+<span class="sd">.. autofunction:: is_prime</span>
+
+<span class="sd">Random</span>
+<span class="sd">------</span>
+<span class="sd">.. autofunction:: generate_random_prime</span>
+<span class="sd">.. autofunction:: generate_random_safe_prime</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">pyoauth.crypto.random</span> <span class="kn">import</span> <span class="n">generate_random_long</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types.number</span> <span class="kn">import</span> <span class="n">pow_mod</span>
+
+
+<span class="k">def</span> <span class="nf">make_prime_sieve</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pre-calculate a sieve of the ~100 primes &lt; 1000.</span>
+
+<span class="sd">    :param n:</span>
+<span class="sd">        Count</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Prime sieve.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sieve</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">))):</span>
+        <span class="c">#if sieve[count] == 0:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sieve</span><span class="p">[</span><span class="n">count</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">sieve</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="k">while</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sieve</span><span class="p">):</span>
+            <span class="n">sieve</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">x</span> <span class="o">+=</span> <span class="n">sieve</span><span class="p">[</span><span class="n">count</span><span class="p">]</span>
+    <span class="n">sieve</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sieve</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">if</span> <span class="n">x</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">sieve</span>
+
+<span class="n">sieve</span> <span class="o">=</span> <span class="n">make_prime_sieve</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="is_prime"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.primes.is_prime">[docs]</a><span class="k">def</span> <span class="nf">is_prime</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determines whether a number is prime.</span>
+
+<span class="sd">    :param n:</span>
+<span class="sd">        Number</span>
+<span class="sd">    :param iterations:</span>
+<span class="sd">        Number of iterations.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        ``True`` if prime; ``False`` otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#Trial division with sieve</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sieve</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">n</span><span class="p">:</span> <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">n</span> <span class="o">%</span> <span class="n">x</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+    <span class="c">#Passed trial division, proceed to Rabin-Miller</span>
+    <span class="c">#Rabin-Miller implemented per Ferguson &amp; Schneier</span>
+    <span class="c">#Compute s, t for Rabin-Miller</span>
+    <span class="n">s</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">s</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">s</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">s</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">t</span><span class="o">+</span><span class="mi">1</span>
+    <span class="c">#Repeat Rabin-Miller x times</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">2</span> <span class="c">#Use 2 as a base for first iteration speedup, per HAC</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">pow_mod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">v</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">v</span> <span class="o">!=</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">v</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="n">pow_mod</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">generate_random_long</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+</div>
+<div class="viewcode-block" id="generate_random_prime"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.primes.generate_random_prime">[docs]</a><span class="k">def</span> <span class="nf">generate_random_prime</span><span class="p">(</span><span class="n">bits</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a random prime number.</span>
+
+<span class="sd">    :param bits:</span>
+<span class="sd">        Number of bits.</span>
+<span class="sd">    :return:</span>
+<span class="sd">        Prime number long value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">bits</span> <span class="o">&lt;</span> <span class="mi">10</span>
+
+    <span class="c">#The 1.5 ensures the 2 MSBs are set</span>
+    <span class="c">#Thus, when used for p,q in RSA, n will have its MSB set</span>
+    <span class="c">#</span>
+    <span class="c">#Since 30 is lcm(2,3,5), we&#39;ll set our test numbers to</span>
+    <span class="c">#29 % 30 and keep them there</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="p">(</span><span class="il">2L</span> <span class="o">**</span> <span class="p">(</span><span class="n">bits</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="mi">3</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">high</span> <span class="o">=</span> <span class="il">2L</span> <span class="o">**</span> <span class="n">bits</span> <span class="o">-</span> <span class="mi">30</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">generate_random_long</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">+=</span> <span class="mi">29</span> <span class="o">-</span> <span class="p">(</span><span class="n">p</span> <span class="o">%</span> <span class="mi">30</span><span class="p">)</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">+=</span> <span class="mi">30</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;=</span> <span class="n">high</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">generate_random_long</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+            <span class="n">p</span> <span class="o">+=</span> <span class="mi">29</span> <span class="o">-</span> <span class="p">(</span><span class="n">p</span> <span class="o">%</span> <span class="mi">30</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_prime</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">p</span>
+
+</div>
+<div class="viewcode-block" id="generate_random_safe_prime"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.primes.generate_random_safe_prime">[docs]</a><span class="k">def</span> <span class="nf">generate_random_safe_prime</span><span class="p">(</span><span class="n">bits</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unused at the moment.</span>
+
+<span class="sd">    Generates a random prime number.</span>
+
+<span class="sd">    :param bits:</span>
+<span class="sd">        Number of bits.</span>
+<span class="sd">    :return:</span>
+<span class="sd">        Prime number long value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">bits</span> <span class="o">&lt;</span> <span class="mi">10</span>
+
+    <span class="c">#The 1.5 ensures the 2 MSBs are set</span>
+    <span class="c">#Thus, when used for p,q in RSA, n will have its MSB set</span>
+    <span class="c">#</span>
+    <span class="c">#Since 30 is lcm(2,3,5), we&#39;ll set our test numbers to</span>
+    <span class="c">#29 % 30 and keep them there</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">bits</span><span class="o">-</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="mi">3</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">high</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">bits</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mi">30</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">generate_random_long</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">+=</span> <span class="mi">29</span> <span class="o">-</span> <span class="p">(</span><span class="n">q</span> <span class="o">%</span> <span class="mi">30</span><span class="p">)</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">q</span> <span class="o">+=</span> <span class="mi">30</span>
+        <span class="k">if</span> <span class="n">q</span> <span class="o">&gt;=</span> <span class="n">high</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">generate_random_long</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+            <span class="n">q</span> <span class="o">+=</span> <span class="mi">29</span> <span class="o">-</span> <span class="p">(</span><span class="n">q</span> <span class="o">%</span> <span class="mi">30</span><span class="p">)</span>
+        <span class="c">#Ideas from Tom Wu&#39;s SRP code</span>
+        <span class="c">#Do trial division on p and q before Rabin-Miller</span>
+        <span class="k">if</span> <span class="n">is_prime</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">is_prime</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">is_prime</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">p</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

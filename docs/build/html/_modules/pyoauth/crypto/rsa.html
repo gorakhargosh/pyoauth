@@ -1,0 +1,124 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.crypto.rsa &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.crypto.rsa</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c"># Released into public domain.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.crypto.rsa</span>
+<span class="sd">:synopsis: Factory functions for RSA public and private keys.</span>
+
+<span class="sd">Encoded key parsing</span>
+<span class="sd">-------------------</span>
+<span class="sd">.. autofunction:: parse_private_key</span>
+<span class="sd">.. autofunction:: parse_public_key</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pyoauth.crypto.codec</span> <span class="kn">import</span> <span class="n">private_key_pem_decode</span><span class="p">,</span> <span class="n">public_key_pem_decode</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pyoauth.crypto.rsa.pycrypto</span> <span class="kn">import</span> <span class="n">PrivateKey</span><span class="p">,</span> <span class="n">PublicKey</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">PrivateKey</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">PublicKey</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;RSA implementation not found.&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="parse_private_key"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.rsa.parse_private_key">[docs]</a><span class="k">def</span> <span class="nf">parse_private_key</span><span class="p">(</span><span class="n">encoded_key</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&quot;PEM&quot;</span><span class="p">):</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="n">encoding</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">encoding</span> <span class="o">==</span> <span class="s">&quot;PEM&quot;</span><span class="p">:</span>
+        <span class="n">key_info</span> <span class="o">=</span> <span class="n">private_key_pem_decode</span><span class="p">(</span><span class="n">encoded_key</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Key encoding not supported.&quot;</span><span class="p">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">PrivateKey</span><span class="p">(</span><span class="n">key_info</span><span class="p">,</span> <span class="n">encoded_key</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">key</span>
+
+</div>
+<div class="viewcode-block" id="parse_public_key"><a class="viewcode-back" href="../../../api/crypto.html#pyoauth.crypto.rsa.parse_public_key">[docs]</a><span class="k">def</span> <span class="nf">parse_public_key</span><span class="p">(</span><span class="n">encoded_key</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&quot;PEM&quot;</span><span class="p">):</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="n">encoding</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">encoding</span> <span class="o">==</span> <span class="s">&quot;PEM&quot;</span><span class="p">:</span>
+        <span class="n">key_info</span> <span class="o">=</span> <span class="n">public_key_pem_decode</span><span class="p">(</span><span class="n">encoded_key</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Key encoding not supported.&quot;</span><span class="p">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">PublicKey</span><span class="p">(</span><span class="n">key_info</span><span class="p">,</span> <span class="n">encoded_key</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">key</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

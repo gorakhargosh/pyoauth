@@ -1,0 +1,181 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.crypto.rsa.pycrypto &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="pyoauth.crypto.rsa" href="../rsa.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.crypto.rsa.pycrypto</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.crypto.rsa.PyCrypto</span>
+<span class="sd">:synopsis: PyCrypto RSA implementation wrapper.</span>
+
+<span class="sd">.. autoclass:: PrivateKey</span>
+<span class="sd">.. autoclass:: PublicKey</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">Crypto.PublicKey</span> <span class="kn">import</span> <span class="n">RSA</span>
+<span class="kn">from</span> <span class="nn">pyoauth.crypto.rsa.keys</span> <span class="kn">import</span> \
+    <span class="n">PublicKey</span> <span class="k">as</span> <span class="n">_PublicKey</span><span class="p">,</span> \
+    <span class="n">PrivateKey</span> <span class="k">as</span> <span class="n">_PrivateKey</span>
+
+
+<div class="viewcode-block" id="PrivateKey"><a class="viewcode-back" href="../../../../api/crypto.html#pyoauth.crypto.rsa.pycrypto.PrivateKey">[docs]</a><span class="k">class</span> <span class="nc">PrivateKey</span><span class="p">(</span><span class="n">_PrivateKey</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a RSA private key.</span>
+
+<span class="sd">    :param encoded_key:</span>
+<span class="sd">        The encoded key string.</span>
+<span class="sd">    :param encoding:</span>
+<span class="sd">        The encoding method of the key. Default PEM.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_info</span><span class="p">,</span> <span class="n">encoded_key</span><span class="p">,</span> <span class="n">encoding</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PrivateKey</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">key_info</span><span class="p">,</span> <span class="n">encoded_key</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
+        <span class="n">key_info_args</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key_info</span><span class="p">[</span><span class="s">&quot;modulus&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key_info</span><span class="p">[</span><span class="s">&quot;publicExponent&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key_info</span><span class="p">[</span><span class="s">&quot;privateExponent&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key_info</span><span class="p">[</span><span class="s">&quot;prime1&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key_info</span><span class="p">[</span><span class="s">&quot;prime2&quot;</span><span class="p">],</span>
+            <span class="c">#self.key_info[&quot;exponent1&quot;],</span>
+            <span class="c">#self.key_info[&quot;exponent2&quot;],</span>
+            <span class="c">#self.key_info[&quot;coefficient&quot;],</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">=</span> <span class="n">RSA</span><span class="o">.</span><span class="n">construct</span><span class="p">(</span><span class="n">key_info_args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_sign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">digest</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sign the digest.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">digest</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">digest</span><span class="p">,</span> <span class="n">signature</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Verify signature against digest signed by public key.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#public_key = self.key.publickey()</span>
+        <span class="c">#return public_key.verify(digest, (signature, ))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">digest</span><span class="p">,</span> <span class="p">(</span><span class="n">signature</span><span class="p">,</span> <span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">.</span><span class="n">n</span>
+
+</div>
+<div class="viewcode-block" id="PublicKey"><a class="viewcode-back" href="../../../../api/crypto.html#pyoauth.crypto.rsa.pycrypto.PublicKey">[docs]</a><span class="k">class</span> <span class="nc">PublicKey</span><span class="p">(</span><span class="n">_PublicKey</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a RSA public key.</span>
+
+<span class="sd">    :param encoded_key:</span>
+<span class="sd">        The encoded key string.</span>
+<span class="sd">    :param encoding:</span>
+<span class="sd">        The encoding method of the key. Default PEM.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_info</span><span class="p">,</span> <span class="n">encoded_key</span><span class="p">,</span> <span class="n">encoding</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PublicKey</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">key_info</span><span class="p">,</span> <span class="n">encoded_key</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
+        <span class="n">key_info_args</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key_info</span><span class="p">[</span><span class="s">&quot;modulus&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key_info</span><span class="p">[</span><span class="s">&quot;exponent&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">=</span> <span class="n">RSA</span><span class="o">.</span><span class="n">construct</span><span class="p">(</span><span class="n">key_info_args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_sign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">digest</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sign the digest.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">digest</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">digest</span><span class="p">,</span> <span class="n">signature</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Verify signature against digest signed by public key.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">digest</span><span class="p">,</span> <span class="p">(</span><span class="n">signature</span><span class="p">,</span> <span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">.</span><span class="n">n</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

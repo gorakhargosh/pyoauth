@@ -1,0 +1,184 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.oauth1 &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.oauth1</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># OAuth 1.0 implementation.</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2011 Yesudeep Mangalapilly &lt;yesudeep@gmail.com&gt;</span>
+<span class="c">#</span>
+<span class="c"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may</span>
+<span class="c"># not use this file except in compliance with the License. You may obtain</span>
+<span class="c"># a copy of the License at</span>
+<span class="c">#</span>
+<span class="c">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c">#</span>
+<span class="c"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT</span>
+<span class="c"># WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the</span>
+<span class="c"># License for the specific language governing permissions and limitations</span>
+<span class="c"># under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.oauth1</span>
+<span class="sd">:synopsis: Implements OAuth 1.0.</span>
+
+<span class="sd">.. autoclass:: Credentials</span>
+<span class="sd">   :members:</span>
+<span class="sd">   :show-inheritance:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pyoauth.decorators</span> <span class="kn">import</span> <span class="n">deprecated</span>
+
+
+<span class="c"># Signature methods.</span>
+<span class="n">SIGNATURE_METHOD_HMAC_SHA1</span> <span class="o">=</span> <span class="s">&quot;HMAC-SHA1&quot;</span>
+<span class="n">SIGNATURE_METHOD_RSA_SHA1</span> <span class="o">=</span> <span class="s">&quot;RSA-SHA1&quot;</span>
+<span class="n">SIGNATURE_METHOD_PLAINTEXT</span> <span class="o">=</span> <span class="s">&quot;PLAINTEXT&quot;</span>
+<span class="n">SIGNATURE_METHODS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">SIGNATURE_METHOD_HMAC_SHA1</span><span class="p">,</span>
+    <span class="n">SIGNATURE_METHOD_RSA_SHA1</span><span class="p">,</span>
+    <span class="n">SIGNATURE_METHOD_PLAINTEXT</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="Credentials"><a class="viewcode-back" href="../../api/oauth1.html#pyoauth.oauth1.Credentials">[docs]</a><span class="k">class</span> <span class="nc">Credentials</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convenience wrapper for a pair of OAuth 1.0 credentials.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">shared_secret</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        OAuth Credentials.</span>
+
+<span class="sd">        :param identifier:</span>
+<span class="sd">            Identifier (old: key)</span>
+<span class="sd">        :param shared_secret:</span>
+<span class="sd">            Shared secret (old: secret)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shared_secret</span> <span class="o">=</span> <span class="n">shared_secret</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shared_secret</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_secret</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span>
+    <span class="k">def</span> <span class="nf">key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span>
+    <span class="k">def</span> <span class="nf">secret</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_secret</span>
+
+    <span class="c"># Mostly used when storing a secure cookie for temporary credentials</span>
+    <span class="c"># between redirects.</span>
+    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span><span class="p">,</span> <span class="n">shared_secret</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_shared_secret</span><span class="p">)</span>
+
+    <span class="c"># Used for comparison of credentials.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_shared_secret</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">credentials</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">credentials</span><span class="o">.</span><span class="n">key</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">credentials</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">!=</span> <span class="n">credentials</span><span class="o">.</span><span class="n">key</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;</span><span class="si">%(class_name)s</span><span class="s">: identifier=</span><span class="si">%(identifier)s</span><span class="s">, shared_secret=</span><span class="si">%(shared_secret)s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> \
+               <span class="nb">dict</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                    <span class="n">identifier</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+                    <span class="n">shared_secret</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_secret</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

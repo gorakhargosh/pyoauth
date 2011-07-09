@@ -1,0 +1,206 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.crypto.codec.pem &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="pyoauth.crypto.codec" href="../codec.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.crypto.codec.pem</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># Written by Bill Janssen. Borrowed from the Python ``ssl`` module.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.crypto.codec.pem</span>
+<span class="sd">:synopsis: PEM/DER conversion utilities.</span>
+
+<span class="sd">PEM/DER codec</span>
+<span class="sd">-------------</span>
+<span class="sd">.. autofunction:: pem_to_der</span>
+<span class="sd">.. autofunction:: der_to_pem</span>
+
+<span class="sd">Miscellaneous</span>
+<span class="sd">-------------</span>
+<span class="sd">.. autofunction:: cert_time_to_seconds</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types.codec</span> <span class="kn">import</span> <span class="n">base64_decode</span><span class="p">,</span> <span class="n">base64_encode</span>
+
+
+<span class="n">CERT_PEM_HEADER</span> <span class="o">=</span> <span class="s">&#39;-----BEGIN CERTIFICATE-----&#39;</span>
+<span class="n">CERT_PEM_FOOTER</span> <span class="o">=</span> <span class="s">&#39;-----END CERTIFICATE-----&#39;</span>
+
+<span class="n">PRIVATE_KEY_PEM_HEADER</span> <span class="o">=</span> <span class="s">&#39;-----BEGIN PRIVATE KEY-----&#39;</span>
+<span class="n">PRIVATE_KEY_PEM_FOOTER</span> <span class="o">=</span> <span class="s">&#39;-----END PRIVATE KEY-----&#39;</span>
+
+<span class="n">PUBLIC_KEY_PEM_HEADER</span> <span class="o">=</span> <span class="s">&#39;-----BEGIN PUBLIC KEY-----&#39;</span>
+<span class="n">PUBLIC_KEY_PEM_FOOTER</span> <span class="o">=</span> <span class="s">&#39;-----END PUBLIC KEY-----&#39;</span>
+
+<span class="n">RSA_PRIVATE_KEY_PEM_HEADER</span> <span class="o">=</span> <span class="s">&#39;-----BEGIN RSA PRIVATE KEY-----&#39;</span>
+<span class="n">RSA_PRIVATE_KEY_PEM_FOOTER</span> <span class="o">=</span> <span class="s">&#39;-----END RSA PRIVATE KEY-----&#39;</span>
+
+
+<div class="viewcode-block" id="cert_time_to_seconds"><a class="viewcode-back" href="../../../../api/crypto.html#pyoauth.crypto.codec.pem.cert_time_to_seconds">[docs]</a><span class="k">def</span> <span class="nf">cert_time_to_seconds</span><span class="p">(</span><span class="n">cert_time</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a date-time string in standard ASN1_print form</span>
+<span class="sd">    (&quot;MON DAY 24HOUR:MINUTE:SEC YEAR TIMEZONE&quot;) and return</span>
+<span class="sd">    a Python time value in seconds past the epoch.</span>
+
+<span class="sd">    :param cert_time:</span>
+<span class="sd">        Time value in the certificate.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Python time value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">cert_time</span><span class="p">,</span> <span class="s">&quot;%b </span><span class="si">%d</span><span class="s"> %H:%M:%S %Y GMT&quot;</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="pem_to_der"><a class="viewcode-back" href="../../../../api/crypto.html#pyoauth.crypto.codec.pem.pem_to_der">[docs]</a><span class="k">def</span> <span class="nf">pem_to_der</span><span class="p">(</span><span class="n">pem_cert_string</span><span class="p">,</span> <span class="n">pem_header</span><span class="p">,</span> <span class="n">pem_footer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts the DER as a byte sequence out of an ASCII PEM formatted</span>
+<span class="sd">    certificate or key.</span>
+
+<span class="sd">    Taken from the Python SSL module.</span>
+
+<span class="sd">    :param pem_cert_string:</span>
+<span class="sd">        The PEM certificate or key string.</span>
+<span class="sd">    :param pem_header:</span>
+<span class="sd">        The PEM header to find.</span>
+<span class="sd">    :param pem_footer:</span>
+<span class="sd">        The PEM footer to find.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Be a little lenient.</span>
+    <span class="n">pem_cert_string</span> <span class="o">=</span> <span class="n">pem_cert_string</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pem_cert_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">pem_header</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid PEM encoding; must start with </span><span class="si">%s</span><span class="s">&quot;</span>
+                         <span class="o">%</span> <span class="n">pem_header</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pem_cert_string</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">pem_footer</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid PEM encoding; must end with </span><span class="si">%s</span><span class="s">&quot;</span>
+                         <span class="o">%</span> <span class="n">pem_footer</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">pem_cert_string</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">pem_header</span><span class="p">):</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">pem_footer</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">base64_decode</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="der_to_pem"><a class="viewcode-back" href="../../../../api/crypto.html#pyoauth.crypto.codec.pem.der_to_pem">[docs]</a><span class="k">def</span> <span class="nf">der_to_pem</span><span class="p">(</span><span class="n">der_cert_bytes</span><span class="p">,</span> <span class="n">pem_header</span><span class="p">,</span> <span class="n">pem_footer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a certificate in binary DER format and returns the</span>
+<span class="sd">    PEM version of it as a string.</span>
+
+<span class="sd">    Taken from the Python SSL module.</span>
+
+<span class="sd">    :param der_cert_bytes:</span>
+<span class="sd">        A byte string of the DER.</span>
+<span class="sd">    :param pem_header:</span>
+<span class="sd">        The PEM header to use.</span>
+<span class="sd">    :param pem_footer:</span>
+<span class="sd">        The PEM footer to use.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Does what base64.b64encode without the `altchars` argument does.</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">base64_encode</span><span class="p">(</span><span class="n">der_cert_bytes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">pem_header</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span>
+            <span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span>
+            <span class="n">pem_footer</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+
+<span class="c"># Helper functions. Use these instead of using der_to_per and per_to_der.</span></div>
+<span class="n">pem_to_der_private_key</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">pem_to_der</span><span class="p">,</span>
+                                 <span class="n">pem_header</span><span class="o">=</span><span class="n">PRIVATE_KEY_PEM_HEADER</span><span class="p">,</span>
+                                 <span class="n">pem_footer</span><span class="o">=</span><span class="n">PRIVATE_KEY_PEM_FOOTER</span><span class="p">)</span>
+<span class="n">pem_to_der_rsa_private_key</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">pem_to_der</span><span class="p">,</span>
+                                     <span class="n">pem_header</span><span class="o">=</span><span class="n">RSA_PRIVATE_KEY_PEM_HEADER</span><span class="p">,</span>
+                                     <span class="n">pem_footer</span><span class="o">=</span><span class="n">RSA_PRIVATE_KEY_PEM_FOOTER</span><span class="p">)</span>
+<span class="n">pem_to_der_public_key</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">pem_to_der</span><span class="p">,</span>
+                                <span class="n">pem_header</span><span class="o">=</span><span class="n">PUBLIC_KEY_PEM_HEADER</span><span class="p">,</span>
+                                <span class="n">pem_footer</span><span class="o">=</span><span class="n">PUBLIC_KEY_PEM_FOOTER</span><span class="p">)</span>
+<span class="n">pem_to_der_certificate</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">pem_to_der</span><span class="p">,</span>
+                                 <span class="n">pem_header</span><span class="o">=</span><span class="n">CERT_PEM_HEADER</span><span class="p">,</span>
+                                 <span class="n">pem_footer</span><span class="o">=</span><span class="n">CERT_PEM_FOOTER</span><span class="p">)</span>
+
+<span class="n">der_to_pem_private_key</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">der_to_pem</span><span class="p">,</span>
+                                 <span class="n">pem_header</span><span class="o">=</span><span class="n">PRIVATE_KEY_PEM_HEADER</span><span class="p">,</span>
+                                 <span class="n">pem_footer</span><span class="o">=</span><span class="n">PRIVATE_KEY_PEM_FOOTER</span><span class="p">)</span>
+<span class="n">der_to_pem_rsa_private_key</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">der_to_pem</span><span class="p">,</span>
+                                     <span class="n">pem_header</span><span class="o">=</span><span class="n">RSA_PRIVATE_KEY_PEM_HEADER</span><span class="p">,</span>
+                                     <span class="n">pem_footer</span><span class="o">=</span><span class="n">RSA_PRIVATE_KEY_PEM_FOOTER</span><span class="p">)</span>
+<span class="n">der_to_pem_public_key</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">der_to_pem</span><span class="p">,</span>
+                                <span class="n">pem_header</span><span class="o">=</span><span class="n">PUBLIC_KEY_PEM_HEADER</span><span class="p">,</span>
+                                <span class="n">pem_footer</span><span class="o">=</span><span class="n">PUBLIC_KEY_PEM_FOOTER</span><span class="p">)</span>
+<span class="n">der_to_pem_certificate</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">der_to_pem</span><span class="p">,</span>
+                                 <span class="n">pem_header</span><span class="o">=</span><span class="n">CERT_PEM_HEADER</span><span class="p">,</span>
+                                 <span class="n">pem_footer</span><span class="o">=</span><span class="n">CERT_PEM_FOOTER</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

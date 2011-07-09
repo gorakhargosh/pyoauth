@@ -1,0 +1,893 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Type detection, encoding, and conversion &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="Cryptography primitives" href="crypto.html" />
+    <link rel="prev" title="Protocol-specific utilities" href="protocol.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="type-detection-encoding-and-conversion">
+<h1>Type detection, encoding, and conversion<a class="headerlink" href="#type-detection-encoding-and-conversion" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pyoauth.types">
+<span id="pyoauth-types"></span><h2><cite>pyoauth.types</cite><a class="headerlink" href="#module-pyoauth.types" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.types</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Common portable Python type conversion and detection.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="type-detection">
+<h3>Type detection<a class="headerlink" href="#type-detection" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.types.is_sequence">
+<tt class="descclassname">pyoauth.types.</tt><tt class="descname">is_sequence</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types.html#is_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.is_sequence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.is_unicode">
+<tt class="descclassname">pyoauth.types.</tt><tt class="descname">is_unicode</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types.html#is_unicode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.is_unicode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether the given value is a Unicode string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; The value to test.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><tt class="xref docutils literal"><span class="pre">True</span></tt> if <tt class="docutils literal"><span class="pre">value</span></tt> is a Unicode string; <tt class="xref docutils literal"><span class="pre">False</span></tt> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.is_bytes">
+<tt class="descclassname">pyoauth.types.</tt><tt class="descname">is_bytes</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types.html#is_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.is_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether the given value is a byte string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; The value to test.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><tt class="xref docutils literal"><span class="pre">True</span></tt> if <tt class="docutils literal"><span class="pre">value</span></tt> is a byte string; <tt class="xref docutils literal"><span class="pre">False</span></tt> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.is_bytes_or_unicode">
+<tt class="descclassname">pyoauth.types.</tt><tt class="descname">is_bytes_or_unicode</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types.html#is_bytes_or_unicode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.is_bytes_or_unicode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether the given value is an instance of a string irrespective
+of whether it is a byte string or a Unicode string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; The value to test.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><tt class="xref docutils literal"><span class="pre">True</span></tt> if <tt class="docutils literal"><span class="pre">value</span></tt> is a string; <tt class="xref docutils literal"><span class="pre">False</span></tt> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.types.bitstring">
+<span id="pyoauth-types-bitstring"></span><h2><cite>pyoauth.types.bitstring</cite><a class="headerlink" href="#module-pyoauth.types.bitstring" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.types.bitstring</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Utilities for working with bit strings.</td>
+</tr>
+<tr class="field"><th class="field-name">author:</th><td class="field-body">Arne Roomann-Kurrik &lt;<a class="reference external" href="mailto:kurrik&#37;&#52;&#48;gmail&#46;com">kurrik<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="type-conversion">
+<h3>Type conversion<a class="headerlink" href="#type-conversion" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.types.bitstring.bits_to_long">
+<tt class="descclassname">pyoauth.types.bitstring.</tt><tt class="descname">bits_to_long</tt><big>(</big><em>bits</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/bitstring.html#bits_to_long"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.bitstring.bits_to_long" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a bit sequence to a long value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bits</strong> &#8211; Bit sequence.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Long value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.bitstring.long_to_bitstring">
+<tt class="descclassname">pyoauth.types.bitstring.</tt><tt class="descname">long_to_bitstring</tt><big>(</big><em>num</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/bitstring.html#long_to_bitstring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.bitstring.long_to_bitstring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a long into the bit string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>num</strong> &#8211; Long value</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A bit string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.types.bytearray">
+<span id="pyoauth-types-bytearray"></span><h2><cite>pyoauth.types.bytearray</cite><a class="headerlink" href="#module-pyoauth.types.bytearray" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.types.bytearray</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Byte arrays.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="creation-and-manipulation">
+<h3>Creation and manipulation<a class="headerlink" href="#creation-and-manipulation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.types.bytearray.bytearray_create">
+<tt class="descclassname">pyoauth.types.bytearray.</tt><tt class="descname">bytearray_create</tt><big>(</big><em>sequence</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/bytearray.html#bytearray_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.bytearray.bytearray_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a byte array from a given sequence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sequence</strong> &#8211; The sequence from which a byte array will be created.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A byte array.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.bytearray.bytearray_create_zeros">
+<tt class="descclassname">pyoauth.types.bytearray.</tt><tt class="descname">bytearray_create_zeros</tt><big>(</big><em>count</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/bytearray.html#bytearray_create_zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.bytearray.bytearray_create_zeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a zero-filled byte array of with <tt class="docutils literal"><span class="pre">count</span></tt> bytes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>count</strong> &#8211; The number of zero bytes.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Zero-filled byte array.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.bytearray.bytearray_concat">
+<tt class="descclassname">pyoauth.types.bytearray.</tt><tt class="descname">bytearray_concat</tt><big>(</big><em>byte_array1</em>, <em>byte_array2</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/bytearray.html#bytearray_concat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.bytearray.bytearray_concat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenates two byte arrays.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>byte_array1</strong> &#8211; Byte array 1</li>
+<li><strong>byte_array2</strong> &#8211; Byte array 2</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Concatenated byte array.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>Type conversion<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.types.bytearray.bytearray_to_bytes">
+<tt class="descclassname">pyoauth.types.bytearray.</tt><tt class="descname">bytearray_to_bytes</tt><big>(</big><em>byte_array</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/bytearray.html#bytearray_to_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.bytearray.bytearray_to_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a byte array into a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>byte_array</strong> &#8211; The byte array.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">String.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.bytearray.bytes_to_bytearray">
+<tt class="descclassname">pyoauth.types.bytearray.</tt><tt class="descname">bytes_to_bytearray</tt><big>(</big><em>byte_string</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/bytearray.html#bytes_to_bytearray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.bytearray.bytes_to_bytearray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a string into a byte array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>byte_string</strong> &#8211; String value.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Byte array.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.bytearray.bytearray_to_long">
+<tt class="descclassname">pyoauth.types.bytearray.</tt><tt class="descname">bytearray_to_long</tt><big>(</big><em>byte_array</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/bytearray.html#bytearray_to_long"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.bytearray.bytearray_to_long" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a byte array to long.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>byte_array</strong> &#8211; The byte array.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Long.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.bytearray.long_to_bytearray">
+<tt class="descclassname">pyoauth.types.bytearray.</tt><tt class="descname">long_to_bytearray</tt><big>(</big><em>num</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/bytearray.html#long_to_bytearray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.bytearray.long_to_bytearray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a long into a byte array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>num</strong> &#8211; Long value</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Long.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.types.codec">
+<span id="pyoauth-types-codec"></span><h2><cite>pyoauth.types.codec</cite><a class="headerlink" href="#module-pyoauth.types.codec" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.types.codec</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Number representation codecs.</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="pyoauth.types.codec.base64_decode">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">base64_decode</tt><big>(</big><em>encoded</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#base64_decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.base64_decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes a base-64 encoded string into a byte string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>encoded</strong> &#8211; Base-64 encoded byte string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">byte string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.base64_encode">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">base64_encode</tt><big>(</big><em>byte_string</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#base64_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.base64_encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a byte string using Base 64 and removes the last new line character.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>byte_string</strong> &#8211; The byte string to encode.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Base64 encoded string without newline characters.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.bytes_to_hex">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">bytes_to_hex</tt><big>(</big><em>byte_string</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#bytes_to_hex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.bytes_to_hex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a byte string to its hex representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>byte_string</strong> &#8211; Byte string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Hex-encoded byte string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.hex_to_bytes">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">hex_to_bytes</tt><big>(</big><em>encoded</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#hex_to_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.hex_to_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a hex byte string to its byte representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>encoded</strong> &#8211; Hex string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Byte string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.bytes_to_base64">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">bytes_to_base64</tt><big>(</big><em>byte_string</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#bytes_to_base64"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.bytes_to_base64" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a byte string to its Base64 representation.
+(Mostly for consistency.)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>byte_string</strong> &#8211; Byte string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Base64-encoded byte string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.base64_to_bytes">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">base64_to_bytes</tt><big>(</big><em>encoded</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#base64_to_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.base64_to_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes a base-64 encoded string into a byte string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>encoded</strong> &#8211; Base-64 encoded byte string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">byte string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.bytes_to_decimal">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">bytes_to_decimal</tt><big>(</big><em>byte_string</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#bytes_to_decimal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.bytes_to_decimal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a byte string to its decimal representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>byte_string</strong> &#8211; Byte string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Decimal-encoded byte string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.decimal_to_bytes">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">decimal_to_bytes</tt><big>(</big><em>encoded</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#decimal_to_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.decimal_to_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a decimal encoded string to its byte representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>encoded</strong> &#8211; Decimal encoded string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Byte string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.base64_to_bytearray">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">base64_to_bytearray</tt><big>(</big><em>encoded</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#base64_to_bytearray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.base64_to_bytearray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a base-64 encoded value into a byte array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>encoded</strong> &#8211; The base-64 encoded value.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Byte array.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.bytearray_to_base64">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">bytearray_to_base64</tt><big>(</big><em>byte_array</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#bytearray_to_base64"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.bytearray_to_base64" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base-64 encodes a byte array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>byte_array</strong> &#8211; The byte array.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Base-64 encoded byte array without newlines.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.long_to_base64">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">long_to_base64</tt><big>(</big><em>num</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#long_to_base64"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.long_to_base64" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base-64 encodes a long.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>num</strong> &#8211; A long integer.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Base-64 encoded byte string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.codec.base64_to_long">
+<tt class="descclassname">pyoauth.types.codec.</tt><tt class="descname">base64_to_long</tt><big>(</big><em>encoded</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/codec.html#base64_to_long"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.codec.base64_to_long" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base-64 decodes a string into a long.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>encoded</strong> &#8211; The encoded byte string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Long value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyoauth.types.json">
+<span id="pyoauth-types-json"></span><h2><cite>pyoauth.types.json</cite><a class="headerlink" href="#module-pyoauth.types.json" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.types.json</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">JSON codec.</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="pyoauth.types.json.json_decode">
+<tt class="descclassname">pyoauth.types.json.</tt><tt class="descname">json_decode</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/json.html#json_decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.json.json_decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes a JSON string into its equivalent Python value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; JSON string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Decoded Python value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.json.json_encode">
+<tt class="descclassname">pyoauth.types.json.</tt><tt class="descname">json_encode</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/json.html#json_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.json.json_encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a Python value into its equivalent JSON string.</p>
+<p>JSON permits but does not require forward slashes to be escaped.
+This is useful when json data is emitted in a &lt;script&gt; tag
+in HTML, as it prevents &lt;/script&gt; tags from prematurely terminating
+the javscript. Some json libraries do this escaping by default,
+although python&#8217;s standard library does not, so we do it here.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body"><a class="reference external" href="http://stackoverflow.com/questions/1580647/json-why-are-forward-slashes-escaped">http://stackoverflow.com/questions/1580647/json-why-are-forward-slashes-escaped</a></td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; Python value.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">JSON string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyoauth.types.number">
+<span id="pyoauth-types-number"></span><h2><cite>pyoauth.types.number</cite><a class="headerlink" href="#module-pyoauth.types.number" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.types.number</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Number routines.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="id2">
+<h3>Type conversion<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.types.number.bytes_to_long">
+<tt class="descclassname">pyoauth.types.number.</tt><tt class="descname">bytes_to_long</tt><big>(</big><em>byte_string</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/number.html#bytes_to_long"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.number.bytes_to_long" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a byte string to a long integer:</p>
+<div class="highlight-python"><pre>bytes_to_long(bytestring) : long</pre>
+</div>
+<p>This is (essentially) the inverse of long_to_bytes().</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bytestring</strong> &#8211; A byte string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Long.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.number.long_to_bytes">
+<tt class="descclassname">pyoauth.types.number.</tt><tt class="descname">long_to_bytes</tt><big>(</big><em>num</em>, <em>blocksize=0</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/number.html#long_to_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.number.long_to_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a long integer to a byte string:</p>
+<div class="highlight-python"><pre>long_to_bytes(n:long, blocksize:int) : string</pre>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>num</strong> &#8211; Long value</li>
+<li><strong>blocksize</strong> &#8211; If optional blocksize is given and greater than zero, pad the front of
+the byte string with binary zeros so that the length is a multiple of
+blocksize.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Byte string.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="bignum">
+<h3>BigNum<a class="headerlink" href="#bignum" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.types.number.mpi_to_long">
+<tt class="descclassname">pyoauth.types.number.</tt><tt class="descname">mpi_to_long</tt><big>(</big><em>mpi_byte_string</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/number.html#mpi_to_long"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.number.mpi_to_long" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an OpenSSL-format MPI Bignum byte string into a long.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mpi_byte_string</strong> &#8211; OpenSSL-format MPI Bignum byte string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Long value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.number.long_to_mpi">
+<tt class="descclassname">pyoauth.types.number.</tt><tt class="descname">long_to_mpi</tt><big>(</big><em>num</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/number.html#long_to_mpi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.number.long_to_mpi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a long value into an OpenSSL-format MPI Bignum byte string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>num</strong> &#8211; Long value.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">OpenSSL-format MPI Bignum byte string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="math">
+<h3>Math<a class="headerlink" href="#math" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.types.number.pow_mod">
+<tt class="descclassname">pyoauth.types.number.</tt><tt class="descname">pow_mod</tt><big>(</big><em>base</em>, <em>power</em>, <em>modulus</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/number.html#pow_mod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.number.pow_mod" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Calculates:</dt>
+<dd>base**pow mod modulus</dd>
+</dl>
+<p>Uses multi bit scanning with nBitScan bits at a time.
+From Bryan G. Olson&#8217;s post to comp.lang.python</p>
+<p>Does left-to-right instead of pow()&#8217;s right-to-left,
+thus about 30% faster than the python built-in with small bases</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>base</strong> &#8211; Base</li>
+<li><strong>power</strong> &#8211; Power</li>
+<li><strong>modulus</strong> &#8211; Modulus</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">base**pow mod modulus</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.number.inverse_mod">
+<tt class="descclassname">pyoauth.types.number.</tt><tt class="descname">inverse_mod</tt><big>(</big><em>a</em>, <em>b</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/number.html#inverse_mod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.number.inverse_mod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns inverse of a mod b, zero if none</p>
+<p>Uses Extended Euclidean Algorithm</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> &#8211; Long value</li>
+<li><strong>b</strong> &#8211; Long value</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Inverse of a mod b, zero if none.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.types.unicode">
+<span id="pyoauth-types-unicode"></span><h2><cite>pyoauth.types.unicode</cite><a class="headerlink" href="#module-pyoauth.types.unicode" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.types.unicode</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Unicode encoding utility functions.</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="pyoauth.types.unicode.unicode_to_utf8">
+<tt class="descclassname">pyoauth.types.unicode.</tt><tt class="descname">unicode_to_utf8</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/unicode.html#unicode_to_utf8"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.unicode.unicode_to_utf8" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a string argument to a UTF-8 encoded byte string if it is a
+Unicode string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; If already a byte string or None, it is returned unchanged.
+Otherwise it must be a Unicode string and is encoded as UTF-8.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.unicode.bytes_to_unicode">
+<tt class="descclassname">pyoauth.types.unicode.</tt><tt class="descname">bytes_to_unicode</tt><big>(</big><em>value</em>, <em>encoding='utf-8'</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/unicode.html#bytes_to_unicode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.unicode.bytes_to_unicode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts bytes to a Unicode string decoding it according to the encoding
+specified.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>value</strong> &#8211; If already a Unicode string or None, it is returned unchanged.
+Otherwise it must be a byte string.</li>
+<li><strong>encoding</strong> &#8211; The encoding used to decode bytes. Defaults to UTF-8</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.unicode.to_utf8_if_unicode">
+<tt class="descclassname">pyoauth.types.unicode.</tt><tt class="descname">to_utf8_if_unicode</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/unicode.html#to_utf8_if_unicode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.unicode.to_utf8_if_unicode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an argument to a UTF-8 encoded byte string if the argument
+is a Unicode string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; The value that will be UTF-8 encoded if it is a string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">UTF-8 encoded byte string if the argument is a Unicode string; otherwise
+the value is returned unchanged.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.unicode.to_unicode_if_bytes">
+<tt class="descclassname">pyoauth.types.unicode.</tt><tt class="descname">to_unicode_if_bytes</tt><big>(</big><em>value</em>, <em>encoding='utf-8'</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/unicode.html#to_unicode_if_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.unicode.to_unicode_if_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an argument to Unicode string if the argument is a byte string
+decoding it as specified by the encoding.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> &#8211; The value that will be converted to a Unicode string.</li>
+<li><strong>encoding</strong> &#8211; The encoding used to decode bytes. Defaults to UTF-8.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Unicode string if the argument is a byte string. Otherwise the value
+is returned unchanged.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.types.unicode.to_unicode_recursively">
+<tt class="descclassname">pyoauth.types.unicode.</tt><tt class="descname">to_unicode_recursively</tt><big>(</big><em>obj</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/types/unicode.html#to_unicode_recursively"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.types.unicode.to_unicode_recursively" title="Permalink to this definition">¶</a></dt>
+<dd><p>Walks a simple data structure, converting byte strings to unicode.</p>
+<p>Supports lists, tuples, and dictionaries.</p>
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Type detection, encoding, and conversion</a><ul>
+<li><a class="reference internal" href="#module-pyoauth.types"><cite>pyoauth.types</cite></a><ul>
+<li><a class="reference internal" href="#type-detection">Type detection</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.types.bitstring"><cite>pyoauth.types.bitstring</cite></a><ul>
+<li><a class="reference internal" href="#type-conversion">Type conversion</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.types.bytearray"><cite>pyoauth.types.bytearray</cite></a><ul>
+<li><a class="reference internal" href="#creation-and-manipulation">Creation and manipulation</a></li>
+<li><a class="reference internal" href="#id1">Type conversion</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.types.codec"><cite>pyoauth.types.codec</cite></a></li>
+<li><a class="reference internal" href="#module-pyoauth.types.json"><cite>pyoauth.types.json</cite></a></li>
+<li><a class="reference internal" href="#module-pyoauth.types.number"><cite>pyoauth.types.number</cite></a><ul>
+<li><a class="reference internal" href="#id2">Type conversion</a></li>
+<li><a class="reference internal" href="#bignum">BigNum</a></li>
+<li><a class="reference internal" href="#math">Math</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.types.unicode"><cite>pyoauth.types.unicode</cite></a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Navigation</h3>
+<p>
+  <a href="../index.html">Documentation overview</a>
+</p>
+<ul>
+    <li>Previous: <a
+      href="protocol.html"
+      title="previous chapter"
+    >Protocol-specific utilities</a>
+    </li>
+    <li>Next: <a
+      href="crypto.html"
+      title="next chapter"
+    >Cryptography primitives</a>
+    </li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/types.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

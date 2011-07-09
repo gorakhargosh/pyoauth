@@ -1,0 +1,150 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>A typical OAuth 1.0 flow in simple words &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="Using RSA-SHA1 signatures" href="rsa_sha1.html" />
+    <link rel="prev" title="PyOAuth" href="../index.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="a-typical-oauth-1-0-flow-in-simple-words">
+<h1>A typical OAuth 1.0 flow in simple words<a class="headerlink" href="#a-typical-oauth-1-0-flow-in-simple-words" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic">
+<li><p class="first">Construct a client with its client credentials.</p>
+</li>
+<li><p class="first">Send an HTTPS request for temporary credentials with a callback URL
+which the server will call with an OAuth verification code after
+authorizing the resource owner (end-user).</p>
+</li>
+<li><p class="first">Obtain temporary credentials from a successful server response.</p>
+</li>
+<li><p class="first">Use the temporary credentials to build an authorization URL and
+redirect the resource owner (end-user) to the generated URL.</p>
+</li>
+<li><p class="first">If a callback URL is not provided when requesting temporary credentials,
+the server displays the OAuth verification code to the resource owner
+(end-user), which she then types into your application.</p>
+<p>OR</p>
+<p>If a callback URL is provided, the server redirects the resource owner
+(end-user) after authorization to your callback URL attaching the
+OAuth verification code as a query parameter.</p>
+</li>
+<li><p class="first">Using the obtained OAuth verification code from step 5 and the
+temporary credentials obtained in step 3, send an HTTPS request for
+token credentials.</p>
+</li>
+<li><p class="first">Obtain token credentials from a successful server response.</p>
+</li>
+<li><p class="first">Save the token credentials for future use (say, in a database).</p>
+</li>
+</ol>
+<div class="section" id="accessing-a-resource">
+<h2>Accessing a resource<a class="headerlink" href="#accessing-a-resource" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Construct a client with its client credentials.</li>
+<li>Using the token credentials that you have saved (say, in a database),
+send an HTTP request to a resource URL.</li>
+<li>Obtain the response and deal with it.</li>
+</ol>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">A typical OAuth 1.0 flow in simple words</a><ul>
+<li><a class="reference internal" href="#accessing-a-resource">Accessing a resource</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Navigation</h3>
+<p>
+  <a href="../index.html">Documentation overview</a>
+</p>
+<ul>
+    <li>Previous: <a
+      href="../index.html"
+      title="previous chapter"
+    >PyOAuth</a>
+    </li>
+    <li>Next: <a
+      href="rsa_sha1.html"
+      title="next chapter"
+    >Using RSA-SHA1 signatures</a>
+    </li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/guides/oauth1.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

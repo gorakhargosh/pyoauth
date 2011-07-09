@@ -1,0 +1,224 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.oauth1.client.google &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="pyoauth.oauth1.client" href="../client.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.oauth1.client.google</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># Google OAuth 1.0 Client.</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2011 Yesudeep Mangalapilly &lt;yesudeep@gmail.com&gt;</span>
+<span class="c">#</span>
+<span class="c"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may</span>
+<span class="c"># not use this file except in compliance with the License. You may obtain</span>
+<span class="c"># a copy of the License at</span>
+<span class="c">#</span>
+<span class="c">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c">#</span>
+<span class="c"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT</span>
+<span class="c"># WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the</span>
+<span class="c"># License for the specific language governing permissions and limitations</span>
+<span class="c"># under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.oauth1.client.google</span>
+<span class="sd">:synopsis: Google OAuth 1.0 client implementation.</span>
+
+<span class="sd">.. autoclass:: GoogleClient</span>
+<span class="sd">   :members:</span>
+<span class="sd">   :show-inheritance:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pyoauth.error</span> <span class="kn">import</span> <span class="n">SignatureMethodNotSupportedError</span>
+<span class="kn">from</span> <span class="nn">pyoauth.oauth1</span> <span class="kn">import</span> <span class="n">SIGNATURE_METHOD_HMAC_SHA1</span><span class="p">,</span> <span class="n">SIGNATURE_METHOD_PLAINTEXT</span>
+
+<span class="kn">from</span> <span class="nn">pyoauth.oauth1.client</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types</span> <span class="kn">import</span> <span class="n">is_bytes_or_unicode</span>
+
+<div class="viewcode-block" id="GoogleClient"><a class="viewcode-back" href="../../../../api/oauth1.html#pyoauth.oauth1.client.google.GoogleClient">[docs]</a><span class="k">class</span> <span class="nc">GoogleClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates an instance of a Google OAuth 1.0 client.</span>
+
+<span class="sd">    :see: http://code.google.com/apis/accounts/docs/OAuth_ref.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI</span> <span class="o">=</span> <span class="s">&quot;https://www.google.com/accounts/OAuthGetRequestToken&quot;</span>
+    <span class="n">_OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI</span> <span class="o">=</span> <span class="s">&quot;https://www.google.com/accounts/OAuthAuthorizeToken&quot;</span>
+    <span class="n">_OAUTH_TOKEN_CREDENTIALS_REQUEST_URI</span> <span class="o">=</span> <span class="s">&quot;https://www.google.com/accounts/OAuthGetAccessToken&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">client_credentials</span><span class="p">,</span>
+                 <span class="n">use_authorization_header</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GoogleClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="n">client_credentials</span><span class="o">=</span><span class="n">client_credentials</span><span class="p">,</span>
+            <span class="n">temporary_credentials_request_uri</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI</span><span class="p">,</span>
+            <span class="n">token_credentials_request_uri</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI</span><span class="p">,</span>
+            <span class="n">resource_owner_authorization_uri</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI</span><span class="p">,</span>
+            <span class="n">use_authorization_header</span><span class="o">=</span><span class="n">use_authorization_header</span>
+        <span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_check_signature_method</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">signature_method</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">signature_method</span> <span class="o">==</span> <span class="n">SIGNATURE_METHOD_PLAINTEXT</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SignatureMethodNotSupportedError</span><span class="p">(</span><span class="s">&quot;Google OAuth 1.0 does not support the `</span><span class="si">%r</span><span class="s">` signature method.&quot;</span> <span class="o">%</span> <span class="n">signature_method</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GoogleClient.build_temporary_credentials_request"><a class="viewcode-back" href="../../../../api/oauth1.html#pyoauth.oauth1.client.google.GoogleClient.build_temporary_credentials_request">[docs]</a>    <span class="k">def</span> <span class="nf">build_temporary_credentials_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                            <span class="n">scopes</span><span class="p">,</span>
+                                            <span class="n">xoauth_displayname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                            <span class="n">method</span><span class="o">=</span><span class="s">&quot;POST&quot;</span><span class="p">,</span>
+                                            <span class="n">payload_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                            <span class="n">headers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                            <span class="n">realm</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                            <span class="n">oauth_signature_method</span><span class="o">=</span><span class="n">SIGNATURE_METHOD_HMAC_SHA1</span><span class="p">,</span>
+                                            <span class="n">oauth_callback</span><span class="o">=</span><span class="s">&quot;oob&quot;</span><span class="p">,</span>
+                                            <span class="o">**</span><span class="n">extra_oauth_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param scopes:</span>
+<span class="sd">            A list of scopes to use with the credential request.</span>
+<span class="sd">        :param xoauth_displayname:</span>
+<span class="sd">            The display name of the application.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload_params</span> <span class="o">=</span> <span class="n">payload_params</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="n">scope</span> <span class="o">=</span> <span class="n">scopes</span> <span class="k">if</span> <span class="n">is_bytes_or_unicode</span><span class="p">(</span><span class="n">scopes</span><span class="p">)</span> <span class="k">else</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scopes</span><span class="p">)</span>
+        <span class="n">google_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">xoauth_displayname</span><span class="p">:</span>
+            <span class="n">google_params</span><span class="p">[</span><span class="s">&quot;xoauth_displayname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xoauth_displayname</span>
+        <span class="n">payload_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">google_params</span><span class="p">)</span>
+
+        <span class="n">GoogleClient</span><span class="o">.</span><span class="n">_check_signature_method</span><span class="p">(</span><span class="n">oauth_signature_method</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">GoogleClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">build_temporary_credentials_request</span><span class="p">(</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">payload_params</span><span class="o">=</span><span class="n">payload_params</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">realm</span><span class="o">=</span><span class="n">realm</span><span class="p">,</span>
+            <span class="n">oauth_signature_method</span><span class="o">=</span><span class="n">oauth_signature_method</span><span class="p">,</span>
+            <span class="n">oauth_callback</span><span class="o">=</span><span class="n">oauth_callback</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">extra_oauth_params</span>
+        <span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">build_token_credentials_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                        <span class="n">temporary_credentials</span><span class="p">,</span>
+                                        <span class="n">oauth_verifier</span><span class="p">,</span>
+                                        <span class="n">method</span><span class="o">=</span><span class="s">&quot;POST&quot;</span><span class="p">,</span>
+                                        <span class="n">payload_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                        <span class="n">headers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                        <span class="n">realm</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                        <span class="n">oauth_signature_method</span><span class="o">=</span><span class="n">SIGNATURE_METHOD_HMAC_SHA1</span><span class="p">,</span>
+                                        <span class="o">**</span><span class="n">extra_oauth_params</span><span class="p">):</span>
+        <span class="n">GoogleClient</span><span class="o">.</span><span class="n">_check_signature_method</span><span class="p">(</span><span class="n">oauth_signature_method</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">GoogleClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">build_token_credentials_request</span><span class="p">(</span>
+            <span class="n">temporary_credentials</span><span class="o">=</span><span class="n">temporary_credentials</span><span class="p">,</span>
+            <span class="n">oauth_verifier</span><span class="o">=</span><span class="n">oauth_verifier</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">payload_params</span><span class="o">=</span><span class="n">payload_params</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">realm</span><span class="o">=</span><span class="n">realm</span><span class="p">,</span>
+            <span class="n">oauth_signature_method</span><span class="o">=</span><span class="n">oauth_signature_method</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">extra_oauth_params</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">build_resource_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                               <span class="n">token_credentials</span><span class="p">,</span>
+                               <span class="n">method</span><span class="p">,</span>
+                               <span class="n">url</span><span class="p">,</span>
+                               <span class="n">payload_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">headers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">realm</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">oauth_signature_method</span><span class="o">=</span><span class="n">SIGNATURE_METHOD_HMAC_SHA1</span><span class="p">,</span>
+                               <span class="o">**</span><span class="n">extra_oauth_params</span><span class="p">):</span>
+        <span class="n">GoogleClient</span><span class="o">.</span><span class="n">_check_signature_method</span><span class="p">(</span><span class="n">oauth_signature_method</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">GoogleClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">build_resource_request</span><span class="p">(</span>
+            <span class="n">token_credentials</span><span class="o">=</span><span class="n">token_credentials</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
+            <span class="n">payload_params</span><span class="o">=</span><span class="n">payload_params</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">realm</span><span class="o">=</span><span class="n">realm</span><span class="p">,</span>
+            <span class="n">oauth_signature_method</span><span class="o">=</span><span class="n">oauth_signature_method</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">extra_oauth_params</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+    </ul></li>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

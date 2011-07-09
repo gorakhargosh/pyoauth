@@ -1,0 +1,258 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.types.codec &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="pyoauth.types" href="../types.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.types.codec</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># Types for compatibility.</span>
+<span class="c"># Placed into the public domain.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.types.codec</span>
+<span class="sd">:synopsis: Number representation codecs.</span>
+
+
+<span class="sd">.. autofunction:: base64_decode</span>
+<span class="sd">.. autofunction:: base64_encode</span>
+<span class="sd">.. autofunction:: bytes_to_hex</span>
+<span class="sd">.. autofunction:: hex_to_bytes</span>
+<span class="sd">.. autofunction:: bytes_to_base64</span>
+<span class="sd">.. autofunction:: base64_to_bytes</span>
+<span class="sd">.. autofunction:: bytes_to_decimal</span>
+<span class="sd">.. autofunction:: decimal_to_bytes</span>
+<span class="sd">.. autofunction:: base64_to_bytearray</span>
+<span class="sd">.. autofunction:: bytearray_to_base64</span>
+<span class="sd">.. autofunction:: long_to_base64</span>
+<span class="sd">.. autofunction:: base64_to_long</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">binascii</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types</span> <span class="kn">import</span> <span class="nb">bytes</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types.bytearray</span> <span class="kn">import</span> <span class="n">bytes_to_bytearray</span><span class="p">,</span> <span class="n">bytearray_to_bytes</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types.number</span> <span class="kn">import</span> <span class="n">bytes_to_long</span><span class="p">,</span> <span class="n">long_to_bytes</span>
+
+
+<div class="viewcode-block" id="base64_decode"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.base64_decode">[docs]</a><span class="k">def</span> <span class="nf">base64_decode</span><span class="p">(</span><span class="n">encoded</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decodes a base-64 encoded string into a byte string.</span>
+
+<span class="sd">    :param encoded:</span>
+<span class="sd">        Base-64 encoded byte string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">binascii</span><span class="o">.</span><span class="n">a2b_base64</span><span class="p">(</span><span class="n">encoded</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="base64_encode"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.base64_encode">[docs]</a><span class="k">def</span> <span class="nf">base64_encode</span><span class="p">(</span><span class="n">byte_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encodes a byte string using Base 64 and removes the last new line character.</span>
+
+<span class="sd">    :param byte_string:</span>
+<span class="sd">        The byte string to encode.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Base64 encoded string without newline characters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">binascii</span><span class="o">.</span><span class="n">b2a_base64</span><span class="p">(</span><span class="n">byte_string</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="bytes_to_hex"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.bytes_to_hex">[docs]</a><span class="k">def</span> <span class="nf">bytes_to_hex</span><span class="p">(</span><span class="n">byte_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a byte string to its hex representation.</span>
+
+<span class="sd">    :param byte_string:</span>
+<span class="sd">        Byte string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Hex-encoded byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">binascii</span><span class="o">.</span><span class="n">b2a_hex</span><span class="p">(</span><span class="n">byte_string</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="hex_to_bytes"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.hex_to_bytes">[docs]</a><span class="k">def</span> <span class="nf">hex_to_bytes</span><span class="p">(</span><span class="n">encoded</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a hex byte string to its byte representation.</span>
+
+<span class="sd">    :param encoded:</span>
+<span class="sd">        Hex string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">binascii</span><span class="o">.</span><span class="n">a2b_hex</span><span class="p">(</span><span class="n">encoded</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="bytes_to_base64"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.bytes_to_base64">[docs]</a><span class="k">def</span> <span class="nf">bytes_to_base64</span><span class="p">(</span><span class="n">byte_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a byte string to its Base64 representation.</span>
+<span class="sd">    (Mostly for consistency.)</span>
+
+<span class="sd">    :param byte_string:</span>
+<span class="sd">        Byte string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Base64-encoded byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">base64_encode</span><span class="p">(</span><span class="n">byte_string</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="base64_to_bytes"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.base64_to_bytes">[docs]</a><span class="k">def</span> <span class="nf">base64_to_bytes</span><span class="p">(</span><span class="n">encoded</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decodes a base-64 encoded string into a byte string.</span>
+
+<span class="sd">    :param encoded:</span>
+<span class="sd">        Base-64 encoded byte string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">base64_decode</span><span class="p">(</span><span class="n">encoded</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="bytes_to_decimal"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.bytes_to_decimal">[docs]</a><span class="k">def</span> <span class="nf">bytes_to_decimal</span><span class="p">(</span><span class="n">byte_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a byte string to its decimal representation.</span>
+
+<span class="sd">    :param byte_string:</span>
+<span class="sd">        Byte string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Decimal-encoded byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#return bytes(int(bytes_to_hex(byte_string), 16))</span>
+    <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">bytes_to_long</span><span class="p">(</span><span class="n">byte_string</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="decimal_to_bytes"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.decimal_to_bytes">[docs]</a><span class="k">def</span> <span class="nf">decimal_to_bytes</span><span class="p">(</span><span class="n">encoded</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a decimal encoded string to its byte representation.</span>
+
+<span class="sd">    :param encoded:</span>
+<span class="sd">        Decimal encoded string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">long_to_bytes</span><span class="p">(</span><span class="nb">long</span><span class="p">(</span><span class="n">encoded</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="long_to_base64"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.long_to_base64">[docs]</a><span class="k">def</span> <span class="nf">long_to_base64</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base-64 encodes a long.</span>
+
+<span class="sd">    :param num:</span>
+<span class="sd">        A long integer.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Base-64 encoded byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">byte_string</span> <span class="o">=</span> <span class="n">long_to_bytes</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">base64_encode</span><span class="p">(</span><span class="n">byte_string</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="base64_to_long"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.base64_to_long">[docs]</a><span class="k">def</span> <span class="nf">base64_to_long</span><span class="p">(</span><span class="n">encoded</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base-64 decodes a string into a long.</span>
+
+<span class="sd">    :param encoded:</span>
+<span class="sd">        The encoded byte string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Long value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">byte_string</span> <span class="o">=</span> <span class="n">base64_decode</span><span class="p">(</span><span class="n">encoded</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bytes_to_long</span><span class="p">(</span><span class="n">byte_string</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="base64_to_bytearray"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.base64_to_bytearray">[docs]</a><span class="k">def</span> <span class="nf">base64_to_bytearray</span><span class="p">(</span><span class="n">encoded</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a base-64 encoded value into a byte array.</span>
+
+<span class="sd">    :param encoded:</span>
+<span class="sd">        The base-64 encoded value.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Byte array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">bytes_to_bytearray</span><span class="p">(</span><span class="n">base64_decode</span><span class="p">(</span><span class="n">encoded</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="bytearray_to_base64"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.codec.bytearray_to_base64">[docs]</a><span class="k">def</span> <span class="nf">bytearray_to_base64</span><span class="p">(</span><span class="n">byte_array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base-64 encodes a byte array.</span>
+
+<span class="sd">    :param byte_array:</span>
+<span class="sd">        The byte array.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Base-64 encoded byte array without newlines.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">base64_encode</span><span class="p">(</span><span class="n">bytearray_to_bytes</span><span class="p">(</span><span class="n">byte_array</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,403 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.types.number &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="pyoauth.types" href="../types.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.types.number</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c"># Released into public domain.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.types.number</span>
+<span class="sd">:synopsis: Number routines.</span>
+
+<span class="sd">Type conversion</span>
+<span class="sd">---------------</span>
+<span class="sd">.. autofunction:: bytes_to_long</span>
+<span class="sd">.. autofunction:: long_to_bytes</span>
+
+<span class="sd">BigNum</span>
+<span class="sd">------</span>
+<span class="sd">.. autofunction:: mpi_to_long</span>
+<span class="sd">.. autofunction:: long_to_mpi</span>
+
+<span class="sd">Math</span>
+<span class="sd">----</span>
+<span class="sd">.. autofunction:: pow_mod</span>
+<span class="sd">.. autofunction:: inverse_mod</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="kn">from</span> <span class="nn">pyoauth.types.bytearray</span> <span class="kn">import</span> \
+    <span class="n">bytearray_concat</span><span class="p">,</span> \
+    <span class="n">bytearray_create_zeros</span><span class="p">,</span> \
+    <span class="n">bytes_to_bytearray</span><span class="p">,</span> \
+    <span class="n">bytearray_to_bytes</span><span class="p">,</span> \
+    <span class="n">long_to_bytearray</span><span class="p">,</span> \
+    <span class="n">bytearray_to_long</span>
+
+<span class="c"># Taken from PyCrypto &quot;as is&quot;.</span>
+<span class="c"># Improved conversion functions contributed by Barry Warsaw, after</span>
+<span class="c"># careful benchmarking</span>
+
+<div class="viewcode-block" id="long_to_bytes"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.number.long_to_bytes">[docs]</a><span class="k">def</span> <span class="nf">long_to_bytes</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">blocksize</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a long integer to a byte string::</span>
+
+<span class="sd">        long_to_bytes(n:long, blocksize:int) : string</span>
+
+<span class="sd">    :param num:</span>
+<span class="sd">        Long value</span>
+<span class="sd">    :param blocksize:</span>
+<span class="sd">        If optional blocksize is given and greater than zero, pad the front of</span>
+<span class="sd">        the byte string with binary zeros so that the length is a multiple of</span>
+<span class="sd">        blocksize.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># after much testing, this algorithm was deemed to be the fastest</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">pack</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span>
+    <span class="k">while</span> <span class="n">num</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">pack</span><span class="p">(</span><span class="s">&#39;&gt;I&#39;</span><span class="p">,</span> <span class="n">num</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span><span class="n">L</span><span class="p">)</span> <span class="o">+</span> <span class="n">s</span>
+        <span class="n">num</span> <span class="o">&gt;&gt;=</span> <span class="mi">32</span>
+    <span class="c"># strip off leading zeros</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;</span><span class="se">\000</span><span class="s">&#39;</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># only happens when n == 0</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\000</span><span class="s">&#39;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
+    <span class="c"># add back some pad bytes.  this could be done more efficiently w.r.t. the</span>
+    <span class="c"># de-padding being done above, but sigh...</span>
+    <span class="k">if</span> <span class="n">blocksize</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">%</span> <span class="n">blocksize</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">blocksize</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">%</span> <span class="n">blocksize</span><span class="p">)</span> <span class="o">*</span> <span class="s">&#39;</span><span class="se">\000</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">s</span>
+    <span class="k">return</span> <span class="n">s</span>
+
+</div>
+<div class="viewcode-block" id="bytes_to_long"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.number.bytes_to_long">[docs]</a><span class="k">def</span> <span class="nf">bytes_to_long</span><span class="p">(</span><span class="n">byte_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a byte string to a long integer::</span>
+
+<span class="sd">        bytes_to_long(bytestring) : long</span>
+
+<span class="sd">    This is (essentially) the inverse of long_to_bytes().</span>
+
+<span class="sd">    :param bytestring:</span>
+<span class="sd">        A byte string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Long.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="il">0L</span>
+    <span class="n">unpack</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte_string</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">length</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">byte_string</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\000</span><span class="s">&#39;</span> <span class="o">*</span> <span class="n">extra</span> <span class="o">+</span> <span class="n">byte_string</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">length</span> <span class="o">+</span> <span class="n">extra</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="p">(</span><span class="n">acc</span> <span class="o">&lt;&lt;</span> <span class="mi">32</span><span class="p">)</span> <span class="o">+</span> <span class="n">unpack</span><span class="p">(</span><span class="s">&#39;&gt;I&#39;</span><span class="p">,</span> <span class="n">byte_string</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">acc</span>
+
+</div>
+<span class="k">def</span> <span class="nf">long_to_bytes_original</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a long integer to a byte string::</span>
+
+<span class="sd">        long_to_bytes(n:long) : string</span>
+
+<span class="sd">    :param num:</span>
+<span class="sd">        Long value</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">byte_array</span> <span class="o">=</span> <span class="n">long_to_bytearray</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bytearray_to_bytes</span><span class="p">(</span><span class="n">byte_array</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">bytes_to_long_original</span><span class="p">(</span><span class="n">byte_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a byte string to a long integer::</span>
+
+<span class="sd">        bytes_to_long(byte_string) : long</span>
+
+<span class="sd">    This is (essentially) the inverse of long_to_bytes().</span>
+
+<span class="sd">    :param byte_string:</span>
+<span class="sd">        A byte string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Long.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">byte_array</span> <span class="o">=</span> <span class="n">bytes_to_bytearray</span><span class="p">(</span><span class="n">byte_string</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bytearray_to_long</span><span class="p">(</span><span class="n">byte_array</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="mpi_to_long"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.number.mpi_to_long">[docs]</a><span class="k">def</span> <span class="nf">mpi_to_long</span><span class="p">(</span><span class="n">mpi_byte_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts an OpenSSL-format MPI Bignum byte string into a long.</span>
+
+<span class="sd">    :param mpi_byte_string:</span>
+<span class="sd">        OpenSSL-format MPI Bignum byte string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Long value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#Make sure this is a positive number</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">mpi_byte_string</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">&amp;</span> <span class="mh">0x80</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="n">byte_array</span> <span class="o">=</span> <span class="n">bytes_to_bytearray</span><span class="p">(</span><span class="n">mpi_byte_string</span><span class="p">[</span><span class="mi">4</span><span class="p">:])</span>
+    <span class="k">return</span> <span class="n">bytearray_to_long</span><span class="p">(</span><span class="n">byte_array</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="long_to_mpi"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.number.long_to_mpi">[docs]</a><span class="k">def</span> <span class="nf">long_to_mpi</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a long value into an OpenSSL-format MPI Bignum byte string.</span>
+
+<span class="sd">    :param num:</span>
+<span class="sd">        Long value.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        OpenSSL-format MPI Bignum byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">byte_array</span> <span class="o">=</span> <span class="n">long_to_bytearray</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c">#If the high-order bit is going to be set,</span>
+    <span class="c">#add an extra byte of zeros</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">bit_count</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x7</span><span class="p">):</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">byte_count</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="o">+</span> <span class="n">ext</span>
+    <span class="n">byte_array</span> <span class="o">=</span> <span class="n">bytearray_concat</span><span class="p">(</span><span class="n">bytearray_create_zeros</span><span class="p">(</span><span class="mi">4</span><span class="o">+</span><span class="n">ext</span><span class="p">),</span> <span class="n">byte_array</span><span class="p">)</span>
+    <span class="n">byte_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">length</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
+    <span class="n">byte_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">length</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
+    <span class="n">byte_array</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">length</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
+    <span class="n">byte_array</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">length</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
+    <span class="k">return</span> <span class="n">bytearray_to_bytes</span><span class="p">(</span><span class="n">byte_array</span><span class="p">)</span>
+
+</div>
+<span class="k">def</span> <span class="nf">gcd</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the greatest common divisor.</span>
+
+<span class="sd">    Non-recursive fast implementation.</span>
+
+<span class="sd">    :param a:</span>
+<span class="sd">        Long value.</span>
+<span class="sd">    :param b:</span>
+<span class="sd">        Long value.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Greatest common divisor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">b</span><span class="p">:</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span> <span class="o">%</span> <span class="n">b</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">a</span>
+
+
+<span class="k">def</span> <span class="nf">lcm</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Least common multiple.</span>
+
+<span class="sd">    :param a:</span>
+<span class="sd">        Long value.</span>
+<span class="sd">    :param v:</span>
+<span class="sd">        Long value.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Least common multiple.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># TODO: This will break when python division changes, but we can&#39;t use //</span>
+    <span class="c"># because of Jython</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="n">gcd</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="inverse_mod"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.number.inverse_mod">[docs]</a><span class="k">def</span> <span class="nf">inverse_mod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns inverse of a mod b, zero if none</span>
+
+<span class="sd">    Uses Extended Euclidean Algorithm</span>
+
+<span class="sd">    :param a:</span>
+<span class="sd">        Long value</span>
+<span class="sd">    :param b:</span>
+<span class="sd">        Long value</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Inverse of a mod b, zero if none.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
+    <span class="n">uc</span><span class="p">,</span> <span class="n">ud</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">c</span><span class="p">:</span>
+        <span class="c"># TODO: This will break when python division changes, but we can&#39;t use</span>
+        <span class="c"># // because of Jython</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">d</span> <span class="o">/</span> <span class="n">c</span>
+        <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">-</span><span class="p">(</span><span class="n">q</span><span class="o">*</span><span class="n">c</span><span class="p">),</span> <span class="n">c</span>
+        <span class="n">uc</span><span class="p">,</span> <span class="n">ud</span> <span class="o">=</span> <span class="n">ud</span> <span class="o">-</span> <span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">uc</span><span class="p">),</span> <span class="n">uc</span>
+    <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ud</span> <span class="o">%</span> <span class="n">b</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+</div>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">gmpy</span>
+    <span class="k">def</span> <span class="nf">pow_mod</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">modulus</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates:</span>
+<span class="sd">            base**pow mod modulus</span>
+
+<span class="sd">        :param base:</span>
+<span class="sd">            Base</span>
+<span class="sd">        :param power:</span>
+<span class="sd">            Power</span>
+<span class="sd">        :param modulus:</span>
+<span class="sd">            Modulus</span>
+<span class="sd">        :returns:</span>
+<span class="sd">            base**pow mod modulus</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">gmpy</span><span class="o">.</span><span class="n">mpz</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="n">power</span> <span class="o">=</span> <span class="n">gmpy</span><span class="o">.</span><span class="n">mpz</span><span class="p">(</span><span class="n">power</span><span class="p">)</span>
+        <span class="n">modulus</span> <span class="o">=</span> <span class="n">gmpy</span><span class="o">.</span><span class="n">mpz</span><span class="p">(</span><span class="n">modulus</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">modulus</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">long</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+<div class="viewcode-block" id="pow_mod"><a class="viewcode-back" href="../../../api/types.html#pyoauth.types.number.pow_mod">[docs]</a>    <span class="k">def</span> <span class="nf">pow_mod</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">modulus</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates:</span>
+<span class="sd">            base**pow mod modulus</span>
+
+<span class="sd">        Uses multi bit scanning with nBitScan bits at a time.</span>
+<span class="sd">        From Bryan G. Olson&#39;s post to comp.lang.python</span>
+
+<span class="sd">        Does left-to-right instead of pow()&#39;s right-to-left,</span>
+<span class="sd">        thus about 30% faster than the python built-in with small bases</span>
+
+<span class="sd">        :param base:</span>
+<span class="sd">            Base</span>
+<span class="sd">        :param power:</span>
+<span class="sd">            Power</span>
+<span class="sd">        :param modulus:</span>
+<span class="sd">            Modulus</span>
+<span class="sd">        :returns:</span>
+<span class="sd">            base**pow mod modulus</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nBitScan</span> <span class="o">=</span> <span class="mi">5</span>
+
+        <span class="c">#TREV - Added support for negative exponents</span>
+        <span class="n">negativeResult</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">power</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">power</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">negativeResult</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">exp2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">nBitScan</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">exp2</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="c"># Break power into a list of digits of nBitScan bits.</span>
+        <span class="c"># The list is recursive so easy to read in reverse direction.</span>
+        <span class="n">nibbles</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">while</span> <span class="n">power</span><span class="p">:</span>
+            <span class="n">nibbles</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">power</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">),</span> <span class="n">nibbles</span>
+            <span class="n">power</span> <span class="o">&gt;&gt;=</span> <span class="n">nBitScan</span>
+
+        <span class="c"># Make a table of powers of base up to 2**nBitScan - 1</span>
+        <span class="n">lowPowers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">exp2</span><span class="p">):</span>
+            <span class="n">lowPowers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">lowPowers</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">base</span><span class="p">)</span> <span class="o">%</span> <span class="n">modulus</span><span class="p">)</span>
+
+        <span class="c"># To exponentiate by the first nibble, look it up in the table</span>
+        <span class="n">nib</span><span class="p">,</span> <span class="n">nibbles</span> <span class="o">=</span> <span class="n">nibbles</span>
+        <span class="n">prod</span> <span class="o">=</span> <span class="n">lowPowers</span><span class="p">[</span><span class="n">nib</span><span class="p">]</span>
+
+        <span class="c"># For the rest, square nBitScan times, then multiply by</span>
+        <span class="c"># base^nibble</span>
+        <span class="k">while</span> <span class="n">nibbles</span><span class="p">:</span>
+            <span class="n">nib</span><span class="p">,</span> <span class="n">nibbles</span> <span class="o">=</span> <span class="n">nibbles</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">nBitScan</span><span class="p">):</span>
+                <span class="n">prod</span> <span class="o">=</span> <span class="p">(</span><span class="n">prod</span> <span class="o">*</span> <span class="n">prod</span><span class="p">)</span> <span class="o">%</span> <span class="n">modulus</span>
+            <span class="k">if</span> <span class="n">nib</span><span class="p">:</span> <span class="n">prod</span> <span class="o">=</span> <span class="p">(</span><span class="n">prod</span> <span class="o">*</span> <span class="n">lowPowers</span><span class="p">[</span><span class="n">nib</span><span class="p">])</span> <span class="o">%</span> <span class="n">modulus</span>
+
+        <span class="c">#TREV - Added support for negative exponents</span>
+        <span class="k">if</span> <span class="n">negativeResult</span><span class="p">:</span>
+            <span class="n">prodInv</span> <span class="o">=</span> <span class="n">inverse_mod</span><span class="p">(</span><span class="n">prod</span><span class="p">,</span> <span class="n">modulus</span><span class="p">)</span>
+            <span class="c">#Check to make sure the inverse is correct</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">prod</span> <span class="o">*</span> <span class="n">prodInv</span><span class="p">)</span> <span class="o">%</span> <span class="n">modulus</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">prodInv</span>
+        <span class="k">return</span> <span class="n">prod</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

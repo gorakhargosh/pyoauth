@@ -1,0 +1,880 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Protocol-specific utilities &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="Type detection, encoding, and conversion" href="types.html" />
+    <link rel="prev" title="Client implementations" href="oauth1.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="protocol-specific-utilities">
+<h1>Protocol-specific utilities<a class="headerlink" href="#protocol-specific-utilities" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pyoauth.protocol">
+<span id="pyoauth-protocol"></span><h2><cite>pyoauth.protocol</cite><a class="headerlink" href="#module-pyoauth.protocol" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.protocol</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Protocol-specific utility functions.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="nonce-verification-code-and-timestamp">
+<h3>Nonce, verification code, and timestamp<a class="headerlink" href="#nonce-verification-code-and-timestamp" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.protocol.generate_nonce">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">generate_nonce</tt><big>(</big><em>bit_strength=64</em>, <em>base=10</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#generate_nonce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.generate_nonce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a random ASCII-encoded unsigned integral number in decimal
+hexadecimal, or base-64 representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body"><p class="first">Nonce and Timestamp (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.3">http://tools.ietf.org/html/rfc5849#section-3.3</a>)</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bit_strength</strong> &#8211; Bit strength. Default 64.</li>
+<li><strong>base</strong> &#8211; <dl class="docutils">
+<dt>One of:</dt>
+<dd><ol class="first last arabic">
+<li>10 (default)</li>
+<li>16</li>
+<li>64</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A string representation of a randomly-generated ASCII-encoded
+hexadecimal/decimal/base64-representation unsigned integral number
+based on the bit strength specified.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.protocol.generate_verification_code">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">generate_verification_code</tt><big>(</big><em>length=8</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#generate_verification_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.generate_verification_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an OAuth verification code.</p>
+<p>The verification code will be displayed by the server if a callback URL
+is not provided by the client. The resource owner (the end-user) may
+need to enter this verification code on a limited device. Therefore,
+we limit the length of this code to 8 characters to keep it suitable
+for manual entry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body">Resource Owner Authorization
+(<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-2.2">http://tools.ietf.org/html/rfc5849#section-2.2</a>)</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>length</strong> &#8211; Length of the verification code to be returned. Default 8.
+The length MUST be a positive even number.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A string representation of a randomly-generated hexadecimal OAuth
+verification code.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.protocol.generate_timestamp">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">generate_timestamp</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#generate_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.generate_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an OAuth timestamp.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body">Nonce and Timestamp (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.3">http://tools.ietf.org/html/rfc5849#section-3.3</a>)</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A string containing a positive integer representing time.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.protocol.generate_client_secret">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">generate_client_secret</tt><big>(</big><em>bit_strength=144</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#generate_client_secret"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.generate_client_secret" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a random Base-64-encoded client secret to assign to a
+registered client application.</p>
+<p>Consumer secrets are base64-encoded but not URL-safe. This is done to
+force the user into properly percent-encoding the secrets before generating
+OAuth signatures for base strings.</p>
+<p>As a side note, Google OAuth generates client secrets with similar encoding
+and this problem is a little hard to trace for the client, but it is a
+problem that should be fixed by the client after all. OAuth protocol
+version 1.0a requires percent-encoding the secrets before generating
+signatures. (See, :func:<tt class="docutils literal"><span class="pre">generate_plaintext_signature</span></tt>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bit_strength</strong> &#8211; Bit strength. 144 is default.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A base-64-encoded random unsigned-integral consumer secret based
+on the bit strength specified.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="oauth-signature-and-base-string">
+<h3>OAuth signature and base string<a class="headerlink" href="#oauth-signature-and-base-string" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.protocol.generate_hmac_sha1_signature">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">generate_hmac_sha1_signature</tt><big>(</big><em>client_shared_secret</em>, <em>method</em>, <em>url</em>, <em>oauth_params=None</em>, <em>token_or_temporary_shared_secret=None</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#generate_hmac_sha1_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.generate_hmac_sha1_signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates an HMAC-SHA1 signature for a base string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body"><p class="first">HMAC-SHA1 (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.4.2">http://tools.ietf.org/html/rfc5849#section-3.4.2</a>)</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>client_shared_secret</strong> &#8211; Client (consumer) shared secret.</li>
+<li><strong>method</strong> &#8211; Base string HTTP method.</li>
+<li><strong>url</strong> &#8211; Base string URL that may include a query string.
+All protocol-specific parameters will be ignored from the query string.</li>
+<li><strong>oauth_params</strong> &#8211; Base string protocol-specific query parameters.
+All non-protocol parameters will be ignored.</li>
+<li><strong>token_or_temporary_shared_secret</strong> &#8211; Token/temporary credentials shared secret if available.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">HMAC-SHA1 signature.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.protocol.generate_rsa_sha1_signature">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">generate_rsa_sha1_signature</tt><big>(</big><em>client_private_key</em>, <em>method</em>, <em>url</em>, <em>oauth_params=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#generate_rsa_sha1_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.generate_rsa_sha1_signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates an RSA-SHA1 OAuth signature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body"><p class="first">RSA-SHA1 (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.4.3">http://tools.ietf.org/html/rfc5849#section-3.4.3</a>)</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>client_private_key</strong> &#8211; PEM-encoded RSA private key.</li>
+<li><strong>method</strong> &#8211; Base string HTTP method.</li>
+<li><strong>url</strong> &#8211; Base string URL that may include a query string.
+All protocol-specific paramters will be ignored from the query string.</li>
+<li><strong>oauth_params</strong> &#8211; Base string protocol-specific query parameters.
+All non-protocol parameters will be ignored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">RSA-SHA1 signature.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.protocol.verify_rsa_sha1_signature">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">verify_rsa_sha1_signature</tt><big>(</big><em>signature</em>, <em>client_certificate</em>, <em>method</em>, <em>url</em>, <em>oauth_params=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#verify_rsa_sha1_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.verify_rsa_sha1_signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verifies a RSA-SHA1 OAuth signature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body"><p class="first">RSA-SHA1 (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.4.3">http://tools.ietf.org/html/rfc5849#section-3.4.3</a>)</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>signature</strong> &#8211; RSA-SHA1 OAuth signature.</li>
+<li><strong>client_certificate</strong> &#8211; PEM-encoded X.509 certificate or RSA public key.</li>
+<li><strong>method</strong> &#8211; Base string HTTP method.</li>
+<li><strong>url</strong> &#8211; Base string URL that may include a query string.
+All protocol-specific parameters will be ignored from the query string.</li>
+<li><strong>oauth_params</strong> &#8211; Base string protocol-specific query parameters.
+All non-protocol parameters will be ignored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><tt class="xref docutils literal"><span class="pre">True</span></tt> if verified to be correct; <tt class="xref docutils literal"><span class="pre">False</span></tt> otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.protocol.generate_plaintext_signature">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">generate_plaintext_signature</tt><big>(</big><em>client_shared_secret</em>, <em>method</em>, <em>url</em>, <em>oauth_params=None</em>, <em>token_or_temporary_shared_secret=None</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#generate_plaintext_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.generate_plaintext_signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a PLAINTEXT signature for a base string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body"><p class="first">PLAINTEXT (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.4.4">http://tools.ietf.org/html/rfc5849#section-3.4.4</a>)</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>client_shared_secret</strong> &#8211; Client (consumer) shared secret.</li>
+<li><strong>method</strong> &#8211; (Not used). Base string HTTP method.</li>
+<li><strong>url</strong> &#8211; (Not used). Base string URL that may include query string.
+All protocol-specific parameters will be ignored from the query string.</li>
+<li><strong>oauth_params</strong> &#8211; (Not used). Base string protocol-specific query parameters.
+All non-protocol parameters will be ignored.</li>
+<li><strong>token_or_temporary_shared_secret</strong> &#8211; Token/temporary credentials shared secret if available.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">PLAINTEXT signature.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.protocol.generate_signature_base_string">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">generate_signature_base_string</tt><big>(</big><em>method</em>, <em>url</em>, <em>oauth_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#generate_signature_base_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.generate_signature_base_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a signature base string based on the URL, method, and
+oauth parameters.</p>
+<p>Any query parameter by the name &#8220;oauth_signature&#8221; will be excluded
+from the base string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body"><p class="first">Signature base string (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.4.1">http://tools.ietf.org/html/rfc5849#section-3.4.1</a>)</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>method</strong> &#8211; HTTP request method.</li>
+<li><strong>url</strong> &#8211; The URL. If this includes a query string, query parameters are first
+extracted and encoded as well. All protocol-specific parameters
+will be ignored from the query string.</li>
+<li><strong>oauth_params</strong> &#8211; Protocol-specific parameters must be specified in this dictionary.
+All non-protocol parameters will be ignored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Base string.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="authorization-http-header-creation-and-parsing">
+<h3>Authorization HTTP header creation and parsing<a class="headerlink" href="#authorization-http-header-creation-and-parsing" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.protocol.generate_normalized_authorization_header_value">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">generate_normalized_authorization_header_value</tt><big>(</big><em>oauth_params</em>, <em>realm=None</em>, <em>param_delimiter='</em>, <em>'</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#generate_normalized_authorization_header_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.generate_normalized_authorization_header_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the Authorization header value.</p>
+<p>Please note that the generated authorization header value MUST be
+on a SINGLE line.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body"><p class="first">Authorization Header <a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.5.1">http://tools.ietf.org/html/rfc5849#section-3.5.1</a></p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>oauth_params</strong> &#8211; Protocol-specific parameters excluding the <tt class="docutils literal"><span class="pre">realm</span></tt> parameter.</li>
+<li><strong>realm</strong> &#8211; If specified, the realm is included into the Authorization header.
+The realm is never percent-encoded according to the OAuth spec.</li>
+<li><strong>param_delimiter</strong> &#8211; <p>The delimiter used to separate header value parameters.
+According to the Specification, this must be a comma &#8221;,&#8221;. However,
+certain services like Yahoo! use &#8220;&amp;&#8221; instead. Comma is default.</p>
+<p>See <a class="reference external" href="https://github.com/oauth/oauth-ruby/pull/12">https://github.com/oauth/oauth-ruby/pull/12</a></p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A properly formatted Authorization header value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.protocol.parse_authorization_header_value">
+<tt class="descclassname">pyoauth.protocol.</tt><tt class="descname">parse_authorization_header_value</tt><big>(</big><em>header_value</em>, <em>param_delimiter='</em>, <em>'</em>, <em>strict=True</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/protocol.html#parse_authorization_header_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.protocol.parse_authorization_header_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the OAuth Authorization header.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body"><p class="first">Authorization Header <a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.5.1">http://tools.ietf.org/html/rfc5849#section-3.5.1</a></p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>header_value</strong> &#8211; Header value.</li>
+<li><strong>param_delimiter</strong> &#8211; <p>The delimiter used to separate header value parameters.
+According to the Specification, this must be a comma &#8221;,&#8221;. However,
+certain services like Yahoo! use &#8220;&amp;&#8221; instead. Comma is default.</p>
+<p>If you want to use another delimiter character, the <tt class="docutils literal"><span class="pre">strict</span></tt>
+argument to this function must also be set to <tt class="xref docutils literal"><span class="pre">False</span></tt>.
+See <a class="reference external" href="https://github.com/oauth/oauth-ruby/pull/12">https://github.com/oauth/oauth-ruby/pull/12</a></p>
+</li>
+<li><strong>strict</strong> &#8211; When <tt class="xref docutils literal"><span class="pre">True</span></tt>, more strict checking will be performed.
+The authorization header value must be on a single line.
+The param delimiter MUST be a comma.
+When <tt class="xref docutils literal"><span class="pre">False</span></tt>, the parser is a bit lenient.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary of parameter name value pairs.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.url">
+<span id="pyoauth-url"></span><h2><cite>pyoauth.url</cite><a class="headerlink" href="#module-pyoauth.url" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.url</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Protocol-specific URL utility functions.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="percent-encoding">
+<h3>Percent-encoding<a class="headerlink" href="#percent-encoding" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.url.percent_encode">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">percent_encode</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#percent_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.percent_encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Percent-encodes according to the OAuth spec.</p>
+<p>Used in constructing the signature base string and the &#8220;Authorization&#8221;
+header field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body">Percent Encoding (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.6">http://tools.ietf.org/html/rfc5849#section-3.6</a>)</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; Query string parameter value to escape. If the value is a Unicode
+string, it will be encoded to UTF-8. A byte string is considered
+exactly that, a byte string and will not be UTF-8 encoded—however, it
+will be percent-encoded.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Percent-encoded string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.url.percent_decode">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">percent_decode</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#percent_decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.percent_decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Percent-decodes according to the OAuth spec.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body">Percent Encoding (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.6">http://tools.ietf.org/html/rfc5849#section-3.6</a>)</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; Value to percent-decode. Value will be UTF-8 encoded if
+it is a Unicode string. &#8216;+&#8217; is treated as a &#8216; &#8216; character.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Percent-decoded value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="query-string-parsing-and-construction">
+<h3>Query string parsing and construction<a class="headerlink" href="#query-string-parsing-and-construction" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.url.parse_qs">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">parse_qs</tt><big>(</big><em>query_string</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#parse_qs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.parse_qs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a query parameter string according to the OAuth spec.</p>
+<p>Use only with OAuth query strings.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body">Parameter Sources (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1">http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1</a>)</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_string</strong> &#8211; Query string to parse. If <tt class="docutils literal"><span class="pre">query_string</span></tt> starts with a <tt class="docutils literal"><span class="pre">?</span></tt> character
+it will be ignored for convenience.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.url.urlencode_s">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">urlencode_s</tt><big>(</big><em>query_params</em>, <em>allow_func=None</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#urlencode_s"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.urlencode_s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializes a dictionary of query parameters into a string of query
+parameters, <tt class="docutils literal"><span class="pre">name=value</span></tt> pairs separated by <tt class="docutils literal"><span class="pre">&amp;</span></tt>, sorted first by
+<tt class="docutils literal"><span class="pre">name</span></tt> then by <tt class="docutils literal"><span class="pre">value</span></tt> based on the OAuth percent-encoding
+rules and specification.</p>
+<p>Behaves like <tt class="xref py py-func docutils literal"><span class="pre">urllib.urlencode()</span></tt> with <tt class="docutils literal"><span class="pre">doseq=1</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_params</strong> &#8211; Dictionary of query parameters.</li>
+<li><strong>allow_func</strong> &#8211; <p>A callback that will be called for each query parameter and should
+return <tt class="xref docutils literal"><span class="pre">False</span></tt> or a falsy value if that parameter should not be
+included. By default, all query parameters are included. The function
+takes the following method signature:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">allow_func</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">is_name_allowed</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_value_allowed</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A string of query parameters, <tt class="docutils literal"><span class="pre">name=value</span></tt> pairs separated by <tt class="docutils literal"><span class="pre">&amp;</span></tt>,
+sorted first by <tt class="docutils literal"><span class="pre">name</span></tt> and then by <tt class="docutils literal"><span class="pre">value</span></tt> based on the OAuth
+percent-encoding rules and specification.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.url.urlencode_sl">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">urlencode_sl</tt><big>(</big><em>query_params</em>, <em>allow_func=None</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#urlencode_sl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.urlencode_sl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializes a dictionary of query parameters into a list of query
+parameters, <tt class="docutils literal"><span class="pre">(name,</span> <span class="pre">value)</span></tt> pairs, sorted first by <tt class="docutils literal"><span class="pre">name</span></tt> then by
+<tt class="docutils literal"><span class="pre">value</span></tt> based on the OAuth percent-encoding rules and specification.</p>
+<p>Behaves like <tt class="xref py py-func docutils literal"><span class="pre">urllib.urlencode()</span></tt> with <tt class="docutils literal"><span class="pre">doseq=1</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_params</strong> &#8211; Dictionary of query parameters.</li>
+<li><strong>allow_func</strong> &#8211; <p>A callback that will be called for each query parameter and should
+return <tt class="xref docutils literal"><span class="pre">False</span></tt> or a falsy value if that parameter should not be
+included. By default, all query parameters are included. The function
+takes the following method signature:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">allow_func</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">is_name_allowed</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_value_allowed</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of query parameters, <tt class="docutils literal"><span class="pre">(name,</span> <span class="pre">value)</span></tt> pairs, sorted first by
+<tt class="docutils literal"><span class="pre">name</span></tt> and then by <tt class="docutils literal"><span class="pre">value</span></tt> based on the OAuth percent-encoding rules
+and specification.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="url-parsing-and-convenience-utilities">
+<h3>URL parsing and convenience utilities<a class="headerlink" href="#url-parsing-and-convenience-utilities" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.url.urlparse_normalized">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">urlparse_normalized</tt><big>(</big><em>url</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#urlparse_normalized"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.urlparse_normalized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like <tt class="xref py py-func docutils literal"><span class="pre">urlparse.urlparse()</span></tt> but also normalizes scheme, netloc, port,
+and the path.</p>
+<p>Use with OAuth URLs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">See :</th><td class="field-body">Base String URI (<a class="reference external" href="http://tools.ietf.org/html/rfc5849#section-3.4.1.2">http://tools.ietf.org/html/rfc5849#section-3.4.1.2</a>)</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> &#8211; The URL to split and normalize.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Tuple that contains these elements:
+<tt class="docutils literal"><span class="pre">(scheme,</span> <span class="pre">netloc,</span> <span class="pre">path,</span> <span class="pre">params,</span> <span class="pre">query,</span> <span class="pre">fragment)</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.url.url_append_query">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">url_append_query</tt><big>(</big><em>url</em>, <em>query_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#url_append_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.url_append_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends query params to any existing query string in the URL
+and returns a properly formatted URL. URL fragments are preserved.</p>
+<p>This is the equivalent of doing:</p>
+<div class="highlight-python"><pre>sorted(URL query parameters) + "&amp;" + sorted(query_params)</pre>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> &#8211; The URL into which the query parameters will be concatenated.</li>
+<li><strong>query_params</strong> &#8211; A dictionary of query parameters or a query string.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A URL with the query parameters concatenated.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">url_append_query</span><span class="p">(</span><span class="s">&quot;http://example.com/foo?a=b#fragment&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="s">&quot;d&quot;</span><span class="p">))</span>
+<span class="go">&#39;http://example.com/foo?a=b&amp;c=d#fragment&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.url.url_add_query">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">url_add_query</tt><big>(</big><em>url</em>, <em>extra_query_params</em>, <em>allow_func=None</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#url_add_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.url_add_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds additional query parameters to a URL while preserving existing ones.</p>
+<p>The URL will be normalized according to the OAuth specification with the
+exception that the URL fragment is preserved.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> &#8211; The URL to add the additional query parameters to.</li>
+<li><strong>extra_query_params</strong> &#8211; The additional query parameters as a dictionary object or a query
+string.</li>
+<li><strong>allow_func</strong> &#8211; <p>A callback that will be called for each query parameter and should
+return <tt class="xref docutils literal"><span class="pre">False</span></tt> or a falsy value if that parameter should not be
+included. By default, all query parameters are included. The function
+takes the following method signature:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">allow_func</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">is_name_allowed</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_value_allowed</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A normalized URL with the fragment and existing query parameters
+preserved and with the extra query parameters added.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.url.oauth_url_sanitize">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">oauth_url_sanitize</tt><big>(</big><em>url</em>, <em>force_secure=True</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#oauth_url_sanitize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.oauth_url_sanitize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes an OAuth URL and cleans up protocol-specific parameters
+from the query string.</p>
+<p>Used only in base string construction, Authorization headers construction
+and parsing, and OAuth requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> &#8211; The OAuth URL to sanitize.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Normalized sanitized URL.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="query-parameters">
+<h3>Query parameters<a class="headerlink" href="#query-parameters" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.url.query_add">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">query_add</tt><big>(</big><em>*query_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#query_add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.query_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges multiple query parameter dictionaries or strings.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_params</strong> &#8211; One or more query string or a dictionary of query parameters.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A dictionary of merged query parameters.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.url.query_filter">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">query_filter</tt><big>(</big><em>query_params</em>, <em>allow_func=None</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#query_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.query_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters query parameters out of a query parameter dictionary or
+query string.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">allow_only_parameter_names_starting_with_oauth</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;oauth&quot;</span><span class="p">)</span>
+
+<span class="n">query_filter</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span>
+    <span class="n">allow_func</span><span class="o">=</span><span class="n">allow_only_parameter_names_starting_with_oauth</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_params</strong> &#8211; Query parameter dictionary or query string.</li>
+<li><strong>allow_func</strong> &#8211; <p>A callback that will be called for each query parameter and should
+return <tt class="xref docutils literal"><span class="pre">False</span></tt> or a falsy value if that parameter should not be
+included. By default, all query parameters are included. The function
+takes the following method signature:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">allow_func</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">is_name_allowed</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_value_allowed</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A filtered dictionary of query parameters.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.url.query_unflatten">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">query_unflatten</tt><big>(</big><em>query_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#query_unflatten"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.query_unflatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a query string parses it into an un-flattened query parameter
+dictionary or given a parameter dictionary, un-flattens it.</p>
+<p>Example:</p>
+<div class="highlight-python"><pre>dict(a=1, b=[1, 2], c="")   -&gt;   dict(a[1], b=[1, 2], c=[""])
+a=1&amp;b=1&amp;b=2&amp;c=              -&gt;   dict(a[1], b=[1, 2], c=[""])</pre>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_params</strong> &#8211; A query parameter dictionary or a query string.
+If this argument is <tt class="xref docutils literal"><span class="pre">None</span></tt> an empty dictionary will be returned.
+Any other value will raise a
+<tt class="xref py py-class docutils literal"><span class="pre">pyoauth.errors.InvalidQueryParametersError</span></tt> exception.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">An un-flattened query parameter dictionary.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="parameter-sanitization">
+<h3>Parameter sanitization<a class="headerlink" href="#parameter-sanitization" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.url.request_protocol_params_sanitize">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">request_protocol_params_sanitize</tt><big>(</big><em>protocol_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#request_protocol_params_sanitize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.request_protocol_params_sanitize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes non-OAuth and non-transmittable OAuth parameters from the
+request query parameters.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>Do NOT use this function with responses. Use ONLY with requests.</p>
+<p class="last">Specifically used ONLY in base string construction, Authorization
+headers construction and parsing, and OAuth requests.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>protocol_params</strong> &#8211; Query string or query parameter dictionary. Does not filter out
+<tt class="docutils literal"><span class="pre">oauth_signature</span></tt>, but DOES filter out <tt class="docutils literal"><span class="pre">oauth_consumer_secret</span></tt> and
+<tt class="docutils literal"><span class="pre">oauth_token_secret</span></tt>. These secret parameters must never be
+transmitted.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Filtered protocol parameters dictionary.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.url.query_params_sanitize">
+<tt class="descclassname">pyoauth.url.</tt><tt class="descname">query_params_sanitize</tt><big>(</big><em>query_params</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/url.html#query_params_sanitize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.url.query_params_sanitize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes protocol parameters from the query parameters.</p>
+<p>Used only in base string construction, Authorization headers construction
+and parsing, and OAuth requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_params</strong> &#8211; Query string or query parameter dictionary.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Filtered URL query parameter dictionary.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.http">
+<span id="pyoauth-http"></span><h2><cite>pyoauth.http</cite><a class="headerlink" href="#module-pyoauth.http" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.http</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Adaptor functionality for HTTP.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="request-and-response-proxies">
+<h3>Request and Response Proxies<a class="headerlink" href="#request-and-response-proxies" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pyoauth.http.RequestProxy">
+<em class="property">class </em><tt class="descclassname">pyoauth.http.</tt><tt class="descname">RequestProxy</tt><big>(</big><em>method</em>, <em>url</em>, <em>body=None</em>, <em>headers=None</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/http.html#RequestProxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.http.RequestProxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adaptor HTTP Request class.</p>
+<p>Framework implementers can subclass this class and must use it with
+the client methods for them to work.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyoauth.http.ResponseProxy">
+<em class="property">class </em><tt class="descclassname">pyoauth.http.</tt><tt class="descname">ResponseProxy</tt><big>(</big><em>status_code</em>, <em>status</em>, <em>body</em>, <em>headers=None</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/http.html#ResponseProxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.http.ResponseProxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adaptor HTTP Response class.</p>
+<p>Framework implementers can subclass this class and must use it with
+the client methods for them to work.</p>
+</dd></dl>
+
+</div>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Protocol-specific utilities</a><ul>
+<li><a class="reference internal" href="#module-pyoauth.protocol"><cite>pyoauth.protocol</cite></a><ul>
+<li><a class="reference internal" href="#nonce-verification-code-and-timestamp">Nonce, verification code, and timestamp</a></li>
+<li><a class="reference internal" href="#oauth-signature-and-base-string">OAuth signature and base string</a></li>
+<li><a class="reference internal" href="#authorization-http-header-creation-and-parsing">Authorization HTTP header creation and parsing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.url"><cite>pyoauth.url</cite></a><ul>
+<li><a class="reference internal" href="#percent-encoding">Percent-encoding</a></li>
+<li><a class="reference internal" href="#query-string-parsing-and-construction">Query string parsing and construction</a></li>
+<li><a class="reference internal" href="#url-parsing-and-convenience-utilities">URL parsing and convenience utilities</a></li>
+<li><a class="reference internal" href="#query-parameters">Query parameters</a></li>
+<li><a class="reference internal" href="#parameter-sanitization">Parameter sanitization</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.http"><cite>pyoauth.http</cite></a><ul>
+<li><a class="reference internal" href="#request-and-response-proxies">Request and Response Proxies</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Navigation</h3>
+<p>
+  <a href="../index.html">Documentation overview</a>
+</p>
+<ul>
+    <li>Previous: <a
+      href="oauth1.html"
+      title="previous chapter"
+    >Client implementations</a>
+    </li>
+    <li>Next: <a
+      href="types.html"
+      title="next chapter"
+    >Type detection, encoding, and conversion</a>
+    </li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/protocol.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

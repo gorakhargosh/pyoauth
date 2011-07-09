@@ -1,0 +1,643 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyoauth.url &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyoauth.url</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># URL utility functions.</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2011 Yesudeep Mangalapilly &lt;yesudeep@gmail.com&gt;</span>
+<span class="c">#</span>
+<span class="c"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may</span>
+<span class="c"># not use this file except in compliance with the License. You may obtain</span>
+<span class="c"># a copy of the License at</span>
+<span class="c">#</span>
+<span class="c">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c">#</span>
+<span class="c"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT</span>
+<span class="c"># WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the</span>
+<span class="c"># License for the specific language governing permissions and limitations</span>
+<span class="c"># under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:module: pyoauth.url</span>
+<span class="sd">:synopsis: Protocol-specific URL utility functions.</span>
+
+<span class="sd">Percent-encoding</span>
+<span class="sd">----------------</span>
+<span class="sd">.. autofunction:: percent_encode</span>
+<span class="sd">.. autofunction:: percent_decode</span>
+
+<span class="sd">Query string parsing and construction</span>
+<span class="sd">-------------------------------------</span>
+<span class="sd">.. autofunction:: parse_qs</span>
+<span class="sd">.. autofunction:: urlencode_s</span>
+<span class="sd">.. autofunction:: urlencode_sl</span>
+
+<span class="sd">URL parsing and convenience utilities</span>
+<span class="sd">-------------------------------------</span>
+<span class="sd">.. autofunction:: urlparse_normalized</span>
+<span class="sd">.. autofunction:: url_append_query</span>
+<span class="sd">.. autofunction:: url_add_query</span>
+<span class="sd">.. autofunction:: oauth_url_sanitize</span>
+
+<span class="sd">Query parameters</span>
+<span class="sd">----------------</span>
+<span class="sd">.. autofunction:: query_add</span>
+<span class="sd">.. autofunction:: query_filter</span>
+<span class="sd">.. autofunction:: query_unflatten</span>
+
+<span class="sd">Parameter sanitization</span>
+<span class="sd">----------------------</span>
+<span class="sd">.. autofunction:: request_protocol_params_sanitize</span>
+<span class="sd">.. autofunction:: query_params_sanitize</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c"># Python 3.</span>
+    <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">urlunparse</span><span class="p">,</span> <span class="n">parse_qs</span> <span class="k">as</span> <span class="n">_parse_qs</span><span class="p">,</span> <span class="n">quote</span><span class="p">,</span> <span class="n">unquote_plus</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c"># Python 2.5+</span>
+    <span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">urlunparse</span>
+    <span class="kn">from</span> <span class="nn">urllib</span> <span class="kn">import</span> <span class="n">quote</span><span class="p">,</span> <span class="n">unquote_plus</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># Python 2.6+</span>
+        <span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">parse_qs</span> <span class="k">as</span> <span class="n">_parse_qs</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">cgi</span> <span class="kn">import</span> <span class="n">parse_qs</span> <span class="k">as</span> <span class="n">_parse_qs</span>
+
+<span class="kn">from</span> <span class="nn">pyoauth.types</span> <span class="kn">import</span> <span class="n">is_sequence</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">is_bytes_or_unicode</span>
+<span class="kn">from</span> <span class="nn">pyoauth.types.unicode</span> <span class="kn">import</span> <span class="n">to_utf8_if_unicode</span><span class="p">,</span> <span class="n">unicode_to_utf8</span>
+<span class="kn">from</span> <span class="nn">pyoauth.error</span> <span class="kn">import</span> <span class="n">InvalidQueryParametersError</span><span class="p">,</span> \
+    <span class="n">InsecureOAuthParametersError</span><span class="p">,</span> \
+    <span class="n">InvalidOAuthParametersError</span><span class="p">,</span> \
+    <span class="n">InsecureOAuthUrlError</span><span class="p">,</span> \
+    <span class="n">InvalidUrlError</span>
+
+
+<div class="viewcode-block" id="parse_qs"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.parse_qs">[docs]</a><span class="k">def</span> <span class="nf">parse_qs</span><span class="p">(</span><span class="n">query_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses a query parameter string according to the OAuth spec.</span>
+
+<span class="sd">    Use only with OAuth query strings.</span>
+
+<span class="sd">    :see: Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)</span>
+<span class="sd">    :param query_string:</span>
+<span class="sd">        Query string to parse. If ``query_string`` starts with a ``?`` character</span>
+<span class="sd">        it will be ignored for convenience.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query_string</span> <span class="o">=</span> <span class="n">to_utf8_if_unicode</span><span class="p">(</span><span class="n">query_string</span><span class="p">)</span> <span class="ow">or</span> <span class="s">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">query_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;?&quot;</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Ignoring `?` query string prefix -- `</span><span class="si">%r</span><span class="s">`&quot;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">_parse_qs</span><span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">keep_blank_values</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="percent_encode"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.percent_encode">[docs]</a><span class="k">def</span> <span class="nf">percent_encode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Percent-encodes according to the OAuth spec.</span>
+
+<span class="sd">    Used in constructing the signature base string and the &quot;Authorization&quot;</span>
+<span class="sd">    header field.</span>
+
+<span class="sd">    :see: Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)</span>
+<span class="sd">    :param value:</span>
+<span class="sd">        Query string parameter value to escape. If the value is a Unicode</span>
+<span class="sd">        string, it will be encoded to UTF-8. A byte string is considered</span>
+<span class="sd">        exactly that, a byte string and will not be UTF-8 encoded—however, it</span>
+<span class="sd">        will be percent-encoded.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Percent-encoded string.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">to_utf8_if_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">quote</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s">&quot;~&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="percent_decode"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.percent_decode">[docs]</a><span class="k">def</span> <span class="nf">percent_decode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Percent-decodes according to the OAuth spec.</span>
+
+<span class="sd">    :see: Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)</span>
+<span class="sd">    :param value:</span>
+<span class="sd">        Value to percent-decode. Value will be UTF-8 encoded if</span>
+<span class="sd">        it is a Unicode string. &#39;+&#39; is treated as a &#39; &#39; character.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Percent-decoded value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">unquote_plus</span><span class="p">(</span><span class="n">unicode_to_utf8</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="urlencode_s"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.urlencode_s">[docs]</a><span class="k">def</span> <span class="nf">urlencode_s</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="n">allow_func</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializes a dictionary of query parameters into a string of query</span>
+<span class="sd">    parameters, ``name=value`` pairs separated by ``&amp;``, sorted first by</span>
+<span class="sd">    ``name`` then by ``value`` based on the OAuth percent-encoding</span>
+<span class="sd">    rules and specification.</span>
+
+<span class="sd">    Behaves like :func:`urllib.urlencode` with ``doseq=1``.</span>
+
+<span class="sd">    :param query_params:</span>
+<span class="sd">        Dictionary of query parameters.</span>
+<span class="sd">    :param allow_func:</span>
+<span class="sd">        A callback that will be called for each query parameter and should</span>
+<span class="sd">        return ``False`` or a falsy value if that parameter should not be</span>
+<span class="sd">        included. By default, all query parameters are included. The function</span>
+<span class="sd">        takes the following method signature::</span>
+
+<span class="sd">            def allow_func(name, value):</span>
+<span class="sd">                return is_name_allowed(name) and is_value_allowed(value)</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A string of query parameters, ``name=value`` pairs separated by ``&amp;``,</span>
+<span class="sd">        sorted first by ``name`` and then by ``value`` based on the OAuth</span>
+<span class="sd">        percent-encoding rules and specification.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">k</span> <span class="o">+</span> <span class="s">&quot;=&quot;</span> <span class="o">+</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span>
+                     <span class="n">urlencode_sl</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="n">allow_func</span><span class="o">=</span><span class="n">allow_func</span><span class="p">)])</span>
+
+</div>
+<div class="viewcode-block" id="urlencode_sl"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.urlencode_sl">[docs]</a><span class="k">def</span> <span class="nf">urlencode_sl</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="n">allow_func</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializes a dictionary of query parameters into a list of query</span>
+<span class="sd">    parameters, ``(name, value)`` pairs, sorted first by ``name`` then by</span>
+<span class="sd">    ``value`` based on the OAuth percent-encoding rules and specification.</span>
+
+<span class="sd">    Behaves like :func:`urllib.urlencode` with ``doseq=1``.</span>
+
+<span class="sd">    :param query_params:</span>
+<span class="sd">        Dictionary of query parameters.</span>
+<span class="sd">    :param allow_func:</span>
+<span class="sd">        A callback that will be called for each query parameter and should</span>
+<span class="sd">        return ``False`` or a falsy value if that parameter should not be</span>
+<span class="sd">        included. By default, all query parameters are included. The function</span>
+<span class="sd">        takes the following method signature::</span>
+
+<span class="sd">            def allow_func(name, value):</span>
+<span class="sd">                return is_name_allowed(name) and is_value_allowed(value)</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A list of query parameters, ``(name, value)`` pairs, sorted first by</span>
+<span class="sd">        ``name`` and then by ``value`` based on the OAuth percent-encoding rules</span>
+<span class="sd">        and specification.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query_params</span> <span class="o">=</span> <span class="n">query_params</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">encoded_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c"># Keys are also percent-encoded according to OAuth spec.</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">percent_encode</span><span class="p">(</span><span class="n">unicode_to_utf8</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">allow_func</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">allow_func</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">is_bytes_or_unicode</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+            <span class="n">encoded_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">percent_encode</span><span class="p">(</span><span class="n">v</span><span class="p">),))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="c"># Loop over the sequence.</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                        <span class="n">encoded_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">percent_encode</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="p">))</span>
+                <span class="c"># ``urllib.urlencode()`` doesn&#39;t preserve blank lists.</span>
+                <span class="c"># Therefore, we&#39;re discarding them.</span>
+                <span class="c">#else:</span>
+                <span class="c">#    # Preserve blank list values.</span>
+                <span class="c">#    encoded_pairs.append((k, &quot;&quot;, ))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">encoded_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">percent_encode</span><span class="p">(</span><span class="n">v</span><span class="p">),))</span>
+    <span class="c"># Sort after encoding according to the OAuth spec.</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">encoded_pairs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="urlparse_normalized"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.urlparse_normalized">[docs]</a><span class="k">def</span> <span class="nf">urlparse_normalized</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Like :func:`urlparse.urlparse` but also normalizes scheme, netloc, port,</span>
+<span class="sd">    and the path.</span>
+
+<span class="sd">    Use with OAuth URLs.</span>
+
+<span class="sd">    :see: Base String URI (http://tools.ietf.org/html/rfc5849#section-3.4.1.2)</span>
+<span class="sd">    :param url:</span>
+<span class="sd">        The URL to split and normalize.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Tuple that contains these elements:</span>
+<span class="sd">        ``(scheme, netloc, path, params, query, fragment)``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidUrlError</span><span class="p">(</span><span class="s">&quot;Invalid URL `</span><span class="si">%r</span><span class="s">`&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">,))</span>
+
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+    <span class="n">scheme</span>      <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">scheme</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="c"># Netloc.</span>
+    <span class="n">username</span>    <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">username</span> <span class="ow">or</span> <span class="s">&quot;&quot;</span>
+    <span class="n">password</span>    <span class="o">=</span> <span class="p">(</span><span class="s">&quot;:&quot;</span> <span class="o">+</span> <span class="n">parts</span><span class="o">.</span><span class="n">password</span><span class="p">)</span> <span class="k">if</span> <span class="n">parts</span><span class="o">.</span><span class="n">password</span> <span class="k">else</span> <span class="s">&quot;&quot;</span>
+    <span class="n">credentials</span> <span class="o">=</span> <span class="n">username</span> <span class="o">+</span> <span class="n">password</span>
+    <span class="n">credentials</span> <span class="o">=</span> <span class="p">(</span><span class="n">credentials</span> <span class="o">+</span> <span class="s">&quot;@&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">credentials</span> <span class="k">else</span> <span class="s">&quot;&quot;</span>
+
+    <span class="c"># Exclude default port numbers.</span>
+    <span class="c"># See:</span>
+    <span class="k">if</span> <span class="n">parts</span><span class="o">.</span><span class="n">port</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">scheme</span> <span class="o">==</span> <span class="s">&quot;http&quot;</span> <span class="ow">and</span> <span class="n">parts</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="mi">80</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">scheme</span> <span class="o">==</span> <span class="s">&quot;https&quot;</span> <span class="ow">and</span> <span class="n">parts</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="mi">443</span><span class="p">):</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;:&quot;</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">parts</span><span class="o">.</span><span class="n">port</span><span class="p">))</span> <span class="k">if</span> <span class="n">parts</span><span class="o">.</span><span class="n">port</span> <span class="k">else</span> <span class="s">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+    <span class="n">netloc</span>        <span class="o">=</span> <span class="n">credentials</span> <span class="o">+</span> <span class="n">parts</span><span class="o">.</span><span class="n">hostname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="n">port</span>
+    <span class="c"># http://tools.ietf.org/html/rfc3986#section-3</span>
+    <span class="c"># and http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.2.2</span>
+    <span class="n">path</span>          <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">path</span> <span class="ow">or</span> <span class="s">&quot;/&quot;</span>
+    <span class="n">matrix_params</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">params</span> <span class="ow">or</span> <span class="s">&quot;&quot;</span>
+    <span class="n">fragment</span>      <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">fragment</span> <span class="ow">or</span> <span class="s">&quot;&quot;</span>
+    <span class="n">query</span>         <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">query</span> <span class="ow">or</span> <span class="s">&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">matrix_params</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">fragment</span>
+
+
+<span class="c">#TODO: Add test for url_add_query uses OAuth param sort order.</span></div>
+<div class="viewcode-block" id="url_add_query"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.url_add_query">[docs]</a><span class="k">def</span> <span class="nf">url_add_query</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">extra_query_params</span><span class="p">,</span> <span class="n">allow_func</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds additional query parameters to a URL while preserving existing ones.</span>
+
+<span class="sd">    The URL will be normalized according to the OAuth specification with the</span>
+<span class="sd">    exception that the URL fragment is preserved.</span>
+
+<span class="sd">    :param url:</span>
+<span class="sd">        The URL to add the additional query parameters to.</span>
+<span class="sd">    :param extra_query_params:</span>
+<span class="sd">        The additional query parameters as a dictionary object or a query</span>
+<span class="sd">        string.</span>
+<span class="sd">    :param allow_func:</span>
+<span class="sd">        A callback that will be called for each query parameter and should</span>
+<span class="sd">        return ``False`` or a falsy value if that parameter should not be</span>
+<span class="sd">        included. By default, all query parameters are included. The function</span>
+<span class="sd">        takes the following method signature::</span>
+
+<span class="sd">            def allow_func(name, value):</span>
+<span class="sd">                return is_name_allowed(name) and is_value_allowed(value)</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A normalized URL with the fragment and existing query parameters</span>
+<span class="sd">        preserved and with the extra query parameters added.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scheme</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">fragment</span> <span class="o">=</span> <span class="n">urlparse_normalized</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="n">query_add</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">extra_query_params</span><span class="p">)</span>
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">urlencode_s</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">allow_func</span><span class="o">=</span><span class="n">allow_func</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">urlunparse</span><span class="p">((</span><span class="n">scheme</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">qs</span><span class="p">,</span> <span class="n">fragment</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="url_append_query"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.url_append_query">[docs]</a><span class="k">def</span> <span class="nf">url_append_query</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">query_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Appends query params to any existing query string in the URL</span>
+<span class="sd">    and returns a properly formatted URL. URL fragments are preserved.</span>
+
+<span class="sd">    This is the equivalent of doing::</span>
+
+<span class="sd">        sorted(URL query parameters) + &quot;&amp;&quot; + sorted(query_params)</span>
+
+<span class="sd">    :param url:</span>
+<span class="sd">        The URL into which the query parameters will be concatenated.</span>
+<span class="sd">    :param query_params:</span>
+<span class="sd">        A dictionary of query parameters or a query string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A URL with the query parameters concatenated.</span>
+
+<span class="sd">    Usage::</span>
+
+<span class="sd">        &gt;&gt;&gt; url_append_query(&quot;http://example.com/foo?a=b#fragment&quot;, dict(c=&quot;d&quot;))</span>
+<span class="sd">        &#39;http://example.com/foo?a=b&amp;c=d#fragment&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">query_params</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">url</span>
+    <span class="n">scheme</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">fragment</span> <span class="o">=</span> <span class="n">urlparse_normalized</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="p">(</span><span class="n">query</span> <span class="o">+</span> <span class="s">&quot;&amp;&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">query</span> <span class="k">else</span> <span class="n">query</span>
+    <span class="n">query_string</span> <span class="o">=</span> <span class="n">query</span> <span class="o">+</span> <span class="n">urlencode_s</span><span class="p">(</span><span class="n">query_unflatten</span><span class="p">(</span><span class="n">query_params</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">urlunparse</span><span class="p">((</span><span class="n">scheme</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">query_string</span><span class="p">,</span> <span class="n">fragment</span><span class="p">))</span>
+
+
+</div>
+<div class="viewcode-block" id="query_add"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.query_add">[docs]</a><span class="k">def</span> <span class="nf">query_add</span><span class="p">(</span><span class="o">*</span><span class="n">query_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merges multiple query parameter dictionaries or strings.</span>
+
+<span class="sd">    :param query_params:</span>
+<span class="sd">        One or more query string or a dictionary of query parameters.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A dictionary of merged query parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">qp</span> <span class="ow">in</span> <span class="n">query_params</span><span class="p">:</span>
+        <span class="n">qp</span> <span class="o">=</span> <span class="n">query_unflatten</span><span class="p">(</span><span class="n">qp</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">qp</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">d</span>
+
+
+<span class="c">#def query_update(query_params, *extra_query_params):</span>
+<span class="c">#    &quot;&quot;&quot;</span>
+<span class="c">#    Updates a dictionary of query parameters or a query string with</span>
+<span class="c">#    replacement parameter values from the specified additional</span>
+<span class="c">#    query parameter dictionaries or query strings.</span>
+<span class="c">#</span>
+<span class="c">#    The parameters specified toward the end of the arguments to this function</span>
+<span class="c">#    take precedence over all previous parameters.</span>
+<span class="c">#</span>
+<span class="c">#    .. WARNING:</span>
+<span class="c">#        This is a dangerous routine. Be careful with this routine.</span>
+<span class="c">#        It may bite.</span>
+<span class="c">#</span>
+<span class="c">#    :param query_params:</span>
+<span class="c">#        Initial query parameter dictionary or query string.</span>
+<span class="c">#    :param extra_query_params:</span>
+<span class="c">#        A list query parameter dictionaries or query strings.</span>
+<span class="c">#    :returns:</span>
+<span class="c">#        A dictionary of updated query parameters.</span>
+<span class="c">#    &quot;&quot;&quot;</span>
+<span class="c">#    query_params = query_unflatten(query_params)</span>
+<span class="c">#    d = {}</span>
+<span class="c">#    d.update(query_params)</span>
+<span class="c">#    for qp in extra_query_params:</span>
+<span class="c">#        qp = query_unflatten(qp)</span>
+<span class="c">#        d.update(qp)</span>
+<span class="c">#    return d</span>
+
+</div>
+<span class="k">def</span> <span class="nf">query_append</span><span class="p">(</span><span class="o">*</span><span class="n">query_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Appends additional query parameters to a query string. The additional</span>
+<span class="sd">    query parameters appear after the initial query string.</span>
+
+<span class="sd">    :param query_params:</span>
+<span class="sd">        Additional query parameters dictionary or query string.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Concatenated query string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">li</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">qp</span> <span class="ow">in</span> <span class="n">query_params</span><span class="p">:</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">urlencode_s</span><span class="p">(</span><span class="n">query_unflatten</span><span class="p">(</span><span class="n">qp</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">qs</span><span class="p">:</span>
+            <span class="n">li</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">qs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">li</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="query_filter"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.query_filter">[docs]</a><span class="k">def</span> <span class="nf">query_filter</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="n">allow_func</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filters query parameters out of a query parameter dictionary or</span>
+<span class="sd">    query string.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        def allow_only_parameter_names_starting_with_oauth(name, value):</span>
+<span class="sd">            return name.startswith(&quot;oauth&quot;)</span>
+
+<span class="sd">        query_filter(query_params,</span>
+<span class="sd">            allow_func=allow_only_parameter_names_starting_with_oauth)</span>
+
+<span class="sd">    :param query_params:</span>
+<span class="sd">        Query parameter dictionary or query string.</span>
+<span class="sd">    :param allow_func:</span>
+<span class="sd">        A callback that will be called for each query parameter and should</span>
+<span class="sd">        return ``False`` or a falsy value if that parameter should not be</span>
+<span class="sd">        included. By default, all query parameters are included. The function</span>
+<span class="sd">        takes the following method signature::</span>
+
+<span class="sd">            def allow_func(name, value):</span>
+<span class="sd">                return is_name_allowed(name) and is_value_allowed(value)</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        A filtered dictionary of query parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query_params</span> <span class="o">=</span> <span class="n">query_unflatten</span><span class="p">(</span><span class="n">query_params</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">allow_func</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">allow_func</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">d</span>
+
+</div>
+<div class="viewcode-block" id="query_unflatten"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.query_unflatten">[docs]</a><span class="k">def</span> <span class="nf">query_unflatten</span><span class="p">(</span><span class="n">query_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a query string parses it into an un-flattened query parameter</span>
+<span class="sd">    dictionary or given a parameter dictionary, un-flattens it.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        dict(a=1, b=[1, 2], c=&quot;&quot;)   -&gt;   dict(a[1], b=[1, 2], c=[&quot;&quot;])</span>
+<span class="sd">        a=1&amp;b=1&amp;b=2&amp;c=              -&gt;   dict(a[1], b=[1, 2], c=[&quot;&quot;])</span>
+
+<span class="sd">    :param query_params:</span>
+<span class="sd">        A query parameter dictionary or a query string.</span>
+<span class="sd">        If this argument is ``None`` an empty dictionary will be returned.</span>
+<span class="sd">        Any other value will raise a</span>
+<span class="sd">        :class:`pyoauth.errors.InvalidQueryParametersError` exception.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        An un-flattened query parameter dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">is_bytes_or_unicode</span><span class="p">(</span><span class="n">query_params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">parse_qs</span><span class="p">(</span><span class="n">query_params</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="c"># Un-flatten the dictionary.</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">d</span>
+        <span class="c"># Alternative, but slower:</span>
+        <span class="c">#return parse_qs(urlencode_s(query_params))</span>
+    <span class="k">elif</span> <span class="n">query_params</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidQueryParametersError</span><span class="p">(</span><span class="s">&quot;Dictionary or query string required: got `</span><span class="si">%r</span><span class="s">` instead&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="request_protocol_params_sanitize"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.request_protocol_params_sanitize">[docs]</a><span class="k">def</span> <span class="nf">request_protocol_params_sanitize</span><span class="p">(</span><span class="n">protocol_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes non-OAuth and non-transmittable OAuth parameters from the</span>
+<span class="sd">    request query parameters.</span>
+
+<span class="sd">    .. WARNING:: Do NOT use this function with responses. Use ONLY with requests.</span>
+
+<span class="sd">        Specifically used ONLY in base string construction, Authorization</span>
+<span class="sd">        headers construction and parsing, and OAuth requests.</span>
+
+
+<span class="sd">    :param protocol_params:</span>
+<span class="sd">        Query string or query parameter dictionary. Does not filter out</span>
+<span class="sd">        ``oauth_signature``, but DOES filter out ``oauth_consumer_secret`` and</span>
+<span class="sd">        ``oauth_token_secret``. These secret parameters must never be</span>
+<span class="sd">        transmitted.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Filtered protocol parameters dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">allow_func</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;oauth_&quot;</span><span class="p">):</span>
+            <span class="c"># This gets rid of &quot;realm&quot; or any non-OAuth param.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c"># Multiple values for a protocol parameter are not allowed.</span>
+                <span class="c"># We don&#39;t silently discard values because failing fast</span>
+                <span class="c"># is better than simply logging and waiting for the user</span>
+                <span class="c"># to figure it out all by herself.</span>
+                <span class="c">#</span>
+                <span class="c"># See Making Requests (http://tools.ietf.org/html/rfc5849#section-3.1)</span>
+                <span class="c"># Point 2. Each parameter MUST NOT appear more than once per</span>
+                <span class="c"># request, so we disallow multiple values for a protocol</span>
+                <span class="c"># parameter.</span>
+                <span class="k">raise</span> <span class="n">InvalidOAuthParametersError</span><span class="p">(</span><span class="s">&quot;Multiple protocol parameter values found </span><span class="si">%r</span><span class="s">=</span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;oauth_consumer_secret&quot;</span><span class="p">,</span> <span class="s">&quot;oauth_token_secret&quot;</span><span class="p">,</span> <span class="p">):</span>
+                <span class="k">raise</span> <span class="n">InsecureOAuthParametersError</span><span class="p">(</span><span class="s">&quot;[SECURITY-ISSUE] Client attempting to transmit confidential protocol parameter `</span><span class="si">%r</span><span class="s">`. Communication is insecure if this is in your server logs.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Invalid protocol parameter ignored: `</span><span class="si">%r</span><span class="s">`&quot;</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="n">query_filter</span><span class="p">(</span><span class="n">protocol_params</span><span class="p">,</span> <span class="n">allow_func</span><span class="o">=</span><span class="n">allow_func</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="query_params_sanitize"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.query_params_sanitize">[docs]</a><span class="k">def</span> <span class="nf">query_params_sanitize</span><span class="p">(</span><span class="n">query_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes protocol parameters from the query parameters.</span>
+
+<span class="sd">    Used only in base string construction, Authorization headers construction</span>
+<span class="sd">    and parsing, and OAuth requests.</span>
+
+<span class="sd">    :param query_params:</span>
+<span class="sd">        Query string or query parameter dictionary.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Filtered URL query parameter dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">allow_func</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="c"># This gets rid of any params beginning with &quot;oauth_&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">n</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;oauth_&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Protocol parameter ignored from URL query parameters: `</span><span class="si">%r</span><span class="s">`&quot;</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="n">query_filter</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="n">allow_func</span><span class="o">=</span><span class="n">allow_func</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="oauth_url_sanitize"><a class="viewcode-back" href="../../api/protocol.html#pyoauth.url.oauth_url_sanitize">[docs]</a><span class="k">def</span> <span class="nf">oauth_url_sanitize</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">force_secure</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalizes an OAuth URL and cleans up protocol-specific parameters</span>
+<span class="sd">    from the query string.</span>
+
+<span class="sd">    Used only in base string construction, Authorization headers construction</span>
+<span class="sd">    and parsing, and OAuth requests.</span>
+
+<span class="sd">    :param url:</span>
+<span class="sd">        The OAuth URL to sanitize.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        Normalized sanitized URL.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scheme</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">fragment</span> <span class="o">=</span> <span class="n">urlparse_normalized</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">urlencode_s</span><span class="p">(</span><span class="n">query_params_sanitize</span><span class="p">(</span><span class="n">query</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">force_secure</span> <span class="ow">and</span> <span class="n">scheme</span> <span class="o">!=</span> <span class="s">&quot;https&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InsecureOAuthUrlError</span><span class="p">(</span><span class="s">&quot;OAuth 1.0 specification requires the use of SSL/TLS for inter-server communication.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">force_secure</span> <span class="ow">and</span> <span class="n">scheme</span> <span class="o">!=</span> <span class="s">&quot;https&quot;</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;CAUTION: RFC specification requires the use of SSL/TLS for credential requests.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">urlunparse</span><span class="p">((</span><span class="n">scheme</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+
+</div>
+<span class="k">def</span> <span class="nf">is_valid_callback_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determines whether a specified URL is a valid oauth_callback callback</span>
+<span class="sd">    absolute URL as required by http://tools.ietf.org/html/rfc5849#section-2.1</span>
+<span class="sd">    (Temporary Credentials) in the OAuth specification.</span>
+
+<span class="sd">    :param url:</span>
+<span class="sd">        The URL to validate.</span>
+<span class="sd">    :returns:</span>
+<span class="sd">        ``True`` if valid; ``False`` otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_bytes_or_unicode</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">url</span> <span class="o">==</span> <span class="s">&quot;oob&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">scheme</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">scheme</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;http&quot;</span><span class="p">,</span> <span class="s">&quot;https&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">netloc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+<h3>Navigation</h3>
+<p>
+  <a href="../../index.html">Documentation overview</a>
+</p>
+<ul>
+    </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

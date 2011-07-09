@@ -1,0 +1,695 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Cryptography primitives &mdash; pyoauth v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/minimalism.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="pyoauth v0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="Contributing" href="../guides/hacking.html" />
+    <link rel="prev" title="Type detection, encoding, and conversion" href="types.html" /> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="cryptography-primitives">
+<h1>Cryptography primitives<a class="headerlink" href="#cryptography-primitives" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pyoauth.crypto.hash">
+<span id="pyoauth-crypto-hash"></span><h2><cite>pyoauth.crypto.hash</cite><a class="headerlink" href="#module-pyoauth.crypto.hash" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.crypto.hash</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Convenient hashing functions.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="sha-1-digests">
+<h3>SHA-1 digests<a class="headerlink" href="#sha-1-digests" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.hash.sha1_digest">
+<tt class="descclassname">pyoauth.crypto.hash.</tt><tt class="descname">sha1_digest</tt><big>(</big><em>*inputs</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/hash.html#sha1_digest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.hash.sha1_digest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a SHA-1 digest of a variable number of inputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputs</strong> &#8211; A variable number of inputs for which the digest will be calculated.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A byte string containing the SHA-1 message digest.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.crypto.hash.sha1_hex_digest">
+<tt class="descclassname">pyoauth.crypto.hash.</tt><tt class="descname">sha1_hex_digest</tt><big>(</big><em>*inputs</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/hash.html#sha1_hex_digest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.hash.sha1_hex_digest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates hexadecimal representation of the SHA-1 digest of a variable
+number of inputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputs</strong> &#8211; A variable number of inputs for which the digest will be calculated.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Hexadecimal representation of the SHA-1 digest.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.crypto.hash.sha1_base64_digest">
+<tt class="descclassname">pyoauth.crypto.hash.</tt><tt class="descname">sha1_base64_digest</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/hash.html#sha1_base64_digest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.hash.sha1_base64_digest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates Base-64-encoded SHA-1 digest of a variable
+number of inputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputs</strong> &#8211; A variable number of inputs for which the digest will be calculated.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Base-64-encoded SHA-1 digest.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="md5-digests">
+<h3>MD5 digests<a class="headerlink" href="#md5-digests" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.hash.md5_digest">
+<tt class="descclassname">pyoauth.crypto.hash.</tt><tt class="descname">md5_digest</tt><big>(</big><em>*inputs</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/hash.html#md5_digest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.hash.md5_digest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a MD5 digest of a variable number of inputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputs</strong> &#8211; A variable number of inputs for which the digest will be calculated.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A byte string containing the MD5 message digest.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.crypto.hash.md5_hex_digest">
+<tt class="descclassname">pyoauth.crypto.hash.</tt><tt class="descname">md5_hex_digest</tt><big>(</big><em>*inputs</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/hash.html#md5_hex_digest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.hash.md5_hex_digest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates hexadecimal representation of the MD5 digest of a variable
+number of inputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputs</strong> &#8211; A variable number of inputs for which the digest will be calculated.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Hexadecimal representation of the MD5 digest.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="hmac-sha-1-digests">
+<h3>HMAC-SHA-1 digests<a class="headerlink" href="#hmac-sha-1-digests" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.hash.hmac_sha1_digest">
+<tt class="descclassname">pyoauth.crypto.hash.</tt><tt class="descname">hmac_sha1_digest</tt><big>(</big><em>key</em>, <em>data</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/hash.html#hmac_sha1_digest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.hash.hmac_sha1_digest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a HMAC SHA-1 digest.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>key</strong> &#8211; The key for the digest.</li>
+<li><strong>data</strong> &#8211; The data for which the digest will be calculted.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">HMAC SHA-1 Digest.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.crypto.hash.hmac_sha1_base64_digest">
+<tt class="descclassname">pyoauth.crypto.hash.</tt><tt class="descname">hmac_sha1_base64_digest</tt><big>(</big><em>key</em>, <em>data</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/hash.html#hmac_sha1_base64_digest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.hash.hmac_sha1_base64_digest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a base64-encoded HMAC SHA-1 signature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>key</strong> &#8211; The key for the signature.</li>
+<li><strong>data</strong> &#8211; The data to be signed.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Base64-encoded HMAC SHA-1 signature.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.crypto.primes">
+<span id="pyoauth-crypto-primes"></span><h2><cite>pyoauth.crypto.primes</cite><a class="headerlink" href="#module-pyoauth.crypto.primes" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.crypto.primes</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Cryptographic prime number routines.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="verification">
+<h3>Verification<a class="headerlink" href="#verification" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.primes.is_prime">
+<tt class="descclassname">pyoauth.crypto.primes.</tt><tt class="descname">is_prime</tt><big>(</big><em>n</em>, <em>iterations=5</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/primes.html#is_prime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.primes.is_prime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether a number is prime.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>n</strong> &#8211; Number</li>
+<li><strong>iterations</strong> &#8211; Number of iterations.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><tt class="xref docutils literal"><span class="pre">True</span></tt> if prime; <tt class="xref docutils literal"><span class="pre">False</span></tt> otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="random">
+<h3>Random<a class="headerlink" href="#random" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.primes.generate_random_prime">
+<tt class="descclassname">pyoauth.crypto.primes.</tt><tt class="descname">generate_random_prime</tt><big>(</big><em>bits</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/primes.html#generate_random_prime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.primes.generate_random_prime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a random prime number.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bits</strong> &#8211; Number of bits.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Prime number long value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.crypto.primes.generate_random_safe_prime">
+<tt class="descclassname">pyoauth.crypto.primes.</tt><tt class="descname">generate_random_safe_prime</tt><big>(</big><em>bits</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/primes.html#generate_random_safe_prime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.primes.generate_random_safe_prime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unused at the moment.</p>
+<p>Generates a random prime number.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bits</strong> &#8211; Number of bits.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Prime number long value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.crypto.random">
+<span id="pyoauth-crypto-random"></span><h2><cite>pyoauth.crypto.random</cite><a class="headerlink" href="#module-pyoauth.crypto.random" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.crypto.random</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Random number and string generation utilities.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="bytes-and-byte-arrays">
+<h3>Bytes and byte arrays<a class="headerlink" href="#bytes-and-byte-arrays" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.random.generate_random_bytes">
+<tt class="descclassname">pyoauth.crypto.random.</tt><tt class="descname">generate_random_bytes</tt><big>(</big><em>count</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/random.html#generate_random_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.random.generate_random_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a random byte string with <tt class="docutils literal"><span class="pre">count</span></tt> bytes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>count</strong> &#8211; Number of bytes.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Random byte string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.crypto.random.generate_random_bytearray">
+<tt class="descclassname">pyoauth.crypto.random.</tt><tt class="descname">generate_random_bytearray</tt><big>(</big><em>count</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/random.html#generate_random_bytearray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.random.generate_random_bytearray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a random byte array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>count</strong> &#8211; The number of bytes.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A random byte array.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="numbers">
+<h3>Numbers<a class="headerlink" href="#numbers" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.random.generate_random_long">
+<tt class="descclassname">pyoauth.crypto.random.</tt><tt class="descname">generate_random_long</tt><big>(</big><em>low</em>, <em>high</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/random.html#generate_random_long"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.random.generate_random_long" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a random long integer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>low</strong> &#8211; Low</li>
+<li><strong>high</strong> &#8211; High</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Random long integer value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="strings">
+<h3>Strings<a class="headerlink" href="#strings" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.random.generate_random_uint_string">
+<tt class="descclassname">pyoauth.crypto.random.</tt><tt class="descname">generate_random_uint_string</tt><big>(</big><em>bit_strength=64</em>, <em>base=10</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/random.html#generate_random_uint_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.random.generate_random_uint_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a random ASCII-encoded unsigned integral number in decimal
+or hexadecimal representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bit_strength</strong> &#8211; Bit strength.</li>
+<li><strong>base</strong> &#8211; <dl class="docutils">
+<dt>One of:</dt>
+<dd><ol class="first last arabic">
+<li>10 (default)</li>
+<li>16</li>
+<li>64</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A string representation of a randomly-generated ASCII-encoded
+hexadecimal/decimal-representation unsigned integral number
+based on the bit strength specified.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.crypto.random.generate_random_hex_string">
+<tt class="descclassname">pyoauth.crypto.random.</tt><tt class="descname">generate_random_hex_string</tt><big>(</big><em>length=8</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/random.html#generate_random_hex_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.random.generate_random_hex_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a random ASCII-encoded hexadecimal string of an even length.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>length</strong> &#8211; Length of the string to be returned. Default 32.
+The length MUST be a positive even number.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A string representation of a randomly-generated hexadecimal string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.crypto.codec">
+<span id="pyoauth-crypto-codec"></span><h2><cite>pyoauth.crypto.codec</cite><a class="headerlink" href="#module-pyoauth.crypto.codec" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.crypto.codec</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Codecs to encode and decode keys and certificates in various formats.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="pem-key-decoders">
+<h3>PEM key decoders<a class="headerlink" href="#pem-key-decoders" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.codec.public_key_pem_decode">
+<tt class="descclassname">pyoauth.crypto.codec.</tt><tt class="descname">public_key_pem_decode</tt><big>(</big><em>pem_key</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/codec.html#public_key_pem_decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.codec.public_key_pem_decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes a PEM-encoded public key/X.509 certificate string into internal representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pem_key</strong> &#8211; The PEM-encoded key. Must be one of:
+1. RSA public key.
+2. X.509 certificate.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A dictionary of key information.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.crypto.codec.private_key_pem_decode">
+<tt class="descclassname">pyoauth.crypto.codec.</tt><tt class="descname">private_key_pem_decode</tt><big>(</big><em>pem_key</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/codec.html#private_key_pem_decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.codec.private_key_pem_decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes a PEM-encoded private key string into internal representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pem_key</strong> &#8211; The PEM-encoded RSA private key.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A dictionary of key information.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.crypto.codec.pem">
+<span id="pyoauth-crypto-codec-pem"></span><h2><cite>pyoauth.crypto.codec.pem</cite><a class="headerlink" href="#module-pyoauth.crypto.codec.pem" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.crypto.codec.pem</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">PEM/DER conversion utilities.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="pem-der-codec">
+<h3>PEM/DER codec<a class="headerlink" href="#pem-der-codec" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.codec.pem.pem_to_der">
+<tt class="descclassname">pyoauth.crypto.codec.pem.</tt><tt class="descname">pem_to_der</tt><big>(</big><em>pem_cert_string</em>, <em>pem_header</em>, <em>pem_footer</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/codec/pem.html#pem_to_der"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.codec.pem.pem_to_der" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts the DER as a byte sequence out of an ASCII PEM formatted
+certificate or key.</p>
+<p>Taken from the Python SSL module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pem_cert_string</strong> &#8211; The PEM certificate or key string.</li>
+<li><strong>pem_header</strong> &#8211; The PEM header to find.</li>
+<li><strong>pem_footer</strong> &#8211; The PEM footer to find.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.crypto.codec.pem.der_to_pem">
+<tt class="descclassname">pyoauth.crypto.codec.pem.</tt><tt class="descname">der_to_pem</tt><big>(</big><em>der_cert_bytes</em>, <em>pem_header</em>, <em>pem_footer</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/codec/pem.html#der_to_pem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.codec.pem.der_to_pem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a certificate in binary DER format and returns the
+PEM version of it as a string.</p>
+<p>Taken from the Python SSL module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>der_cert_bytes</strong> &#8211; A byte string of the DER.</li>
+<li><strong>pem_header</strong> &#8211; The PEM header to use.</li>
+<li><strong>pem_footer</strong> &#8211; The PEM footer to use.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="miscellaneous">
+<h3>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.codec.pem.cert_time_to_seconds">
+<tt class="descclassname">pyoauth.crypto.codec.pem.</tt><tt class="descname">cert_time_to_seconds</tt><big>(</big><em>cert_time</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/codec/pem.html#cert_time_to_seconds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.codec.pem.cert_time_to_seconds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a date-time string in standard ASN1_print form
+(&#8220;MON DAY 24HOUR:MINUTE:SEC YEAR TIMEZONE&#8221;) and return
+a Python time value in seconds past the epoch.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cert_time</strong> &#8211; Time value in the certificate.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">Python time value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.crypto.rsa">
+<span id="pyoauth-crypto-rsa"></span><h2><cite>pyoauth.crypto.rsa</cite><a class="headerlink" href="#module-pyoauth.crypto.rsa" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.crypto.rsa</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">Factory functions for RSA public and private keys.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="encoded-key-parsing">
+<h3>Encoded key parsing<a class="headerlink" href="#encoded-key-parsing" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pyoauth.crypto.rsa.parse_private_key">
+<tt class="descclassname">pyoauth.crypto.rsa.</tt><tt class="descname">parse_private_key</tt><big>(</big><em>encoded_key</em>, <em>encoding='PEM'</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/rsa.html#parse_private_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.rsa.parse_private_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyoauth.crypto.rsa.parse_public_key">
+<tt class="descclassname">pyoauth.crypto.rsa.</tt><tt class="descname">parse_public_key</tt><big>(</big><em>encoded_key</em>, <em>encoding='PEM'</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/rsa.html#parse_public_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.rsa.parse_public_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-pyoauth.crypto.rsa.keys">
+<span id="pyoauth-crypto-rsa-keys"></span><h2><cite>pyoauth.crypto.rsa.keys</cite><a class="headerlink" href="#module-pyoauth.crypto.rsa.keys" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pyoauth.crypto.rsa.pycrypto">
+<span id="pyoauth-crypto-rsa-pycrypto"></span><h2><cite>pyoauth.crypto.rsa.pycrypto</cite><a class="headerlink" href="#module-pyoauth.crypto.rsa.pycrypto" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">module:</th><td class="field-body">pyoauth.crypto.rsa.PyCrypto</td>
+</tr>
+<tr class="field"><th class="field-name">synopsis:</th><td class="field-body">PyCrypto RSA implementation wrapper.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyoauth.crypto.rsa.pycrypto.PrivateKey">
+<em class="property">class </em><tt class="descclassname">pyoauth.crypto.rsa.pycrypto.</tt><tt class="descname">PrivateKey</tt><big>(</big><em>key_info</em>, <em>encoded_key</em>, <em>encoding</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/rsa/pycrypto.html#PrivateKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.rsa.pycrypto.PrivateKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a RSA private key.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>encoded_key</strong> &#8211; The encoded key string.</li>
+<li><strong>encoding</strong> &#8211; The encoding method of the key. Default PEM.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyoauth.crypto.rsa.pycrypto.PublicKey">
+<em class="property">class </em><tt class="descclassname">pyoauth.crypto.rsa.pycrypto.</tt><tt class="descname">PublicKey</tt><big>(</big><em>key_info</em>, <em>encoded_key</em>, <em>encoding</em><big>)</big><a class="reference internal" href="../_modules/pyoauth/crypto/rsa/pycrypto.html#PublicKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyoauth.crypto.rsa.pycrypto.PublicKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a RSA public key.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>encoded_key</strong> &#8211; The encoded key string.</li>
+<li><strong>encoding</strong> &#8211; The encoding method of the key. Default PEM.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Cryptography primitives</a><ul>
+<li><a class="reference internal" href="#module-pyoauth.crypto.hash"><cite>pyoauth.crypto.hash</cite></a><ul>
+<li><a class="reference internal" href="#sha-1-digests">SHA-1 digests</a></li>
+<li><a class="reference internal" href="#md5-digests">MD5 digests</a></li>
+<li><a class="reference internal" href="#hmac-sha-1-digests">HMAC-SHA-1 digests</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.crypto.primes"><cite>pyoauth.crypto.primes</cite></a><ul>
+<li><a class="reference internal" href="#verification">Verification</a></li>
+<li><a class="reference internal" href="#random">Random</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.crypto.random"><cite>pyoauth.crypto.random</cite></a><ul>
+<li><a class="reference internal" href="#bytes-and-byte-arrays">Bytes and byte arrays</a></li>
+<li><a class="reference internal" href="#numbers">Numbers</a></li>
+<li><a class="reference internal" href="#strings">Strings</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.crypto.codec"><cite>pyoauth.crypto.codec</cite></a><ul>
+<li><a class="reference internal" href="#pem-key-decoders">PEM key decoders</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.crypto.codec.pem"><cite>pyoauth.crypto.codec.pem</cite></a><ul>
+<li><a class="reference internal" href="#pem-der-codec">PEM/DER codec</a></li>
+<li><a class="reference internal" href="#miscellaneous">Miscellaneous</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.crypto.rsa"><cite>pyoauth.crypto.rsa</cite></a><ul>
+<li><a class="reference internal" href="#encoded-key-parsing">Encoded key parsing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pyoauth.crypto.rsa.keys"><cite>pyoauth.crypto.rsa.keys</cite></a></li>
+<li><a class="reference internal" href="#module-pyoauth.crypto.rsa.pycrypto"><cite>pyoauth.crypto.rsa.pycrypto</cite></a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Navigation</h3>
+<p>
+  <a href="../index.html">Documentation overview</a>
+</p>
+<ul>
+    <li>Previous: <a
+      href="types.html"
+      title="previous chapter"
+    >Type detection, encoding, and conversion</a>
+    </li>
+    <li>Next: <a
+      href="../guides/hacking.html"
+      title="next chapter"
+    >Contributing</a>
+    </li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/crypto.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/gorakhargosh/pyoauth">
+      <img
+        style="position: absolute; top: 0; right: 0; border: 0;"
+        src="https://assets2.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_right_gray_6d6d6d.png&path="
+        alt="Fork me on GitHub">
+    </a>
+  
+
+    <div class="footer">
+        &copy; Copyright 2011, Yesudeep Mangalapilly.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
