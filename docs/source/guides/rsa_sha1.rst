@@ -125,7 +125,8 @@ these keys with OAuth:
 3. The OAuth provider can now use the public key that you shared with it
    to verify the messages that you sent to it signed with your private key.
 
-That's essentially it.
+So, after that, all you have to do is use ``"RSA-SHA1"`` as your signature
+method to build your client requests. That's essentially it. Easy, huh?
 
 
 What does a key look like?
