@@ -35,6 +35,7 @@ MD5 digests
 -----------
 .. autofunction:: md5_digest
 .. autofunction:: md5_hex_digest
+.. autofunction:: md5_base64_digest
 
 HMAC-SHA-1 digests
 ------------------
@@ -115,6 +116,19 @@ def md5_hex_digest(*inputs):
         Hexadecimal representation of the MD5 digest.
     """
     return bytes_to_hex(md5_digest(*inputs))
+
+
+def md5_base64_digest(*value):
+    """
+    Calculates Base-64-encoded MD5 digest of a variable
+    number of inputs.
+
+    :param inputs:
+        A variable number of inputs for which the digest will be calculated.
+    :returns:
+        Base-64-encoded MD5 digest.
+    """
+    return bytes_to_base64(md5_digest(*value))
 
 
 def hmac_sha1_digest(key, data):
