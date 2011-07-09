@@ -25,3 +25,9 @@
 .. _M2Crypto: http://chandlerproject.org/Projects/MeTooCrypto
 .. _RFC5849: http://tools.ietf.org/html/rfc5849
 .. _specification: http://tools.ietf.org/html/rfc5849
+.. _pyasn1: http://pypi.python.org/pypi/pyasn1
+.. _PEM: http://en.wikipedia.org/wiki/Privacy_Enhanced_Mail
+.. _Keyczar RSA private key format: http://code.google.com/p/keyczar/wiki/RsaPrivateKey
+.. _Keyczar: http://www.keyczar.org/
+.. _OpenSSL: http://www.openssl.org/
+
