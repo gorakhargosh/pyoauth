@@ -33,12 +33,12 @@ OAuth signature and base string
 .. autofunction:: generate_rsa_sha1_signature
 .. autofunction:: verify_rsa_sha1_signature
 .. autofunction:: generate_plaintext_signature
-.. autofunction:: generate_signature_base_string
+.. autofunction:: generate_base_string
 
 Authorization HTTP header creation and parsing
 ----------------------------------------------
-.. autofunction:: generate_normalized_authorization_header_value
-.. autofunction:: parse_authorization_header_value
+.. autofunction:: generate_authorization_header
+.. autofunction:: parse_authorization_header
 
 """
 
@@ -148,55 +148,43 @@ def generate_timestamp():
     return bytes(int(time.time()))
 
 
-def generate_hmac_sha1_signature(client_shared_secret,
-                            method, url, oauth_params=None,
-                            token_or_temporary_shared_secret=None):
+def generate_hmac_sha1_signature(base_string,
+                                 client_shared_secret,
+                                 token_shared_secret=None):
     """
     Calculates an HMAC-SHA1 signature for a base string.
 
     :see: HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)
+    :param base_string:
+        Base string.
     :param client_shared_secret:
         Client (consumer) shared secret.
-    :param method:
-        Base string HTTP method.
-    :param url:
-        Base string URL that may include a query string.
-        All protocol-specific parameters will be ignored from the query string.
-    :param oauth_params:
-        Base string protocol-specific query parameters.
-        All non-protocol parameters will be ignored.
-    :param token_or_temporary_shared_secret:
+    :param token_shared_secret:
         Token/temporary credentials shared secret if available.
     :returns:
         HMAC-SHA1 signature.
     """
-    oauth_params = oauth_params or {}
-    base_string = generate_signature_base_string(method, url, oauth_params)
     key = _generate_plaintext_signature(client_shared_secret,
-                                   token_or_temporary_shared_secret)
+                                        token_shared_secret)
     return hmac_sha1_base64_digest(key, base_string)
 
 
-def verify_hmac_sha1_signature(signature, client_shared_secret,
-                               method, url, oauth_params=None,
-                               token_or_temporary_shared_secret=None,
+def verify_hmac_sha1_signature(signature,
+                               base_string,
+                               client_shared_secret,
+                               token_shared_secret=None,
                                debug=False):
     """
     Verifies an HMAC-SHA1 signature for a base string.
 
     :see: HMAC-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.2)
-    :param
+    :param signature:
+        The signature to verify.
+    :param base_string:
+        The base string.
     :param client_shared_secret:
         Client (consumer) shared secret.
-    :param method:
-        Base string HTTP method.
-    :param url:
-        Base string URL that may include a query string.
-        All protocol-specific parameters will be ignored from the query string.
-    :param oauth_params:
-        Base string protocol-specific query parameters.
-        All non-protocol parameters will be ignored.
-    :param token_or_temporary_shared_secret:
+    :param token_shared_secret:
         Token/temporary credentials shared secret if available.
     :param debug:
         Default ``False``.
@@ -204,19 +192,19 @@ def verify_hmac_sha1_signature(signature, client_shared_secret,
         ``True`` to turn on debugging mode, which attempts to find out
         why signature verification fails, if it does; ``False`` otherwise.
     :returns:
-        A tuple of (whether signature matches (boolean), error message (None if it succeeded)).
+        A tuple of
+            (whether signature matches (boolean),
+            error message (None if it succeeded)).
     """
-    oauth_params = oauth_params or {}
-    base_string = generate_signature_base_string(method, url, oauth_params)
     key = _generate_plaintext_signature(client_shared_secret,
-                                        token_or_temporary_shared_secret)
-    ok = (signature == hmac_sha1_base64_digest(key, base_string))
-    if ok:
+                                        token_shared_secret)
+    check_ok = (signature == hmac_sha1_base64_digest(key, base_string))
+    if check_ok:
         err = None
     else:
         err = "Invalid signature"
 
-    if not ok and debug:
+    if not check_ok and debug:
         # Try to find out why it didn't match.
         # We need to help the poor human souls on the other
         # side of this mess who are trying to debug their OAuth clients.
@@ -226,134 +214,116 @@ def verify_hmac_sha1_signature(signature, client_shared_secret,
 
         # Assume correct base string but detect incorrect signature encoding.
         key = _generate_plaintext_signature(client_shared_secret,
-                                            token_or_temporary_shared_secret,
+                                            token_shared_secret,
                                             _percent_encode=False)
         if signature == hmac_sha1_base64_digest(key, base_string):
-            return ok, "Invalid signature: signature elements are not percent-encoded properly"
+            return check_ok, "Invalid signature: signature elements " \
+                       "are not percent-encoded properly"
 
         # Assume correct base string but detect missing ampersands in signature.
-        if client_shared_secret and not token_or_temporary_shared_secret:
+        if client_shared_secret and not token_shared_secret:
             key = percent_encode(client_shared_secret) + "&"
             if signature == hmac_sha1_base64_digest(key, base_string):
-                return ok, "Invalid signature: missing ampersand `&` after client shared secret in signature"
-        elif not client_shared_secret and token_or_temporary_shared_secret:
-            key = "&" + percent_encode(token_or_temporary_shared_secret)
+                return check_ok, "Invalid signature: missing ampersand `&` " \
+                           "after client shared secret in signature"
+        elif not client_shared_secret and token_shared_secret:
+            key = "&" + percent_encode(token_shared_secret)
             if signature == hmac_sha1_base64_digest(key, base_string):
-                return ok, "Invalid signature: missing ampersand `&` before token secret in signature"
-        elif not client_shared_secret and not token_or_temporary_shared_secret:
+                return check_ok, "Invalid signature: missing ampersand `&` "\
+                           "before token secret in signature"
+        elif not client_shared_secret and not token_shared_secret:
             key = "&"
             if signature == hmac_sha1_base64_digest(key, base_string):
-                return ok, "Invalid signature: missing ampersand `&` without secrets in signature"
-        elif client_shared_secret and token_or_temporary_shared_secret:
-            key = percent_encode(client_shared_secret) + "&" + percent_encode(token_or_temporary_shared_secret)
+                return check_ok, "Invalid signature: missing ampersand `&` "\
+                           "without secrets in signature"
+        elif client_shared_secret and token_shared_secret:
+            key = percent_encode(client_shared_secret) + \
+                  "&" + percent_encode(token_shared_secret)
             if signature == hmac_sha1_base64_digest(key, base_string):
-                return ok, "Invalid signature: missing ampersand `&` between signature secrets"
+                return check_ok, "Invalid signature: missing ampersand `&` "\
+                           "between signature secrets"
 
         # Assume incorrect base string
-        return ok, "Invalid signature: check base string?"
+        return check_ok, "Invalid signature: check base string?"
 
-    return ok, err
+    return check_ok, err
 
 
-def generate_rsa_sha1_signature(client_private_key,
-                                method, url, oauth_params=None,
+def generate_rsa_sha1_signature(base_string,
+                                client_private_key,
                                 *args, **kwargs):
     """
     Calculates an RSA-SHA1 OAuth signature.
 
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
 
+    :param base_string:
+        Base string.
     :param client_private_key:
         PEM-encoded RSA private key.
-    :param method:
-        Base string HTTP method.
-    :param url:
-        Base string URL that may include a query string.
-        All protocol-specific paramters will be ignored from the query string.
-    :param oauth_params:
-        Base string protocol-specific query parameters.
-        All non-protocol parameters will be ignored.
     :returns:
         RSA-SHA1 signature.
     """
     from pyoauth.crypto.rsa import parse_private_key
-
-    oauth_params = oauth_params or {}
-    base_string = generate_signature_base_string(method, url, oauth_params)
 
     key = parse_private_key(client_private_key)
     return base64_encode(key.pkcs1_v1_5_sign(sha1_digest(base_string)))
 
 
 def verify_rsa_sha1_signature(signature,
+                              base_string,
                               client_certificate,
-                              method, url, oauth_params=None,
                               *args, **kwargs):
     """
     Verifies a RSA-SHA1 OAuth signature.
 
     :see: RSA-SHA1 (http://tools.ietf.org/html/rfc5849#section-3.4.3)
 
+    :param base_string:
+        Base string.
     :param signature:
         RSA-SHA1 OAuth signature.
     :param client_certificate:
         PEM-encoded X.509 certificate or RSA public key.
-    :param method:
-        Base string HTTP method.
-    :param url:
-        Base string URL that may include a query string.
-        All protocol-specific parameters will be ignored from the query string.
-    :param oauth_params:
-        Base string protocol-specific query parameters.
-        All non-protocol parameters will be ignored.
     :returns:
         ``True`` if verified to be correct; ``False`` otherwise.
     """
     from pyoauth.crypto.rsa import parse_public_key
-
-    oauth_params = oauth_params or {}
-    base_string = generate_signature_base_string(method, url, oauth_params)
 
     key = parse_public_key(client_certificate)
     return key.pkcs1_v1_5_verify(sha1_digest(base_string),
                                  base64_decode(signature))
 
 
-def generate_plaintext_signature(client_shared_secret,
-                            method, url, oauth_params=None,
-                            token_or_temporary_shared_secret=None):
+def generate_plaintext_signature(base_string,
+                                 client_shared_secret,
+                                 token_shared_secret=None):
     """
     Calculates a PLAINTEXT signature for a base string.
 
     :see: PLAINTEXT (http://tools.ietf.org/html/rfc5849#section-3.4.4)
+    :param base_string:
+        (Unused) base string.
     :param client_shared_secret:
         Client (consumer) shared secret.
-    :param method:
-        (Not used). Base string HTTP method.
-    :param url:
-        (Not used). Base string URL that may include query string.
-        All protocol-specific parameters will be ignored from the query string.
-    :param oauth_params:
-        (Not used). Base string protocol-specific query parameters.
-        All non-protocol parameters will be ignored.
-    :param token_or_temporary_shared_secret:
+    :param token_shared_secret:
         Token/temporary credentials shared secret if available.
     :returns:
         PLAINTEXT signature.
     """
     return _generate_plaintext_signature(client_shared_secret,
-                                    token_or_temporary_shared_secret)
+                                    token_shared_secret)
 
 
 def _generate_plaintext_signature(client_shared_secret,
-                                  token_or_temporary_shared_secret=None,
+                                  token_shared_secret=None,
                                   _percent_encode=True):
     """
     Calculates the PLAINTEXT signature.
 
     :param client_shared_secret:
         Client (consumer) shared secret.
-    :param token_or_temporary_shared_secret:
+    :param token_shared_secret:
         Token/temporary credentials shared secret if available.
     :param _percent_encode:
         (DEBUG)
@@ -367,19 +337,20 @@ def _generate_plaintext_signature(client_shared_secret,
         PLAINTEXT signature.
     """
     client_shared_secret = client_shared_secret or ""
-    token_or_temporary_shared_secret = token_or_temporary_shared_secret or ""
+    token_shared_secret = token_shared_secret or ""
     if _percent_encode:
         return "&".join([percent_encode(a) for a in [
-                client_shared_secret, token_or_temporary_shared_secret]])
+                client_shared_secret, token_shared_secret]])
     else:
         # User clients can forget to do this and this has been fixed
         # by OAuth 1.0a, so we use this piece of code to detect whether
         # the user's OAuth client library complies with the specification
         # when in debugging mode.
-        return "&".join([client_shared_secret, token_or_temporary_shared_secret])
+        return "&".join([client_shared_secret,
+                         token_shared_secret])
 
 
-def generate_signature_base_string(method, url, oauth_params):
+def generate_base_string(method, url, oauth_params):
     """
     Calculates a signature base string based on the URL, method, and
     oauth parameters.
@@ -406,21 +377,31 @@ def generate_signature_base_string(method, url, oauth_params):
                        "PATCH")
     method_normalized = method.upper()
     if method_normalized not in allowed_methods:
-        raise InvalidHttpMethodError("Method must be one of the HTTP methods %s: got `%s` instead" % (allowed_methods, method))
+        raise InvalidHttpMethodError(
+            "Method must be one of the HTTP methods %s: "\
+            "got `%s` instead" % (allowed_methods, method))
     if not url:
         raise InvalidUrlError("URL must be specified: got `%r`" % (url, ))
     if not isinstance(oauth_params, dict):
-        raise InvalidOAuthParametersError("Dictionary required: got `%r`" % (oauth_params, ))
+        raise InvalidOAuthParametersError(
+            "Dictionary required: got `%r`" % (oauth_params, ))
 
-    scheme, netloc, path, matrix_params, query, fragment = urlparse_normalized(url)
-    query_string = _generate_signature_base_string_query(query, oauth_params)
-    normalized_url = urlunparse((scheme, netloc, path, matrix_params, None, None))
+    scheme, netloc, path, matrix_params, query, _ = urlparse_normalized(url)
+    query_string = generate_base_string_query(query, oauth_params)
+    normalized_url = urlunparse((
+        scheme,
+        netloc,
+        path,
+        matrix_params,
+        None,
+        None
+    ))
     return "&".join([
         percent_encode(e) for e in [
             method_normalized, normalized_url, query_string]])
 
 
-def _generate_signature_base_string_query(url_query_params, oauth_params):
+def generate_base_string_query(url_query_params, oauth_params):
     """
     Serializes URL query parameters and OAuth protocol parameters into a valid
     OAuth base string URI query string.
@@ -448,16 +429,16 @@ def _generate_signature_base_string_query(url_query_params, oauth_params):
     # the secrets from the entire list of parameters.
     def allow_func(name, value):
         return name not in ("oauth_signature",
-                            #"oauth_consumer_secret",    # Already filtered by protocol parameter sanitization above.
-                            #"oauth_token_secret",       # Already filtered by protocol parameter sanitization above.
+                            #"oauth_consumer_secret", # Sanitized above.
+                            #"oauth_token_secret",    # Sanitized above.
                             )
     query = urlencode_s(query_params, allow_func=allow_func)
     return query
 
 
-def generate_normalized_authorization_header_value(oauth_params,
-                                                   realm=None,
-                                                   param_delimiter=","):
+def generate_authorization_header(oauth_params,
+                                  realm=None,
+                                  param_delimiter=","):
     """
     Builds the Authorization header value.
 
@@ -480,18 +461,19 @@ def generate_normalized_authorization_header_value(oauth_params,
         A properly formatted Authorization header value.
     """
     if realm:
-        s = 'OAuth realm="' + unicode_to_utf8(realm) + '"' + param_delimiter
+        value = 'OAuth realm="' + unicode_to_utf8(realm) + '"' + param_delimiter
     else:
-        s = 'OAuth '
+        value = 'OAuth '
     oauth_params = request_protocol_params_sanitize(oauth_params)
     normalized_param_pairs = urlencode_sl(oauth_params)
-    s += param_delimiter.join([k + '="' + v + '"' for k, v in normalized_param_pairs])
-    return s
+    value += param_delimiter.join([k + '="' + v + '"'
+                               for k, v in normalized_param_pairs])
+    return value
 
 
-def parse_authorization_header_value(header_value,
-                                     param_delimiter=",",
-                                     strict=True):
+def parse_authorization_header(header_value,
+                               param_delimiter=",",
+                               strict=True):
     """
     Parses the OAuth Authorization header.
 
@@ -514,9 +496,9 @@ def parse_authorization_header_value(header_value,
     :returns:
         Dictionary of parameter name value pairs.
     """
-    d = {}
+    params = {}
     param_list, realm = \
-        _parse_authorization_header_value_l(header_value,
+        parse_authorization_header_l(header_value,
                                             param_delimiter=param_delimiter,
                                             strict=strict)
     for name, value in param_list:
@@ -524,18 +506,18 @@ def parse_authorization_header_value(header_value,
         # detected by the sanitization below and flagged as an error
         # in the Authorization header value.
         #
-        #d[name] = [value]
-        if name in d:
-            d[name].append(value)
+        #params[name] = [value]
+        if name in params:
+            params[name].append(value)
         else:
-            d[name] = [value]
-    d = request_protocol_params_sanitize(d)
-    return d, realm
+            params[name] = [value]
+    params = request_protocol_params_sanitize(params)
+    return params, realm
 
 
-def _parse_authorization_header_value_l(header_value,
-                                        param_delimiter=",",
-                                        strict=True):
+def parse_authorization_header_l(header_value,
+                                 param_delimiter=",",
+                                 strict=True):
     """
     Parses the OAuth Authorization header preserving the order of the
     parameters as in the header value.
@@ -567,9 +549,11 @@ def _parse_authorization_header_value_l(header_value,
     header_value = unicode_to_utf8(header_value)
     if strict:
         if "\n" in header_value:
-            raise ValueError("Header value must be on a single line: got `%r`" % (header_value, ))
+            raise ValueError("Header value must be on a single line: got `%r`" \
+                             % (header_value, ))
         if param_delimiter != ",":
-            raise ValueError("The param delimiter must be a comma: got `%r`" % (param_delimiter, ))
+            raise ValueError("The param delimiter must be a comma: got `%r`" \
+                             % (param_delimiter, ))
 
     pattern = re.compile(r"(^OAuth[\s]+)", re.IGNORECASE)
     header_value = re.sub(pattern, "", header_value.strip(), 1)
@@ -581,20 +565,27 @@ def _parse_authorization_header_value_l(header_value,
     for param in pairs:
         if not param:
             if header_value.endswith(param_delimiter):
-                raise InvalidAuthorizationHeaderError("Malformed `Authorization` header value -- found trailing `%r` character" % param_delimiter)
+                raise InvalidAuthorizationHeaderError(
+                    "Malformed `Authorization` header value -- "\
+                    "found trailing `%r` character" % param_delimiter)
             else:
                 # Blank param?
                 continue
-        nv = param.split("=", 1)
-        if len(nv) != 2:
-            raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" % (param, ))
-        name, value = nv[0].strip(), nv[1].strip()
+        name_value = param.split("=", 1)
+        if len(name_value) != 2:
+            raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" \
+                                                  % (param, ))
+        name, value = name_value[0].strip(), name_value[1].strip()
         if len(value) < 2:
-            raise InvalidAuthorizationHeaderError("bad parameter value: `%r` -- missing quotes?" % (param, ))
+            raise InvalidAuthorizationHeaderError(
+                "bad parameter value: `%r` -- missing quotes?" % (param, ))
         if value[0] != '"' or value[-1] != '"':
-            raise InvalidAuthorizationHeaderError("missing quotes around parameter value: `%r` -- values must be quoted using (\")" % (param, ))
+            raise InvalidAuthorizationHeaderError(
+                "missing quotes around parameter value: `%r` "\
+                "-- values must be quoted using (\")" % (param, ))
 
-        # We only need to remove a single pair of quotes. Do not use str.strip('"').
+        # We only need to remove a single pair of quotes.
+        # Do not use str.strip('"').
         # We need to be able to detect problems with the values too.
         value = value[1:-1]
         name = percent_decode(name)

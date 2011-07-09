@@ -30,26 +30,40 @@ try:
     # Built-in JSON library.
     import json
     assert hasattr(json, "loads") and hasattr(json, "dumps")
-    _json_decode = json.loads
-    _json_encode = json.dumps
+
+    def json_loads(value):
+        """Wrapper to decode JSON."""
+        return json.loads(value)
+    def json_dumps(value):
+        """Wrapper to encode JSON."""
+        return json.dumps(value)
 except Exception:
     try:
         # Try to use the simplejson library.
         import simplejson as json
-        _json_decode = lambda s: json.loads(bytes_to_unicode(s))
-        _json_encode = lambda v: json.dumps(v)
+        def json_loads(value):
+            """Wrapper to decode JSON."""
+            return json.loads(bytes_to_unicode(value))
+        def json_dumps(value):
+            """Wrapper to encode JSON."""
+            return json.dumps(value)
     except ImportError:
         try:
             # For Google App Engine.
             from django.utils import simplejson as json
-            _json_decode = lambda s: json.loads(bytes_to_unicode(s))
-            _json_encode = lambda v: json.dumps(v)
+            def json_loads(value):
+                """Wrapper to decode JSON."""
+                return json.loads(bytes_to_unicode(value))
+            def json_dumps(value):
+                """Wrapper to encode JSON."""
+                return json.dumps(value)
         except ImportError:
-            def _json_decode(s):
+            def json_loads(s):
+                """Wrapper to decode JSON."""
                 raise NotImplementedError(
                     "A JSON parser is required, e.g., simplejson at "
                     "http://pypi.python.org/pypi/simplejson/")
-            _json_encode = _json_decode
+            json_dumps = json_loads
 
 
 def json_encode(value):
@@ -68,7 +82,7 @@ def json_encode(value):
     :returns:
         JSON string.
     """
-    return _json_encode(to_unicode_recursively(value)).replace("</", "<\\/")
+    return json_dumps(to_unicode_recursively(value)).replace("</", "<\\/")
 
 
 def json_decode(value):
@@ -80,5 +94,5 @@ def json_decode(value):
     :returns:
         Decoded Python value.
     """
-    return _json_decode(value)
+    return json_loads(value)
 

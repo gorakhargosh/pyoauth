@@ -8,7 +8,7 @@ from pyoauth.error import InvalidOAuthParametersError, \
     InvalidSignatureMethodError, \
     InvalidHttpResponseError, HttpError, InvalidContentTypeError, IllegalArgumentError
 from pyoauth.http import RequestProxy, ResponseProxy
-from pyoauth.protocol import parse_authorization_header_value
+from pyoauth.protocol import parse_authorization_header
 
 try:
     from nose.tools import assert_dict_equal
@@ -235,8 +235,8 @@ OAuth realm="Photos",\
         assert_equal(request.payload, valid_request.payload)
         assert_equal(request.url, valid_request.url)
 
-        expected_authorization_header, expected_realm = parse_authorization_header_value(valid_request.headers["Authorization"])
-        got_authorization_header, got_realm = parse_authorization_header_value(request.headers["Authorization"])
+        expected_authorization_header, expected_realm = parse_authorization_header(valid_request.headers["Authorization"])
+        got_authorization_header, got_realm = parse_authorization_header(request.headers["Authorization"])
         assert_equal(got_realm, expected_realm)
         assert_dict_equal(got_authorization_header, expected_authorization_header)
 
@@ -273,7 +273,7 @@ OAuth realm="Photos",\
         assert_equal(request.payload, valid_request.payload)
         assert_equal(request.url, valid_request.url)
 
-        expected_authorization_header, expected_realm = parse_authorization_header_value(valid_request.headers["Authorization"])
-        got_authorization_header, got_realm = parse_authorization_header_value(request.headers["Authorization"])
+        expected_authorization_header, expected_realm = parse_authorization_header(valid_request.headers["Authorization"])
+        got_authorization_header, got_realm = parse_authorization_header(request.headers["Authorization"])
         assert_equal(got_realm, expected_realm)
         assert_dict_equal(got_authorization_header, expected_authorization_header)

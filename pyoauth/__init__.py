@@ -15,3 +15,17 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+"""
+:module: pyoauth
+:synopsis: Python OAuth implementation for clients and servers.
+
+Client classes do not send HTTP requests but implement enough of the
+OAuth protocol to help you build request proxies that can be used to send actual
+HTTP requests. In essence, it implements OAuth and nothing else.
+This is a very conscious decision by the library authors. It allows
+framework authors and API users to use the library without pulling in
+unnecessary dependencies which may not work on their platform of choice.
+
+:see: http://gorakhargosh.github.com/pyoauth/ for more information.
+"""

@@ -34,7 +34,7 @@ protocol.
 
 Client classes do not send HTTP requests but implement enough of the
 OAuth protocol to help you build request proxies that can be used to send actual
-HTTP requests. In essence, it implements OAuth 1.0 and nothing else.
+HTTP requests. In essence, it implements OAuth and nothing else.
 This is a very conscious decision by the library authors. It allows
 framework authors and API users to use the library without pulling in
 unnecessary dependencies which may not work on their platform of choice.

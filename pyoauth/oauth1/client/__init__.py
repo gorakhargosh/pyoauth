@@ -51,7 +51,7 @@ from pyoauth.protocol import generate_nonce, \
     generate_hmac_sha1_signature, \
     generate_rsa_sha1_signature, \
     generate_plaintext_signature, \
-    generate_normalized_authorization_header_value
+    generate_authorization_header, generate_base_string
 
 
 SIGNATURE_METHOD_MAP = {
@@ -562,8 +562,9 @@ class Client(object):
         signature_url = url_add_query(url, payload_params)
 
         # Determine the request's OAuth signature.
+        base_string = generate_base_string(method, signature_url, oauth_params)
         oauth_params["oauth_signature"] = self._sign_request_data(oauth_signature_method,
-                                                                  method, signature_url, oauth_params,
+                                                                  base_string,
                                                                   token_or_temporary_credentials)
 
         # Build request data now.
@@ -579,7 +580,7 @@ class Client(object):
             raise InvalidAuthorizationHeaderError("Authorization field is already present in headers: `%r`" % (headers, ))
         if self._use_authorization_header:
             auth_header_value = \
-                generate_normalized_authorization_header_value(oauth_params,
+                generate_authorization_header(oauth_params,
                                                           realm=realm,
                                                           param_delimiter=self._authorization_header_param_delimiter)
             headers["Authorization"] = auth_header_value
@@ -604,7 +605,7 @@ class Client(object):
                             headers=headers)
 
     def _sign_request_data(self, signature_method,
-                           method, url, oauth_params,
+                           base_string,
                            credentials):
         """
         Generates a signature for the given OAuth request using the credentials
@@ -612,6 +613,6 @@ class Client(object):
         """
         sign_func = SIGNATURE_METHOD_MAP[signature_method]
         credentials_shared_secret = credentials.shared_secret if credentials else None
-        return sign_func(self._client_credentials.shared_secret,
-                         method, url, oauth_params,
+        return sign_func(base_string,
+                         self._client_credentials.shared_secret,
                          credentials_shared_secret)

@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+:module: pyoauth.decorators
+:synopsis: Decorators used throughout the library.
+"""
+
 import warnings
 import functools
 
@@ -24,6 +29,9 @@ def deprecated(func):
     """
     @functools.wraps(func)
     def new_func(*args, **kwargs):
+        """
+        Wrapper function.
+        """
         warnings.warn_explicit(
             "Call to deprecated function %(funcname)s." % {
                 'funcname': func.__name__,
