@@ -96,17 +96,87 @@ No, I mean it's harder for you to work with. And it also allows attackers
 to snoop into everything you're saying *after they're long dead and gone*.
 
 Consider a series of love letters Mr. Bunny sends to Mrs. Bunny. But the
-postman, Mr. Fox, however, is a very cunning fox. He doesn't like Mr. Bunny,
-so he opens all of Mr. Bunny's letters and changes all the words of love
-into those of hatred. Mrs. Bunny is furious and scolds Mr. Bunny about all
-those letters of hatred, but Mr. Bunny never sent them! So, Mr. Bunny rubs
-Aladdin's lamp and asks the genie for a magical lock.
+postman, Mr. Evil Fox, however, is a very cunning fox. He doesn't like
+Mr. Bunny, so he opens all of Mr. Bunny's letters and changes a few words before
+delivering them to trick Mrs. Bunny into thinking that Mr. Bunny is cheating
+on her.
+
+    What Mr. Bunny sends::
+
+        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        |                                                       |
+        |   Dear Mrs. Bunny,                                    |
+        |                                                       |
+        |   I love you.                                         |
+        |                                                       |
+        |   Love, Mr. Bunny                                     |
+        |                                                       |
+        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    What Mrs. Bunny receives::
+
+        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        |                                                       |
+        |   Dear Mrs. Hippopotamus,                             |
+        |                                                       |
+        |   I love you.                                         |
+        |                                                       |
+        |   Love, Mr. Bunny                                     |
+        |                                                       |
+        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    All thanks to Mr. Evil Fox.
+
+::
+
+      ____________________________________
+     /                                    \
+    |                                      |
+    |   Grrrrrrrr. >=|B                    |
+    |                                      |
+     \____________________________________/
+                                   V
+                               Mrs. Bunny
+
+
+Mrs. Bunny is furious and scolds Mr. Bunny about all the letters Mr. Bunny
+never sent! Mr. Bunny is perplexed and rubs Aladdin's lamp to ask the genie
+for a magical lock.
 
     A magical lock with two keys: one to lock it and the other to open it.
 
 He gives the second key to Mrs. Bunny and only she can now open the envelopes
-that Mr. Bunny sends to her. Poor Mr. Fox tries his best to open Mr. Bunny's
-letters, but can't anymore. Hooray!
+that Mr. Bunny sends to her. Poor Mr. Evil Fox tries his best to open
+Mr. Bunny's letters, but can't anymore. Hooray!
+
+    What Mr. Bunny sends::
+
+        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        |                                                       |
+        |   Dear Mrs. Bunny,                                    |
+        |                                                       |
+        |   I love you. Hooray!                                 |
+        |                                                       |
+        |   Love, Mr. Bunny                                     |
+        |                                                       |
+        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    What Mrs. Bunny now receives::
+
+        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        |                                                       |
+        |   Dear Mrs. Bunny,                                    |
+        |                                                       |
+        |   I love you. Hooray!                                 |
+        |                                                       |
+        |   Love, Mr. Bunny                                     |
+        |                                                       |
+        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+::
+
+    Mr. Fox               ->  ='(
+    Mr. and Mrs. Bunny    ->  =B and =B
 
 Imagine public-key encryption to be the equivalent of having a lock with two
 complementary keys—that is, if you lock something with one key, only the
@@ -119,14 +189,15 @@ two keys to secure your messages in a way that:
 3. Ensures the messages that A and B exchange **aren't tampered with while
    in transit**.
 
-Now, using RSA-SHA-1 signatures shouldn't be as difficult as they are to use
-with OAuth. Therefore, we have tried to take the burden of implementing it away
-from you and made it as easy as possible for you to use this signature method.
+Now, using RSA-SHA-1 signatures shouldn't be as difficult to use as they are
+with OAuth. Therefore, we have tried to take the burden of implementing them
+away from you and made it as easy as possible for you to use this signature
+method.
 
 
 So how does OAuth use public-key encryption?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-OAuth requires the use of SSL by the clients when requesting token secrets
+OAuth requires the use of SSL by clients when requesting token secrets
 from OAuth servers. This takes care of the confidential part. The other two
 are handled by RSA-SHA-1 signatures.
 
@@ -140,8 +211,8 @@ Here is what you have to do to use your RSA key-pair with OAuth:
    request building methods to **use** ``"RSA-SHA1"`` **as the signature
    method** and your **RSA private key as the client secret**. Easy, huh?
 
-The OAuth provider can now use the public key that you shared with it
-to verify the messages that you sent to it signed with your private key.
+The OAuth provider can now use your public key to verify the messages that
+you send to it after you sign them with your private key.
 
 That's essentially it.
 
