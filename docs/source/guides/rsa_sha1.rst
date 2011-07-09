@@ -122,7 +122,7 @@ these keys with OAuth:
 2. Sign your messages with your RSA private key (which you keep safe and don't
    share with anybody else including the OAuth provider) by telling the
    request building methods to **use** ``"RSA-SHA1"`` **as the signature
-   method**. Easy, huh?
+   method** and your **RSA private key as the client secret**. Easy, huh?
 
 The OAuth provider can now use the public key that you shared with it
 to verify the messages that you sent to it signed with your private key.
