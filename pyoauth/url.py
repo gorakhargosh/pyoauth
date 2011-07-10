@@ -294,7 +294,7 @@ def url_append_query(url, query):
 
     This is the equivalent of doing::
 
-        sorted(URL query parameters) + "&" + sorted(query_params)
+        sorted(URL query parameters) + "&" + sorted(query)
 
     :param url:
         The URL into which the query parameters will be concatenated.
@@ -394,7 +394,7 @@ def query_filter(query, allow_func=None):
         def allow_only_parameter_names_starting_with_oauth(name, value):
             return name.startswith("oauth")
 
-        query_filter(query_params,
+        query_filter(query,
             allow_func=allow_only_parameter_names_starting_with_oauth)
 
     :param query:
@@ -450,7 +450,7 @@ def query_unflatten(query):
                 new_query_d[name] = list(value)
         return new_query_d
         # Alternative, but slower:
-        #return parse_qs(urlencode_s(query_params))
+        #return parse_qs(urlencode_s(query))
     elif query is None:
         return {}
     else:

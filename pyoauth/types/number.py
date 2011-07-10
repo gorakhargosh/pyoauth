@@ -42,6 +42,7 @@ Math
 
 
 import struct
+from pyoauth.types import bit_count, byte_count
 
 from pyoauth.types.bytearray import \
     bytearray_concat, \
@@ -101,7 +102,7 @@ def bytes_to_long(byte_string):
 
     This is (essentially) the inverse of long_to_bytes().
 
-    :param bytestring:
+    :param byte_string:
         A byte string.
     :returns:
         Long.
@@ -190,7 +191,7 @@ def long_to_mpi(num):
     return bytearray_to_bytes(byte_array)
 
 
-def gcd(a,b):
+def gcd(a, b):
     """
     Calculates the greatest common divisor.
 
@@ -203,7 +204,7 @@ def gcd(a,b):
     :returns:
         Greatest common divisor.
     """
-    a, b = max(a,b), min(a,b)
+    a, b = max(a, b), min(a, b)
     while b:
         a, b = b, (a % b)
     return a

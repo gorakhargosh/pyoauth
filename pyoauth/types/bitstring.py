@@ -26,8 +26,11 @@ Type conversion
 .. autofunction:: long_to_bitstring
 """
 
+from pyoauth.types import bytes
+
 try:
-    a = reduce((lambda a, b: a + b), [1, 2, 3, 4])
+    # Check whether we have reduce as a built-in.
+    reduce_test = reduce((lambda num1, num2: num1 + num2), [1, 2, 3, 4])
 except Exception:
     # Python 3k
     from functools import reduce
@@ -42,7 +45,7 @@ def bits_to_long(bits):
     :returns:
         Long value.
     """
-    return reduce((lambda x, y: (x << 1) + y), bits)
+    return reduce((lambda first, second: (first << 1) + second), bits)
 
 
 def long_to_bitstring(num):
@@ -54,9 +57,10 @@ def long_to_bitstring(num):
     :returns:
         A bit string.
     """
-    buf = ''
+    bit_string = ''
     while num > 1:
-      buf = str(num & 1) + buf
+      bit_string = bytes(num & 1) + bit_string
       num >>= 1
-    buf = str(num) + buf
-    return buf
+    bit_string = bytes(num) + bit_string
+    return bit_string
+

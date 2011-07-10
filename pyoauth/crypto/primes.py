@@ -39,18 +39,17 @@ from pyoauth.crypto.random import generate_random_long
 from pyoauth.types.number import pow_mod
 
 
-def make_prime_sieve(n):
+def make_prime_sieve(size):
     """
     Pre-calculate a sieve of the ~100 primes < 1000.
 
-    :param n:
+    :param size:
         Count
     :returns:
         Prime sieve.
     """
-    sieve = range(n)
-    for count in range(2, int(math.sqrt(n))):
-        #if sieve[count] == 0:
+    sieve = range(size)
+    for count in range(2, int(math.sqrt(size))):
         if not sieve[count]:
             continue
         x = sieve[count] * 2
@@ -63,11 +62,11 @@ def make_prime_sieve(n):
 sieve = make_prime_sieve(1000)
 
 
-def is_prime(n, iterations=5):
+def is_prime(num, iterations=5):
     """
     Determines whether a number is prime.
 
-    :param n:
+    :param num:
         Number
     :param iterations:
         Number of iterations.
@@ -76,27 +75,27 @@ def is_prime(n, iterations=5):
     """
     #Trial division with sieve
     for x in sieve:
-        if x >= n: return True
-        if not n % x: return False
+        if x >= num: return True
+        if not num % x: return False
     #Passed trial division, proceed to Rabin-Miller
     #Rabin-Miller implemented per Ferguson & Schneier
     #Compute s, t for Rabin-Miller
-    s, t = n-1, 0
+    s, t = num-1, 0
     while not s % 2:
         s, t = s/2, t+1
     #Repeat Rabin-Miller x times
     a = 2 #Use 2 as a base for first iteration speedup, per HAC
     for count in range(iterations):
-        v = pow_mod(a, s, n)
+        v = pow_mod(a, s, num)
         if v==1:
             continue
         i = 0
-        while v != n-1:
+        while v != num-1:
             if i == t-1:
                 return False
             else:
-                v, i = pow_mod(v, 2, n), i+1
-        a = generate_random_long(2, n)
+                v, i = pow_mod(v, 2, num), i+1
+        a = generate_random_long(2, num)
     return True
 
 
@@ -163,4 +162,3 @@ def generate_random_safe_prime(bits):
             if is_prime(p):
                 if is_prime(q):
                     return p
-

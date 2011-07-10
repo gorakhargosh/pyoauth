@@ -100,7 +100,8 @@ def to_unicode_recursively(obj):
     Supports lists, tuples, and dictionaries.
     """
     if isinstance(obj, dict):
-        return dict((to_unicode_recursively(k), to_unicode_recursively(v)) for (k,v) in obj.iteritems())
+        return dict((to_unicode_recursively(k),
+                     to_unicode_recursively(v)) for (k, v) in obj.iteritems())
     elif isinstance(obj, list):
         return list(to_unicode_recursively(i) for i in obj)
     elif isinstance(obj, tuple):
