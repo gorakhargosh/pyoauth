@@ -19,3 +19,7 @@
 # SOFTWARE.
 # ===================================================================
 
+"""
+:module: pyoauth.asn1
+:synopsis: Contains ASN.1 parsing routines to parse PEM-encoded keys.
+"""

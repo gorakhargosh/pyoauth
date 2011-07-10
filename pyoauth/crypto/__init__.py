@@ -18,3 +18,8 @@
 # SOFTWARE.
 # ===================================================================
 
+"""
+:module: pyoauth.crypto
+:synopsis: Cryptography primitives.
+
+"""

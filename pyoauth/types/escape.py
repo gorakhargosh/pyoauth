@@ -17,8 +17,8 @@
 # under the License.
 
 """
-:module: pyoauth.types.json
-:synopsis: JSON codec.
+:module: pyoauth.types.escape
+:synopsis: Common escaping.
 
 .. autofunction:: json_decode
 .. autofunction:: json_encode

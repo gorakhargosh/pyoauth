@@ -102,7 +102,9 @@ class RSAPrivateKey(object):
 
         algorithm = cover_asn1[1][0]
         if algorithm != cls._RSA_OID:
-            raise ValueError("Only RSA encryption is currently supported: got algorithm `%r`" % algorithm)
+            raise ValueError(
+                "Only RSA encryption is supported: got algorithm `%r`" \
+                % algorithm)
         key_der = bytes(cover_asn1[2])
         key_asn1 = decoder.decode(key_der, asn1Spec=keyType)[0]
         return cover_asn1, key_asn1
@@ -156,8 +158,11 @@ class RSAPublicKey(object):
     def public_key(self):
         algorithm = self._key_asn1.getComponentByName('algorithm')[0]
         if algorithm != self._RSA_OID:
-            raise NotImplementedError("Only RSA encryption is currently supported: got algorithm `%r`" % algorithm)
-        modulus, exponent = self.parse_public_rsa_key_bits(self._key_asn1.getComponentByName('subjectPublicKey'))
+            raise NotImplementedError(
+                "Only RSA encryption is supported: got algorithm `%r`" \
+                % algorithm)
+        modulus, exponent = self.parse_public_rsa_key_bits(
+            self._key_asn1.getComponentByName('subjectPublicKey'))
         return dict(
             modulus=modulus,
             exponent=exponent,

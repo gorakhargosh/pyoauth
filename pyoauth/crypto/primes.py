@@ -75,8 +75,10 @@ def is_prime(num, iterations=5):
     """
     #Trial division with sieve
     for x in sieve:
-        if x >= num: return True
-        if not num % x: return False
+        if x >= num:
+            return True
+        if not num % x:
+            return False
     #Passed trial division, proceed to Rabin-Miller
     #Rabin-Miller implemented per Ferguson & Schneier
     #Compute s, t for Rabin-Miller
@@ -87,7 +89,7 @@ def is_prime(num, iterations=5):
     a = 2 #Use 2 as a base for first iteration speedup, per HAC
     for count in range(iterations):
         v = pow_mod(a, s, num)
-        if v==1:
+        if v == 1:
             continue
         i = 0
         while v != num-1:

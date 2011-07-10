@@ -40,7 +40,8 @@ from pyoauth.crypto.codec.pem.rsa import RSAPrivateKey, RSAPublicKey
 
 def public_key_pem_decode(pem_key):
     """
-    Decodes a PEM-encoded public key/X.509 certificate string into internal representation.
+    Decodes a PEM-encoded public key/X.509 certificate string into
+    internal representation.
 
     :param pem_key:
         The PEM-encoded key. Must be one of:
@@ -55,7 +56,8 @@ def public_key_pem_decode(pem_key):
     elif pem_key.startswith(PUBLIC_KEY_PEM_HEADER):
         key = RSAPublicKey(pem_key).public_key
     else:
-        raise NotImplementedError("Only PEM-encoded X.509 certificates and public RSA keys can be read.")
+        raise NotImplementedError(
+            "Only PEM X.509 certificates & public RSA keys can be read.")
     return key
 
 
@@ -69,8 +71,9 @@ def private_key_pem_decode(pem_key):
         A dictionary of key information.
     """
     pem_key = pem_key.strip()
-    if pem_key.startswith(PRIVATE_KEY_PEM_HEADER) or pem_key.startswith(RSA_PRIVATE_KEY_PEM_HEADER):
+    if pem_key.startswith(PRIVATE_KEY_PEM_HEADER) \
+    or pem_key.startswith(RSA_PRIVATE_KEY_PEM_HEADER):
         key = RSAPrivateKey(pem_key).private_key
     else:
-        raise NotImplementedError("Only PEM-encoded private RSA keys can be read.")
+        raise NotImplementedError("Only PEM private RSA keys can be read.")
     return key

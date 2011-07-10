@@ -41,6 +41,14 @@ except ImportError:
 
 
 def parse_private_key(encoded_key, encoding="PEM"):
+    """
+    Parses a private key in the given format.
+
+    :param encoded_key:
+        The encoded key.
+    :param encoding:
+        The encoding used to encode the key. Default "PEM".
+    """
     encoding = encoding.upper()
     if encoding == "PEM":
         key_info = private_key_pem_decode(encoded_key)
@@ -51,6 +59,14 @@ def parse_private_key(encoded_key, encoding="PEM"):
 
 
 def parse_public_key(encoded_key, encoding="PEM"):
+    """
+    Parses a public key in the given format.
+
+    :param encoded_key:
+        The encoded key.
+    :param encoding:
+        The encoding used to encode the key. Default "PEM".
+    """
     encoding = encoding.upper()
     if encoding == "PEM":
         key_info = public_key_pem_decode(encoded_key)

@@ -58,10 +58,10 @@ def sha1_digest(*inputs):
     :returns:
         A byte string containing the SHA-1 message digest.
     """
-    md = sha1()
+    hash_func = sha1()
     for i in inputs:
-        md.update(i)
-    return md.digest()
+        hash_func.update(i)
+    return hash_func.digest()
 
 
 def sha1_hex_digest(*inputs):
@@ -99,10 +99,10 @@ def md5_digest(*inputs):
     :returns:
         A byte string containing the MD5 message digest.
     """
-    md = md5()
+    hash_func = md5()
     for i in inputs:
-        md.update(i)
-    return md.digest()
+        hash_func.update(i)
+    return hash_func.digest()
 
 
 def md5_hex_digest(*inputs):

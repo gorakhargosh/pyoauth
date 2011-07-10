@@ -30,7 +30,8 @@
 from pyasn1.type import univ
 from pyasn1.codec.der import encoder, decoder
 from pyoauth.types.bitstring import bits_to_long
-from pyoauth.crypto.codec.pem import der_to_pem_certificate, pem_to_der_certificate
+from pyoauth.crypto.codec.pem import \
+    der_to_pem_certificate, pem_to_der_certificate
 from pyoauth.crypto.codec.asn1.x509 import Certificate
 
 
@@ -47,10 +48,14 @@ class X509Certificate(object):
 
     @property
     def public_key(self):
-        algorithm = self.subject_public_key_info.getComponentByName('algorithm')[0]
+        spki = self.subject_public_key_info
+        algorithm = spki.getComponentByName('algorithm')[0]
         if algorithm != self._RSA_OID:
-            raise NotImplementedError("Only RSA encryption is currently supported: got algorithm `%r`" % algorithm)
-        modulus, exponent = self.parse_public_rsa_key_bits(self.subject_public_key_info.getComponentByName('subjectPublicKey'))
+            raise NotImplementedError(
+                "Only RSA encryption is supported: got algorithm `%r`" \
+                % algorithm)
+        modulus, exponent = self.parse_public_rsa_key_bits(
+            spki.getComponentByName('subjectPublicKey'))
         return dict(
             modulus=modulus,
             exponent=exponent,
@@ -82,7 +87,8 @@ class X509Certificate(object):
             raise ValueError("Problem ASN.1 decoding public key bytes")
 
         if len(public_key_asn1[0]) < 2:
-            raise ValueError("Couldn't obtain RSA modulus and exponent from public key.")
+            raise ValueError(
+                "Couldn't obtain RSA modulus and exponent from public key.")
 
         return long(public_key_asn1[0][0]), long(public_key_asn1[0][1])
 

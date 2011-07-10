@@ -31,7 +31,7 @@ from pyoauth.types import bytes
 try:
     # Check whether we have reduce as a built-in.
     reduce_test = reduce((lambda num1, num2: num1 + num2), [1, 2, 3, 4])
-except Exception:
+except NameError:
     # Python 3k
     from functools import reduce
 
@@ -59,8 +59,8 @@ def long_to_bitstring(num):
     """
     bit_string = ''
     while num > 1:
-      bit_string = bytes(num & 1) + bit_string
-      num >>= 1
+        bit_string = bytes(num & 1) + bit_string
+        num >>= 1
     bit_string = bytes(num) + bit_string
     return bit_string
 

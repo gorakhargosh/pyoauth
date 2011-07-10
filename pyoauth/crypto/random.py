@@ -63,7 +63,7 @@ try:
             Random byte string.
         """
         return os.urandom(count)
-except Exception:
+except AttributeError:
     try:
         urandom_device = open("/dev/urandom", "rb")
         def generate_random_bytes(count):
@@ -89,18 +89,15 @@ except Exception:
                 :returns:
                     Random byte string.
                 """
-                s = win32prng.generate_random_bytes(count)
-                assert len(s) == count
-                return s
+                random_bytes = win32prng.generate_random_bytes(count)
+                assert len(random_bytes) == count
+                return random_bytes
         except ImportError:
             # What the fuck?!
-            def generate_random_bytes(count):
+            def generate_random_bytes(_):
                 """
-                Should generate a random byte string with ``count`` bytes
-                but barfs instead.
+                WTF.
 
-                :param count:
-                    Number of bytes.
                 :returns:
                     WTF.
                 """
@@ -127,9 +124,9 @@ def generate_random_long(low, high):
         byte_array = generate_random_bytearray(num_bytes)
         if last_bits:
             byte_array[0] = byte_array[0] % (1 << last_bits)
-        n = bytearray_to_long(byte_array)
-        if n >= low and n < high:
-            return n
+        num = bytearray_to_long(byte_array)
+        if num >= low and num < high:
+            return num
 
 
 _BYTE_BASE_ENCODING_MAP = {
@@ -155,13 +152,15 @@ def generate_random_uint_string(bit_strength=64, base=10):
         based on the bit strength specified.
     """
     if bit_strength % 8 or bit_strength <= 0:
-        raise ValueError("This function expects a bit strength: got `%r`." % (bit_strength, ))
+        raise ValueError(
+            "This function expects a bit strength: got `%r`." % bit_strength)
     #num_bytes = bit_strength / 8
     random_bytes = generate_random_bytes(bit_strength >> 3)
     try:
         return _BYTE_BASE_ENCODING_MAP[base](random_bytes)
     except KeyError:
-        raise ValueError("Base must be one of %r" % (_BYTE_BASE_ENCODING_MAP.keys(), ))
+        raise ValueError(
+            "Base must be one of %r" % _BYTE_BASE_ENCODING_MAP.keys())
 
 
 def generate_random_hex_string(length=8):
@@ -174,8 +173,11 @@ def generate_random_hex_string(length=8):
     :returns:
         A string representation of a randomly-generated hexadecimal string.
     """
-    if length % 2 or length <= 0:
-        raise ValueError("This function expects a positive even number length: got length `%r`." % (length, ))
+    #if length % 2 or length <= 0:
+    if length & 1 or length <= 0:
+        raise ValueError(
+            "This function expects a positive even number "\
+            "length: got length `%r`." % length)
     return bytes_to_hex(generate_random_bytes(length/2))
 
 

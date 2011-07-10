@@ -23,9 +23,9 @@ Type detection, encoding, and conversion
 =====================
 .. automodule:: pyoauth.types.codec
 
-`pyoauth.types.json`
-====================
-.. automodule:: pyoauth.types.json
+`pyoauth.types.escape`
+======================
+.. automodule:: pyoauth.types.escape
 
 `pyoauth.types.number`
 ======================

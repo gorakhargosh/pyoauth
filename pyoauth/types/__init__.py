@@ -50,11 +50,19 @@ except Exception:
 
 
 def is_sequence(value):
+    """
+    Determines whether the given value is a sequence.
+
+    :param value:
+        The value to test.
+    :returns:
+        ``True`` if the value is a sequence; ``False`` otherwise.
+    """
     try:
         list(value)
         return True
-    except TypeError, e:
-        assert "is not iterable" in bytes(e)
+    except TypeError, exception:
+        assert "is not iterable" in bytes(exception)
         return False
 
 

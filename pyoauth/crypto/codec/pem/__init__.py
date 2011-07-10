@@ -71,8 +71,8 @@ def pem_to_der(pem_cert_string, pem_header, pem_footer):
     if not pem_cert_string.endswith(pem_footer):
         raise ValueError("Invalid PEM encoding; must end with %s"
                          % pem_footer)
-    d = pem_cert_string[len(pem_header):-len(pem_footer)]
-    return base64_decode(d)
+    encoded = pem_cert_string[len(pem_header):-len(pem_footer)]
+    return base64_decode(encoded)
 
 
 def der_to_pem(der_cert_bytes, pem_header, pem_footer):
@@ -90,9 +90,9 @@ def der_to_pem(der_cert_bytes, pem_header, pem_footer):
         The PEM footer to use.
     """
     # Does what base64.b64encode without the `altchars` argument does.
-    f = base64_encode(der_cert_bytes)
+    encoded = base64_encode(der_cert_bytes)
     return (pem_header + '\n' +
-            textwrap.fill(f, 64) + '\n' +
+            textwrap.fill(encoded, 64) + '\n' +
             pem_footer + '\n')
 
 
