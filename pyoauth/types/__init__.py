@@ -25,6 +25,37 @@
 :module: pyoauth.types
 :synopsis: Common portable Python type conversion and detection.
 
+``bytes``, ``str``, ``unicode``, and ``basestring`` mean different
+things to Python 2.5, 2.6, and 3.x.
+
+Python 2.5
+* ``bytes`` is not available.
+* ``str`` is a byte string.
+* ``unicode`` converts to unicode string.
+* ``basestring`` exists.
+
+Python 2.6
+* ``bytes`` is available and maps to str
+* ``str`` is a byte string.
+* ``unicode`` converts to unicode string
+* ``basestring`` exists.
+
+Python 3.x
+* ``bytes`` is available and does not map to ``str``.
+* ``str`` maps to the earlier ``unicode``, but ``unicode`` has been removed.
+* ``basestring`` has been removed.
+* ``unicode`` has been removed
+
+This module adds portable support for all three versions
+of Python. It introduces these portable types that you can use
+in your code:
+
+* ``bytes`` where you need byte strings.
+* ``unicode_string`` where you need unicode strings
+* a few other utility functions that hide all the
+  complications behind type checking therefore cleaning
+  up the code base.
+
 Type detection
 --------------
 .. autofunction:: is_sequence
