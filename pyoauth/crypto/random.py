@@ -136,8 +136,8 @@ _BYTE_BASE_ENCODING_MAP = {
 }
 def generate_random_uint_string(bit_strength=64, base=10):
     """
-    Generates a random ASCII-encoded unsigned integral number in decimal
-    or hexadecimal representation.
+    Generates a random ASCII-encoded unsigned integral number in decimal,
+    hexadecimal, or Base-64 representation.
 
     :param bit_strength:
         Bit strength.
@@ -148,14 +148,13 @@ def generate_random_uint_string(bit_strength=64, base=10):
             3. 64
     :returns:
         A string representation of a randomly-generated ASCII-encoded
-        hexadecimal/decimal-representation unsigned integral number
+        hexadecimal/decimal/base64-representation unsigned integral number
         based on the bit strength specified.
     """
     if bit_strength % 8 or bit_strength <= 0:
         raise ValueError(
             "This function expects a bit strength: got `%r`." % bit_strength)
-    #num_bytes = bit_strength / 8
-    random_bytes = generate_random_bytes(bit_strength >> 3)
+    random_bytes = generate_random_bytes(bit_strength // 8)
     try:
         return _BYTE_BASE_ENCODING_MAP[base](random_bytes)
     except KeyError:
