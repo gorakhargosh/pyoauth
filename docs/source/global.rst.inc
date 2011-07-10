@@ -31,3 +31,4 @@
 .. _Keyczar: http://www.keyczar.org/
 .. _OpenSSL: http://www.openssl.org/
 
+.. _Custom HTTP methods: http://tools.ietf.org/html/rfc5849#section-3.4.1.1

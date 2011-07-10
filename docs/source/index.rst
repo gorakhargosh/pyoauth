@@ -50,15 +50,18 @@ use SSL and prohibits you from using them if they do not begin with
 ``https://``. You can change this behavior to suit your needs, but the library
 will warn you.
 
+`Custom HTTP methods`_ are currently not supported.
+
 Signature methods
 ~~~~~~~~~~~~~~~~~
-All the signature methods mentioned in the OAuth specification have been
+All the signature methods recommended by the OAuth specification have been
 implemented by this library, namely:
 
 1. PLAINTEXT
 2. HMAC-SHA1
 3. RSA-SHA1
 
+Custom signature methods are currently not supported.
 
 RSA-SHA1 requirements
 *********************
