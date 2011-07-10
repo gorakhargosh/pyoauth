@@ -50,11 +50,13 @@ Parameter sanitization
 .. autofunction:: query_params_sanitize
 
 """
+
 import logging
 
 try:
     # Python 3.
-    from urllib.parse import urlparse, urlunparse, parse_qs as _parse_qs, quote, unquote_plus
+    from urllib.parse import \
+        urlparse, urlunparse, parse_qs as _parse_qs, quote, unquote_plus
 except ImportError:
     # Python 2.5+
     from urlparse import urlparse, urlunparse
@@ -80,14 +82,16 @@ def parse_qs(query_string):
 
     Use only with OAuth query strings.
 
-    :see: Parameter Sources (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
+    :see: Parameter Sources
+        (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
     :param query_string:
         Query string to parse. If ``query_string`` starts with a ``?`` character
         it will be ignored for convenience.
     """
     query_string = to_utf8_if_unicode(query_string) or ""
     if query_string.startswith("?"):
-        logging.warning("Ignoring `?` query string prefix -- `%r`" % query_string)
+        logging.warning(
+            "Ignoring `?` query string prefix -- `%r`", query_string)
         query_string = query_string[1:]
     return _parse_qs(query_string, keep_blank_values=True)
 
@@ -150,7 +154,7 @@ def urlencode_s(query_params, allow_func=None):
         sorted first by ``name`` and then by ``value`` based on the OAuth
         percent-encoding rules and specification.
     """
-    return "&".join([k + "=" + v for k, v in
+    return "&".join([key + "=" + value for key, value in
                      urlencode_sl(query_params, allow_func=allow_func)])
 
 
@@ -179,26 +183,26 @@ def urlencode_sl(query_params, allow_func=None):
     """
     query_params = query_params or {}
     encoded_pairs = []
-    for k, v in query_params.items():
+    for key, value in query_params.items():
         # Keys are also percent-encoded according to OAuth spec.
-        k = percent_encode(unicode_to_utf8(k))
-        if allow_func and not allow_func(k, v):
+        key = percent_encode(unicode_to_utf8(key))
+        if allow_func and not allow_func(key, value):
             continue
-        elif is_bytes_or_unicode(v):
-            encoded_pairs.append((k, percent_encode(v),))
+        elif is_bytes_or_unicode(value):
+            encoded_pairs.append((key, percent_encode(value),))
         else:
-            if is_sequence(v):
+            if is_sequence(value):
                 # Loop over the sequence.
-                if len(v) > 0:
-                    for i in v:
-                        encoded_pairs.append((k, percent_encode(i), ))
+                if len(value) > 0:
+                    for i in value:
+                        encoded_pairs.append((key, percent_encode(i), ))
                 # ``urllib.urlencode()`` doesn't preserve blank lists.
                 # Therefore, we're discarding them.
                 #else:
                 #    # Preserve blank list values.
                 #    encoded_pairs.append((k, "", ))
             else:
-                encoded_pairs.append((k, percent_encode(v),))
+                encoded_pairs.append((key, percent_encode(value),))
     # Sort after encoding according to the OAuth spec.
     return sorted(encoded_pairs)
 
@@ -232,7 +236,8 @@ def urlparse_normalized(url):
     # Exclude default port numbers.
     # See:
     if parts.port:
-        if (scheme == "http" and parts.port == 80) or (scheme == "https" and parts.port == 443):
+        if (scheme == "http" and parts.port == 80) \
+        or (scheme == "https" and parts.port == 443):
             port = ""
         else:
             port = (":" + bytes(parts.port)) if parts.port else ""
@@ -251,7 +256,7 @@ def urlparse_normalized(url):
 
 
 #TODO: Add test for url_add_query uses OAuth param sort order.
-def url_add_query(url, extra_query_params, allow_func=None):
+def url_add_query(url, query, allow_func=None):
     """
     Adds additional query parameters to a URL while preserving existing ones.
 
@@ -260,7 +265,7 @@ def url_add_query(url, extra_query_params, allow_func=None):
 
     :param url:
         The URL to add the additional query parameters to.
-    :param extra_query_params:
+    :param query:
         The additional query parameters as a dictionary object or a query
         string.
     :param allow_func:
@@ -275,14 +280,14 @@ def url_add_query(url, extra_query_params, allow_func=None):
         A normalized URL with the fragment and existing query parameters
         preserved and with the extra query parameters added.
     """
-    scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
+    scheme, netloc, path, params, query_s, fragment = urlparse_normalized(url)
 
-    d = query_add(query, extra_query_params)
-    qs = urlencode_s(d, allow_func=allow_func)
-    return urlunparse((scheme, netloc, path, params, qs, fragment))
+    query_d = query_add(query_s, query)
+    query_s = urlencode_s(query_d, allow_func=allow_func)
+    return urlunparse((scheme, netloc, path, params, query_s, fragment))
 
 
-def url_append_query(url, query_params):
+def url_append_query(url, query):
     """
     Appends query params to any existing query string in the URL
     and returns a properly formatted URL. URL fragments are preserved.
@@ -293,7 +298,7 @@ def url_append_query(url, query_params):
 
     :param url:
         The URL into which the query parameters will be concatenated.
-    :param query_params:
+    :param query:
         A dictionary of query parameters or a query string.
     :returns:
         A URL with the query parameters concatenated.
@@ -303,33 +308,33 @@ def url_append_query(url, query_params):
         >>> url_append_query("http://example.com/foo?a=b#fragment", dict(c="d"))
         'http://example.com/foo?a=b&c=d#fragment'
     """
-    if not query_params:
+    if not query:
         return url
-    scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
-    query = (query + "&") if query else query
-    query_string = query + urlencode_s(query_unflatten(query_params))
-    return urlunparse((scheme, netloc, path, params, query_string, fragment))
+    scheme, netloc, path, params, query_s, fragment = urlparse_normalized(url)
+    query_s = (query_s + "&") if query_s else query_s
+    query_s = query_s + urlencode_s(query_unflatten(query))
+    return urlunparse((scheme, netloc, path, params, query_s, fragment))
 
 
 
-def query_add(*query_params):
+def query_add(*queries):
     """
     Merges multiple query parameter dictionaries or strings.
 
-    :param query_params:
+    :param queries:
         One or more query string or a dictionary of query parameters.
     :returns:
         A dictionary of merged query parameters.
     """
-    d = {}
-    for qp in query_params:
-        qp = query_unflatten(qp)
-        for name, value in qp.items():
-            if name in d:
-                d[name].extend(value)
+    new_query_d = {}
+    for query in queries:
+        query_d = query_unflatten(query)
+        for name, value in query_d.items():
+            if name in new_query_d:
+                new_query_d[name].extend(value)
             else:
-                d[name] = value
-    return d
+                new_query_d[name] = value
+    return new_query_d
 
 
 #def query_update(query_params, *extra_query_params):
@@ -361,25 +366,25 @@ def query_add(*query_params):
 #    return d
 
 
-def query_append(*query_params):
+def query_append(*args):
     """
     Appends additional query parameters to a query string. The additional
     query parameters appear after the initial query string.
 
-    :param query_params:
+    :param args:
         Additional query parameters dictionary or query string.
     :returns:
         Concatenated query string.
     """
-    li = []
-    for qp in query_params:
-        qs = urlencode_s(query_unflatten(qp))
-        if qs:
-            li.append(qs)
-    return "&".join(li)
+    sub_queries = []
+    for query in args:
+        query_s = urlencode_s(query_unflatten(query))
+        if query_s:
+            sub_queries.append(query_s)
+    return "&".join(sub_queries)
 
 
-def query_filter(query_params, allow_func=None):
+def query_filter(query, allow_func=None):
     """
     Filters query parameters out of a query parameter dictionary or
     query string.
@@ -392,7 +397,7 @@ def query_filter(query_params, allow_func=None):
         query_filter(query_params,
             allow_func=allow_only_parameter_names_starting_with_oauth)
 
-    :param query_params:
+    :param query:
         Query parameter dictionary or query string.
     :param allow_func:
         A callback that will be called for each query parameter and should
@@ -405,17 +410,17 @@ def query_filter(query_params, allow_func=None):
     :returns:
         A filtered dictionary of query parameters.
     """
-    query_params = query_unflatten(query_params)
-    d = {}
-    for name, value in query_params.items():
+    query_d = query_unflatten(query)
+    new_query_d = {}
+    for name, value in query_d.items():
         if allow_func and not allow_func(name, value):
             continue
         else:
-            d[name] = value
-    return d
+            new_query_d[name] = value
+    return new_query_d
 
 
-def query_unflatten(query_params):
+def query_unflatten(query):
     """
     Given a query string parses it into an un-flattened query parameter
     dictionary or given a parameter dictionary, un-flattens it.
@@ -425,7 +430,7 @@ def query_unflatten(query_params):
         dict(a=1, b=[1, 2], c="")   ->   dict(a[1], b=[1, 2], c=[""])
         a=1&b=1&b=2&c=              ->   dict(a[1], b=[1, 2], c=[""])
 
-    :param query_params:
+    :param query:
         A query parameter dictionary or a query string.
         If this argument is ``None`` an empty dictionary will be returned.
         Any other value will raise a
@@ -433,23 +438,25 @@ def query_unflatten(query_params):
     :returns:
         An un-flattened query parameter dictionary.
     """
-    if is_bytes_or_unicode(query_params):
-        return parse_qs(query_params)
-    elif isinstance(query_params, dict):
+    if is_bytes_or_unicode(query):
+        return parse_qs(query)
+    elif isinstance(query, dict):
         # Un-flatten the dictionary.
-        d = {}
-        for n, v in query_params.items():
-            if not isinstance(v, list) and not isinstance(v, tuple):
-                d[n] = [v]
+        new_query_d = {}
+        for name, value in query.items():
+            if not isinstance(value, list) and not isinstance(value, tuple):
+                new_query_d[name] = [value]
             else:
-                d[n] = list(v)
-        return d
+                new_query_d[name] = list(value)
+        return new_query_d
         # Alternative, but slower:
         #return parse_qs(urlencode_s(query_params))
-    elif query_params is None:
+    elif query is None:
         return {}
     else:
-        raise InvalidQueryParametersError("Dictionary or query string required: got `%r` instead" % (query_params, ))
+        raise InvalidQueryParametersError(
+            "Dictionary or query string required: got `%r` instead" \
+            % (query, ))
 
 
 def request_protocol_params_sanitize(protocol_params):
@@ -457,7 +464,9 @@ def request_protocol_params_sanitize(protocol_params):
     Removes non-OAuth and non-transmittable OAuth parameters from the
     request query parameters.
 
-    .. WARNING:: Do NOT use this function with responses. Use ONLY with requests.
+    .. WARNING:: Do NOT use this function with responses.
+
+        Use ONLY with requests.
 
         Specifically used ONLY in base string construction, Authorization
         headers construction and parsing, and OAuth requests.
@@ -471,50 +480,78 @@ def request_protocol_params_sanitize(protocol_params):
     :returns:
         Filtered protocol parameters dictionary.
     """
-    def allow_func(n, v):
-        if n.startswith("oauth_"):
+    def allow_func(name, value):
+        """
+        Allows only valid oauth parameters.
+
+        Raises an error if multiple values are specified.
+
+        :param name:
+            Protocol parameter name.
+        :param value:
+            Protocol parameter value.
+        :returns:
+            ``True`` if the parameter should be included; ``False`` otherwise.
+        """
+        if name.startswith("oauth_"):
             # This gets rid of "realm" or any non-OAuth param.
-            if len(v) > 1:
+            if len(value) > 1:
                 # Multiple values for a protocol parameter are not allowed.
                 # We don't silently discard values because failing fast
                 # is better than simply logging and waiting for the user
                 # to figure it out all by herself.
                 #
-                # See Making Requests (http://tools.ietf.org/html/rfc5849#section-3.1)
+                # See Making Requests
+                # (http://tools.ietf.org/html/rfc5849#section-3.1)
                 # Point 2. Each parameter MUST NOT appear more than once per
                 # request, so we disallow multiple values for a protocol
                 # parameter.
-                raise InvalidOAuthParametersError("Multiple protocol parameter values found %r=%r" % (n, v))
-            elif n in ("oauth_consumer_secret", "oauth_token_secret", ):
-                raise InsecureOAuthParametersError("[SECURITY-ISSUE] Client attempting to transmit confidential protocol parameter `%r`. Communication is insecure if this is in your server logs." % (n, ))
+                raise InvalidOAuthParametersError(
+                    "Multiple protocol parameter values found %r=%r" \
+                    % (name, value))
+            elif name in ("oauth_consumer_secret", "oauth_token_secret", ):
+                raise InsecureOAuthParametersError(
+                    "[SECURITY-ISSUE] Client attempting to transmit "\
+                    "confidential protocol parameter `%r`. Communication "\
+                    "is insecure if this is in your server logs." % (name, ))
             else:
                 return True
         else:
-            logging.warning("Invalid protocol parameter ignored: `%r`", n)
+            logging.warning("Invalid protocol parameter ignored: `%r`", name)
             return False
     return query_filter(protocol_params, allow_func=allow_func)
 
 
-def query_params_sanitize(query_params):
+def query_params_sanitize(query):
     """
     Removes protocol parameters from the query parameters.
 
     Used only in base string construction, Authorization headers construction
     and parsing, and OAuth requests.
 
-    :param query_params:
+    :param query:
         Query string or query parameter dictionary.
     :returns:
         Filtered URL query parameter dictionary.
     """
-    def allow_func(n, v):
+    def allow_func(name, _):
+        """
+        Removes any parameters beginning with ``oauth_``.
+
+        :param name:
+            The parameter name.
+        :returns:
+            ``True`` if should be included; ``False`` otherwise.
+        """
         # This gets rid of any params beginning with "oauth_"
-        if not n.startswith("oauth_"):
+        if not name.startswith("oauth_"):
             return True
         else:
-            logging.warning("Protocol parameter ignored from URL query parameters: `%r`", n)
+            logging.warning(
+                "Protocol parameter ignored from URL query parameters: `%r`",
+                name)
             return False
-    return query_filter(query_params, allow_func=allow_func)
+    return query_filter(query, allow_func=allow_func)
 
 
 def oauth_url_sanitize(url, force_secure=True):
@@ -530,12 +567,16 @@ def oauth_url_sanitize(url, force_secure=True):
     :returns:
         Normalized sanitized URL.
     """
-    scheme, netloc, path, params, query, fragment = urlparse_normalized(url)
+    scheme, netloc, path, params, query, _ = urlparse_normalized(url)
     query = urlencode_s(query_params_sanitize(query))
     if force_secure and scheme != "https":
-        raise InsecureOAuthUrlError("OAuth 1.0 specification requires the use of SSL/TLS for inter-server communication.")
+        raise InsecureOAuthUrlError(
+            "OAuth 1.0 specification requires the use of SSL/TLS for "\
+            "inter-server communication.")
     elif not force_secure and scheme != "https":
-        logging.warning("CAUTION: RFC specification requires the use of SSL/TLS for credential requests.")
+        logging.warning(
+            "CAUTION: RFC specification requires the use of SSL/TLS "\
+            "for credential requests.")
     return urlunparse((scheme, netloc, path, params, query, None))
 
 
@@ -556,8 +597,5 @@ def is_valid_callback_url(url):
         return True
     else:
         scheme, netloc, _, _, _, _ = urlparse(url)
-        if scheme.lower() in ("http", "https") and netloc:
-            return True
-        else:
-            return False
+        return scheme.lower() in ("http", "https") and netloc
 

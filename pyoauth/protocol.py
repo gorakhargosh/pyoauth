@@ -427,7 +427,15 @@ def generate_base_string_query(url_query_params, oauth_params):
 
     # Now encode the parameters, while ignoring 'oauth_signature' and obviously,
     # the secrets from the entire list of parameters.
-    def allow_func(name, value):
+    def allow_func(name, _):
+        """Allows only protocol parameters that must be included into
+        the signature.
+
+        :param name:
+            The name of the parameter.
+        :returns:
+            ``True`` if the parameter can be included; ``False`` otherwise.
+        """
         return name not in ("oauth_signature",
                             #"oauth_consumer_secret", # Sanitized above.
                             #"oauth_token_secret",    # Sanitized above.

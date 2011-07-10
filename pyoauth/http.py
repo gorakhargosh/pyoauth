@@ -45,28 +45,37 @@ class RequestProxy(object):
     @property
     def method(self):
         """
-        Property determines the HTTP request method.
+        Determines the HTTP request method.
         """
         return self._method
 
     @property
     def url(self):
+        """
+        Determines the URL.
+        """
         return self._url
 
     @property
     def payload(self):
+        """
+        Payload for the request.
+        """
         return self._body
 
     @property
     def body(self):
+        """Payload for the request."""
         return self._body
 
     @property
     def content(self):
+        """Payload for the request."""
         return self._body
 
     @property
     def headers(self):
+        """Dictionary of headers."""
         return self._headers
 
 
@@ -84,29 +93,50 @@ class ResponseProxy(object):
 
     @property
     def body(self):
+        """Payload from the response."""
         return self._body
 
     @property
     def payload(self):
+        """Payload from the response."""
+        return self._body
+
+    @property
+    def content(self):
+        """Payload from the response."""
         return self._body
 
     @property
     def error(self):
+        """
+        Determines whether an error occurred. ``True`` or ``False``.
+        """
         return self.status_code < 200 or self.status_code >= 300
 
     @property
     def status_code(self):
+        """The HTTP response status code."""
         return self._status_code
 
     @property
     def status(self):
+        """The HTTP response status message."""
         return self._status_message
 
     @property
     def headers(self):
+        """HTTP response headers."""
         return self._headers
 
     def get_header(self, name):
+        """
+        Fetches the value of a header with the given name.
+
+        :param name:
+            The name of the header.
+        :returns:
+            Value of the header.
+        """
         if name in self.headers:
             return self.headers[name]
         elif name.lower() in self.headers:
@@ -120,7 +150,9 @@ class ResponseProxy(object):
 
     @property
     def content_type(self):
+        """Determines the content type of the response."""
         return self.get_header("Content-Type")
 
     def is_body_form_urlencoded(self):
+        """Determines whether the response has content type form urlencoded."""
         return self.content_type == CONTENT_TYPE_FORM_URLENCODED
