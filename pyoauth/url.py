@@ -366,18 +366,18 @@ def query_add(*queries):
 #    return d
 
 
-def query_append(*args):
+def query_append(*queries):
     """
     Appends additional query parameters to a query string. The additional
     query parameters appear after the initial query string.
 
-    :param args:
+    :param queries:
         Additional query parameters dictionary or query string.
     :returns:
         Concatenated query string.
     """
     sub_queries = []
-    for query in args:
+    for query in queries:
         query_s = urlencode_s(query_unflatten(query))
         if query_s:
             sub_queries.append(query_s)
