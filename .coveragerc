@@ -1,0 +1,12 @@
+# .coveragerc to control coverage.py
+[run]
+branch = False
+
+source =
+    pyoauth
+
+omit =
+    /*/tests/*
+
+[report]
+
