@@ -25,8 +25,8 @@ from pyoauth.url import \
     query_add, \
     urlparse_normalized, \
     url_add_query, \
-    query_params_sanitize, \
-    request_protocol_params_sanitize, \
+    query_remove_oauth, \
+    request_query_remove_non_oauth, \
     oauth_url_sanitize, \
     url_append_query, \
     query_append, \
@@ -576,8 +576,8 @@ class Test_query_params_sanitize(object):
         }
         expected_result = urlencode_s(expected_params)
 
-        assert_equal(urlencode_s(query_params_sanitize(params)), expected_result)
-        assert_equal(urlencode_s(query_params_sanitize(query_string)), expected_result)
+        assert_equal(urlencode_s(query_remove_oauth(params)), expected_result)
+        assert_equal(urlencode_s(query_remove_oauth(query_string)), expected_result)
 
 
 class Test_url_sanitize(object):
@@ -628,8 +628,8 @@ class Test_request_protocol_params_sanitize(object):
         }
         expected_result = urlencode_s(expected_params)
 
-        assert_equal(urlencode_s(request_protocol_params_sanitize(params)), expected_result)
-        assert_equal(urlencode_s(request_protocol_params_sanitize(query_string)), expected_result)
+        assert_equal(urlencode_s(request_query_remove_non_oauth(params)), expected_result)
+        assert_equal(urlencode_s(request_query_remove_non_oauth(query_string)), expected_result)
 
     def test_raises_InvalidOAuthParametersError_when_multiple_protocol_param_values_found(self):
         params = {
@@ -640,7 +640,7 @@ class Test_request_protocol_params_sanitize(object):
             "c2": [""],
             "oauth_token": ["kkk9d7dh3k39sjv7", "ahdsa7hd3uhadasd"],
         }
-        assert_raises(InvalidOAuthParametersError, request_protocol_params_sanitize, params)
+        assert_raises(InvalidOAuthParametersError, request_query_remove_non_oauth, params)
 
     def test_raises_InsecureProtocolParametersError_when_confidential_params_found(self):
         params1 = {
@@ -659,8 +659,8 @@ class Test_request_protocol_params_sanitize(object):
             "c2": [""],
             "oauth_token_secret": ["something"]
         }
-        assert_raises(InsecureOAuthParametersError, request_protocol_params_sanitize, params1)
-        assert_raises(InsecureOAuthParametersError, request_protocol_params_sanitize, params2)
+        assert_raises(InsecureOAuthParametersError, request_query_remove_non_oauth, params1)
+        assert_raises(InsecureOAuthParametersError, request_query_remove_non_oauth, params2)
 
 class Test_url_append_query(object):
     def test_does_not_prefix_with_ampersand_when_url_has_no_query_params(self):

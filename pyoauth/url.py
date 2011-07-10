@@ -46,8 +46,8 @@ Query parameters
 
 Parameter sanitization
 ----------------------
-.. autofunction:: request_protocol_params_sanitize
-.. autofunction:: query_params_sanitize
+.. autofunction:: request_query_remove_non_oauth
+.. autofunction:: query_remove_oauth
 
 """
 
@@ -459,7 +459,7 @@ def query_unflatten(query):
             % (query, ))
 
 
-def request_protocol_params_sanitize(protocol_params):
+def request_query_remove_non_oauth(query):
     """
     Removes non-OAuth and non-transmittable OAuth parameters from the
     request query parameters.
@@ -471,8 +471,7 @@ def request_protocol_params_sanitize(protocol_params):
         Specifically used ONLY in base string construction, Authorization
         headers construction and parsing, and OAuth requests.
 
-
-    :param protocol_params:
+    :param query:
         Query string or query parameter dictionary. Does not filter out
         ``oauth_signature``, but DOES filter out ``oauth_consumer_secret`` and
         ``oauth_token_secret``. These secret parameters must never be
@@ -519,10 +518,10 @@ def request_protocol_params_sanitize(protocol_params):
         else:
             logging.warning("Invalid protocol parameter ignored: `%r`", name)
             return False
-    return query_filter(protocol_params, allow_func=allow_func)
+    return query_filter(query, allow_func=allow_func)
 
 
-def query_params_sanitize(query):
+def query_remove_oauth(query):
     """
     Removes protocol parameters from the query parameters.
 
@@ -568,7 +567,7 @@ def oauth_url_sanitize(url, force_secure=True):
         Normalized sanitized URL.
     """
     scheme, netloc, path, params, query, _ = urlparse_normalized(url)
-    query = urlencode_s(query_params_sanitize(query))
+    query = urlencode_s(query_remove_oauth(query))
     if force_secure and scheme != "https":
         raise InsecureOAuthUrlError(
             "OAuth 1.0 specification requires the use of SSL/TLS for "\

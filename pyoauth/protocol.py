@@ -61,7 +61,7 @@ from pyoauth.error import InvalidHttpMethodError, \
     InvalidAuthorizationHeaderError
 from pyoauth.url import percent_encode, percent_decode, \
     urlencode_sl, urlencode_s, urlparse_normalized, \
-    request_protocol_params_sanitize, query_params_sanitize
+    request_query_remove_non_oauth, query_remove_oauth
 from pyoauth.crypto.hash import hmac_sha1_base64_digest, sha1_digest
 from pyoauth.crypto.random import \
     generate_random_uint_string, \
@@ -401,13 +401,13 @@ def generate_base_string(method, url, oauth_params):
             method_normalized, normalized_url, query_string]])
 
 
-def generate_base_string_query(url_query_params, oauth_params):
+def generate_base_string_query(url_query, oauth_params):
     """
     Serializes URL query parameters and OAuth protocol parameters into a valid
     OAuth base string URI query string.
 
     :see: Parameter Normalization (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)
-    :param url_query_params:
+    :param url_query:
         A dictionary or string of URL query parameters. Any parameters starting
         with ``oauth_`` will be ignored.
     :param oauth_params:
@@ -418,12 +418,12 @@ def generate_base_string_query(url_query_params, oauth_params):
     :returns:
         Normalized string of query parameters.
     """
-    url_query_params = query_params_sanitize(url_query_params)
-    oauth_params = request_protocol_params_sanitize(oauth_params)
+    url_query = query_remove_oauth(url_query)
+    oauth_params = request_query_remove_non_oauth(oauth_params)
 
-    query_params = {}
-    query_params.update(url_query_params)
-    query_params.update(oauth_params)
+    query_d = {}
+    query_d.update(url_query)
+    query_d.update(oauth_params)
 
     # Now encode the parameters, while ignoring 'oauth_signature' and obviously,
     # the secrets from the entire list of parameters.
@@ -440,7 +440,7 @@ def generate_base_string_query(url_query_params, oauth_params):
                             #"oauth_consumer_secret", # Sanitized above.
                             #"oauth_token_secret",    # Sanitized above.
                             )
-    query = urlencode_s(query_params, allow_func=allow_func)
+    query = urlencode_s(query_d, allow_func=allow_func)
     return query
 
 
@@ -472,7 +472,7 @@ def generate_authorization_header(oauth_params,
         value = 'OAuth realm="' + unicode_to_utf8(realm) + '"' + param_delimiter
     else:
         value = 'OAuth '
-    oauth_params = request_protocol_params_sanitize(oauth_params)
+    oauth_params = request_query_remove_non_oauth(oauth_params)
     normalized_param_pairs = urlencode_sl(oauth_params)
     value += param_delimiter.join([k + '="' + v + '"'
                                for k, v in normalized_param_pairs])
@@ -519,7 +519,7 @@ def parse_authorization_header(header_value,
             params[name].append(value)
         else:
             params[name] = [value]
-    params = request_protocol_params_sanitize(params)
+    params = request_query_remove_non_oauth(params)
     return params, realm
 
 

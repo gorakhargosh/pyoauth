@@ -41,8 +41,8 @@ from pyoauth.oauth1 import \
     SIGNATURE_METHOD_PLAINTEXT
 from pyoauth.url import \
     oauth_url_sanitize, \
-    request_protocol_params_sanitize, \
-    query_params_sanitize, \
+    request_query_remove_non_oauth, \
+    query_remove_oauth, \
     url_add_query, \
     url_append_query, \
     parse_qs, query_append, is_valid_callback_url
@@ -222,7 +222,7 @@ class Client(object):
         """
         url = self._resource_owner_authorization_uri
         if query_params:
-            query_params = query_params_sanitize(query_params)
+            query_params = query_remove_oauth(query_params)
             url = url_append_query(url, query_params)
         # So that the "oauth_token" appears LAST.
         return url_append_query(url, {
@@ -246,7 +246,7 @@ class Client(object):
         if not url:
             raise NotImplementedError("Service does not support automatic authentication redirects.")
         if query_params:
-            query_params = query_params_sanitize(query_params)
+            query_params = query_remove_oauth(query_params)
             url = url_append_query(url, query_params)
         # So that the "oauth_token" appears LAST.
         return url_append_query(url, {
@@ -519,7 +519,7 @@ class Client(object):
 
         # Filter and add additional OAuth parameters.
         _force_override_reserved_oauth_params_for_tests = "_test_force_override_reserved_oauth_params" in extra_oauth_params
-        extra_oauth_params = request_protocol_params_sanitize(extra_oauth_params)
+        extra_oauth_params = request_query_remove_non_oauth(extra_oauth_params)
         reserved_oauth_params = (
             "oauth_signature",     # Calculated from given parameters.
             "oauth_nonce",         # System-generated.
@@ -541,7 +541,7 @@ class Client(object):
                 oauth_params[k] = v[0]
 
         # Filter payload parameters for the request.
-        payload_params = query_params_sanitize(payload_params)
+        payload_params = query_remove_oauth(payload_params)
 
         # I was not entirely certain about whether PUT payload
         # params should be included in the signature or not.
