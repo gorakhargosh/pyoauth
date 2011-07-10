@@ -221,9 +221,7 @@ def lcm(a, b):
     :returns:
         Least common multiple.
     """
-    # TODO: This will break when python division changes, but we can't use //
-    # because of Jython
-    return (a * b) / gcd(a, b)
+    return (a * b) // gcd(a, b)
 
 
 def inverse_mod(a, b):
@@ -242,10 +240,8 @@ def inverse_mod(a, b):
     c, d = a, b
     uc, ud = 1, 0
     while c:
-        # TODO: This will break when python division changes, but we can't use
-        # // because of Jython
-        q = d / c
-        c, d = d-(q*c), c
+        q = d // c
+        c, d = d - (q * c), c
         uc, ud = ud - (q * uc), uc
     if d == 1:
         return ud % b
