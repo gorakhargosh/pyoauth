@@ -108,7 +108,7 @@ html_theme = 'sphinx-theme-minimalism'
 # documentation.
 #html_theme_options = {}
 html_theme_options = {
-    'github_fork': 'gorakhargosh/pyoauth',
+    'github_fork': 'gorakhargosh/' + PROJECT_NAME,
 }
 #html_theme_options = {
 #    'nosidebar': False,
@@ -181,7 +181,7 @@ html_theme_path = ["_themes"]
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pyoauthdoc'
+htmlhelp_basename = PROJECT_NAME + 'doc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -195,7 +195,7 @@ htmlhelp_basename = 'pyoauthdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'pyoauth.tex', PROJECT_NAME + u' Documentation',
+  ('index', PROJECT_NAME + '.tex', PROJECT_NAME + u' Documentation',
    AUTHOR_NAME, 'manual'),
 ]
 

@@ -97,9 +97,6 @@ API Documentation
 
    api/oauth1
    api/protocol
-   api/types
-   api/crypto
-
 
 
 Contribute
