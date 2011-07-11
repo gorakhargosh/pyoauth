@@ -38,9 +38,12 @@ view-doc: doc
 	@bin/python -c "import webbrowser; webbrowser.open('docs/build/html/index.html')"
 
 test:
+	@echo "You will need Coverage 3.5 and unittest2 or higher for this to work."
 	@bin/coverage erase
-	@bin/python-tests tests/run_tests.py
-	@bin/coverage html
+	@bin/coverage run run_tests.py
+	@bin/coverage report -m
+	@echo "HTML report generated in the 'htmlcov' directory."
+	@bin/coverage html -d htmlcov
 
 lint:
 	@pylint $(PKG_NAME)

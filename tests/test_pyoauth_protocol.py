@@ -1,15 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from nose.tools import assert_equal, \
-    assert_not_equal, \
-    assert_false, \
-    assert_true, \
-    assert_raises
-from nose import SkipTest
-try:
-    from nose.tools import assert_dict_equal
-except ImportError:
-    assert_dict_equal = assert_equal
+import unittest2
 
 from mom.builtins import bytes
 
@@ -33,68 +24,68 @@ from pyoauth.protocol import parse_authorization_header, \
     generate_nonce
 
 
-class Test_generate_nonce(object):
+class Test_generate_nonce(unittest2.TestCase):
     def test_uniqueness(self):
-        assert_not_equal(generate_nonce(), generate_nonce())
+        self.assertNotEqual(generate_nonce(), generate_nonce())
 
     def test_hex_length(self):
         for i in range(1, 1000):
-            assert_equal(len(generate_nonce(64, 16)), 16)
+            self.assertEqual(len(generate_nonce(64, 16)), 16)
 
     def test_unsigned_integer(self):
-        assert_true(int(generate_nonce(64, 10)) >= 0)
-        assert_true(int(generate_nonce(64, 16), 16) >= 0)
+        self.assertTrue(int(generate_nonce(64, 10)) >= 0)
+        self.assertTrue(int(generate_nonce(64, 16), 16) >= 0)
 
     def test_raises_ValueError_when_invalid_bit_strength(self):
-        assert_raises(ValueError, generate_nonce, 63)
-        assert_raises(ValueError, generate_nonce, 0)
+        self.assertRaises(ValueError, generate_nonce, 63)
+        self.assertRaises(ValueError, generate_nonce, 0)
 
     def test_result_is_string(self):
-        assert_true(isinstance(generate_nonce(64, 10), bytes))
-        assert_true(isinstance(generate_nonce(64, 16), bytes))
+        self.assertTrue(isinstance(generate_nonce(64, 10), bytes))
+        self.assertTrue(isinstance(generate_nonce(64, 16), bytes))
 
 
-class Test_generate_verification_code(object):
+class Test_generate_verification_code(unittest2.TestCase):
     def test_length(self):
         default_length = 8
-        assert_equal(len(generate_verification_code()), default_length,
+        self.assertEqual(len(generate_verification_code()), default_length,
                      "Verification code length does not match "\
                      "default expected length of %d." % default_length)
-        assert_equal(len(generate_verification_code(length=10)), 10,
+        self.assertEqual(len(generate_verification_code(length=10)), 10,
                      "Verification code length does not match expected length.")
 
-        assert_raises(ValueError, generate_verification_code, 33)
-        assert_raises(ValueError, generate_verification_code, 0)
-        assert_raises(ValueError, generate_verification_code, -1)
-        assert_raises(ValueError, generate_verification_code, 33)
-        assert_raises(TypeError, generate_verification_code, None)
-        assert_raises(TypeError, generate_verification_code, "")
+        self.assertRaises(ValueError, generate_verification_code, 33)
+        self.assertRaises(ValueError, generate_verification_code, 0)
+        self.assertRaises(ValueError, generate_verification_code, -1)
+        self.assertRaises(ValueError, generate_verification_code, 33)
+        self.assertRaises(TypeError, generate_verification_code, None)
+        self.assertRaises(TypeError, generate_verification_code, "")
 
     def test_uniqueness(self):
-        assert_not_equal(generate_verification_code(),
+        self.assertNotEqual(generate_verification_code(),
                          generate_verification_code(),
                          "Verification code is not unique.")
 
     def test_is_string(self):
-        assert_true(isinstance(generate_verification_code(), bytes),
+        self.assertTrue(isinstance(generate_verification_code(), bytes),
                     "Verification code is not a bytestring.")
 
 
-class Test_generate_timestamp(object):
+class Test_generate_timestamp(unittest2.TestCase):
     def test_is_positive_integer_string(self):
-        assert_true(int(generate_timestamp()) > 0,
+        self.assertTrue(int(generate_timestamp()) > 0,
                     "Timestamp is not positive integer string.")
 
     def test_is_string(self):
-        assert_true(isinstance(generate_timestamp(), bytes),
+        self.assertTrue(isinstance(generate_timestamp(), bytes),
                     "Timestamp is not a string.")
 
     def test_is_not_empty_string(self):
-        assert_true(len(generate_timestamp()) > 0,
+        self.assertTrue(len(generate_timestamp()) > 0,
                     "Timestamp is an empty string.")
 
 
-class Test_generate_hmac_sha1_signature(object):
+class Test_generate_hmac_sha1_signature(unittest2.TestCase):
     _examples = (
         # Temporary credentials request.
         {
@@ -157,7 +148,7 @@ class Test_generate_hmac_sha1_signature(object):
             oauth_params = example["oauth_params"]
             expected_signature = example["oauth_signature"]
             base_string = generate_base_string(method, url, oauth_params)
-            assert_equal(expected_signature,
+            self.assertEqual(expected_signature,
                          generate_hmac_sha1_signature(
                              base_string,
                              client_shared_secret,
@@ -165,7 +156,7 @@ class Test_generate_hmac_sha1_signature(object):
                          ))
 
 
-class Test_generate_and_verify_rsa_sha1_signature(object):
+class Test_generate_and_verify_rsa_sha1_signature(unittest2.TestCase):
     def setUp(self):
         self._examples = (
             # http://wiki.oauth.net/w/page/12238556/TestCases
@@ -234,22 +225,22 @@ yF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE=",
             expected_signature = example["oauth_signature"]
             # Using the RSA private key.
             base_string = generate_base_string(method, url, oauth_params)
-            assert_equal(expected_signature,
+            self.assertEqual(expected_signature,
                          generate_rsa_sha1_signature(base_string,
                                                      client_shared_secret))
             # Using the X.509 certificate.
-            assert_true(verify_rsa_sha1_signature(
+            self.assertTrue(verify_rsa_sha1_signature(
                 expected_signature,
                 base_string,
                 client_certificate))
             # Using the RSA public key.
-            assert_true(verify_rsa_sha1_signature(
+            self.assertTrue(verify_rsa_sha1_signature(
                 expected_signature,
                 base_string,
                 public_key))
 
 
-class Test_generate_plaintext_signature(object):
+class Test_generate_plaintext_signature(unittest2.TestCase):
     def setUp(self):
         self.oauth_signature_method = "PLAINTEXT"
         self.oauth_token_key = "token test key"
@@ -271,7 +262,7 @@ class Test_generate_plaintext_signature(object):
     def test_when_both_secrets_present(self):
         base_string = generate_base_string(
             "POST", "http://example.com/", self.oauth_params)
-        assert_equal(generate_plaintext_signature(
+        self.assertEqual(generate_plaintext_signature(
             base_string,
             self.oauth_consumer_secret,
             self.oauth_token_secret,
@@ -280,7 +271,7 @@ class Test_generate_plaintext_signature(object):
     def test_when_consumer_secret_present(self):
         base_string = generate_base_string(
             "POST", "http://example.com/", self.oauth_params)
-        assert_equal(generate_plaintext_signature(
+        self.assertEqual(generate_plaintext_signature(
             base_string,
             self.oauth_consumer_secret,
             None
@@ -289,7 +280,7 @@ class Test_generate_plaintext_signature(object):
     def test_when_token_secret_present(self):
         base_string = generate_base_string(
             "POST", "http://example.com/", self.oauth_params)
-        assert_equal(generate_plaintext_signature(
+        self.assertEqual(generate_plaintext_signature(
             base_string,
             "",
             self.oauth_token_secret
@@ -298,37 +289,37 @@ class Test_generate_plaintext_signature(object):
     def test_when_neither_secret_present(self):
         base_string = generate_base_string(
             "POST", "http://example.com/", self.oauth_params)
-        assert_equal(generate_plaintext_signature(
+        self.assertEqual(generate_plaintext_signature(
             base_string,
             "",
             None
         ), "&")
 
 
-class Test__generate_plaintext_signature(object):
+class Test__generate_plaintext_signature(unittest2.TestCase):
     def test_both_secrets_present(self):
-        assert_equal(_generate_plaintext_signature("ab cd", "47fba"),
+        self.assertEqual(_generate_plaintext_signature("ab cd", "47fba"),
                      "ab%20cd&47fba")
 
     def test_consumer_secret_absent(self):
-        assert_equal(_generate_plaintext_signature(None, "47fba"), "&47fba")
-        assert_equal(_generate_plaintext_signature("", "47fba"), "&47fba")
+        self.assertEqual(_generate_plaintext_signature(None, "47fba"), "&47fba")
+        self.assertEqual(_generate_plaintext_signature("", "47fba"), "&47fba")
 
 
     def test_token_secret_absent(self):
-        assert_equal(_generate_plaintext_signature("ab cd", None), "ab%20cd&")
-        assert_equal(_generate_plaintext_signature("ab cd", ""), "ab%20cd&")
+        self.assertEqual(_generate_plaintext_signature("ab cd", None), "ab%20cd&")
+        self.assertEqual(_generate_plaintext_signature("ab cd", ""), "ab%20cd&")
 
     def test_both_secrets_absent(self):
-        assert_equal(_generate_plaintext_signature(None, None), "&")
-        assert_equal(_generate_plaintext_signature("", ""), "&")
+        self.assertEqual(_generate_plaintext_signature(None, None), "&")
+        self.assertEqual(_generate_plaintext_signature("", ""), "&")
 
     def test_both_secrets_are_encoded(self):
-        assert_equal(_generate_plaintext_signature("ab cd", "47 f$a"),
+        self.assertEqual(_generate_plaintext_signature("ab cd", "47 f$a"),
                      "ab%20cd&47%20f%24a")
 
 
-class Test_generate_base_string(object):
+class Test_generate_base_string(unittest2.TestCase):
     def setUp(self):
         self.oauth_params = dict(
             oauth_consumer_key="9djdj82h48djs9d2",
@@ -344,7 +335,7 @@ class Test_generate_base_string(object):
           "http://example.com/request?"\
           "b5=%3D%253D&a3=a&c%40=&a2=r%20b&c2&a3=2+q",
           self.oauth_params)
-        assert_equal(base_string,
+        self.assertEqual(base_string,
                      "POST&"\
                      "http%3A%2F%2Fexample.com%2Frequest&"\
                      "a2%3Dr%2520b%26"\
@@ -359,15 +350,15 @@ class Test_generate_base_string(object):
                      "oauth_token%3Dkkk9d7dh3k39sjv7")
 
     def test_InvalidHttpMethodError_when_invalid_http_method(self):
-        assert_raises(InvalidHttpMethodError, generate_base_string, "TypO",
+        self.assertRaises(InvalidHttpMethodError, generate_base_string, "TypO",
                       "http://example.com/request", {})
 
     def test_InvalidUrlError_when_url_blank_or_None(self):
-        assert_raises(InvalidUrlError, generate_base_string, "POST", "",
+        self.assertRaises(InvalidUrlError, generate_base_string, "POST", "",
                 {})
 
     def test_InvalidOAuthParametersError_when_query_params_is_not_dict(self):
-        assert_raises(InvalidOAuthParametersError, generate_base_string, "POST",
+        self.assertRaises(InvalidOAuthParametersError, generate_base_string, "POST",
                       "http://www.google.com/", None)
 
     def test_base_string_does_not_contain_oauth_signature(self):
@@ -379,9 +370,9 @@ class Test_generate_base_string(object):
         url = "http://example.com/request?"\
               "oauth_signature=foobar&realm=something"
         base_string = generate_base_string("POST", url, oauth_params)
-        assert_true("oauth_signature%3D" not in base_string)
-        assert_true("realm%3Dexample.com" not in base_string)
-        assert_true("realm%3Dsomething" in base_string)
+        self.assertTrue("oauth_signature%3D" not in base_string)
+        self.assertTrue("realm%3Dexample.com" not in base_string)
+        self.assertTrue("realm%3Dsomething" in base_string)
 
 
     def test_base_string_preserves_matrix_params_and_drops_default_ports(self):
@@ -390,13 +381,13 @@ class Test_generate_base_string(object):
         base_string = "POST&"\
                       "http://social.yahooapis.com/v1/user/6677/connections"\
                       ";start=0;count=20&format=json"
-        assert_equal(
+        self.assertEqual(
             percent_decode(
                 generate_base_string("POST", url, dict())), base_string)
 
 
 
-class Test_generate_signature_base_string_query(object):
+class Test_generate_signature_base_string_query(unittest2.TestCase):
     def setUp(self):
         self.specification_url_query_params = {
             'b5': ['=%3D'],
@@ -435,41 +426,41 @@ class Test_generate_signature_base_string_query(object):
         self.simplegeo_example_correct_query_string = 'multi=%C2%AE&multi=%C2%AE&multi=BAR&multi=FOO&multi_same=FOO&multi_same=FOO&oauth_consumer_key=0685bd9184jfhq22&oauth_nonce=4572616e48616d6d65724c61686176&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131200&oauth_token=ad180jjd733klru7&oauth_version=1.0&uni_unicode_object=%C2%AE&uni_utf8_bytes=%C2%AE'
 
     def test_oauth_specification_example(self):
-        assert_equal(generate_base_string_query(
+        self.assertEqual(generate_base_string_query(
             self.specification_url_query_params,
             self.specification_example_oauth_params),
                      self.specification_example_query_string)
 
     def test_simplegeo_example(self):
-        assert_not_equal(
+        self.assertNotEqual(
             generate_base_string_query(self.simplegeo_example_url_query_params,
                                               self.simplegeo_example_oauth_params),
             self.simplegeo_example_wrong_order_query_string)
-        assert_equal(
+        self.assertEqual(
             generate_base_string_query(self.simplegeo_example_url_query_params,
                                               self.simplegeo_example_oauth_params),
             self.simplegeo_example_correct_query_string)
 
     def test_query_params_sorted_order(self):
-        assert_equal("a=1&b=2&b=4&b=8",
+        self.assertEqual("a=1&b=2&b=4&b=8",
                      generate_base_string_query(dict(b=[8, 2, 4], a=1), {}))
         qs = generate_base_string_query(
             dict(a=5, b=6, c=["w", "a", "t", "e", "r"]), {})
-        assert_equal("a=5&b=6&c=a&c=e&c=r&c=t&c=w", qs)
+        self.assertEqual("a=5&b=6&c=a&c=e&c=r&c=t&c=w", qs)
 
     def test_multiple_values(self):
-        assert_equal("a=5&a=8",
+        self.assertEqual("a=5&a=8",
                      generate_base_string_query(dict(a=[5, 8]), {}))
 
     def test_non_string_single_value(self):
-        assert_equal("a=5", generate_base_string_query(dict(a=5), None))
-        assert_equal("aFlag=True&bFlag=False",
+        self.assertEqual("a=5", generate_base_string_query(dict(a=5), None))
+        self.assertEqual("aFlag=True&bFlag=False",
                      generate_base_string_query(
                          dict(aFlag=True, bFlag=False), None))
 
     def test_no_query_params_returns_empty_string(self):
-        assert_equal("", generate_base_string_query({}, {}))
-        assert_equal("", generate_base_string_query(None, None))
+        self.assertEqual("", generate_base_string_query({}, {}))
+        self.assertEqual("", generate_base_string_query(None, None))
 
     def test_oauth_signature_and_realm_are_excluded_properly(self):
         qs = generate_base_string_query({
@@ -477,15 +468,15 @@ class Test_generate_signature_base_string_query(object):
             },
             self.specification_example_oauth_params
         )
-        assert_true("oauth_signature=" not in qs)
-        assert_true("realm=" not in qs)
+        self.assertTrue("oauth_signature=" not in qs)
+        self.assertTrue("realm=" not in qs)
 
-        assert_true(
+        self.assertTrue(
             generate_base_string_query(dict(realm="something"), dict()),
             "realm=something")
 
 
-class Test_generate_authorization_header(object):
+class Test_generate_authorization_header(unittest2.TestCase):
     def test_equality_and_realm(self):
         params = {
             'realm': ['Examp%20le'],
@@ -500,11 +491,11 @@ class Test_generate_authorization_header(object):
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }
         expected_value = 'OAuth oauth_consumer_key="0685bd9184jfhq22",oauth_empty="",oauth_nonce="4572616e48616d6d65724c61686176",oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",oauth_signature_method="HMAC-SHA1",oauth_something="%20Some%20Example",oauth_timestamp="137131200",oauth_token="ad180jjd733klru7",oauth_version="1.0"'
-        assert_equal(generate_authorization_header(params),
+        self.assertEqual(generate_authorization_header(params),
                      expected_value)
 
         expected_value = 'OAuth realm="http://example.com/",oauth_consumer_key="0685bd9184jfhq22",oauth_empty="",oauth_nonce="4572616e48616d6d65724c61686176",oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",oauth_signature_method="HMAC-SHA1",oauth_something="%20Some%20Example",oauth_timestamp="137131200",oauth_token="ad180jjd733klru7",oauth_version="1.0"'
-        assert_equal(generate_authorization_header(params,
+        self.assertEqual(generate_authorization_header(params,
                                                    realm="http://example.com/")
                      , expected_value)
 
@@ -523,7 +514,7 @@ class Test_generate_authorization_header(object):
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }
         expected_value = 'OAuth realm="http://example.com/"&oauth_consumer_key="0685bd9184jfhq22"&oauth_empty=""&oauth_nonce="4572616e48616d6d65724c61686176"&oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D"&oauth_signature_method="HMAC-SHA1"&oauth_something="%20Some%20Example"&oauth_timestamp="137131200"&oauth_token="ad180jjd733klru7"&oauth_version="1.0"'
-        assert_equal(generate_authorization_header(params,
+        self.assertEqual(generate_authorization_header(params,
                                                    realm="http://example.com/",
                                                    param_delimiter="&")
                      , expected_value)
@@ -533,23 +524,23 @@ class Test_generate_authorization_header(object):
             'realm': ['Examp%20le'],
             'oauth_something': [' Some Example', "another thing"],
             }
-        assert_raises(InvalidOAuthParametersError, generate_authorization_header, params)
+        self.assertRaises(InvalidOAuthParametersError, generate_authorization_header, params)
 
 
 
-class Test_parse_authorization_header(object):
+class Test_parse_authorization_header(unittest2.TestCase):
     def test_InvalidOAuthParametersError_when_multiple_values(self):
         test_value = '''OAuth realm="Examp%20le",\
             oauth_something="%20Some+Example",\
             oauth_something="another%20thing"\
         '''
-        assert_raises(InvalidOAuthParametersError, parse_authorization_header, test_value)
+        self.assertRaises(InvalidOAuthParametersError, parse_authorization_header, test_value)
 
     def test_value_must_not_have_newlines_when_strict(self):
         test_value = '''OAuth realm="Examp%20le",
             oauth_something="%20Some+Example",
         '''
-        assert_raises(ValueError, parse_authorization_header, test_value, strict=True)
+        self.assertRaises(ValueError, parse_authorization_header, test_value, strict=True)
 
     def test_param_delimiter_can_be_changed(self):
         expected_value = ({
@@ -564,7 +555,7 @@ class Test_parse_authorization_header(object):
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }, 'Examp%20le'
         )
-        assert_equal(expected_value, parse_authorization_header('''\
+        self.assertEqual(expected_value, parse_authorization_header('''\
             OAuth\
 \
             realm="Examp%20le"&\
@@ -580,7 +571,7 @@ class Test_parse_authorization_header(object):
         ''', param_delimiter="&", strict=False), "parsing failed.")
 
     def test_param_delimiter_must_be_comma_when_strict(self):
-        assert_raises(ValueError, parse_authorization_header, '''\
+        self.assertRaises(ValueError, parse_authorization_header, '''\
             OAuth\
 \
             realm="Examp%20le"&\
@@ -608,7 +599,7 @@ class Test_parse_authorization_header(object):
             'oauth_signature': ['wOJIO9A2W5mFwDgiDvZbTSMK/PY='],
             }, 'Examp%20le'
         )
-        assert_equal(expected_value, parse_authorization_header('''\
+        self.assertEqual(expected_value, parse_authorization_header('''\
             OAuth\
 \
             realm="Examp%20le",\
@@ -638,38 +629,42 @@ class Test_parse_authorization_header(object):
         params, realm = parse_authorization_header(
             header_value)
         for name, value in params.items():
-            assert_false(name.lower() == 'oauth realm',
+            self.assertFalse(name.lower() == 'oauth realm',
                          '`OAuth realm` found in header names')
-            assert_false(name.lower() == "realm", '`realm` found in header names')
+            self.assertFalse(name.lower() == "realm", '`realm` found in header names')
 
     def test_InvalidAuthorizationHeaderError_when_trailing_comma_is_found(self):
         header_value = '''OAuth oauth_consumer_key="0685bd9184jfhq22",\
             oauth_token="ad180jjd733klru7",'''
-        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header, header_value)
+        self.assertRaises(InvalidAuthorizationHeaderError, parse_authorization_header, header_value)
 
     def test_InvalidAuthorizationHeaderError_when_bad_parameter_field(self):
         header_value = '''OAuth realm="http://www.google.com/",something'''
-        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header,
+        self.assertRaises(InvalidAuthorizationHeaderError, parse_authorization_header,
                       header_value)
 
     def test_InvalidAuthorizationHeaderError_when_bad_parameter_value(self):
         header_value = '''OAuth realm="http://www.google.com/",something='''
-        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header,
+        self.assertRaises(InvalidAuthorizationHeaderError, parse_authorization_header,
                       header_value)
 
         header_value = '''OAuth realm="http://www.google.com/",something="'''
-        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header,
+        self.assertRaises(InvalidAuthorizationHeaderError, parse_authorization_header,
                       header_value)
 
     def test_InvalidAuthorizationHeaderError_when_missing_quotes_around_value(self):
         header_value = '''OAuth realm="http://www.google.com/",something="something'''
-        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header,
+        self.assertRaises(InvalidAuthorizationHeaderError, parse_authorization_header,
                       header_value)
 
         header_value = '''OAuth realm="http://www.google.com/",something=something"'''
-        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header,
+        self.assertRaises(InvalidAuthorizationHeaderError, parse_authorization_header,
                       header_value)
 
         header_value = '''OAuth realm="http://www.google.com/",something=something'''
-        assert_raises(InvalidAuthorizationHeaderError, parse_authorization_header,
+        self.assertRaises(InvalidAuthorizationHeaderError, parse_authorization_header,
                       header_value)
+
+
+if __name__ == "__main__":
+    unittest2.main()
