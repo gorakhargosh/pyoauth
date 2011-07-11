@@ -9,12 +9,13 @@ try:
 except ImportError:
     assert_dict_equal = assert_equal
 
+from mom.builtins import to_utf8_if_unicode
+
 from pyoauth.error import InvalidUrlError, \
     InvalidQueryParametersError, \
     InsecureOAuthUrlError, \
     InvalidOAuthParametersError, \
     InsecureOAuthParametersError
-from pyoauth.types.unicode import to_utf8_if_unicode
 from pyoauth.url import \
     percent_decode, \
     percent_encode, \

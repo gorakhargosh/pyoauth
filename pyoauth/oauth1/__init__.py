@@ -25,7 +25,7 @@
    :show-inheritance:
 """
 
-from pyoauth.decorators import deprecated
+from mom.decorators import deprecated
 
 
 # Signature methods.

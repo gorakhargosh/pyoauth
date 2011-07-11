@@ -11,7 +11,8 @@ try:
 except ImportError:
     assert_dict_equal = assert_equal
 
-from pyoauth.types import bytes
+from mom.builtins import bytes
+
 from pyoauth.error import \
     InvalidOAuthParametersError, \
     InvalidAuthorizationHeaderError, \

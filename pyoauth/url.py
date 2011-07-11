@@ -67,8 +67,8 @@ except ImportError:
     except ImportError:
         from cgi import parse_qs as _parse_qs
 
-from pyoauth.types import is_sequence, bytes, is_bytes_or_unicode
-from pyoauth.types.unicode import to_utf8_if_unicode, unicode_to_utf8
+from mom.builtins import is_sequence, \
+    bytes, is_bytes_or_unicode, to_utf8_if_unicode, unicode_to_utf8
 from pyoauth.error import InvalidQueryParametersError, \
     InsecureOAuthParametersError, \
     InvalidOAuthParametersError, \

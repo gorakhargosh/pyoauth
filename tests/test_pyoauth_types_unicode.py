@@ -3,12 +3,11 @@
 
 from nose.tools import assert_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.types.unicode import\
+from mom.builtins import \
     to_utf8_if_unicode, to_unicode_if_bytes, bytes_to_unicode, unicode_to_utf8
+from mom.security.random import generate_random_bytes
 
-import uuid
-
-random_bytes = uuid.uuid4().bytes
+random_bytes = generate_random_bytes(100)
 utf8_bytes = '\xc2\xae'
 unicode_string = u'\u00ae'
 

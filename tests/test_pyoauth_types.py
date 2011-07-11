@@ -3,13 +3,15 @@
 
 from nose.tools import assert_equal, assert_false, assert_true, assert_raises
 from nose import SkipTest
-from pyoauth.types import is_unicode, is_bytes, is_bytes_or_unicode
 
-import uuid
+from mom.builtins import is_unicode, is_bytes, is_bytes_or_unicode
+from mom.security.random import generate_random_bytes
 
-random_bytes = uuid.uuid4().bytes
+
+random_bytes = generate_random_bytes(100)
 utf8_bytes = '\xc2\xae'
 unicode_string = u'\u00ae'
+
 
 class Test_is_bytes(object):
     def test_valid(self):

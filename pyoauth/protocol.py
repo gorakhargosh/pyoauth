@@ -44,8 +44,6 @@ Authorization HTTP header creation and parsing
 
 import time
 import re
-from pyoauth.types.codec import base64_encode, base64_decode
-
 try:
     # Python 3.
     from urllib.parse import urlunparse
@@ -53,8 +51,13 @@ except ImportError:
     # Python 2.5+
     from urlparse import urlunparse
 
-from pyoauth.types.unicode import unicode_to_utf8
-from pyoauth.types import bytes
+from mom.codec import base64_encode, base64_decode
+from mom.builtins import unicode_to_utf8, bytes
+from mom.security.hash import hmac_sha1_base64_digest, sha1_digest
+from mom.security.random import \
+    generate_random_uint_string, \
+    generate_random_hex_string
+
 from pyoauth.error import InvalidHttpMethodError, \
     InvalidUrlError, \
     InvalidOAuthParametersError, \
@@ -62,10 +65,6 @@ from pyoauth.error import InvalidHttpMethodError, \
 from pyoauth.url import percent_encode, percent_decode, \
     urlencode_sl, urlencode_s, urlparse_normalized, \
     request_query_remove_non_oauth, query_remove_oauth
-from pyoauth.crypto.hash import hmac_sha1_base64_digest, sha1_digest
-from pyoauth.crypto.random import \
-    generate_random_uint_string, \
-    generate_random_hex_string
 
 
 def generate_nonce(bit_strength=64, base=10):
@@ -264,7 +263,7 @@ def generate_rsa_sha1_signature(base_string,
     :returns:
         RSA-SHA1 signature.
     """
-    from pyoauth.crypto.rsa import parse_private_key
+    from mom.security.rsa import parse_private_key
 
     key = parse_private_key(client_private_key)
     return base64_encode(key.pkcs1_v1_5_sign(sha1_digest(base_string)))
@@ -288,7 +287,7 @@ def verify_rsa_sha1_signature(signature,
     :returns:
         ``True`` if verified to be correct; ``False`` otherwise.
     """
-    from pyoauth.crypto.rsa import parse_public_key
+    from mom.security.rsa import parse_public_key
 
     key = parse_public_key(client_certificate)
     return key.pkcs1_v1_5_verify(sha1_digest(base_string),
