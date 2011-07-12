@@ -190,19 +190,18 @@ def urlencode_sl(query_params, allow_func=None):
             continue
         elif is_bytes_or_unicode(value):
             encoded_pairs.append((key, percent_encode(value),))
+        elif is_sequence(value):
+            # Loop over the sequence.
+            if len(value) > 0:
+                for i in value:
+                    encoded_pairs.append((key, percent_encode(i), ))
+            # ``urllib.urlencode()`` doesn't preserve blank lists.
+            # Therefore, we're discarding them.
+            #else:
+            #    # Preserve blank list values.
+            #    encoded_pairs.append((k, "", ))
         else:
-            if is_sequence(value):
-                # Loop over the sequence.
-                if len(value) > 0:
-                    for i in value:
-                        encoded_pairs.append((key, percent_encode(i), ))
-                # ``urllib.urlencode()`` doesn't preserve blank lists.
-                # Therefore, we're discarding them.
-                #else:
-                #    # Preserve blank list values.
-                #    encoded_pairs.append((k, "", ))
-            else:
-                encoded_pairs.append((key, percent_encode(value),))
+            encoded_pairs.append((key, percent_encode(value),))
     # Sort after encoding according to the OAuth spec.
     return sorted(encoded_pairs)
 
