@@ -286,6 +286,15 @@ class Test_urlencode_s(unittest2.TestCase):
         valid_query_string = "a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9djdj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7"
         self.assertEqual(urlencode_s(params), valid_query_string)
 
+    def test_do_seq_dicts(self):
+        # Behaves like doseq=1
+        params = dict(a=dict(a='b'), b="something")
+        self.assertEqual(urlencode_s(params), 'a=a&b=something')
+
+    def test_do_seq_removes_blank_lists(self):
+        params = dict(a=[], b="something")
+        self.assertEqual(urlencode_s(params), "b=something")
+
 
 class Test_urlencode_sl(unittest2.TestCase):
     def test_valid_query_params_list(self):
