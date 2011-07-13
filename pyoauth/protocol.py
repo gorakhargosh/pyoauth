@@ -518,6 +518,10 @@ def parse_authorization_header(header_value,
             params[name].append(value)
         else:
             params[name] = [value]
+
+    # Sanitize and check parameters. Raises an error if
+    # multiple values are found. Should help with debugging
+    # clients.
     params = request_query_remove_non_oauth(params)
     return params, realm
 
