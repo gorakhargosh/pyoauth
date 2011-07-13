@@ -18,7 +18,7 @@
 
 """
 :module: pyoauth.protocol
-:synopsis: Protocol-specific utility functions.
+:synopsis: OAuth protocol-specific utility functions.
 
 Nonce, verification code, and timestamp
 ---------------------------------------
@@ -27,23 +27,55 @@ Nonce, verification code, and timestamp
 .. autofunction:: generate_timestamp
 .. autofunction:: generate_client_secret
 
-OAuth signature and base string
--------------------------------
+Base string
+-----------
+.. autofunction:: generate_base_string
+.. autofunction:: generate_base_string_query
+
+Signatures
+----------
+The types of signatures currently supported for OAuth 1.0
+are:
+
+1. HMAC-SHA1
+2. RSA-SHA1
+3. PLAINTEXT.
+
+These routines can be used to sign base strings using
+your client and temporary/token credentials. RSA-SHA1
+signatures can be generated using PEM-encoded X.509
+certificates and public keys. X.509 certificates are
+preferable because their validity can be determined.
+
 .. autofunction:: generate_hmac_sha1_signature
 .. autofunction:: generate_rsa_sha1_signature
-.. autofunction:: verify_rsa_sha1_signature
 .. autofunction:: generate_plaintext_signature
-.. autofunction:: generate_base_string
+.. autofunction:: verify_hmac_sha1_signature
+.. autofunction:: verify_rsa_sha1_signature
 
 Authorization HTTP header creation and parsing
 ----------------------------------------------
+OAuth allows the use of the Authorization header
+in HTTP requests and using them is generally a better
+approach than including protocol parameters in the
+URL query string or the request entity-body.
+
+OAuth HTTP authorization headers must use "OAuth"
+(case-insensitive) as their authorization scheme and
+may optionally contain a ``realm`` parameter (which
+is not percent-encoded). Authorization headers must
+be contained within a single line and the order of
+the appearance of these parameters is irrelevant.
+
+These routines can be used to generate and parse
+OAuth authorization headers.
+
 .. autofunction:: generate_authorization_header
 .. autofunction:: parse_authorization_header
-
 """
 
-import time
-import re
+
+import logging
 try:
     # Python 3.
     from urllib.parse import urlunparse
@@ -144,6 +176,8 @@ def generate_timestamp():
     :returns:
         A string containing a positive integer representing time.
     """
+    import time
+
     return bytes(int(time.time()))
 
 
@@ -501,23 +535,31 @@ def parse_authorization_header(header_value,
         The param delimiter MUST be a comma.
         When ``False``, the parser is a bit lenient.
     :returns:
-        Dictionary of parameter name value pairs.
+        A tuple of (Dictionary of parameter name value pairs, realm).
+
+        realm will be ``None`` if the authorization header does not have
+        a ``realm`` parameter.
     """
+    realm = None
     params = {}
-    param_list, realm = \
-        parse_authorization_header_l(header_value,
-                                            param_delimiter=param_delimiter,
-                                            strict=strict)
-    for name, value in param_list:
+    for name, value \
+        in _parse_authorization_header_l(header_value,
+                                        param_delimiter=param_delimiter,
+                                        strict=strict):
         # We do keep track of multiple values because they will be
         # detected by the sanitization below and flagged as an error
         # in the Authorization header value.
         #
         #params[name] = [value]
-        if name in params:
-            params[name].append(value)
+        if not name == "realm":
+            # The ``realm`` parameter is not included into the protocol
+            # parameters list.
+            if name in params:
+                params[name].append(value)
+            else:
+                params[name] = [value]
         else:
-            params[name] = [value]
+            realm = value
 
     # Sanitize and check parameters. Raises an error if
     # multiple values are found. Should help with debugging
@@ -526,15 +568,15 @@ def parse_authorization_header(header_value,
     return params, realm
 
 
-def parse_authorization_header_l(header_value,
-                                 param_delimiter=",",
-                                 strict=True):
+def _parse_authorization_header_l(header,
+                                  param_delimiter=",",
+                                  strict=True):
     """
     Parses the OAuth Authorization header preserving the order of the
     parameters as in the header value.
 
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
-    :param header_value:
+    :param header:
         Header value. Non protocol parameters will be ignored.
     :param param_delimiter:
         The delimiter used to separate header value parameters.
@@ -550,63 +592,102 @@ def parse_authorization_header_l(header_value,
         The param delimiter MUST be a comma.
         When ``False``, the parser is a bit lenient.
     :returns:
-        Tuple:
-        (list of parameter name value pairs in order or appearance, realm)
-
-        realm will be ``None`` if the authorization header does not have
-        a realm parameter.
+        A list of parameter name value pairs in order of appearance.
     """
-    # Remove the auth-scheme from the value.
-    header_value = unicode_to_utf8(header_value)
     if strict:
-        if "\n" in header_value:
+        if "\n" in header:
             raise ValueError("Header value must be on a single line: got `%r`" \
-                             % (header_value, ))
+                             % (header, ))
         if param_delimiter != ",":
             raise ValueError("The param delimiter must be a comma: got `%r`" \
                              % (param_delimiter, ))
-
-    pattern = re.compile(r"(^OAuth[\s]+)", re.IGNORECASE)
-    header_value = re.sub(pattern, "", header_value.strip(), 1)
-    realm = None
-
-    pairs = [param_pair.strip()
-             for param_pair in header_value.split(param_delimiter)]
+    header = _authorization_header_strip_scheme(header.strip())
     decoded_pairs = []
-    for param in pairs:
+    for param in (p.strip() for p in header.split(param_delimiter)):
         if not param:
-            if header_value.endswith(param_delimiter):
+            # Having a trailing param delimiter can trigger this branch.
+            if header.endswith(param_delimiter):
                 raise InvalidAuthorizationHeaderError(
                     "Malformed `Authorization` header value -- "\
                     "found trailing `%r` character" % param_delimiter)
             else:
-                # Blank param?
+                # How did we get here? Blank param?
+                logging.warn("How did we get a blank parameter? Check: `%r`" \
+                             % header)
                 continue
-        name_value = param.split("=", 1)
-        if len(name_value) != 2:
-            raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" \
-                                                  % (param, ))
-        name, value = name_value[0].strip(), name_value[1].strip()
-        if len(value) < 2:
-            raise InvalidAuthorizationHeaderError(
-                "bad parameter value: `%r` -- missing quotes?" % (param, ))
-        if value[0] != '"' or value[-1] != '"':
-            raise InvalidAuthorizationHeaderError(
-                "missing quotes around parameter value: `%r` "\
-                "-- values must be quoted using (\")" % (param, ))
+        decoded_pairs.append(_authorization_header_parse_param(param))
+    return decoded_pairs
 
-        # We only need to remove a single pair of quotes.
-        # Do not use str.strip('"').
-        # We need to be able to detect problems with the values too.
-        value = value[1:-1]
-        name = percent_decode(name)
-        if name.lower() == "realm":
-            # "realm" is case-insensitive.
-            # The realm parameter value is a simple quoted string.
-            # It is neither percent-encoded nor percent-decoded in OAuth.
-            # realm is ignored from the protocol parameters list.
-            realm = value
-        else:
-            value = percent_decode(value)
-        decoded_pairs.append((name, value))
-    return decoded_pairs, realm
+
+def _authorization_header_strip_scheme(header):
+    """
+    Strips the auth-scheme component from an OAuth Authorization header.
+
+    :param header:
+        Header string.
+    :returns:
+        The header without the authorization scheme.
+    """
+    import re
+
+    if not header.lower().startswith("oauth "):
+        raise ValueError("Authorization scheme must be `OAuth`: got `%r`" \
+                         % header)
+    header = re.sub(re.compile(r"(^OAuth[\s]+)", re.IGNORECASE),
+                    "", header, 1)
+    return header
+
+
+def _authorization_header_parse_param(param):
+    """
+    Parses an individual authorization header parameter string.
+
+    The ``realm`` parameter, if present, will not be percent-decoded.
+
+    :param param:
+        The parameter (name=value) pair string.
+    :returns:
+        A tuple of (percent-decoded name, percent-decoded value)
+    """
+    # Split into a name, value pair.
+    try:
+        name, value = param.split("=", 1)
+    except ValueError, exception:
+        assert "need more than 1 value to unpack" in str(exception)
+        raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" \
+                                              % (param, ))
+
+    # Get rid of all the whitespace surrounding the name and value.
+    # Already done in parent function when splitting into param pairs.
+    # name, value = name.strip(), value.strip()
+
+    # Value must be at least ""
+    if len(value) < 2:
+        raise InvalidAuthorizationHeaderError(
+            "bad parameter value: `%r` -- missing quotes?" % (param, ))
+
+    # Value must be quoted between " characters.
+    if value[0] != '"' or value[-1] != '"':
+        raise InvalidAuthorizationHeaderError(
+            "missing quotes around parameter value: `%r` "\
+            "-- values must be quoted using (\")" % (param, ))
+
+    # We only need to remove a *single pair* of quotes.
+    # Do not use str.strip('"') because that will remove more " characters than
+    # necessary. We need to let the user be able to detect problems with the
+    # values as well.
+    value = value[1:-1]
+
+    # Names and values must be percent-decoded except for the ``realm``
+    # parameter.
+    name = percent_decode(name)
+    if name.lower() == "realm":
+        # "realm" is case-insensitive.
+        # The realm parameter value is a simple quoted string.
+        # It is neither percent-encoded nor percent-decoded in OAuth.
+        name = "realm"
+    else:
+        value = percent_decode(value)
+
+    # Hooray! You made it.
+    return name, value
