@@ -404,11 +404,11 @@ class Client(object):
 
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
-        params, credentials = self._parse_credentials_response(response)
+        credentials, params = self._parse_credentials_response(response)
         callback_confirmed = params.get("oauth_callback_confirmed", [""])[0].lower()
         if callback_confirmed != "true":
             raise ValueError("Invalid OAuth server response -- `oauth_callback_confirmed` MUST be set to `true`.")
-        return params, credentials
+        return credentials, params
 
     def parse_token_credentials_response(self, response):
         """
@@ -452,8 +452,9 @@ class Client(object):
             raise InvalidContentTypeError("OAuth credentials server response must have Content-Type: `%s`" % (CONTENT_TYPE_FORM_URLENCODED, ))
 
         params = parse_qs(response.payload)
-        return params, Credentials(identifier=params["oauth_token"][0],
-                                   shared_secret=params["oauth_token_secret"][0])
+        credentials = Credentials(identifier=params["oauth_token"][0],
+                                  shared_secret=params["oauth_token_secret"][0])
+        return credentials, params
 
     def _build_request(self,
                       method,
