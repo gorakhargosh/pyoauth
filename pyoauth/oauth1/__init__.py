@@ -64,7 +64,8 @@ class Credentials(object):
     # Mostly used when storing a secure cookie for temporary credentials
     # between redirects.
     def to_dict(self):
-        return dict(identifier=self._identifier, shared_secret=self._shared_secret)
+        return dict(identifier=self._identifier,
+                    shared_secret=self._shared_secret)
 
     # Used for comparison of credentials.
     @property
@@ -85,8 +86,9 @@ class Credentials(object):
         return self.__repr__()
 
     def __repr__(self):
-        return "<%(class_name)s: identifier=%(identifier)s, shared_secret=%(shared_secret)s>" % \
-               dict(class_name=self.__class__.__name__,
-                    identifier=self.identifier,
-                    shared_secret=self.shared_secret)
+        return "<%(class_name)s: " \
+               "identifier=%(identifier)s, shared_secret=%(shared_secret)s>" \
+               % dict(class_name=self.__class__.__name__,
+                      identifier=self.identifier,
+                      shared_secret=self.shared_secret)
 
