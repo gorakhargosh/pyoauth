@@ -7,7 +7,7 @@ from pyoauth.error import InvalidOAuthParametersError, \
     InvalidAuthorizationHeaderError, \
     InvalidSignatureMethodError, \
     InvalidHttpResponseError, HttpError, InvalidContentTypeError, IllegalArgumentError
-from pyoauth.http import RequestProxy, ResponseProxy
+from pyoauth.http import RequestAdapter, ResponseAdapter
 from pyoauth.protocol import parse_authorization_header
 from pyoauth.oauth1 import Credentials
 from pyoauth.oauth1.client import Client
@@ -45,10 +45,10 @@ class TestClient_OAuth_1_0_Example(unittest2.TestCase):
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        self.assertRaises(ValueError, self.client.parse_temporary_credentials_response, ResponseProxy(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=", headers))
-        self.assertRaises(ValueError, self.client.parse_temporary_credentials_response, ResponseProxy(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=false", headers))
+        self.assertRaises(ValueError, self.client.parse_temporary_credentials_response, ResponseAdapter(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=", headers))
+        self.assertRaises(ValueError, self.client.parse_temporary_credentials_response, ResponseAdapter(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=false", headers))
 
-        credentials, params = self.client.parse_temporary_credentials_response(ResponseProxy(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=true", headers=headers))
+        credentials, params = self.client.parse_temporary_credentials_response(ResponseAdapter(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=true", headers=headers))
         self.assertDictEqual(params, {
             "oauth_token": ["hh5s93j4hdidpola"],
             "oauth_token_secret": ["hdhd0244k9j7ao03"],
@@ -60,7 +60,7 @@ class TestClient_OAuth_1_0_Example(unittest2.TestCase):
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        credentials, params = self.client.parse_token_credentials_response(ResponseProxy(200, "OK", "oauth_token=nnch734d00sl2jdk&oauth_token_secret=pfkkdhi9sl3r4s00", headers=headers))
+        credentials, params = self.client.parse_token_credentials_response(ResponseAdapter(200, "OK", "oauth_token=nnch734d00sl2jdk&oauth_token_secret=pfkkdhi9sl3r4s00", headers=headers))
         self.assertDictEqual(params, {
             "oauth_token": ["nnch734d00sl2jdk"],
             "oauth_token_secret": ["pfkkdhi9sl3r4s00"],
@@ -71,7 +71,7 @@ class TestClient_OAuth_1_0_Example(unittest2.TestCase):
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        credentials, params = self.client._parse_credentials_response(ResponseProxy(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=true", headers=headers))
+        credentials, params = self.client._parse_credentials_response(ResponseAdapter(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=true", headers=headers))
         self.assertDictEqual(params, {
             "oauth_token": ["hh5s93j4hdidpola"],
             "oauth_token_secret": ["hdhd0244k9j7ao03"],
@@ -79,7 +79,7 @@ class TestClient_OAuth_1_0_Example(unittest2.TestCase):
         })
         self.assertEqual(credentials, self.temporary_credentials)
 
-        credentials, params = self.client._parse_credentials_response(ResponseProxy(200, "OK", "oauth_token=nnch734d00sl2jdk&oauth_token_secret=pfkkdhi9sl3r4s00", headers=headers))
+        credentials, params = self.client._parse_credentials_response(ResponseAdapter(200, "OK", "oauth_token=nnch734d00sl2jdk&oauth_token_secret=pfkkdhi9sl3r4s00", headers=headers))
         self.assertDictEqual(params, {
             "oauth_token": ["nnch734d00sl2jdk"],
             "oauth_token_secret": ["pfkkdhi9sl3r4s00"],
@@ -95,16 +95,16 @@ class TestClient_OAuth_1_0_Example(unittest2.TestCase):
             "Content-Type": "application/x-www-form-urlencoded",
         }
 
-        self.assertRaises(InvalidHttpResponseError, self.client._parse_credentials_response, ResponseProxy(status_code, None, body, headers))
-        self.assertRaises(InvalidHttpResponseError, self.client._parse_credentials_response, ResponseProxy(None, status, body, headers))
-        self.assertRaises(InvalidHttpResponseError, self.client._parse_credentials_response, ResponseProxy(status_code, status, None, headers))
-        self.assertRaises(InvalidHttpResponseError, self.client._parse_credentials_response, ResponseProxy(status_code, status, body, None))
+        self.assertRaises(InvalidHttpResponseError, self.client._parse_credentials_response, ResponseAdapter(status_code, None, body, headers))
+        self.assertRaises(InvalidHttpResponseError, self.client._parse_credentials_response, ResponseAdapter(None, status, body, headers))
+        self.assertRaises(InvalidHttpResponseError, self.client._parse_credentials_response, ResponseAdapter(status_code, status, None, headers))
+        self.assertRaises(InvalidHttpResponseError, self.client._parse_credentials_response, ResponseAdapter(status_code, status, body, None))
 
-        self.assertRaises(HttpError, self.client._parse_credentials_response, ResponseProxy(300, "Multiple choices", body, headers))
-        self.assertRaises(HttpError, self.client._parse_credentials_response, ResponseProxy(199, "continue", body, headers))
+        self.assertRaises(HttpError, self.client._parse_credentials_response, ResponseAdapter(300, "Multiple choices", body, headers))
+        self.assertRaises(HttpError, self.client._parse_credentials_response, ResponseAdapter(199, "continue", body, headers))
 
-        self.assertRaises(InvalidHttpResponseError, self.client._parse_credentials_response, ResponseProxy(200, "OK" , "", headers))
-        self.assertRaises(InvalidContentTypeError, self.client._parse_credentials_response, ResponseProxy(200, "OK", body, {"Content-Type": "invalid"}))
+        self.assertRaises(InvalidHttpResponseError, self.client._parse_credentials_response, ResponseAdapter(200, "OK" , "", headers))
+        self.assertRaises(InvalidContentTypeError, self.client._parse_credentials_response, ResponseAdapter(200, "OK", body, {"Content-Type": "invalid"}))
 
 
 class Test_Client_build_temporary_credentials_request(unittest2.TestCase):
@@ -198,7 +198,7 @@ class Test_Client_build_request(unittest2.TestCase):
                       headers={"Authorization": "blah blah."})
 
     def test_valid_request_generated(self):
-        valid_request = RequestProxy("GET",
+        valid_request = RequestAdapter("GET",
                                      "http://photos.example.net/photos?file=vacation.jpg&size=original",
                                      body="",
                                      headers={
@@ -236,7 +236,7 @@ OAuth realm="Photos",\
         self.assertDictEqual(got_authorization_header, expected_authorization_header)
 
     def test_example_post_request(self):
-        valid_request = RequestProxy("POST",
+        valid_request = RequestAdapter("POST",
                                      "https://photos.example.net/initiate",
                                      body="",
                                      headers={

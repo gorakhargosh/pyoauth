@@ -33,7 +33,7 @@ from pyoauth.error import IllegalArgumentError, \
     InvalidAuthorizationHeaderError, \
     InvalidContentTypeError, InvalidHttpRequestError
 
-from pyoauth.http import RequestProxy, CONTENT_TYPE_FORM_URLENCODED
+from pyoauth.http import RequestAdapter, CONTENT_TYPE_FORM_URLENCODED
 from pyoauth.oauth1 import \
     Credentials, \
     SIGNATURE_METHOD_HMAC_SHA1, \
@@ -194,7 +194,7 @@ class Client(object):
             The parameter names must begin with ``oauth_``. Any other parameters
             with names that do not begin with this prefix will be ignored.
         :returns:
-            An instance of :class:`pyoauth.http.RequestProxy`.
+            An instance of :class:`pyoauth.http.RequestAdapter`.
         """
         if not is_valid_callback_url(oauth_callback):
             raise ValueError("`oauth_callback` parameter value is invalid: `%r`" % (oauth_callback, ))
@@ -298,7 +298,7 @@ class Client(object):
             The parameter names must begin with ``oauth_``. Any other parameters
             with names that do not begin with this prefix will be ignored.
         :returns:
-            An instance of :class:`pyoauth.http.RequestProxy`.
+            An instance of :class:`pyoauth.http.RequestAdapter`.
         """
         if "oauth_callback" in extra_oauth_params:
             raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
@@ -356,7 +356,7 @@ class Client(object):
             The parameter names must begin with ``oauth_``. Any other parameters
             with names that do not begin with this prefix will be ignored.
         :returns:
-            An instance of :class:`pyoauth.http.RequestProxy`.
+            An instance of :class:`pyoauth.http.RequestAdapter`.
         """
         if "oauth_callback" in extra_oauth_params:
             raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
@@ -398,7 +398,7 @@ class Client(object):
         temporary credentials request.
 
         :param response:
-            An instance of :class:`pyoauth.http.ResponseProxy`.
+            An instance of :class:`pyoauth.http.ResponseAdapter`.
         :returns:
             A tuple of the form::
 
@@ -416,7 +416,7 @@ class Client(object):
         token credentials request.
 
         :param response:
-            An instance of :class:`pyoauth.http.ResponseProxy`.
+            An instance of :class:`pyoauth.http.ResponseAdapter`.
         :returns:
             A tuple of the form::
 
@@ -430,7 +430,7 @@ class Client(object):
         credential request.
 
         :param response:
-            An instance of :class:`pyoauth.http.ResponseProxy`.
+            An instance of :class:`pyoauth.http.ResponseAdapter`.
         :returns:
             A tuple of the form::
 
@@ -600,7 +600,7 @@ class Client(object):
             headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
             payload = query_append(payload_params, oauth_params)
 
-        return RequestProxy(method,
+        return RequestAdapter(method,
                             url=request_url,
                             body=payload,
                             headers=headers)

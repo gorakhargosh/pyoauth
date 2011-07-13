@@ -22,15 +22,15 @@
 
 Request and Response Proxies
 ----------------------------
-.. autoclass:: RequestProxy
-.. autoclass:: ResponseProxy
+.. autoclass:: RequestAdapter
+.. autoclass:: ResponseAdapter
 
 """
 
 
 CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded"
 
-class RequestProxy(object):
+class RequestAdapter(object):
     """Adaptor HTTP Request class.
 
     Framework implementers can subclass this class and must use it with
@@ -79,7 +79,7 @@ class RequestProxy(object):
         return self._headers
 
 
-class ResponseProxy(object):
+class ResponseAdapter(object):
     """Adaptor HTTP Response class.
 
     Framework implementers can subclass this class and must use it with
