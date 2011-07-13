@@ -614,8 +614,8 @@ def _parse_authorization_header_l(header,
                 # How did you get here? Blank param using a ",,"? Check your
                 # client code.
                 raise InvalidAuthorizationHeaderError(
-                    "Multiple `%r` delimiter characters in header: `%r`" \
-                    % (param_delimiter, header))
+                    "Consecutive `%r` delimiter characters in header "\
+                    "(blank parameter field): `%r`" % (param_delimiter, header))
         decoded_pairs.append(_authorization_header_parse_param(param))
     return decoded_pairs
 
