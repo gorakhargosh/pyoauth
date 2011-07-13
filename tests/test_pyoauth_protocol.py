@@ -2,7 +2,7 @@
 
 import unittest2
 
-from mom.builtins import bytes
+from mom.builtins import is_bytes_or_unicode, is_bytes
 
 from pyoauth.error import \
     InvalidOAuthParametersError, \
@@ -41,8 +41,8 @@ class Test_generate_nonce(unittest2.TestCase):
         self.assertRaises(ValueError, generate_nonce, 0)
 
     def test_result_is_string(self):
-        self.assertTrue(isinstance(generate_nonce(64, 10), bytes))
-        self.assertTrue(isinstance(generate_nonce(64, 16), bytes))
+        self.assertTrue(is_bytes(generate_nonce(64, 10)))
+        self.assertTrue(is_bytes(generate_nonce(64, 16)))
 
 
 class Test_generate_verification_code(unittest2.TestCase):
@@ -67,8 +67,8 @@ class Test_generate_verification_code(unittest2.TestCase):
                          "Verification code is not unique.")
 
     def test_is_string(self):
-        self.assertTrue(isinstance(generate_verification_code(), bytes),
-                    "Verification code is not a bytestring.")
+        self.assertTrue(is_bytes(generate_verification_code()),
+                    "Verification code is not a byte string.")
 
 
 class Test_generate_timestamp(unittest2.TestCase):
@@ -77,7 +77,7 @@ class Test_generate_timestamp(unittest2.TestCase):
                     "Timestamp is not positive integer string.")
 
     def test_is_string(self):
-        self.assertTrue(isinstance(generate_timestamp(), bytes),
+        self.assertTrue(is_bytes_or_unicode(generate_timestamp()),
                     "Timestamp is not a string.")
 
     def test_is_not_empty_string(self):
