@@ -239,7 +239,7 @@ def urlparse_normalized(url):
         or (scheme == "https" and parts.port == 443):
             port = ""
         else:
-            port = (":" + bytes(parts.port)) if parts.port else ""
+            port = (":" + str(parts.port)) if parts.port else ""
     else:
         port = ""
 
