@@ -84,7 +84,7 @@ except ImportError:
     from urlparse import urlunparse
 
 from mom.codec import base64_encode, base64_decode
-from mom.builtins import unicode_to_utf8, bytes
+from mom.builtins import unicode_to_utf8
 from mom.security.hash import hmac_sha1_base64_digest, sha1_digest
 from mom.security.random import \
     generate_random_uint_string, \
@@ -178,7 +178,7 @@ def generate_timestamp():
     """
     import time
 
-    return bytes(int(time.time()))
+    return str(int(time.time()))
 
 
 def generate_hmac_sha1_signature(base_string,
