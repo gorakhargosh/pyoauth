@@ -665,6 +665,12 @@ class Test_parse_authorization_header(unittest2.TestCase):
         self.assertRaises(InvalidAuthorizationHeaderError, parse_authorization_header,
                       header_value)
 
+    def test_InvalidAuthorizationHeaderError_when_blank_parameter(self):
+        header_value = '''OAuth realm="http://www.google.com/",,something="something"'''
+                                                            # ^
+        self.assertRaises(InvalidAuthorizationHeaderError, parse_authorization_header,
+                          header_value)
+
 
 if __name__ == "__main__":
     unittest2.main()

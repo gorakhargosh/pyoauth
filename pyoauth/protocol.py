@@ -611,10 +611,11 @@ def _parse_authorization_header_l(header,
                     "Malformed `Authorization` header value -- "\
                     "found trailing `%r` character" % param_delimiter)
             else:
-                # How did we get here? Blank param?
-                logging.warn("How did we get a blank parameter? Check: `%r`" \
-                             % header)
-                continue
+                # How did you get here? Blank param using a ",,"? Check your
+                # client code.
+                raise InvalidAuthorizationHeaderError(
+                    "Multiple `%r` delimiter characters in header: `%r`" \
+                    % (param_delimiter, header))
         decoded_pairs.append(_authorization_header_parse_param(param))
     return decoded_pairs
 
