@@ -25,8 +25,6 @@
    :show-inheritance:
 """
 
-from mom.decorators import deprecated
-
 
 # Signature methods.
 SIGNATURE_METHOD_HMAC_SHA1 = "HMAC-SHA1"
@@ -61,16 +59,6 @@ class Credentials(object):
 
     @property
     def shared_secret(self):
-        return self._shared_secret
-
-    @property
-    @deprecated
-    def key(self):
-        return self._identifier
-
-    @property
-    @deprecated
-    def secret(self):
         return self._shared_secret
 
     # Mostly used when storing a secure cookie for temporary credentials
