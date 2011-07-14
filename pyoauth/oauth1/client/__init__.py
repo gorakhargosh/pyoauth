@@ -26,31 +26,31 @@
 """
 
 import logging
-from pyoauth.error import IllegalArgumentError, \
-    InvalidHttpResponseError, \
-    HttpError, \
-    InvalidSignatureMethodError, \
-    InvalidAuthorizationHeaderError, \
+from pyoauth.error import IllegalArgumentError,\
+    InvalidHttpResponseError,\
+    HttpError,\
+    InvalidSignatureMethodError,\
+    InvalidAuthorizationHeaderError,\
     InvalidContentTypeError, InvalidHttpRequestError
 
 from pyoauth.http import RequestAdapter, CONTENT_TYPE_FORM_URLENCODED
-from pyoauth.oauth1 import \
-    Credentials, \
-    SIGNATURE_METHOD_HMAC_SHA1, \
-    SIGNATURE_METHOD_RSA_SHA1, \
+from pyoauth.oauth1 import\
+    Credentials,\
+    SIGNATURE_METHOD_HMAC_SHA1,\
+    SIGNATURE_METHOD_RSA_SHA1,\
     SIGNATURE_METHOD_PLAINTEXT
-from pyoauth.url import \
-    oauth_url_sanitize, \
-    request_query_remove_non_oauth, \
-    query_remove_oauth, \
-    url_add_query, \
-    url_append_query, \
+from pyoauth.url import\
+    oauth_url_sanitize,\
+    request_query_remove_non_oauth,\
+    query_remove_oauth,\
+    url_add_query,\
+    url_append_query,\
     parse_qs, query_append, is_valid_callback_url
-from pyoauth.protocol import generate_nonce, \
-    generate_timestamp, \
-    generate_hmac_sha1_signature, \
-    generate_rsa_sha1_signature, \
-    generate_plaintext_signature, \
+from pyoauth.protocol import generate_nonce,\
+    generate_timestamp,\
+    generate_hmac_sha1_signature,\
+    generate_rsa_sha1_signature,\
+    generate_plaintext_signature,\
     generate_authorization_header, generate_base_string
 
 
@@ -58,8 +58,7 @@ SIGNATURE_METHOD_MAP = {
     SIGNATURE_METHOD_HMAC_SHA1: generate_hmac_sha1_signature,
     SIGNATURE_METHOD_RSA_SHA1: generate_rsa_sha1_signature,
     SIGNATURE_METHOD_PLAINTEXT: generate_plaintext_signature,
-}
-
+    }
 
 class Client(object):
     """
@@ -120,6 +119,7 @@ class Client(object):
             See https://github.com/oauth/oauth-ruby/pull/12
 
     """
+
     def __init__(self,
                  client_credentials,
                  temporary_credentials_request_uri,
@@ -132,23 +132,24 @@ class Client(object):
         Creates an instance of an OAuth 1.0 client.
         """
         self._client_credentials = client_credentials
-        self._temporary_credentials_request_uri = \
-            oauth_url_sanitize(temporary_credentials_request_uri,
-                               force_secure=True)
-        self._resource_owner_authorization_uri = \
-            oauth_url_sanitize(resource_owner_authorization_uri,
-                               force_secure=False)
-        self._token_credentials_request_uri = \
-            oauth_url_sanitize(token_credentials_request_uri,
-                               force_secure=True)
+        self._temporary_credentials_request_uri =\
+        oauth_url_sanitize(temporary_credentials_request_uri,
+                           force_secure=True)
+        self._resource_owner_authorization_uri =\
+        oauth_url_sanitize(resource_owner_authorization_uri,
+                           force_secure=False)
+        self._token_credentials_request_uri =\
+        oauth_url_sanitize(token_credentials_request_uri,
+                           force_secure=True)
         if resource_owner_authentication_uri:
-            self._resource_owner_authentication_uri = \
-                oauth_url_sanitize(resource_owner_authentication_uri,
-                                   force_secure=False)
+            self._resource_owner_authentication_uri =\
+            oauth_url_sanitize(resource_owner_authentication_uri,
+                               force_secure=False)
         else:
             self._resource_owner_authentication_uri = ""
         self._use_authorization_header = use_authorization_header
-        self._authorization_header_param_delimiter = authorization_header_param_delimiter
+        self._authorization_header_param_delimiter = \
+            authorization_header_param_delimiter
 
     @property
     def oauth_version(self):
@@ -157,13 +158,13 @@ class Client(object):
         return "1.0"
 
     def build_temporary_credentials_request(self,
-                                            method="POST",
-                                            payload_params=None,
-                                            headers=None,
-                                            realm=None,
-                                            oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-                                            oauth_callback="oob",
-                                            **extra_oauth_params):
+                            method="POST",
+                            payload_params=None,
+                            headers=None,
+                            realm=None,
+                            oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
+                            oauth_callback="oob",
+                            **extra_oauth_params):
         """
         Builds an OAuth request for temporary credentials.
 
@@ -171,10 +172,10 @@ class Client(object):
             HTTP request method. Default POST.
         :param payload_params:
             A dictionary of payload parameters. These will be serialized
-            into the URL or the entity-body depending on the HTTP request method.
-            These must not include any parameters starting with ``oauth_``. Any
-            of these parameters with names starting with the ``oauth_`` prefix
-            will be ignored.
+            into the URL or the entity-body depending on the HTTP request
+            method. These must not include any parameters starting with
+            ``oauth_``. Any of the parameters with names starting with the
+            ``oauth_`` prefix will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
             Must not include the "Authorization" header.
@@ -197,16 +198,18 @@ class Client(object):
             An instance of :class:`pyoauth.http.RequestAdapter`.
         """
         if not is_valid_callback_url(oauth_callback):
-            raise ValueError("`oauth_callback` parameter value is invalid: `%r`" % (oauth_callback, ))
+            raise ValueError(
+                "`oauth_callback` parameter value is invalid: `%r`" \
+                % oauth_callback)
 
         return self._build_request(method=method,
-                                   url=self._temporary_credentials_request_uri,
-                                   payload_params=payload_params,
-                                   headers=headers,
-                                   realm=realm,
-                                   oauth_signature_method=oauth_signature_method,
-                                   oauth_callback=oauth_callback,
-                                   **extra_oauth_params)
+                               url=self._temporary_credentials_request_uri,
+                               payload_params=payload_params,
+                               headers=headers,
+                               realm=realm,
+                               oauth_signature_method=oauth_signature_method,
+                               oauth_callback=oauth_callback,
+                               **extra_oauth_params)
 
     def get_authorization_url(self, temporary_credentials, **query_params):
         """
@@ -224,10 +227,10 @@ class Client(object):
         if query_params:
             query_params = query_remove_oauth(query_params)
             url = url_append_query(url, query_params)
-        # So that the "oauth_token" appears LAST.
+            # So that the "oauth_token" appears LAST.
         return url_append_query(url, {
             "oauth_token": temporary_credentials.identifier,
-        })
+            })
 
     def get_authentication_url(self, temporary_credentials, **query_params):
         """
@@ -244,25 +247,26 @@ class Client(object):
         """
         url = self._resource_owner_authentication_uri
         if not url:
-            raise NotImplementedError("Service does not support automatic authentication redirects.")
+            raise NotImplementedError(
+                "Service does not support automatic authentication redirects.")
         if query_params:
             query_params = query_remove_oauth(query_params)
             url = url_append_query(url, query_params)
-        # So that the "oauth_token" appears LAST.
+            # So that the "oauth_token" appears LAST.
         return url_append_query(url, {
             "oauth_token": temporary_credentials.identifier,
-        })
+            })
 
 
     def build_token_credentials_request(self,
-                                        temporary_credentials,
-                                        oauth_verifier,
-                                        method="POST",
-                                        payload_params=None,
-                                        headers=None,
-                                        realm=None,
-                                        oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-                                        **extra_oauth_params):
+                            temporary_credentials,
+                            oauth_verifier,
+                            method="POST",
+                            payload_params=None,
+                            headers=None,
+                            realm=None,
+                            oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
+                            **extra_oauth_params):
         """
         Builds an OAuth request instance for token credentials from the OAuth
         server.
@@ -278,10 +282,10 @@ class Client(object):
             The HTTP method to use. Default POST.
         :param payload_params:
             A dictionary of payload parameters. These will be serialized
-            into the URL or the entity-body depending on the HTTP request method.
-            These must not include any parameters starting with ``oauth_``. Any
-            of these parameters with names starting with the ``oauth_`` prefix
-            will be ignored.
+            into the URL or the entity-body depending on the HTTP request
+            method. These must not include any parameters starting with
+            ``oauth_``. Any of the parameters with names starting with the
+            ``oauth_`` prefix will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
             Must not include the "Authorization" header.
@@ -301,27 +305,29 @@ class Client(object):
             An instance of :class:`pyoauth.http.RequestAdapter`.
         """
         if "oauth_callback" in extra_oauth_params:
-            raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
+            raise IllegalArgumentError(
+                "`oauth_callback` is reserved for use with temporary "\
+                "credentials request only.")
 
         return self._build_request(method=method,
-                                   url=self._token_credentials_request_uri,
-                                   payload_params=payload_params,
-                                   headers=headers,
-                                   token_or_temporary_credentials=temporary_credentials,
-                                   realm=realm,
-                                   oauth_signature_method=oauth_signature_method,
-                                   oauth_verifier=oauth_verifier,
-                                   **extra_oauth_params)
+                               url=self._token_credentials_request_uri,
+                               payload_params=payload_params,
+                               headers=headers,
+                               auth_credentials=temporary_credentials,
+                               realm=realm,
+                               oauth_signature_method=oauth_signature_method,
+                               oauth_verifier=oauth_verifier,
+                               **extra_oauth_params)
 
     def build_resource_request(self,
-                               token_credentials,
-                               method,
-                               url,
-                               payload_params=None,
-                               headers=None,
-                               realm=None,
-                               oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-                               **extra_oauth_params):
+                           token_credentials,
+                           method,
+                           url,
+                           payload_params=None,
+                           headers=None,
+                           realm=None,
+                           oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
+                           **extra_oauth_params):
         """
         Builds an OAuth request instance for token credentials from the OAuth
         server.
@@ -336,10 +342,10 @@ class Client(object):
             The HTTP URL to which the resource request must be sent.
         :param payload_params:
             A dictionary of payload parameters. These will be serialized
-            into the URL or the entity-body depending on the HTTP request method.
-            These must not include any parameters starting with ``oauth_``. Any
-            of these parameters with names starting with the ``oauth_`` prefix
-            will be ignored.
+            into the URL or the entity-body depending on the HTTP request
+            method. These must not include any parameters starting with
+            ``oauth_``. Any of the parameters with names starting with the
+            ``oauth_`` prefix will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
             Must not include the "Authorization" header.
@@ -359,18 +365,21 @@ class Client(object):
             An instance of :class:`pyoauth.http.RequestAdapter`.
         """
         if "oauth_callback" in extra_oauth_params:
-            raise IllegalArgumentError("`oauth_callback` is reserved for use with temporary credentials request only.")
+            raise IllegalArgumentError(
+                "`oauth_callback` is reserved for use " \
+                "with temporary credentials request only.")
 
         return self._build_request(method=method,
-                                   url=url,
-                                   payload_params=payload_params,
-                                   headers=headers,
-                                   realm=realm,
-                                   token_or_temporary_credentials=token_credentials,
-                                   oauth_signature_method=oauth_signature_method,
-                                   **extra_oauth_params)
+                               url=url,
+                               payload_params=payload_params,
+                               headers=headers,
+                               realm=realm,
+                               auth_credentials=token_credentials,
+                               oauth_signature_method=oauth_signature_method,
+                               **extra_oauth_params)
 
-    def check_verification_code(self, temporary_credentials, oauth_token, oauth_verifier):
+    def check_verification_code(self, temporary_credentials, oauth_token,
+                                oauth_verifier):
         """
         When the OAuth 1.0 server redirects the resource owner to your
         callback URL, it will attach two parameters to the query string.
@@ -389,7 +398,10 @@ class Client(object):
             from the server redirect.
         """
         if temporary_credentials.identifier != oauth_token:
-            raise InvalidHttpRequestError("OAuth token returned in callback query `%r` does not match temporary credentials: `%r`" % (oauth_token, temporary_credentials.identifer,))
+            raise InvalidHttpRequestError(
+                "OAuth token returned in callback query `%r` " \
+                "does not match temporary credentials: `%r`" \
+                % (oauth_token, temporary_credentials.identifer,))
         return oauth_verifier
 
     def parse_temporary_credentials_response(self, response):
@@ -405,9 +417,10 @@ class Client(object):
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
         credentials, params = self._parse_credentials_response(response)
-        callback_confirmed = params.get("oauth_callback_confirmed", [""])[0].lower()
-        if callback_confirmed != "true":
-            raise ValueError("Invalid OAuth server response -- `oauth_callback_confirmed` MUST be set to `true`.")
+        if params.get("oauth_callback_confirmed", [""])[0].lower() != "true":
+            raise ValueError(
+                "Invalid OAuth server response -- " \
+                "`oauth_callback_confirmed` MUST be set to `true`.")
         return credentials, params
 
     def parse_token_credentials_response(self, response):
@@ -437,19 +450,27 @@ class Client(object):
                 (parameter dictionary, pyoauth.oauth1.Credentials instance)
         """
         if not response.status_code:
-            raise InvalidHttpResponseError("Invalid status code: `%r`" % (response.status_code, ))
+            raise InvalidHttpResponseError(
+                "Invalid status code: `%r`" % response.status_code)
         if not response.status:
-            raise InvalidHttpResponseError("Invalid status message: `%r`" % (response.status, ))
+            raise InvalidHttpResponseError(
+                "Invalid status message: `%r`" % response.status)
         if not response.payload:
-            raise InvalidHttpResponseError("Body is invalid or empty: `%r`" % (response.payload, ))
+            raise InvalidHttpResponseError(
+                "Body is invalid or empty: `%r`" % response.payload)
         if not response.headers:
-            raise InvalidHttpResponseError("Headers are invalid or not specified: `%r`" % (response.headers, ))
+            raise InvalidHttpResponseError(
+                "Headers are invalid or not specified: `%r`" \
+                % response.headers)
 
         if response.error:
-            raise HttpError("Could not fetch credentials: HTTP %d - %s" % (response.status_code, response.status,))
-        # The response body must be URL encoded.
+            raise HttpError("Could not fetch credentials: HTTP %d - %s" \
+            % (response.status_code, response.status,))
+            # The response body must be URL encoded.
         if not response.is_body_form_urlencoded():
-            raise InvalidContentTypeError("OAuth credentials server response must have Content-Type: `%s`" % (CONTENT_TYPE_FORM_URLENCODED, ))
+            raise InvalidContentTypeError(
+                "OAuth credentials server response must " \
+                "have Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
 
         params = parse_qs(response.payload)
         credentials = Credentials(identifier=params["oauth_token"][0],
@@ -457,14 +478,14 @@ class Client(object):
         return credentials, params
 
     def _build_request(self,
-                      method,
-                      url,
-                      payload_params=None,
-                      headers=None,
-                      token_or_temporary_credentials=None,
-                      realm=None,
-                      oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-                      **extra_oauth_params):
+                       method,
+                       url,
+                       payload_params=None,
+                       headers=None,
+                       auth_credentials=None,
+                       realm=None,
+                       oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
+                       **extra_oauth_params):
         """
         Builds an OAuth request.
 
@@ -474,10 +495,10 @@ class Client(object):
             The OAuth request URI.
         :param payload_params:
             A dictionary of payload parameters. These will be serialized
-            into the URL or the entity-body depending on the HTTP request method.
-            These must not include any parameters starting with ``oauth_``. Any
-            of these parameters with names starting with the ``oauth_`` prefix
-            will be ignored.
+            into the URL or the entity-body depending on the HTTP request
+            method. These must not include any parameters starting with
+            ``oauth_``. Any of the parameters with names starting with the
+            ``oauth_`` prefix will be ignored.
         :param headers:
             A dictionary of headers that will be passed along with the request.
             Must not include the "Authorization" header.
@@ -501,7 +522,9 @@ class Client(object):
         realm = realm or ""
 
         if oauth_signature_method not in SIGNATURE_METHOD_MAP:
-            raise InvalidSignatureMethodError("Invalid signature method specified: `%r`" % (oauth_signature_method,))
+            raise InvalidSignatureMethodError(
+                "Invalid signature method specified: `%r`" \
+                % oauth_signature_method)
 
         # Required OAuth protocol parameters.
         # See Making Requests (http://tools.ietf.org/html/rfc5849#section-3.1)
@@ -511,34 +534,43 @@ class Client(object):
             oauth_timestamp=generate_timestamp(),
             oauth_nonce=generate_nonce(),
             oauth_version=self.oauth_version,
-        )
-        if token_or_temporary_credentials:
-            oauth_params["oauth_token"] = token_or_temporary_credentials.identifier
+            )
+        if auth_credentials:
+            oauth_params["oauth_token"] = auth_credentials.identifier
 
         if "_test_force_exclude_oauth_version" in extra_oauth_params:
             del oauth_params["oauth_version"]
 
         # Filter and add additional OAuth parameters.
-        _force_override_reserved_oauth_params_for_tests = "_test_force_override_reserved_oauth_params" in extra_oauth_params
+        _force_override_reserved_oauth_params_for_tests = \
+            "_test_force_override_reserved_oauth_params" in extra_oauth_params
         extra_oauth_params = request_query_remove_non_oauth(extra_oauth_params)
         reserved_oauth_params = (
-            "oauth_signature",     # Calculated from given parameters.
-            "oauth_nonce",         # System-generated.
-            "oauth_timestamp",     # System-generated.
-            "oauth_consumer_key",  # Provided when creating the client instance.
-            "oauth_version",       # Optional but MUST be set to "1.0" according to spec.
-            "oauth_token",         # Determined from the token or temporary credentials.
-        )
+            "oauth_signature", # Calculated from given parameters.
+            "oauth_nonce", # System-generated.
+            "oauth_timestamp", # System-generated.
+            "oauth_consumer_key", # Provided when creating the client instance.
+            "oauth_version",
+            # Optional but MUST be set to "1.0" according to spec.
+            "oauth_token",
+            # Determined from the token or temporary credentials.
+            )
         for k, v in extra_oauth_params.items():
-            if not _force_override_reserved_oauth_params_for_tests and k in reserved_oauth_params:
-                # Don't override these required system-generated protocol parameters.
-                raise IllegalArgumentError("Cannot override system-generated protocol parameter `%r`." % k)
+            if not _force_override_reserved_oauth_params_for_tests \
+            and k in reserved_oauth_params:
+                # Don't override these required system-generated
+                # protocol parameters.
+                raise IllegalArgumentError(
+                    "Cannot override system-generated " \
+                    "protocol parameter `%r`." % k)
             else:
                 if k in oauth_params:
                     # Warn when an existing protocol parameter is being
                     # overridden.
-                    logging.warning("Overriding existing protocol parameter `%r`=`%r` with `%r`=`%r`",
-                                    k, oauth_params[k], k, v[0])
+                    logging.warning(
+                        "Overriding existing protocol " \
+                        "parameter `%r`=`%r` with `%r`=`%r`",
+                        k, oauth_params[k], k, v[0])
                 oauth_params[k] = v[0]
 
         # Filter payload parameters for the request.
@@ -548,7 +580,7 @@ class Client(object):
         # params should be included in the signature or not.
         # Here is why:
         #
-        #    http://groups.google.com/group/oauth/browse_thread/thread/fdc0b11f2c4a8dc3/
+        # groups.google.com/group/oauth/browse_thread/thread/fdc0b11f2c4a8dc3/
         #
         # http://tools.ietf.org/html/rfc5849#appendix-A
         # However, Appendix A in the RFC specification clarifies this point.
@@ -564,9 +596,10 @@ class Client(object):
 
         # Determine the request's OAuth signature.
         base_string = generate_base_string(method, signature_url, oauth_params)
-        oauth_params["oauth_signature"] = self._sign_request_data(oauth_signature_method,
-                                                                  base_string,
-                                                                  token_or_temporary_credentials)
+        oauth_params["oauth_signature"] = self._sign_request_data(
+            oauth_signature_method,
+            base_string,
+            auth_credentials)
 
         # Build request data now.
         # OAuth parameters and any parameters starting with the ``oauth_``
@@ -576,14 +609,17 @@ class Client(object):
         # 2. Request URI query string.
         # 3. Request entity body.
         #
-        # See Parameter Transmission (http://tools.ietf.org/html/rfc5849#section-3.6)
+        # See Parameter Transmission
+        # http://tools.ietf.org/html/rfc5849#section-3.6
         if "Authorization" in headers:
-            raise InvalidAuthorizationHeaderError("Authorization field is already present in headers: `%r`" % (headers, ))
+            raise InvalidAuthorizationHeaderError(
+                "Authorization field is already present in headers: `%r`" \
+                % headers)
         if self._use_authorization_header:
-            auth_header_value = \
-                generate_authorization_header(oauth_params,
-                                                          realm=realm,
-                                                          param_delimiter=self._authorization_header_param_delimiter)
+            auth_header_value =\
+            generate_authorization_header(oauth_params,
+                  realm=realm,
+                  param_delimiter=self._authorization_header_param_delimiter)
             headers["Authorization"] = auth_header_value
             # Empty the params if using authorization so that they are not
             # included multiple times in a request below.
@@ -601,9 +637,9 @@ class Client(object):
             payload = query_append(payload_params, oauth_params)
 
         return RequestAdapter(method,
-                            url=request_url,
-                            body=payload,
-                            headers=headers)
+                              url=request_url,
+                              body=payload,
+                              headers=headers)
 
     def _sign_request_data(self, signature_method,
                            base_string,
@@ -613,7 +649,7 @@ class Client(object):
         and the signature method specified.
         """
         sign_func = SIGNATURE_METHOD_MAP[signature_method]
-        credentials_shared_secret = credentials.shared_secret if credentials else None
+        shared_secret = credentials.shared_secret if credentials else None
         return sign_func(base_string,
                          self._client_credentials.shared_secret,
-                         credentials_shared_secret)
+                         shared_secret)
