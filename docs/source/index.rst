@@ -22,6 +22,11 @@ or
 ::
 
     $ git clone git://github.com/gorakhargosh/pyoauth.git
+
+    or
+
+    $ git clone http://code.google.com/p/pyoauth/
+
     $ cd pyoauth
     $ python setup.py install
 
