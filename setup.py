@@ -24,8 +24,6 @@ setup(
     packages=["pyoauth"],
     include_package_data=True,
     install_requires=[
-        "PyCrypto >=2.3",
-        "pyasn1 >=0.0.13b",
         "mom >=0.0.1",
     ],
     keywords=' '.join([
