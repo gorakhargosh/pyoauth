@@ -2,7 +2,7 @@ RM = rm -rf
 
 PKG_NAME=pyoauth
 
-.PHONY: all clean distclean develop lint test upload-doc view-doc doc docs build dist release auto submodules
+.PHONY: all clean distclean develop lint test upload-doc view-doc doc docs build dist release auto submodules push
 
 all: build
 
@@ -62,6 +62,12 @@ bin/buildout: buildout.cfg setup.py
 
 bin/python: bin/buildout
 	@bin/buildout
+
+push:
+	@echo "Pushing repository to remote:origin"
+	@git push origin master
+	@echo "Pushing repository to remote:google"
+	@git push google master
 
 clean:
 	@make -C docs/ clean > /dev/null
