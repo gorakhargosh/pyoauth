@@ -74,8 +74,6 @@ OAuth authorization headers.
 .. autofunction:: parse_authorization_header
 """
 
-
-import logging
 try:
     # Python 3.
     from urllib.parse import urlunparse
