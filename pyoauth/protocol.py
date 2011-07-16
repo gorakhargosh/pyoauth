@@ -81,11 +81,11 @@ except ImportError:
     # Python 2.5+
     from urlparse import urlunparse
 
-from mom.codec import base64_encode, base64_decode
+from mom.codec import decimal_encode, base64_encode, base64_decode
 from mom.builtins import unicode_to_utf8
 from mom.security.hash import hmac_sha1_base64_digest, sha1_digest
 from mom.security.random import \
-    generate_random_uint_string, \
+    generate_random_bits, \
     generate_random_hex_string
 
 from pyoauth.error import InvalidHttpMethodError, \
@@ -97,29 +97,23 @@ from pyoauth.url import percent_encode, percent_decode, \
     request_query_remove_non_oauth, query_remove_oauth
 
 
-def generate_nonce(bit_strength=64, base=10):
+def generate_nonce(n_bits=64):
     """
-    Generates a random ASCII-encoded unsigned integral number in
-    base-representation.
+    Generates a random ASCII-encoded unsigned integral number in decimal
+    representation.
 
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
-    :param bit_strength:
-        Bit strength. Default 64.
-    :param base:
-        One of:
-            1. 2
-            2. 10 (default)
-            3. 16
-            4. 64
+    :param n_bits:
+        Bit size. Default 64.
     :returns:
         A string representation of a randomly-generated ASCII-encoded
-        base-representation unsigned integral number based on the bit strength
+        decimal-representation unsigned integral number based on the bit size
         specified.
     """
-    return generate_random_uint_string(bit_strength=bit_strength, base=base)
+    return decimal_encode(generate_random_bits(n_bits))
 
 
-def generate_client_secret(bit_strength=144):
+def generate_client_secret(n_bits=144):
     """
     Generates a random Base-64-encoded client secret to assign to a
     registered client application.
@@ -134,13 +128,13 @@ def generate_client_secret(bit_strength=144):
     version 1.0a requires percent-encoding the secrets before generating
     signatures. (See, :func:``generate_plaintext_signature``).
 
-    :param bit_strength:
-        Bit strength. 144 is default.
+    :param n_bits:
+        Bit size. 144 is default.
     :returns:
         A base-64-encoded random unsigned-integral consumer secret based
-        on the bit strength specified.
+        on the bit size specified.
     """
-    return generate_random_uint_string(bit_strength=bit_strength, base=64)
+    return base64_encode(generate_random_bits(n_bits))
 
 
 def generate_verification_code(length=8):
@@ -486,10 +480,10 @@ def generate_authorization_header(oauth_params,
     on a single line.
 
     ::
-    
+
         {"oauth_b": "http://example.com/c", ...}, "example foo"
         -> 'OAuth realm="example foo",oauth_b="http%3A%2F%2Fexample.com%2Fc"...'
-    
+
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param oauth_params:
         Protocol-specific parameters excluding the ``realm`` parameter.
@@ -525,8 +519,8 @@ def parse_authorization_header(header_value,
     ::
 
         'OAuth realm="example.com",oauth_nonce="123456789",..."
-        -> ({"oauth_nonce": ["123456789"], ...}, "example.com")    
-    
+        -> ({"oauth_nonce": ["123456789"], ...}, "example.com")
+
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param header_value:
         Header value.
@@ -588,7 +582,7 @@ def _parse_authorization_header_l(header,
 
         'OAuth realm="example.com",oauth_nonce="123456789",..."
         -> [("realm", "example.com"), ("oauth_nonce", "123456789"), ...]
-    
+
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param header:
         Header value. Non protocol parameters will be ignored.
@@ -641,7 +635,7 @@ def _authorization_header_strip_scheme(header):
     ::
 
          'OAuth realm="example.com",...' -> 'realm="example.com",...'
-    
+
     :param header:
         Header string.
     :returns:
@@ -662,11 +656,11 @@ def _authorization_header_parse_param(param):
     Parses an individual authorization header parameter string.
 
     ::
-    
+
         'name="value%201"' -> ("name", "value 1")
-    
+
     The ``realm`` parameter, if present, will not be percent-decoded.
-    
+
     :param param:
         The parameter (name=value) pair string.
     :returns:

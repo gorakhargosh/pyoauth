@@ -112,6 +112,7 @@ def percent_encode(value):
     :returns:
         Percent-encoded string.
    """
+    # Escapes '/' too
     value = bytes(to_utf8_if_unicode(value))
     return quote(value, safe="~")
 

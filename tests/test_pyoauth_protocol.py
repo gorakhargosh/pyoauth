@@ -28,22 +28,15 @@ class Test_generate_nonce(unittest2.TestCase):
     def test_uniqueness(self):
         self.assertNotEqual(generate_nonce(), generate_nonce())
 
-    def test_hex_length(self):
-        for i in range(1, 1000):
-            self.assertEqual(len(generate_nonce(64, 16)), 16)
-
     def test_unsigned_integer(self):
-        self.assertTrue(int(generate_nonce(64, 10)) >= 0)
-        self.assertTrue(int(generate_nonce(64, 16), 16) >= 0)
-
-    def test_raises_ValueError_when_invalid_bit_strength(self):
-        self.assertRaises(ValueError, generate_nonce, 63)
-        self.assertRaises(ValueError, generate_nonce, 0)
+        self.assertTrue(int(generate_nonce(64)) >= 0)
 
     def test_result_is_string(self):
-        self.assertTrue(is_bytes(generate_nonce(64, 10)))
-        self.assertTrue(is_bytes(generate_nonce(64, 16)))
+        self.assertTrue(is_bytes(generate_nonce(64)))
 
+    def test_range(self):
+        value = long(generate_nonce(64))
+        self.assertTrue(value >= 0 and value < (2L ** 64))
 
 class Test_generate_verification_code(unittest2.TestCase):
     def test_length(self):
