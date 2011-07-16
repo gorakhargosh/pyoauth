@@ -198,8 +198,8 @@ method.
 So how does OAuth use public-key encryption?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 OAuth requires the use of SSL by clients when requesting token secrets
-from OAuth servers. This takes care of the confidential part. The other two
-are handled by RSA-SHA-1 signatures.
+from OAuth servers. Verifying the authenticity of the messages is handled
+by RSA-SHA-1 signatures.
 
 Here is what you have to do to use your RSA key-pair with OAuth:
 
