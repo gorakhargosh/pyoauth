@@ -482,9 +482,14 @@ def generate_authorization_header(oauth_params,
     """
     Builds the Authorization header value.
 
-    Please note that the generated authorization header value MUST be
-    on a SINGLE line.
+    Please note that the generated authorization header value will be
+    on a single line.
 
+    ::
+    
+        {"oauth_b": "http://example.com/c", ...}, "example foo"
+        -> 'OAuth realm="example foo",oauth_b="http%3A%2F%2Fexample.com%2Fc"...'
+    
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param oauth_params:
         Protocol-specific parameters excluding the ``realm`` parameter.
@@ -517,6 +522,11 @@ def parse_authorization_header(header_value,
     """
     Parses the OAuth Authorization header.
 
+    ::
+
+        'OAuth realm="example.com",oauth_nonce="123456789",..."
+        -> ({"oauth_nonce": ["123456789"], ...}, "example.com")    
+    
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param header_value:
         Header value.
@@ -574,6 +584,11 @@ def _parse_authorization_header_l(header,
     Parses the OAuth Authorization header preserving the order of the
     parameters as in the header value.
 
+    ::
+
+        'OAuth realm="example.com",oauth_nonce="123456789",..."
+        -> [("realm", "example.com"), ("oauth_nonce", "123456789"), ...]
+    
     :see: Authorization Header http://tools.ietf.org/html/rfc5849#section-3.5.1
     :param header:
         Header value. Non protocol parameters will be ignored.
@@ -623,6 +638,10 @@ def _authorization_header_strip_scheme(header):
     """
     Strips the auth-scheme component from an OAuth Authorization header.
 
+    ::
+
+         'OAuth realm="example.com",...' -> 'realm="example.com",...'
+    
     :param header:
         Header string.
     :returns:
@@ -642,8 +661,12 @@ def _authorization_header_parse_param(param):
     """
     Parses an individual authorization header parameter string.
 
+    ::
+    
+        'name="value%201"' -> ("name", "value 1")
+    
     The ``realm`` parameter, if present, will not be percent-decoded.
-
+    
     :param param:
         The parameter (name=value) pair string.
     :returns:
