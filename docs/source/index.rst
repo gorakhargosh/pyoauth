@@ -33,8 +33,8 @@ or
 
 About the implementation
 ------------------------
-This library implements version 1.0 of the OAuth protocol as per
-the RFC5849_ specification, which supersedes any previous versions of the
+PyOAuth implements versions 1.0 and 2.0 of the OAuth protocol as per the RFC
+specifications (See RFC5849_), which supersede any previous versions of the
 protocol.
 
 Client classes do not send HTTP requests but implement enough of the
