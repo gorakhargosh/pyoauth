@@ -123,7 +123,7 @@ def generate_client_secret(n_bits=144):
     OAuth signatures for base strings.
 
     As a side note, Google OAuth generates client secrets with similar encoding
-    and this problem is a little hard to trace for the client, but it is a
+    and the above problem is a little hard to trace for the client, but it is a
     problem that should be fixed by the client after all. OAuth protocol
     version 1.0a requires percent-encoding the secrets before generating
     signatures. (See, :func:``generate_plaintext_signature``).
