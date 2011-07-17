@@ -18,10 +18,10 @@
 
 """
 :module: pyoauth.http
-:synopsis: Adaptor functionality for HTTP.
+:synopsis: Adapter functionality for HTTP.
 
-Request and Response Proxies
-----------------------------
+Request and Response Adapters
+-----------------------------
 .. autoclass:: RequestAdapter
 .. autoclass:: ResponseAdapter
 
