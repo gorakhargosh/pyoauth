@@ -535,6 +535,17 @@ class Test_parse_authorization_header(unittest2.TestCase):
         '''
         self.assertRaises(ValueError, parse_authorization_header, test_value, strict=True)
 
+    def test_value_can_have_newlines_when_not_strict(self):
+        test_value = '''OAuth realm="Examp%20le",
+            oauth_something="%20Some+Example"
+        '''
+        expected_value = ({
+            "oauth_something": [" Some Example"],
+        }, "Examp%20le")
+        got = parse_authorization_header(test_value, strict=False)
+        self.assertDictEqual(got[0], expected_value[0])
+        self.assertEqual(got[1], expected_value[1])
+
     def test_param_delimiter_can_be_changed(self):
         expected_value = ({
             'oauth_nonce': ['4572616e48616d6d65724c61686176'],
