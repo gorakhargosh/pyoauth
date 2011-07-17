@@ -102,6 +102,8 @@ def generate_nonce(n_bits=64):
     Generates a random ASCII-encoded unsigned integral number in decimal
     representation.
 
+    The nonce/timestamp pair should always be unique to prevent replay attacks.
+
     :see: Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
     :param n_bits:
         Bit size. Default 64.
@@ -163,6 +165,8 @@ def generate_verification_code(length=8):
 def generate_timestamp():
     """
     Generates an OAuth timestamp.
+
+    The nonce/timestamp pair should always be unique to prevent replay attacks.
 
     :see:
         Nonce and Timestamp (http://tools.ietf.org/html/rfc5849#section-3.3)
