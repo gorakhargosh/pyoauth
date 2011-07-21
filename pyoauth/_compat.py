@@ -16,12 +16,30 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+
 try:
     # Python 3.
-    from urllib.parse import urlunparse
+    from urllib.parse import urlparse, urlunparse, parse_qs, quote, unquote_plus
 except ImportError:
     # Python 2.5+
-    from urlparse import urlunparse
+    from urlparse import urlparse, urlunparse
+    from urllib import quote, unquote_plus
+    try:
+        # Python 2.6+
+        from urlparse import parse_qs
+    except ImportError:
+        from cgi import parse_qs
+
+__all__ = [
+    "urlunparse",
+    "parse_qs",
+    "unquote_plus",
+    "quote",
+    "urlparse",
+]
 
 urlunparse = urlunparse
-
+parse_qs = parse_qs
+unquote_plus = unquote_plus
+quote = quote
+urlparse = urlparse

@@ -73,9 +73,9 @@ OAuth authorization headers.
 .. autofunction:: generate_authorization_header
 .. autofunction:: parse_authorization_header
 """
-from itertools import imap
 
-from pyoauth._compat import urlunparse
+
+from itertools import imap
 
 from mom.codec import decimal_encode, base64_encode, base64_decode
 from mom.builtins import unicode_to_utf8
@@ -84,13 +84,14 @@ from mom.security.random import \
     generate_random_bits, \
     generate_random_hex_string
 
+from pyoauth._compat import urlunparse
+from pyoauth.url import percent_encode, percent_decode, \
+    urlencode_sl, urlencode_s, urlparse_normalized, \
+    request_query_remove_non_oauth, query_remove_oauth
 from pyoauth.error import InvalidHttpMethodError, \
     InvalidUrlError, \
     InvalidOAuthParametersError, \
     InvalidAuthorizationHeaderError
-from pyoauth.url import percent_encode, percent_decode, \
-    urlencode_sl, urlencode_s, urlparse_normalized, \
-    request_query_remove_non_oauth, query_remove_oauth
 
 
 def generate_nonce(n_bits=64):

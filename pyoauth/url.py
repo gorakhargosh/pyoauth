@@ -53,22 +53,12 @@ Parameter sanitization
 
 import logging
 
-try:
-    # Python 3.
-    from urllib.parse import \
-        urlparse, urlunparse, parse_qs as _parse_qs, quote, unquote_plus
-except ImportError:
-    # Python 2.5+
-    from urlparse import urlparse, urlunparse
-    from urllib import quote, unquote_plus
-    try:
-        # Python 2.6+
-        from urlparse import parse_qs as _parse_qs
-    except ImportError:
-        from cgi import parse_qs as _parse_qs
-
 from mom.builtins import is_sequence, \
     bytes, is_bytes_or_unicode, to_utf8_if_unicode, unicode_to_utf8
+
+from pyoauth._compat import urlparse, urlunparse, parse_qs as _parse_qs, \
+    quote, \
+    unquote_plus
 from pyoauth.error import InvalidQueryParametersError, \
     InsecureOAuthParametersError, \
     InvalidOAuthParametersError, \
