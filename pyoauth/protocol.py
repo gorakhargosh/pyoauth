@@ -75,12 +75,7 @@ OAuth authorization headers.
 """
 from itertools import imap
 
-try:
-    # Python 3.
-    from urllib.parse import urlunparse
-except ImportError:
-    # Python 2.5+
-    from urlparse import urlunparse
+from pyoauth._compat import urlunparse
 
 from mom.codec import decimal_encode, base64_encode, base64_decode
 from mom.builtins import unicode_to_utf8
@@ -411,10 +406,10 @@ def generate_base_string(method, url, oauth_params):
             "Method must be one of the HTTP methods %s: "\
             "got `%s` instead" % (allowed_methods, method))
     if not url:
-        raise InvalidUrlError("URL must be specified: got `%r`" % (url, ))
+        raise InvalidUrlError("URL must be specified: got `%r`" % (url,))
     if not isinstance(oauth_params, dict):
         raise InvalidOAuthParametersError(
-            "Dictionary required: got `%r`" % (oauth_params, ))
+            "Dictionary required: got `%r`" % (oauth_params,))
 
     scheme, netloc, path, matrix_params, query, _ = urlparse_normalized(url)
     query_string = generate_base_string_query(query, oauth_params)
@@ -608,10 +603,10 @@ def _parse_authorization_header_l(header,
     if strict:
         if "\n" in header:
             raise ValueError("Header value must be on a single line: got `%r`" \
-                             % (header, ))
+                             % (header,))
         if param_delimiter != ",":
             raise ValueError("The param delimiter must be a comma: got `%r`" \
-                             % (param_delimiter, ))
+                             % (param_delimiter,))
     header = _authorization_header_strip_scheme(header.strip())
     decoded_pairs = []
     for param in (p.strip() for p in header.split(param_delimiter)):
@@ -649,9 +644,9 @@ def _authorization_header_strip_scheme(header):
     if not header.lower().startswith("oauth "):
         raise ValueError("Authorization scheme must be `OAuth`: got `%r`" \
                          % header)
-    header = re.sub(re.compile(r"(^OAuth[\s]+)", re.IGNORECASE),
-                    "", header, 1)
-    return header
+
+    pattern = re.compile(r"(^OAuth[\s]+)", re.IGNORECASE)
+    return re.sub(pattern, "", header, 1)
 
 
 def _authorization_header_parse_param(param):
@@ -672,10 +667,9 @@ def _authorization_header_parse_param(param):
     # Split into a name, value pair.
     try:
         name, value = param.split("=", 1)
-    except ValueError, exception:
-        #assert "need more than 1 value to unpack" in str(exception)
+    except ValueError:
         raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" \
-                                              % (param, ))
+                                              % (param,))
 
     # Get rid of all the whitespace surrounding the name and value.
     # Already done in parent function when splitting into param pairs.
@@ -684,13 +678,13 @@ def _authorization_header_parse_param(param):
     # Value must be at least ""
     if len(value) < 2:
         raise InvalidAuthorizationHeaderError(
-            "bad parameter value: `%r` -- missing quotes?" % (param, ))
+            "bad parameter value: `%r` -- missing quotes?" % (param,))
 
     # Value must be quoted between " characters.
     if value[0] != '"' or value[-1] != '"':
         raise InvalidAuthorizationHeaderError(
             "missing quotes around parameter value: `%r` "\
-            "-- values must be quoted using (\")" % (param, ))
+            "-- values must be quoted using (\")" % (param,))
 
     # We only need to remove a *single pair* of quotes.
     # Do not use str.strip('"') because that will remove more " characters than
@@ -707,6 +701,7 @@ def _authorization_header_parse_param(param):
         # It is neither percent-encoded nor percent-decoded in OAuth.
         name = "realm"
     else:
+        # Percent decode if the parameter is not ``realm``.
         value = percent_decode(value)
 
     # Hooray! You made it.
