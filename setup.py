@@ -10,6 +10,10 @@ More information at http://github.com/gorakhargosh/pyoauth
 
 from setuptools import setup
 
+import logging
+logging.warning("Alpha development. install_requires is disabled. Undo this "
+                "when you're done.")
+
 setup(
     name="pyoauth",
     version="0.0.1",
@@ -24,7 +28,7 @@ setup(
     packages=["pyoauth"],
     include_package_data=True,
     install_requires=[
-        "mom >=0.0.1",
+    #    "mom >=0.0.1",
     ],
     keywords=' '.join([
         "python",
