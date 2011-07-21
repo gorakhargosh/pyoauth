@@ -431,15 +431,17 @@ def generate_base_string_query(url_query, oauth_params):
     Serializes URL query parameters and OAuth protocol parameters into a valid
     OAuth base string URI query string.
 
-    :see: Parameter Normalization (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)
+    :see: Parameter Normalization
+          (http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2)
     :param url_query:
         A dictionary or string of URL query parameters. Any parameters starting
         with ``oauth_`` will be ignored.
     :param oauth_params:
-        A dictionary or string of protocol-specific query parameters. Any parameter
-        names that do not begin with ``oauth_`` will be excluded from the
-        normalized query string. ``oauth_signature``, ``oauth_consumer_secret``,
-        and ``oauth_token_secret`` are also specifically excluded.
+        A dictionary or string of protocol-specific query parameters. Any
+        parameter names that do not begin with ``oauth_`` will be excluded
+        from the normalized query string. ``oauth_signature``,
+        ``oauth_consumer_secret``, and ``oauth_token_secret`` are also
+        specifically excluded.
     :returns:
         Normalized string of query parameters.
     """
