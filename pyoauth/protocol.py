@@ -673,7 +673,7 @@ def _authorization_header_parse_param(param):
     try:
         name, value = param.split("=", 1)
     except ValueError, exception:
-        assert "need more than 1 value to unpack" in str(exception)
+        #assert "need more than 1 value to unpack" in str(exception)
         raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" \
                                               % (param, ))
 
