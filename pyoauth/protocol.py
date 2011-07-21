@@ -73,6 +73,7 @@ OAuth authorization headers.
 .. autofunction:: generate_authorization_header
 .. autofunction:: parse_authorization_header
 """
+from itertools import imap
 
 try:
     # Python 3.
@@ -369,15 +370,14 @@ def _generate_plaintext_signature(client_shared_secret,
     client_shared_secret = client_shared_secret or ""
     token_shared_secret = token_shared_secret or ""
     if _percent_encode:
-        return "&".join([percent_encode(a) for a in [
-                client_shared_secret, token_shared_secret]])
+        return "&".join(imap(percent_encode,
+                            (client_shared_secret, token_shared_secret)))
     else:
         # User clients can forget to do this and this has been fixed
         # by OAuth 1.0a, so we use this piece of code to detect whether
         # the user's OAuth client library complies with the specification
         # when in debugging mode.
-        return "&".join([client_shared_secret,
-                         token_shared_secret])
+        return "&".join((client_shared_secret, token_shared_secret))
 
 
 def generate_base_string(method, url, oauth_params):
@@ -426,9 +426,8 @@ def generate_base_string(method, url, oauth_params):
         None,
         None
     ))
-    return "&".join([
-        percent_encode(e) for e in [
-            method_normalized, normalized_url, query_string]])
+    return "&".join(imap(percent_encode,
+                        (method_normalized, normalized_url, query_string)))
 
 
 def generate_base_string_query(url_query, oauth_params):
