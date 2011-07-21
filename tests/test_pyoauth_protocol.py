@@ -4,6 +4,7 @@
 import unittest2
 
 from mom.builtins import is_bytes_or_unicode, is_bytes
+from mom.codec import bytes_to_long, base64_decode
 
 from pyoauth.error import \
     InvalidOAuthParametersError, \
@@ -23,7 +24,7 @@ from pyoauth.protocol import parse_authorization_header, \
     generate_base_string, \
     _generate_plaintext_signature, \
     generate_nonce, _authorization_header_strip_scheme, \
-    _authorization_header_parse_param
+    _authorization_header_parse_param, generate_client_secret
 
 
 class Test_generate_nonce(unittest2.TestCase):
@@ -39,6 +40,21 @@ class Test_generate_nonce(unittest2.TestCase):
     def test_range(self):
         value = long(generate_nonce(64))
         self.assertTrue(value >= 0 and value < (2L ** 64))
+
+
+class Test_generate_client_secret(unittest2.TestCase):
+    def test_uniqueness(self):
+        self.assertNotEqual(generate_client_secret(), generate_client_secret())
+
+    def test_result_is_string(self):
+        self.assertTrue(is_bytes(generate_client_secret()))
+
+    def test_range(self):
+        for i in range(100):
+            n_bits = 144
+            value = bytes_to_long(base64_decode(generate_client_secret(144)))
+            self.assertTrue(value >= 0 and value < (2L ** n_bits))
+
 
 class Test_generate_verification_code(unittest2.TestCase):
     def test_length(self):
