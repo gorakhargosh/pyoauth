@@ -19,7 +19,8 @@
 
 try:
     # Python 3.
-    from urllib.parse import urlparse, urlunparse, parse_qs, quote, unquote_plus
+    from urllib.parse import urlparse, urlunparse, parse_qs, quote, \
+        unquote_plus
 except ImportError:
     # Python 2.5+
     from urlparse import urlparse, urlunparse
