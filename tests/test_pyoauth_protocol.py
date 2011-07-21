@@ -315,6 +315,10 @@ class Test__generate_plaintext_signature(unittest2.TestCase):
         self.assertEqual(_generate_plaintext_signature("ab cd", "47 f$a"),
                      "ab%20cd&47%20f%24a")
 
+    def test_without_encoding(self):
+        self.assertEqual(_generate_plaintext_signature("ab cd", "47 f$a",
+                                                       False), "ab cd&47 f$a")
+
 
 class Test_generate_base_string(unittest2.TestCase):
     def setUp(self):
