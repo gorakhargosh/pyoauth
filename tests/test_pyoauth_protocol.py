@@ -762,6 +762,25 @@ class Test__auth_header_strip_scheme(unittest2.TestCase):
 
 
 class Test__auth_header_parse_param(unittest2.TestCase):
+    def test_parses_param(self):
+        self.assertEqual(
+            _authorization_header_parse_param
+                ('oauth_token="DcTLsknQAZcrPNdsu4JM%2FPX%2F"'),
+            ('oauth_token', 'DcTLsknQAZcrPNdsu4JM/PX/')
+        )
+
+    def test_parses_realm_without_decoding(self):
+        self.assertEqual(
+            _authorization_header_parse_param('realm="example%20com"'),
+            ("realm", "example%20com")
+        )
+
+    def test_parses_without_stripping_multiple_end_quotes(self):
+        self.assertEqual(
+            _authorization_header_parse_param('realm=""example.com""'),
+            ("realm", '"example.com"'),
+        )
+
     def test_InvalidAuthorizationHeaderError_when_missing_quotes(self):
         params = [
             # Missing quotes
