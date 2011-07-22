@@ -76,6 +76,7 @@ OAuth authorization headers.
 
 
 from itertools import imap
+import logging
 
 from mom.codec import decimal_encode, base64_encode, base64_decode
 from mom.codec.text import utf8_encode
@@ -85,13 +86,21 @@ from mom.security.random import \
     generate_random_hex_string
 
 from pyoauth._compat import urlunparse
+from pyoauth.http import RequestAdapter, CONTENT_TYPE_FORM_URLENCODED
+from pyoauth.oauth1 import \
+    SIGNATURE_METHOD_PLAINTEXT, \
+    SIGNATURE_METHOD_RSA_SHA1, \
+    SIGNATURE_METHOD_HMAC_SHA1
 from pyoauth.url import percent_encode, percent_decode, \
     urlencode_sl, urlencode_s, urlparse_normalized, \
-    request_query_remove_non_oauth, query_remove_oauth
+    request_query_remove_non_oauth, query_remove_oauth, \
+    url_add_query, url_append_query, query_append
 from pyoauth.error import InvalidHttpMethodError, \
     InvalidUrlError, \
     InvalidOAuthParametersError, \
-    InvalidAuthorizationHeaderError
+    InvalidAuthorizationHeaderError, \
+    InvalidSignatureMethodError, \
+    IllegalArgumentError
 
 
 def generate_nonce(n_bits=64):
@@ -339,7 +348,7 @@ def generate_plaintext_signature(base_string,
         PLAINTEXT signature.
     """
     return _generate_plaintext_signature(client_shared_secret,
-                                    token_shared_secret)
+                                         token_shared_secret)
 
 
 def _generate_plaintext_signature(client_shared_secret,
@@ -469,6 +478,120 @@ def generate_base_string_query(url_query, oauth_params):
                             )
     query = urlencode_s(query_d, allow_func=allow_func)
     return query
+
+
+SIGNATURE_METHOD_MAP = {
+    SIGNATURE_METHOD_HMAC_SHA1: generate_hmac_sha1_signature,
+    SIGNATURE_METHOD_RSA_SHA1: generate_rsa_sha1_signature,
+    SIGNATURE_METHOD_PLAINTEXT: generate_plaintext_signature,
+}
+
+def build_request(client_credentials,
+                  method, url, params=None, headers=None,
+                  auth_credentials=None,
+                  realm=None, use_authorization_header=True,
+                  oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
+                  oauth_version="1.0",
+                  **extra_oauth_params):
+    headers = headers or {}
+    params = params or {}
+    method = method.upper()
+    realm = realm or ""
+
+    params = query_remove_oauth(params)
+
+    # Make oauth params and sign the request.
+    oauth_params = _generate_oauth_params(client_credentials,
+                                          auth_credentials,
+                                          oauth_signature_method,
+                                          oauth_version,
+                                          **extra_oauth_params)
+    signature_url = url_add_query(url, params)
+    base_string = generate_base_string(method, signature_url, oauth_params)
+    signature = _generate_signature(client_credentials, base_string,
+                                    oauth_params, auth_credentials)
+    oauth_params["oauth_signature"] = signature
+
+    # Adds the authorization header if asked.
+    # OAuth parameters and any parameters starting with the ``oauth_``
+    # must be included only in ONE of these three locations:
+    #
+    # 1. Authorization header.
+    # 2. Request URI query string.
+    # 3. Request entity body.
+    #
+    # See Parameter Transmission
+    # http://tools.ietf.org/html/rfc5849#section-3.6
+    if "Authorization" in headers:
+        raise InvalidAuthorizationHeaderError(
+            "Authorization field is already present in headers: %r" % headers
+        )
+    if use_authorization_header:
+        headers["Authorization"] = generate_authorization_header(oauth_params,
+                                                                 realm)
+        # Empty the oauth params dictionary so that it is not included again
+        # below.
+        oauth_params = None
+
+    if method == "GET":
+        url = url_append_query(url_add_query(url, params), oauth_params)
+        body = ""
+    else:
+        headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
+        body = query_append(params, oauth_params)
+    return RequestAdapter(method, url, body, headers)
+
+
+def _generate_oauth_params(client_credentials,
+                           auth_credentials=None,
+                           oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
+                           oauth_version="1.0",
+                           **extra_oauth_params):
+    if oauth_signature_method not in SIGNATURE_METHOD_MAP:
+        raise InvalidSignatureMethodError(
+            "Invalid signature method specified: %r" % oauth_signature_method
+        )
+
+    # Reserved OAuth parameters.
+    oauth_params = dict(
+        oauth_consumer_key=client_credentials.identifier,
+        oauth_signature_method=oauth_signature_method,
+        oauth_timestamp=generate_timestamp(),
+        oauth_nonce=generate_nonce(),
+        oauth_version=oauth_version,
+    )
+    # If we have an oauth token.
+    if auth_credentials:
+        oauth_params["oauth_token"] = auth_credentials.identifier
+
+    # Clean up oauth parameters in the arguments.
+    extra_oauth_params = request_query_remove_non_oauth(extra_oauth_params)
+    reserved_oauth_params = ("oauth_signature",
+                             "oauth_nonce",
+                             "oauth_timestamp",
+                             "oauth_token",
+                             "oauth_consumer_key")
+    for k, v in extra_oauth_params.items():
+        if k in reserved_oauth_params:
+            raise IllegalArgumentError("Cannot override system-generated " \
+                                       "protocol parameter: %r" % k)
+        else:
+            if k in oauth_params:
+                logging.warning("Overriding existing protocol " \
+                                "parameter %r=%r with %r=%r",
+                                k, oauth_params[k], k, v[0])
+            oauth_params[k] = v[0]
+    return oauth_params
+
+
+def _generate_signature(client_credentials,
+                        base_string,
+                        oauth_params,
+                        auth_credentials=None):
+    token_secret = auth_credentials.shared_secret if auth_credentials else None
+    sign_func = SIGNATURE_METHOD_MAP[oauth_params["oauth_signature_method"]]
+    return sign_func(base_string,
+                     client_credentials.shared_secret, token_secret)
 
 
 def generate_authorization_header(oauth_params,
