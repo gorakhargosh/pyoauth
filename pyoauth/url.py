@@ -93,7 +93,7 @@ def percent_encode(value):
     Used in constructing the signature base string and the "Authorization"
     header field::
 
-        'c@' -> 'c%40'
+        percent_encode('c@') -> 'c%40'
 
     :see: Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
     :param value:
@@ -113,7 +113,7 @@ def percent_decode(value):
     """
     Percent-decodes according to the OAuth spec::
 
-        'c%40' -> 'c@'
+        percent_decode('c%40') -> 'c@'
 
     :see: Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
     :param value:
