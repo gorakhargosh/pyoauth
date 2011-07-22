@@ -327,35 +327,6 @@ def query_add(*queries):
     return new_query_d
 
 
-#def query_update(query_params, *extra_query_params):
-#    """
-#    Updates a dictionary of query parameters or a query string with
-#    replacement parameter values from the specified additional
-#    query parameter dictionaries or query strings.
-#
-#    The parameters specified toward the end of the arguments to this function
-#    take precedence over all previous parameters.
-#
-#    .. WARNING:
-#        This is a dangerous routine. Be careful with this routine.
-#        It may bite.
-#
-#    :param query_params:
-#        Initial query parameter dictionary or query string.
-#    :param extra_query_params:
-#        A list query parameter dictionaries or query strings.
-#    :returns:
-#        A dictionary of updated query parameters.
-#    """
-#    query_params = query_unflatten(query_params)
-#    d = {}
-#    d.update(query_params)
-#    for qp in extra_query_params:
-#        qp = query_unflatten(qp)
-#        d.update(qp)
-#    return d
-
-
 def query_append(*queries):
     """
     Appends additional query parameters to a query string. The additional
