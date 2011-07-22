@@ -78,7 +78,7 @@ OAuth authorization headers.
 from itertools import imap
 
 from mom.codec import decimal_encode, base64_encode, base64_decode
-from mom.builtins import unicode_to_utf8
+from mom.codec.text import utf8_encode
 from mom.security.hash import hmac_sha1_base64_digest, sha1_digest
 from mom.security.random import \
     generate_random_bits, \
@@ -501,7 +501,8 @@ def generate_authorization_header(oauth_params,
         A properly formatted Authorization header value.
     """
     if realm:
-        value = 'OAuth realm="' + unicode_to_utf8(realm) + '"' + param_delimiter
+        value = 'OAuth realm="' + utf8_encode(realm) + '"' + \
+                utf8_encode(param_delimiter)
     else:
         value = 'OAuth '
     oauth_params = request_query_remove_non_oauth(oauth_params)

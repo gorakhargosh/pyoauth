@@ -53,8 +53,8 @@ Parameter sanitization
 
 import logging
 
-from mom.builtins import is_sequence, \
-    bytes, is_bytes_or_unicode, to_utf8_if_unicode, unicode_to_utf8
+from mom.builtins import is_sequence, bytes, is_bytes_or_unicode
+from mom.codec.text import utf8_encode_if_unicode, utf8_encode
 
 from pyoauth._compat import urlparse, urlunparse, parse_qs as _parse_qs, \
     quote, \
@@ -78,7 +78,7 @@ def parse_qs(query_string):
         Query string to parse. If ``query_string`` starts with a ``?`` character
         it will be ignored for convenience.
     """
-    query_string = to_utf8_if_unicode(query_string) or ""
+    query_string = utf8_encode_if_unicode(query_string) or ""
     if query_string.startswith("?"):
         logging.warning(
             "Ignoring `?` query string prefix -- `%r`", query_string)
@@ -103,7 +103,7 @@ def percent_encode(value):
         Percent-encoded string.
    """
     # Escapes '/' too
-    value = bytes(to_utf8_if_unicode(value))
+    value = bytes(utf8_encode_if_unicode(value))
     return quote(value, safe="~")
 
 
@@ -118,7 +118,7 @@ def percent_decode(value):
     :returns:
         Percent-decoded value.
     """
-    return unquote_plus(unicode_to_utf8(value))
+    return unquote_plus(utf8_encode(value))
 
 
 def urlencode_s(query_params, allow_func=None):
@@ -176,7 +176,7 @@ def urlencode_sl(query_params, allow_func=None):
     encoded_pairs = []
     for key, value in query_params.items():
         # Keys are also percent-encoded according to OAuth spec.
-        key = percent_encode(unicode_to_utf8(key))
+        key = percent_encode(utf8_encode(key))
         if allow_func and not allow_func(key, value):
             continue
         elif is_bytes_or_unicode(value):

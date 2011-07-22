@@ -3,7 +3,7 @@
 
 import unittest2
 
-from mom.builtins import to_utf8_if_unicode
+from mom.codec.text import utf8_encode_if_unicode
 from urlparse import urlparse
 
 from pyoauth.error import InvalidUrlError, \
@@ -281,7 +281,7 @@ class Test_percent_decode(unittest2.TestCase):
             (u'\u3001', '%E3%80%81'),
         ]
         for k, v in ex:
-            self.assertEqual(percent_decode(v), to_utf8_if_unicode(k))
+            self.assertEqual(percent_decode(v), utf8_encode_if_unicode(k))
 
 class Test_urlencode_s(unittest2.TestCase):
     def test_valid_query_string(self):
