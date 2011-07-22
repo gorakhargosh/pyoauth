@@ -20,10 +20,10 @@
 try:
     # Python 3.
     from urllib.parse import urlparse, urlunparse, parse_qs, quote, \
-        unquote_plus
+        unquote_plus, urljoin
 except ImportError:
     # Python 2.5+
-    from urlparse import urlparse, urlunparse
+    from urlparse import urlparse, urlunparse, urljoin
     from urllib import quote, unquote_plus
     try:
         # Python 2.6+
@@ -37,8 +37,10 @@ __all__ = [
     "unquote_plus",
     "quote",
     "urlparse",
+    "urljoin",
 ]
 
+urljoin = urljoin
 urlunparse = urlunparse
 parse_qs = parse_qs
 unquote_plus = unquote_plus
