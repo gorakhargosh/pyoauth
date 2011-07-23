@@ -508,8 +508,9 @@ def build_request(client_credentials,
                                           **extra_oauth_params)
     signature_url = url_add_query(url, params)
     base_string = generate_base_string(method, signature_url, oauth_params)
-    signature = _generate_signature(client_credentials, base_string,
-                                    oauth_params, auth_credentials)
+    token_secret = auth_credentials.shared_secret if auth_credentials else None
+    signature = _generate_signature(client_credentials.shared_secret,
+                                    base_string, oauth_params, token_secret)
     oauth_params["oauth_signature"] = signature
 
     # Adds the authorization header if asked.
@@ -584,14 +585,17 @@ def _generate_oauth_params(client_credentials,
     return oauth_params
 
 
-def _generate_signature(client_credentials,
+def _generate_signature(client_secret,
                         base_string,
                         oauth_params,
-                        auth_credentials=None):
-    token_secret = auth_credentials.shared_secret if auth_credentials else None
-    sign_func = SIGNATURE_METHOD_MAP[oauth_params["oauth_signature_method"]]
-    return sign_func(base_string,
-                     client_credentials.shared_secret, token_secret)
+                        token_secret=None):
+    signature_method = oauth_params["oauth_signature_method"]
+    try:
+        sign_func = SIGNATURE_METHOD_MAP[signature_method]
+    except KeyError:
+        raise InvalidSignatureMethodError(
+            "unsupported signature method: %r" % signature_method)
+    return sign_func(base_string, client_secret, token_secret)
 
 
 def generate_authorization_header(oauth_params,

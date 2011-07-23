@@ -10,7 +10,7 @@ from pyoauth.error import \
     InvalidOAuthParametersError, \
     InvalidAuthorizationHeaderError, \
     InvalidHttpMethodError, \
-    InvalidUrlError
+    InvalidUrlError, InvalidSignatureMethodError
 from pyoauth.protocol import parse_authorization_header, \
     generate_base_string_query, \
     generate_authorization_header, \
@@ -24,7 +24,7 @@ from pyoauth.protocol import parse_authorization_header, \
     generate_base_string, \
     _generate_plaintext_signature, \
     generate_nonce, _authorization_header_strip_scheme, \
-    _authorization_header_parse_param, generate_client_secret
+    _authorization_header_parse_param, generate_client_secret, _generate_signature
 
 
 class Test_generate_nonce(unittest2.TestCase):
@@ -796,6 +796,86 @@ class Test__auth_header_parse_param(unittest2.TestCase):
         for param in params:
             self.assertRaises(InvalidAuthorizationHeaderError,
                               _authorization_header_parse_param, param)
+
+
+class Test__generate_signature(unittest2.TestCase):
+    def test_generates_signature(self):
+        params = {
+            "method": "POST",
+            "realm": "Photos",
+            "url": "https://photos.example.net/initiate",
+            "oauth_consumer_secret": "kd94hf93k423kf44",
+            "oauth_token_secret": None,
+            "oauth_signature": "74KNZJeDHnMBp0EMJ9ZHt/XKycU=",
+            "oauth_params": dict(
+                oauth_consumer_key="dpf43f3p2l4k3l03",
+                oauth_signature_method="HMAC-SHA1",
+                oauth_timestamp="137131200",
+                oauth_nonce="wIjqoS",
+                oauth_callback="http://printer.example.com/ready",
+            )
+        }
+        base_string = generate_base_string(
+            params["method"],
+            params["url"],
+            params["oauth_params"]
+        )
+        self.assertEqual(_generate_signature(
+            params["oauth_consumer_secret"],
+            base_string,
+            params["oauth_params"],
+            params["oauth_token_secret"],
+        ), params["oauth_signature"])
+
+    def test_raises_InvalidSignatureMethodError_when_invalid_signature_method(self):
+        params = {
+            "method": "POST",
+            "url": "https://photos.example.net/initiate",
+            "oauth_consumer_secret": "kd94hf93k423kf44",
+            "oauth_token_secret": None,
+            "oauth_params": dict(
+                oauth_consumer_key="dpf43f3p2l4k3l03",
+                oauth_signature_method="HMAC-SHOOOOOOOOOOOOOOO1",
+                oauth_timestamp="137131200",
+                oauth_nonce="wIjqoS",
+                oauth_callback="http://printer.example.com/ready",
+            )
+        }
+        base_string = generate_base_string(
+            params["method"],
+            params["url"],
+            params["oauth_params"]
+        )
+        self.assertRaises(InvalidSignatureMethodError, _generate_signature,
+            params["oauth_consumer_secret"],
+            base_string,
+            params["oauth_params"],
+            None)
+
+    def test_raises_KeyError_when_missing_signature_method(self):
+        params = {
+            "method": "POST",
+            "url": "https://photos.example.net/initiate",
+            "oauth_consumer_secret": "kd94hf93k423kf44",
+            "oauth_token_secret": None,
+            "oauth_params": dict(
+                oauth_consumer_key="dpf43f3p2l4k3l03",
+                oauth_timestamp="137131200",
+                # oauth_signature_method="HMAC-SHOOOOOOOOOOOOOOO1",
+                oauth_nonce="wIjqoS",
+                oauth_callback="http://printer.example.com/ready",
+            )
+        }
+        base_string = generate_base_string(
+            params["method"],
+            params["url"],
+            params["oauth_params"]
+        )
+        self.assertRaises(KeyError, _generate_signature,
+            params["oauth_consumer_secret"],
+            base_string,
+            params["oauth_params"],
+            None)
 
 
 if __name__ == "__main__":
