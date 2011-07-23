@@ -22,7 +22,7 @@
 :synopsis: OAuth 1.0 support for App Engine.
 """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, with_statement
 
 try:
     from webapp2 import cached_property
