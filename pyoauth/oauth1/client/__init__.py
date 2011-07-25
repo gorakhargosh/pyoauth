@@ -362,6 +362,71 @@ class _OAuthClient(object):
         return self._http_client.fetch(request, async_callback)
 
     @classmethod
+    def check_verification_code(cls,
+                                temporary_credentials,
+                                oauth_token, oauth_verifier):
+        """
+        When an OAuth 1.0 server redirects the resource owner to your
+        callback URL after authorization, it will attach two parameters to
+        the query string.
+
+        1. ``oauth_token``: Must match your temporary credentials identifier.
+        2. ``oauth_verifier``: Server-generated verification code that you will
+           use in the next step--that is requesting token credentials.
+
+        :param temporary_credentials:
+            Temporary credentials
+        :param oauth_token:
+            The value of the ``oauth_token`` parameter as obtained
+            from the server redirect.
+        :param oauth_verifier:
+            The value of the ``oauth_verifier`` parameter as obtained
+            from the server redirect.
+        """
+        if temporary_credentials.identifier != oauth_token:
+            raise InvalidHttpRequestError(
+                "OAuth token returned in callback query `%r` " \
+                "does not match temporary credentials: `%r`" % \
+                (oauth_token, temporary_credentials.identifier)
+            )
+        return oauth_verifier
+
+    @classmethod
+    def parse_temporary_credentials_response(cls, response):
+        """
+        Parses the entity-body of the OAuth server response to an OAuth
+        temporary credentials request.
+
+        :param response:
+            An instance of :class:`pyoauth.http.ResponseAdapter`.
+        :returns:
+            A tuple of the form::
+
+                (pyoauth.oauth1.Credentials instance, other parameters)
+        """
+        credentials, params = cls._parse_credentials_response(response)
+        if params.get("oauth_callback_confirmed", [""])[0].lower() != "true":
+            raise ValueError(
+                "Invalid OAuth server response -- " \
+                "`oauth_callback_confirmed` MUST be set to `true`.")
+        return credentials, params
+
+    @classmethod
+    def parse_token_credentials_response(cls, response):
+        """
+        Parses the entity-body of the OAuth server response to an OAuth
+        token credentials request.
+
+        :param response:
+            An instance of :class:`pyoauth.http.ResponseAdapter`.
+        :returns:
+            A tuple of the form::
+
+                (pyoauth.oauth1.Credentials instance, other parameters)
+        """
+        return cls._parse_credentials_response(response)
+
+    @classmethod
     def _parse_credentials_response(cls, response):
         """
         Parses the entity-body of the OAuth server response to an OAuth
@@ -645,67 +710,3 @@ class Client(_OAuthClient):
             "oauth_token": temporary_credentials.identifier,
             })
 
-    @classmethod
-    def check_verification_code(cls,
-                                temporary_credentials,
-                                oauth_token, oauth_verifier):
-        """
-        When an OAuth 1.0 server redirects the resource owner to your
-        callback URL after authorization, it will attach two parameters to
-        the query string.
-
-        1. ``oauth_token``: Must match your temporary credentials identifier.
-        2. ``oauth_verifier``: Server-generated verification code that you will
-           use in the next step--that is requesting token credentials.
-
-        :param temporary_credentials:
-            Temporary credentials
-        :param oauth_token:
-            The value of the ``oauth_token`` parameter as obtained
-            from the server redirect.
-        :param oauth_verifier:
-            The value of the ``oauth_verifier`` parameter as obtained
-            from the server redirect.
-        """
-        if temporary_credentials.identifier != oauth_token:
-            raise InvalidHttpRequestError(
-                "OAuth token returned in callback query `%r` " \
-                "does not match temporary credentials: `%r`" % \
-                (oauth_token, temporary_credentials.identifier)
-            )
-        return oauth_verifier
-
-    @classmethod
-    def parse_temporary_credentials_response(cls, response):
-        """
-        Parses the entity-body of the OAuth server response to an OAuth
-        temporary credentials request.
-
-        :param response:
-            An instance of :class:`pyoauth.http.ResponseAdapter`.
-        :returns:
-            A tuple of the form::
-
-                (pyoauth.oauth1.Credentials instance, other parameters)
-        """
-        credentials, params = cls._parse_credentials_response(response)
-        if params.get("oauth_callback_confirmed", [""])[0].lower() != "true":
-            raise ValueError(
-                "Invalid OAuth server response -- " \
-                "`oauth_callback_confirmed` MUST be set to `true`.")
-        return credentials, params
-
-    @classmethod
-    def parse_token_credentials_response(cls, response):
-        """
-        Parses the entity-body of the OAuth server response to an OAuth
-        token credentials request.
-
-        :param response:
-            An instance of :class:`pyoauth.http.ResponseAdapter`.
-        :returns:
-            A tuple of the form::
-
-                (pyoauth.oauth1.Credentials instance, other parameters)
-        """
-        return cls._parse_credentials_response(response)
