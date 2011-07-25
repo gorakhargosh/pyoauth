@@ -427,7 +427,7 @@ class Client(_OAuthClient):
                                     oauth_callback="oob",
                                     **extra_oauth_params):
         """
-        Makes an OAuth request.
+        Fetches temporary credentials.
 
         :param method:
             HTTP method.
@@ -484,7 +484,7 @@ class Client(_OAuthClient):
                                     SIGNATURE_METHOD_HMAC_SHA1,
                                 **extra_oauth_params):
         """
-        Fetches token credentials.
+        Fetches token credentials using the temporary credentials.
 
         :param temporary_credentials:
             Temporary credentials obtained in a previous step.
