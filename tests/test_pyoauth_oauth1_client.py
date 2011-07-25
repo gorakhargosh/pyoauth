@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest2
-from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError
+from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError, InvalidHttpRequestError
 from pyoauth.http import ResponseAdapter
 from pyoauth.oauth1 import Credentials
 from pyoauth.oauth1.client import _OAuthClient
@@ -239,3 +239,24 @@ class Test__OAuthClient_misc(unittest2.TestCase):
 
         self.assertRaises(InvalidHttpResponseError, _OAuthClient._parse_credentials_response, ResponseAdapter(200, "OK" , "", headers))
         self.assertRaises(InvalidContentTypeError, _OAuthClient._parse_credentials_response, ResponseAdapter(200, "OK", body, {"Content-Type": "invalid"}))
+
+
+class Test__OAuthClient_check_verification_code(unittest2.TestCase):
+    def test_raises_InvalidHttpRequestError_when_identifier_invalid(self):
+        temporary_credentials = Credentials(identifier="hh5s93j4hdidpola",
+                                            shared_secret="hdhd0244k9j7ao03")
+
+        self.assertRaises(InvalidHttpRequestError,
+                          _OAuthClient.check_verification_code,
+                          temporary_credentials, "non-matching-token",
+                          "verification-code")
+
+    def test_returns_verification_code(self):
+        temporary_credentials = Credentials(identifier="hh5s93j4hdidpola",
+                                            shared_secret="hdhd0244k9j7ao03")
+        self.assertEqual(
+            _OAuthClient.check_verification_code(
+                temporary_credentials,
+                temporary_credentials.identifier,
+                "verification-code"
+            ), "verification-code")
