@@ -266,7 +266,7 @@ class _OAuthClient(object):
             argument.
         """
         method = method.upper()
-        params = params or {}
+        params = query_remove_oauth(params) if params else {}
         body = body or ""
         headers = headers or {}
         url = oauth_url_sanitize(url, force_secure=False)
