@@ -3,8 +3,11 @@
 
 import unittest2
 from pyoauth.error import InvalidSignatureMethodError
-from pyoauth.protocol import generate_base_string
 from pyoauth.oauth1.client import _OAuthClient
+
+class Test__OAuthClient_oauth_version(unittest2.TestCase):
+    def test_default_is_1_0(self):
+        self.assertEqual(_OAuthClient(None, None).oauth_version, "1.0")
 
 class Test__OAuthClient__generate_signature(unittest2.TestCase):
     def test_generates_signature(self):
