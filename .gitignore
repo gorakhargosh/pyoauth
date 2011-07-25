@@ -8,6 +8,7 @@
 *.bak
 *.bkp
 .idea/
+.settings/
 
 # Build specific files.
 .installed.cfg
