@@ -228,15 +228,20 @@ class _OAuthClient(object):
             body = query_append(params, oauth_params)
         return RequestAdapter(method, url, body, headers)
 
-    def _request(self,
-                method, url, params=None, body=None, headers=None,
-                realm=None,
-                auth_credentials=None,
-                oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-                **extra_oauth_params):
+    @classmethod
+    def _request(cls,
+                 client_credentials,
+                 method, url, params=None, body=None, headers=None,
+                 realm=None, use_authorization_header=True,
+                 auth_credentials=None,
+                 oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
+                 oauth_version="1.0",
+                 **extra_oauth_params):
         """
         Makes an OAuth request.
 
+        :param client_credentials:
+            Client credentials (consumer key and secret).
         :param method:
             HTTP method.
         :param url:
@@ -253,6 +258,8 @@ class _OAuthClient(object):
             Request headers dictionary.
         :param realm:
             Authorization realm.
+        :param use_authorization_header:
+            ``True`` if we should; ``False`` otherwise.
         :param auth_credentials:
             OAuth token/temporary credentials (if available).
         :param oauth_signature_method:
@@ -271,7 +278,6 @@ class _OAuthClient(object):
         headers = headers or {}
         url = oauth_url_sanitize(url, force_secure=False)
 
-        client_credentials = self._client_credentials
         if auth_credentials:
             oauth_token = auth_credentials.identifier
             oauth_token_secret = auth_credentials.shared_secret
@@ -279,27 +285,27 @@ class _OAuthClient(object):
             oauth_token = oauth_token_secret = None
 
         # Build oauth parameters.
-        oauth_params = self._generate_oauth_params(
+        oauth_params = cls._generate_oauth_params(
             oauth_consumer_key=client_credentials.identifier,
             oauth_signature_method=oauth_signature_method,
-            oauth_version=self.oauth_version,
-            oauth_timestamp=self.generate_timestamp(),
-            oauth_nonce=self.generate_nonce(),
+            oauth_version=oauth_version,
+            oauth_timestamp=cls.generate_timestamp(),
+            oauth_nonce=cls.generate_nonce(),
             oauth_token=oauth_token,
             **extra_oauth_params
         )
 
         # Sign the request.
-        signature = self._generate_signature(method, url, params,
+        signature = cls._generate_signature(method, url, params,
                                             client_credentials.shared_secret,
                                             oauth_token_secret,
                                             oauth_params)
         oauth_params["oauth_signature"] = signature
 
         # Now build the request.
-        return self._build_request(
+        return cls._build_request(
             method, url, params, body, headers,
-            oauth_params, realm, self._use_authorization_header
+            oauth_params, realm, use_authorization_header
         )
 
     def _fetch(self,
@@ -345,9 +351,13 @@ class _OAuthClient(object):
             argument.
         """
         request = self._request(
+            self._client_credentials,
             method, url, params,
-            body, headers, realm, auth_credentials,
-            oauth_signature_method, **extra_oauth_params
+            body, headers, realm, self._use_authorization_header,
+            auth_credentials,
+            oauth_signature_method,
+            self.oauth_version,
+            **extra_oauth_params
         )
         return self._http_client.fetch(request, async_callback)
 
@@ -635,7 +645,8 @@ class Client(_OAuthClient):
             "oauth_token": temporary_credentials.identifier,
             })
 
-    def check_verification_code(self,
+    @classmethod
+    def check_verification_code(cls,
                                 temporary_credentials,
                                 oauth_token, oauth_verifier):
         """
@@ -664,7 +675,8 @@ class Client(_OAuthClient):
             )
         return oauth_verifier
 
-    def parse_temporary_credentials_response(self, response):
+    @classmethod
+    def parse_temporary_credentials_response(cls, response):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         temporary credentials request.
@@ -676,14 +688,15 @@ class Client(_OAuthClient):
 
                 (pyoauth.oauth1.Credentials instance, other parameters)
         """
-        credentials, params = self._parse_credentials_response(response)
+        credentials, params = cls._parse_credentials_response(response)
         if params.get("oauth_callback_confirmed", [""])[0].lower() != "true":
             raise ValueError(
                 "Invalid OAuth server response -- " \
                 "`oauth_callback_confirmed` MUST be set to `true`.")
         return credentials, params
 
-    def parse_token_credentials_response(self, response):
+    @classmethod
+    def parse_token_credentials_response(cls, response):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         token credentials request.
@@ -695,4 +708,4 @@ class Client(_OAuthClient):
 
                 (pyoauth.oauth1.Credentials instance, other parameters)
         """
-        return self._parse_credentials_response(response)
+        return cls._parse_credentials_response(response)
