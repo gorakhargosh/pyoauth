@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import unittest2
-from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError, InvalidHttpRequestError
-from pyoauth.http import ResponseAdapter
+from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError, InvalidHttpRequestError, InvalidAuthorizationHeaderError
+from pyoauth.http import ResponseAdapter, RequestAdapter
 from pyoauth.oauth1 import Credentials
 from pyoauth.oauth1.client import _OAuthClient, Client
 from mom.builtins import is_bytes, is_bytes_or_unicode
@@ -332,3 +332,96 @@ class Test__OAuthClient_urls(unittest2.TestCase):
                           a="something here",
                           b=["another thing", 5],
                           oauth_ignored="ignored")
+
+
+class Test__OAuthClient__build_request(unittest2.TestCase):
+    def test_auth_header(self):
+        oauth_params = dict(
+            oauth_blah="blah",
+        )
+        headers = {
+            "something": "blah",
+        }
+        params = dict(a="b")
+        expected = RequestAdapter("GET",
+                                 "http://example.com/foo?a=b",
+                                 None,
+                                 {
+                "Authorization": 'OAuth realm="realm",oauth_blah="blah"',
+                "something": "blah",
+            })
+        got = _OAuthClient._build_request("GET",
+                                          "http://example.com/foo",
+                                          params, None, headers,
+                                          oauth_params, "realm", True)
+        self.assertEqual(expected.method, got.method)
+        self.assertEqual(expected.url, got.url)
+        self.assertEqual(expected.body, got.body)
+        self.assertDictEqual(expected.headers, got.headers)
+
+    def test_get_query_string(self):
+        oauth_params = dict(
+            oauth_blah="blah",
+        )
+        headers = {
+            "something": "blah",
+        }
+        params = dict(a="b")
+        expected = RequestAdapter("GET",
+                                 "http://example.com/foo?a=b&oauth_blah=blah",
+                                 None,
+                                 {"something": "blah"})
+        got = _OAuthClient._build_request("GET",
+                                          "http://example.com/foo",
+                                          params, None, headers,
+                                          oauth_params, "realm", False)
+        self.assertEqual(expected.method, got.method)
+        self.assertEqual(expected.url, got.url)
+        self.assertEqual(expected.body, got.body)
+        self.assertDictEqual(expected.headers, got.headers)
+
+    def test_payload(self):
+        oauth_params = dict(
+            oauth_blah="blah",
+        )
+        headers = {
+            "something": "blah",
+        }
+        params = dict(a="b")
+        expected = RequestAdapter("POST",
+                                 "http://example.com/foo",
+                                 "a=b&oauth_blah=blah",
+                                 {
+            "something": "blah",
+            "Content-Type": "application/x-www-form-urlencoded"
+        })
+        got = _OAuthClient._build_request("POST",
+                                          "http://example.com/foo",
+                                          params, "", headers,
+                                          oauth_params, "realm", False)
+        self.assertEqual(expected.method, got.method)
+        self.assertEqual(expected.url, got.url)
+        self.assertEqual(expected.body, got.body)
+        self.assertDictEqual(expected.headers, got.headers)
+
+    def test_raises_InvalidHttpRequestError_when_body_and_GET(self):
+        oauth_params = dict(
+            oauth_blah="blah",
+        )
+        self.assertRaises(InvalidHttpRequestError,
+                          _OAuthClient._build_request,
+                          "GET",
+                          "http://example.com/foo",
+                          None, "a=b", {}, oauth_params,
+                          "realm", False)
+
+    def test_raises_InvalidAuthorizationHeaderError_when_auth_present(self):
+        oauth_params = dict(
+            oauth_blah="blah",
+        )
+        self.assertRaises(InvalidAuthorizationHeaderError,
+                          _OAuthClient._build_request,
+                          "POST",
+                          "http://example.com/foo",
+                          None, "a=b", {"Authorization": ""}, oauth_params,
+                          "realm", False)
