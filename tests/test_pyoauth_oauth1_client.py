@@ -5,7 +5,7 @@ import unittest2
 from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError, InvalidHttpRequestError
 from pyoauth.http import ResponseAdapter
 from pyoauth.oauth1 import Credentials
-from pyoauth.oauth1.client import _OAuthClient
+from pyoauth.oauth1.client import _OAuthClient, Client
 from mom.builtins import is_bytes, is_bytes_or_unicode
 
 class Test__OAuthClient_oauth_version(unittest2.TestCase):
@@ -260,3 +260,75 @@ class Test__OAuthClient_check_verification_code(unittest2.TestCase):
                 temporary_credentials.identifier,
                 "verification-code"
             ), "verification-code")
+
+
+class Test__OAuthClient_urls(unittest2.TestCase):
+    def setUp(self):
+        self.client_credentials = Credentials(identifier="dpf43f3p2l4k3l03",
+                                              shared_secret="kd94hf93k423kf44")
+        self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola",
+                                                 shared_secret="hdhd0244k9j7ao03")
+        self.token_credentials = Credentials(identifier="nnch734d00sl2jdk",
+                                             shared_secret="pfkkdhi9sl3r4s00")
+        args = dict(
+            temporary_credentials_uri="https://photos.example.net/initiate",
+            token_credentials_uri="https://photos.example.net/token",
+            authorization_uri="https://photos.example.net/authorize",
+            authentication_uri="https://photos.example.net/authenticate",
+            use_authorization_header=True
+        )
+        self.client = Client(None, self.client_credentials, **args)
+
+    def test___init__(self):
+        c = self.client
+        self.assertEqual(c._temporary_credentials_uri,
+                         "https://photos.example.net/initiate")
+        self.assertEqual(c._token_credentials_uri,
+                         "https://photos.example.net/token")
+        self.assertEqual(c._authorization_uri,
+                         "https://photos.example.net/authorize")
+        self.assertEqual(c._authentication_uri,
+                         "https://photos.example.net/authenticate")
+        self.assertEqual(c._use_authorization_header, True)
+        self.assertEqual(c._client_credentials.identifier, "dpf43f3p2l4k3l03")
+        self.assertEqual(c._client_credentials.shared_secret, "kd94hf93k423kf44")
+
+    def test_get_authorization_url(self):
+        url = self.client.get_authorization_url(self.temporary_credentials,
+                                                a="something here",
+                                                b=["another thing", 5],
+                                                oauth_ignored="ignored")
+        self.assertEqual(url,
+                         "https://photos.example.net/authorize?" \
+                         "a=something%20here" \
+                         "&b=5" \
+                         "&b=another%20thing&oauth_token=" +
+                         self.temporary_credentials.identifier)
+
+    def test_get_authentication_url(self):
+        url = self.client.get_authentication_url(self.temporary_credentials,
+                                                a="something here",
+                                                b=["another thing", 5],
+                                                oauth_ignored="ignored")
+        self.assertEqual(url,
+                         "https://photos.example.net/authenticate?" \
+                         "a=something%20here" \
+                         "&b=5" \
+                         "&b=another%20thing&oauth_token=" +
+                         self.temporary_credentials.identifier)
+
+    def test_no_authentication_url(self):
+        args = dict(
+            temporary_credentials_uri="https://photos.example.net/initiate",
+            token_credentials_uri="https://photos.example.net/token",
+            authorization_uri="https://photos.example.net/authorize",
+            authentication_uri=None,
+            use_authorization_header=True
+        )
+        client = Client(None, self.client_credentials, **args)
+        self.assertRaises(NotImplementedError,
+                          client.get_authentication_url,
+                          self.temporary_credentials,
+                          a="something here",
+                          b=["another thing", 5],
+                          oauth_ignored="ignored")
