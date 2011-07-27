@@ -261,9 +261,10 @@ class _OAuthClient(object):
                     "HTTP method GET does not take an entity body: got %r" % \
                     body
                 )
-            if body:
-                body = utf8_encode(body)
-                headers["content-length"] = str(len(body))
+            if body and \
+               "content-length" not in headers and \
+               "Content-Length" not in headers:
+                raise ValueError("You must set the content-length header.")
         else:
             if params or oauth_params:
                 # Append to payload and set content type.
