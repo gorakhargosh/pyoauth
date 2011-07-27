@@ -276,9 +276,12 @@ a:link {
 
 class Test__OAuthClient_misc(unittest2.TestCase):
     def setUp(self):
-        self.client_credentials = Credentials(identifier="dpf43f3p2l4k3l03", shared_secret="kd94hf93k423kf44")
-        self.temporary_credentials = Credentials(identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
-        self.token_credentials = Credentials(identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
+        self.client_credentials = Credentials(
+            identifier="dpf43f3p2l4k3l03", shared_secret="kd94hf93k423kf44")
+        self.temporary_credentials = Credentials(
+            identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
+        self.token_credentials = Credentials(
+            identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
 
     def test_parse_temporary_credentials_response(self):
         headers = {
@@ -295,6 +298,21 @@ class Test__OAuthClient_misc(unittest2.TestCase):
         })
         self.assertEqual(credentials, self.temporary_credentials)
 
+        # Non-strict parsing.
+        credentials, params = \
+            _OAuthClient.parse_temporary_credentials_response(
+                ResponseAdapter(200, "OK",
+                                "oauth_token=hh5s93j4hdidpola\
+&oauth_token_secret=hdhd0244k9j7ao03", headers={
+                        'Content-Type': 'INVALID-CONTENT-TYPE',
+                    }), strict=False)
+        self.assertDictEqual(params, {
+            "oauth_token": ["hh5s93j4hdidpola"],
+            "oauth_token_secret": ["hdhd0244k9j7ao03"],
+        })
+        self.assertEqual(credentials, self.temporary_credentials)
+
+
     def test_parse_token_credentials_response(self):
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -305,6 +323,21 @@ class Test__OAuthClient_misc(unittest2.TestCase):
             "oauth_token_secret": ["pfkkdhi9sl3r4s00"],
         })
         self.assertEqual(credentials, self.token_credentials)
+
+        # Non-strict.
+        credentials, params = \
+            _OAuthClient.parse_token_credentials_response(
+                ResponseAdapter(200, "OK",
+                                "oauth_token=nnch734d00sl2jdk\
+&oauth_token_secret=pfkkdhi9sl3r4s00", headers={
+                        "Content-Type": "INVALID-CONTENT-TYPE",
+                    }), strict=False)
+        self.assertDictEqual(params, {
+            "oauth_token": ["nnch734d00sl2jdk"],
+            "oauth_token_secret": ["pfkkdhi9sl3r4s00"],
+        })
+        self.assertEqual(credentials, self.token_credentials)
+
 
     def test__parse_credentials_response(self):
         headers = {
