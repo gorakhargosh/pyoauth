@@ -16,6 +16,7 @@
 # under the License.
 
 from __future__ import absolute_import
+
 import logging
 
 from pyoauth.http import CONTENT_TYPE_FORM_URLENCODED, RequestAdapter
@@ -516,12 +517,12 @@ class _OAuthClient(object):
 
                 (pyoauth.oauth1.Credentials instance, other parameters)
         """
-        if not response.status_code:
-            raise InvalidHttpResponseError(
-                "Invalid status code: `%r`" % response.status_code)
         if not response.status:
             raise InvalidHttpResponseError(
-                "Invalid status message: `%r`" % response.status)
+                "Invalid status code: `%r`" % response.status)
+        if not response.reason:
+            raise InvalidHttpResponseError(
+                "Invalid status message: `%r`" % response.reason)
         if not response.body:
             raise InvalidHttpResponseError(
                 "Body is invalid or empty: `%r`" % response.body)
@@ -532,7 +533,7 @@ class _OAuthClient(object):
 
         if response.error:
             raise HttpError("Could not fetch credentials: HTTP %d - %s" \
-            % (response.status_code, response.status,))
+            % (response.status, response.reason,))
 
         # The response body must be form URL-encoded.
         if not response.is_body_form_urlencoded():

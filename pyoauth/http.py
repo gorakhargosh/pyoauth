@@ -85,10 +85,10 @@ class ResponseAdapter(object):
     Framework implementers can subclass this class and must use it with
     the client methods for them to work.
     """
-    def __init__(self, status_code, status, body, headers=None):
+    def __init__(self, status, reason, body, headers=None):
         self._body = body
-        self._status_message = status
-        self._status_code = status_code
+        self._status = status
+        self._reason = reason
         self._headers = headers or {}
 
     @property
@@ -111,17 +111,17 @@ class ResponseAdapter(object):
         """
         Determines whether an error occurred. ``True`` or ``False``.
         """
-        return self.status_code < 200 or self.status_code >= 300
-
-    @property
-    def status_code(self):
-        """The HTTP response status code."""
-        return self._status_code
+        return self.status < 200 or self.status >= 300
 
     @property
     def status(self):
+        """The HTTP response status code."""
+        return self._status
+
+    @property
+    def reason(self):
         """The HTTP response status message."""
-        return self._status_message
+        return self._reason
 
     @property
     def headers(self):

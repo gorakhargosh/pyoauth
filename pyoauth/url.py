@@ -53,6 +53,8 @@ Parameter sanitization
 
 import logging
 
+import itertools
+
 from mom.builtins import is_sequence, bytes, is_bytes_or_unicode
 from mom.codec.text import utf8_encode_if_unicode, utf8_encode
 
