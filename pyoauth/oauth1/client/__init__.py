@@ -192,9 +192,7 @@ class _OAuthClient(object):
                 )
 
         # Make oauth params and sign the request.
-        # NOTE: We're not explicitly filtering oauth_ params from params in
-        # this method because it is done by the caller.
-        signature_url = url_add_query(url, params)
+        signature_url = url_add_query(url, query_remove_oauth(params))
         base_string = generate_base_string(method, signature_url, oauth_params)
 
         signature_method = oauth_params["oauth_signature_method"]
