@@ -87,7 +87,7 @@ class _OAuthClient(object):
                                oauth_token,
                                **extra_oauth_params):
         """
-        Generates property formatted oauth_params dictionary for use with an
+        Generates properly formatted ``oauth_params`` dictionary for use with an
         OAuth request.
 
         :param oauth_consumer_key:
