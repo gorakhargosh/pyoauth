@@ -443,7 +443,8 @@ class _OAuthClient(object):
         :param strict:
             ``True`` (default) for string response parsing; ``False`` to be a
             bit lenient. Some non-compliant OAuth servers return credentials
-            without setting the content-type. Smugmug, for example, does this.
+            without setting the content-type.
+
             Setting this to ``False`` will not raise an error, but will
             still warn you that the response content-type is not valid.
             The temporary credentials response also expects
@@ -485,7 +486,8 @@ class _OAuthClient(object):
         :param strict:
             ``True`` (default) for string response parsing; ``False`` to be a
             bit lenient. Some non-compliant OAuth servers return credentials
-            without setting the content-type. Smugmug, for example, does this.
+            without setting the content-type.
+
             Setting this to ``False`` will not raise an error, but will
             still warn you that the response content-type is not valid.
         :returns:
@@ -506,7 +508,8 @@ class _OAuthClient(object):
         :param strict:
             ``True`` (default) for string response parsing; ``False`` to be a
             bit lenient. Some non-compliant OAuth servers return credentials
-            without setting the content-type. Smugmug, for example, does this.
+            without setting the content-type.
+
             Setting this to ``False`` will not raise an error, but will
             still warn you that the response content-type is not valid.
         :returns:
