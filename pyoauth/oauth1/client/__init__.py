@@ -275,18 +275,23 @@ class _OAuthClient(object):
             argument.
         """
         method = method.upper()
-        params = query_remove_oauth(params) if params else {}
         body = body or ""
         headers = headers or {}
+
+        # Query/payload parameters must not contain OAuth-specific parameters.
+        params = query_remove_oauth(params) if params else {}
+
+        # The URL must not contain OAuth-specific parameters.
         url = oauth_url_sanitize(url, force_secure=False)
 
+        # Temporary credentials requests don't have ``oauth_token``.
         if auth_credentials:
             oauth_token = auth_credentials.identifier
             oauth_token_secret = auth_credentials.shared_secret
         else:
             oauth_token = oauth_token_secret = None
 
-        # Build oauth parameters.
+        # Make OAuth-specific parameter dictionary.
         oauth_params = cls._generate_oauth_params(
             oauth_consumer_key=client_credentials.identifier,
             oauth_signature_method=oauth_signature_method,
@@ -407,6 +412,9 @@ class _OAuthClient(object):
                 (pyoauth.oauth1.Credentials instance, other parameters)
         """
         credentials, params = cls._parse_credentials_response(response)
+
+        # The OAuth specification mandates that this parameter must be set to
+        # `"true"`; otherwise, the response is invalid.
         if params.get("oauth_callback_confirmed", [""])[0].lower() != "true":
             raise ValueError(
                 "Invalid OAuth server response -- " \
@@ -458,7 +466,8 @@ class _OAuthClient(object):
         if response.error:
             raise HttpError("Could not fetch credentials: HTTP %d - %s" \
             % (response.status_code, response.status,))
-            # The response body must be URL encoded.
+
+        # The response body must be form URL-encoded.
         if not response.is_body_form_urlencoded():
             raise InvalidContentTypeError(
                 "OAuth credentials server response must " \
