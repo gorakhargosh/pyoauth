@@ -3,11 +3,12 @@
 
 import unittest2
 from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError, InvalidHttpRequestError, InvalidAuthorizationHeaderError, InvalidOAuthParametersError
-from pyoauth.http import ResponseAdapter, RequestAdapter
+from pyoauth.http import ResponseAdapter, RequestAdapter, CONTENT_TYPE_FORM_URLENCODED
 from pyoauth.oauth1 import Credentials
 from pyoauth.oauth1.client import _OAuthClient, Client
 from mom.builtins import is_bytes, is_bytes_or_unicode
 from pyoauth.protocol import parse_authorization_header
+from pyoauth.url import percent_decode
 
 class Test__OAuthClient_oauth_version(unittest2.TestCase):
     def test_default_is_1_0(self):
@@ -120,10 +121,111 @@ class Test__OAuthClient__generate_signature(unittest2.TestCase):
             params["method"],
             params["url"],
             None,
+            None,
+            None,
             params["oauth_consumer_secret"],
             params["oauth_token_secret"],
             params["oauth_params"],
         ), params["oauth_signature"])
+
+
+    def test_generates_signature_including_urlencoded_body(self):
+        oauth_params = dict(
+            oauth_consumer_key="dpf43f3p2l4k3l03",
+            oauth_token="nnch734d00sl2jdk",
+            oauth_signature_method="HMAC-SHA1",
+            oauth_timestamp="137131202",
+            oauth_nonce="chapoH",
+        )
+        self.assertEqual(_OAuthClient._generate_signature(
+            "GET",
+            # I Know ^ is a GET request and we're specifying a body in this
+            # test. _generate_signature does not validate HTTP methods,
+            # but only generates signatures. This example must produce
+            # the same signature as in the RFC example, hence the test.
+            "http://photos.example.net/photos",
+            params=None,
+            body="file=vacation.jpg&size=original&oauth_ignored=IGNORED",
+            headers={
+                "Content-Type": CONTENT_TYPE_FORM_URLENCODED,
+            },
+            oauth_consumer_secret="kd94hf93k423kf44",
+            oauth_token_secret="pfkkdhi9sl3r4s00",
+            oauth_params=oauth_params,
+        ), percent_decode("MdpQcU8iPSUjWoN%2FUDMsK2sui9I%3D"))
+
+
+    def test_error_when_headers_or_content_type_missing_body_specified(self):
+        oauth_params = dict(
+            oauth_consumer_key="dpf43f3p2l4k3l03",
+            oauth_token="nnch734d00sl2jdk",
+            oauth_signature_method="HMAC-SHA1",
+            oauth_timestamp="137131202",
+            oauth_nonce="chapoH",
+        )
+        self.assertRaises(TypeError,
+            _OAuthClient._generate_signature,
+            "GET",
+            # I Know ^ is a GET request and we're specifying a body in this
+            # test. _generate_signature does not validate HTTP methods,
+            # but only generates signatures. This example must produce
+            # the same signature as in the RFC example, hence the test.
+            "http://photos.example.net/photos",
+            params=None,
+            body="file=vacation.jpg&size=original",
+            headers=None,
+            oauth_consumer_secret="kd94hf93k423kf44",
+            oauth_token_secret="pfkkdhi9sl3r4s00",
+            oauth_params=oauth_params,
+        )
+        self.assertRaises(KeyError,
+            _OAuthClient._generate_signature,
+            "GET",
+            # I Know ^ is a GET request and we're specifying a body in this
+            # test. _generate_signature does not validate HTTP methods,
+            # but only generates signatures. This example must produce
+            # the same signature as in the RFC example, hence the test.
+            "http://photos.example.net/photos",
+            params=None,
+            body="file=vacation.jpg&size=original",
+            headers={},
+            oauth_consumer_secret="kd94hf93k423kf44",
+            oauth_token_secret="pfkkdhi9sl3r4s00",
+            oauth_params=oauth_params,
+        )
+
+    def test_ignores_body_params_if_content_type_is_not_urlencoded(self):
+        oauth_params = dict(
+            oauth_consumer_key="dpf43f3p2l4k3l03",
+            oauth_token="nnch734d00sl2jdk",
+            oauth_signature_method="HMAC-SHA1",
+            oauth_timestamp="137131202",
+            oauth_nonce="chapoH",
+        )
+        self.assertEqual(_OAuthClient._generate_signature(
+            "GET",
+            # I Know ^ is a GET request and we're specifying a body in this
+            # test. _generate_signature does not validate HTTP methods,
+            # but only generates signatures. This example must produce
+            # the same signature as in the RFC example, hence the test.
+            "http://photos.example.net/photos?file=vacation.jpg&size=original",
+            params=None,
+            body="""
+body {
+    font-family: "Lucida Grande", serif;
+}
+a:link {
+    text-decoration: none;
+}
+""",
+            headers={
+                "Content-Type": "text/css",
+            },
+            oauth_consumer_secret="kd94hf93k423kf44",
+            oauth_token_secret="pfkkdhi9sl3r4s00",
+            oauth_params=oauth_params,
+        ), percent_decode("MdpQcU8iPSUjWoN%2FUDMsK2sui9I%3D"))
+
 
     def test_raises_InvalidSignatureMethodError_when_invalid_signature_method(self):
         params = {
@@ -143,7 +245,7 @@ class Test__OAuthClient__generate_signature(unittest2.TestCase):
               _OAuthClient._generate_signature,
               params["method"],
               params["url"],
-              None,
+              None, None, None,
               params["oauth_consumer_secret"],
               params["oauth_token_secret"],
               params["oauth_params"],
@@ -166,7 +268,7 @@ class Test__OAuthClient__generate_signature(unittest2.TestCase):
         self.assertRaises(KeyError, _OAuthClient._generate_signature,
               params["method"],
               params["url"],
-              None,
+              None, None, None,
               params["oauth_consumer_secret"],
               params["oauth_token_secret"],
               params["oauth_params"],

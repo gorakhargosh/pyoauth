@@ -16,6 +16,7 @@
 # under the License.
 
 from __future__ import absolute_import
+import logging
 
 from pyoauth.http import CONTENT_TYPE_FORM_URLENCODED, RequestAdapter
 from pyoauth.error import \
@@ -34,7 +35,7 @@ from pyoauth.protocol import \
 from pyoauth.url import \
     url_append_query, url_add_query, \
     query_append, request_query_remove_non_oauth, \
-    oauth_url_sanitize, is_valid_callback_url, query_remove_oauth, parse_qs
+    oauth_url_sanitize, is_valid_callback_url, query_remove_oauth, parse_qs, query_add
 from pyoauth.protocol import \
     generate_hmac_sha1_signature, \
     generate_rsa_sha1_signature, \
@@ -135,6 +136,7 @@ class _OAuthClient(object):
 
     @classmethod
     def _generate_signature(cls, method, url, params,
+                            body, headers,
                             oauth_consumer_secret,
                             oauth_token_secret,
                             oauth_params):
@@ -148,6 +150,10 @@ class _OAuthClient(object):
             Request URL.
         :param params:
             Additional query/payload parameters.
+        :param body:
+            Payload if any.
+        :param headers:
+            HTTP headers as a dictionary.
         :param oauth_consumer_secret:
             OAuth client shared secret (consumer secret).
         :param oauth_token_secret:
@@ -159,7 +165,34 @@ class _OAuthClient(object):
         :returns:
             Request signature.
         """
+        # Take parameters from the body if the Content-Type is specified
+        # as ``application/x-www-form-urlencoded``.
+        # http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
+        if body:
+            try:
+                content_type = headers["Content-Type"]
+                if content_type == CONTENT_TYPE_FORM_URLENCODED:
+                    # These parameters must also be included in the signature.
+                    # Ignore OAuth-specific parameters. They must be specified
+                    # separately.
+                    body_params = query_remove_oauth(parse_qs(body))
+                    params = query_add(params, body_params)
+                else:
+                    logging.info(
+                        "Entity-body specified but `Content-Type` header " \
+                        "value is not %r: entity-body parameters if " \
+                        "present will not be signed: got body %r" % \
+                        (CONTENT_TYPE_FORM_URLENCODED, body)
+                    )
+            except KeyError:
+                raise KeyError(
+                    "Entity-body specified but `Content-Type` header " \
+                    "is missing: got body %r" % body
+                )
+
         # Make oauth params and sign the request.
+        # NOTE: We're not explicitly filtering oauth_ params from params in
+        # this method because it is done by the caller.
         signature_url = url_add_query(url, params)
         base_string = generate_base_string(method, signature_url, oauth_params)
 
@@ -303,7 +336,7 @@ class _OAuthClient(object):
         )
 
         # Sign the request.
-        signature = cls._generate_signature(method, url, params,
+        signature = cls._generate_signature(method, url, params, body, headers,
                                             client_credentials.shared_secret,
                                             oauth_token_secret,
                                             oauth_params)
