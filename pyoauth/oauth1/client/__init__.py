@@ -35,7 +35,8 @@ from pyoauth.protocol import \
 from pyoauth.url import \
     url_append_query, url_add_query, \
     query_append, request_query_remove_non_oauth, \
-    oauth_url_sanitize, is_valid_callback_url, query_remove_oauth, parse_qs, query_add
+    oauth_url_sanitize, is_valid_callback_url, query_remove_oauth, \
+    parse_qs, query_add
 from pyoauth.protocol import \
     generate_hmac_sha1_signature, \
     generate_rsa_sha1_signature, \
