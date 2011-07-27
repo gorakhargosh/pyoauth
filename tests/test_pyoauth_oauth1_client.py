@@ -147,7 +147,7 @@ class Test__OAuthClient__generate_signature(unittest2.TestCase):
             params=None,
             body="file=vacation.jpg&size=original&oauth_ignored=IGNORED",
             headers={
-                "Content-Type": CONTENT_TYPE_FORM_URLENCODED,
+                "content-type": CONTENT_TYPE_FORM_URLENCODED,
             },
             oauth_consumer_secret="kd94hf93k423kf44",
             oauth_token_secret="pfkkdhi9sl3r4s00",
@@ -219,7 +219,7 @@ a:link {
 }
 """,
             headers={
-                "Content-Type": "text/css",
+                "content-type": "text/css",
             },
             oauth_consumer_secret="kd94hf93k423kf44",
             oauth_token_secret="pfkkdhi9sl3r4s00",
@@ -285,7 +285,7 @@ class Test__OAuthClient_misc(unittest2.TestCase):
 
     def test_parse_temporary_credentials_response(self):
         headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "content-type": "application/x-www-form-urlencoded",
         }
         self.assertRaises(ValueError, _OAuthClient.parse_temporary_credentials_response, ResponseAdapter(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=", headers))
         self.assertRaises(ValueError, _OAuthClient.parse_temporary_credentials_response, ResponseAdapter(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=false", headers))
@@ -304,7 +304,7 @@ class Test__OAuthClient_misc(unittest2.TestCase):
                 ResponseAdapter(200, "OK",
                                 "oauth_token=hh5s93j4hdidpola\
 &oauth_token_secret=hdhd0244k9j7ao03", headers={
-                        'Content-Type': 'INVALID-CONTENT-TYPE',
+                        'content-type': 'INVALID-CONTENT-TYPE',
                     }), strict=False)
         self.assertDictEqual(params, {
             "oauth_token": ["hh5s93j4hdidpola"],
@@ -315,7 +315,7 @@ class Test__OAuthClient_misc(unittest2.TestCase):
 
     def test_parse_token_credentials_response(self):
         headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "content-type": "application/x-www-form-urlencoded",
         }
         credentials, params = _OAuthClient.parse_token_credentials_response(ResponseAdapter(200, "OK", "oauth_token=nnch734d00sl2jdk&oauth_token_secret=pfkkdhi9sl3r4s00", headers=headers))
         self.assertDictEqual(params, {
@@ -330,7 +330,7 @@ class Test__OAuthClient_misc(unittest2.TestCase):
                 ResponseAdapter(200, "OK",
                                 "oauth_token=nnch734d00sl2jdk\
 &oauth_token_secret=pfkkdhi9sl3r4s00", headers={
-                        "Content-Type": "INVALID-CONTENT-TYPE",
+                        "content-type": "INVALID-CONTENT-TYPE",
                     }), strict=False)
         self.assertDictEqual(params, {
             "oauth_token": ["nnch734d00sl2jdk"],
@@ -341,7 +341,7 @@ class Test__OAuthClient_misc(unittest2.TestCase):
 
     def test__parse_credentials_response(self):
         headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "content-type": "application/x-www-form-urlencoded",
         }
         credentials, params = _OAuthClient._parse_credentials_response(ResponseAdapter(200, "OK", "oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=true", headers=headers))
         self.assertDictEqual(params, {
@@ -363,7 +363,7 @@ class Test__OAuthClient_misc(unittest2.TestCase):
         status = "OK"
         body = "oauth_token=nnch734d00sl2jdk&oauth_token_secret=pfkkdhi9sl3r4s00"
         headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "content-type": "application/x-www-form-urlencoded",
         }
         self.assertRaises(InvalidHttpResponseError, _OAuthClient._parse_credentials_response, ResponseAdapter(status_code, None, body, headers))
         self.assertRaises(InvalidHttpResponseError, _OAuthClient._parse_credentials_response, ResponseAdapter(None, status, body, headers))
@@ -374,7 +374,7 @@ class Test__OAuthClient_misc(unittest2.TestCase):
         self.assertRaises(HttpError, _OAuthClient._parse_credentials_response, ResponseAdapter(199, "continue", body, headers))
 
         self.assertRaises(InvalidHttpResponseError, _OAuthClient._parse_credentials_response, ResponseAdapter(200, "OK" , "", headers))
-        self.assertRaises(InvalidContentTypeError, _OAuthClient._parse_credentials_response, ResponseAdapter(200, "OK", body, {"Content-Type": "invalid"}))
+        self.assertRaises(InvalidContentTypeError, _OAuthClient._parse_credentials_response, ResponseAdapter(200, "OK", body, {"content-type": "invalid"}))
 
 
 class Test__OAuthClient_check_verification_code(unittest2.TestCase):
@@ -529,7 +529,8 @@ class Test__OAuthClient__build_request(unittest2.TestCase):
                                  "a=b&oauth_blah=blah",
                                  {
             "something": "blah",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "content-type": "application/x-www-form-urlencoded",
+            "content-length": "19",
         })
         got = _OAuthClient._build_request("POST",
                                           "http://example.com/foo",

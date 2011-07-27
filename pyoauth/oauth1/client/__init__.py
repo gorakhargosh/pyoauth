@@ -174,7 +174,7 @@ class _OAuthClient(object):
         # http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
         if body:
             try:
-                content_type = headers["Content-Type"]
+                content_type = headers["content-type"]
                 if content_type == CONTENT_TYPE_FORM_URLENCODED:
                     # These parameters must also be included in the signature.
                     # Ignore OAuth-specific parameters. They must be specified
@@ -261,8 +261,9 @@ class _OAuthClient(object):
                     "HTTP method GET does not take an entity body: got %r" % \
                     body
                 )
-            body = utf8_encode(body)
-            headers["content-length"] = str(len(body))
+            if body:
+                body = utf8_encode(body)
+                headers["content-length"] = str(len(body))
         else:
             if params or oauth_params:
                 # Append to payload and set content type.
