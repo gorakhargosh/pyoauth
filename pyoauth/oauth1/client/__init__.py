@@ -19,6 +19,8 @@ from __future__ import absolute_import
 
 import logging
 
+from mom.codec.text import utf8_encode
+
 from pyoauth.http import CONTENT_TYPE_FORM_URLENCODED, RequestAdapter
 from pyoauth.error import \
     InvalidAuthorizationHeaderError, InvalidSignatureMethodError, \
@@ -259,10 +261,18 @@ class _OAuthClient(object):
                     "HTTP method GET does not take an entity body: got %r" % \
                     body
                 )
-        elif params or oauth_params:
-            # Append to payload and set content type.
-            headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
-            body = query_append(params, oauth_params)
+            body = utf8_encode(body)
+            headers["content-length"] = str(len(body))
+        else:
+            if params or oauth_params:
+                # Append to payload and set content type.
+                body = utf8_encode(query_append(params, oauth_params))
+                headers["content-type"] = CONTENT_TYPE_FORM_URLENCODED
+                headers["content-length"] = str(len(body))
+            else:
+                # Zero-length body.
+                body = ""
+                headers["content-length"] = "0"
         return RequestAdapter(method, url, body, headers)
 
     @classmethod
