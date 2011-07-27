@@ -459,13 +459,12 @@ class _OAuthClient(object):
 
         # The OAuth specification mandates that this parameter must be set to
         # `"true"`; otherwise, the response is invalid.
-        if strict:
-            if params.get("oauth_callback_confirmed", [""])[0].lower() !="true":
+        if params.get("oauth_callback_confirmed", [""])[0].lower() !="true":
+            if strict:
                 raise ValueError(
                     "Invalid OAuth server response -- " \
                     "`oauth_callback_confirmed` MUST be set to `true`.")
-        else:
-            if params.get("oauth_callback_confirmed", [""])[0].lower() !="true":
+            else:
                 logging.warning(
                     "Response parsing strict-mode disabled -- " \
                     "OAuth server credentials response specifies invalid " \
@@ -536,13 +535,12 @@ class _OAuthClient(object):
             % (response.status_code, response.status,))
 
         # The response body must be form URL-encoded.
-        if strict:
-            if not response.is_body_form_urlencoded():
+        if not response.is_body_form_urlencoded():
+            if strict:
                 raise InvalidContentTypeError(
                     "OAuth credentials server response must " \
                     "have Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
-        else:
-            if not response.is_body_form_urlencoded():
+            else:
                 logging.warning(
                     "Response parsing strict-mode disabled -- " \
                     "OAuth server credentials response specifies invalid " \
