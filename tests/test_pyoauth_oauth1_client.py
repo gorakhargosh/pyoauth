@@ -7,6 +7,7 @@ from pyoauth.http import ResponseAdapter, RequestAdapter
 from pyoauth.oauth1 import Credentials
 from pyoauth.oauth1.client import _OAuthClient, Client
 from mom.builtins import is_bytes, is_bytes_or_unicode
+from pyoauth.protocol import parse_authorization_header
 
 class Test__OAuthClient_oauth_version(unittest2.TestCase):
     def test_default_is_1_0(self):
@@ -425,3 +426,103 @@ class Test__OAuthClient__build_request(unittest2.TestCase):
                           "http://example.com/foo",
                           None, "a=b", {"Authorization": ""}, oauth_params,
                           "realm", False)
+
+class Test__OAuthClient__request(unittest2.TestCase):
+    def test__request_data(self):
+        expected = RequestAdapter(
+            'POST',
+            'https://photos.example.net/initiate',
+            '',
+            headers = {
+                "Authorization": '''\
+OAuth realm="Photos",\
+oauth_consumer_key="dpf43f3p2l4k3l03",\
+oauth_signature_method="HMAC-SHA1",\
+oauth_timestamp="137131200",\
+oauth_nonce="wIjqoS",\
+oauth_callback="http%3A%2F%2Fprinter.example.com%2Fready",\
+oauth_signature="74KNZJeDHnMBp0EMJ9ZHt%2FXKycU%3D"''',
+            }
+        )
+        client_credentials = Credentials('dpf43f3p2l4k3l03', 'kd94hf93k423kf44')
+
+        class MockClient(_OAuthClient):
+            @classmethod
+            def generate_timestamp(cls):
+                return "137131200"
+
+            @classmethod
+            def generate_nonce(cls):
+                return "wIjqoS"
+
+        got = MockClient._request(
+            client_credentials,
+            'POST',
+            'https://photos.example.net/initiate',
+            realm='Photos',
+            oauth_version=None,
+            oauth_callback='http://printer.example.com/ready'
+        )
+        self.assertEqual(got.method, expected.method)
+        self.assertEqual(got.url, expected.url)
+        self.assertEqual(got.body, expected.body)
+        expected_headers, expected_realm = parse_authorization_header(
+            expected.headers["Authorization"],
+        )
+        got_headers, got_realm = parse_authorization_header(
+            got.headers["Authorization"],
+        )
+        self.assertDictEqual(got_headers, expected_headers)
+        self.assertEqual(got_realm, expected_realm)
+
+    def test__resource_request_data(self):
+        expected = RequestAdapter(
+            'GET',
+            'http://photos.example.net/photos?file=vacation.jpg&size=original',
+            '',
+            headers = {
+                "Authorization": '''\
+OAuth realm="Photos",\
+oauth_consumer_key="dpf43f3p2l4k3l03",\
+oauth_token="nnch734d00sl2jdk",\
+oauth_signature_method="HMAC-SHA1",\
+oauth_timestamp="137131202",\
+oauth_nonce="chapoH",\
+oauth_signature="MdpQcU8iPSUjWoN%2FUDMsK2sui9I%3D"''',
+            }
+        )
+        auth_credentials = Credentials('nnch734d00sl2jdk', 'pfkkdhi9sl3r4s00')
+        client_credentials = Credentials('dpf43f3p2l4k3l03', 'kd94hf93k423kf44')
+
+        class MockClient(_OAuthClient):
+            @classmethod
+            def generate_timestamp(cls):
+                return "137131202"
+
+            @classmethod
+            def generate_nonce(cls):
+                return "chapoH"
+
+        got = MockClient._request(
+            client_credentials,
+            'GET',
+            'http://photos.example.net/photos',
+            params={
+                "file": "vacation.jpg",
+                "size": "original",
+            },
+            realm='Photos',
+            auth_credentials=auth_credentials,
+            oauth_version=None
+        )
+        self.assertEqual(got.method, expected.method)
+        self.assertEqual(got.url, expected.url)
+        self.assertEqual(got.body, expected.body)
+        expected_headers, expected_realm = parse_authorization_header(
+            expected.headers["Authorization"],
+        )
+        got_headers, got_realm = parse_authorization_header(
+            got.headers["Authorization"],
+        )
+        self.assertDictEqual(got_headers, expected_headers)
+        self.assertEqual(got_realm, expected_realm)
