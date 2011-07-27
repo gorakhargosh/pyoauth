@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest2
-from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError, InvalidHttpRequestError, InvalidAuthorizationHeaderError
+from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError, InvalidHttpRequestError, InvalidAuthorizationHeaderError, InvalidOAuthParametersError
 from pyoauth.http import ResponseAdapter, RequestAdapter
 from pyoauth.oauth1 import Credentials
 from pyoauth.oauth1.client import _OAuthClient, Client
@@ -527,6 +527,15 @@ oauth_signature="MdpQcU8iPSUjWoN%2FUDMsK2sui9I%3D"''',
         self.assertDictEqual(got_headers, expected_headers)
         self.assertEqual(got_realm, expected_realm)
 
+    def test_InvalidOAuthParametersError_multiple_oauth_param_values(self):
+        creds = Credentials(
+            identifier="dpf43f3p2l4k3l03", shared_secret="kd94hf93k423kf44")
+        self.assertRaises(InvalidOAuthParametersError,
+                      _OAuthClient._request,
+                      creds,
+                      "POST",
+                      "http://photos.example.net/blah",
+                      oauth_something=[1, 2, 3])
 
 
 class Test_Client_fetch_temporary_credentials(unittest2.TestCase):
@@ -571,3 +580,4 @@ class Test_Client_fetch_token_credentials(unittest2.TestCase):
                           self.temporary_credentials,
                           "POST",
                           oauth_callback="oob")
+
