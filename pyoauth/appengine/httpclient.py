@@ -1,22 +1,37 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Tornado-compliant asynchronous HTTP client interface.
-
+#
+# Copyright (C) 2010 Rodrigo Moraes <rodrigo.moraes@gmail.com>
+# Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
 
 import logging
 
 from functools import partial
 from google.appengine.api import urlfetch
+
 from pyoauth.http import ResponseAdapter
 
 
 class HttpResponseError(object):
     """A dummy response used when urlfetch raises an exception."""
-    code = 404
-    body = '404 Not Found'
-    error = 'Error 404'
+    status_code = 404
+    content = '404 Not Found'
+    status = 'Error 404'
+    headers = None
 
-class AsyncHTTPClient(object):
+class _AsyncHttpClient(object):
     """An non-blocking HTTP client that uses `google.appengine.api.urlfetch`."""
     def fetch(self, url, callback, **kwargs):
         # Replace kwarg keys.
@@ -54,46 +69,18 @@ def create_rpc_callback(rpc, callback, *args, **kwargs):
         try:
             args += (result,)
             return callback(*args, **kwargs)
-        except Exception, e:
+        except Exception:
             logging.error("Exception during callback", exc_info=True)
 
     return wrapper
 
 
-class HttpAdapterMixin(object):
-    # Framework-specific adaptor.
-    # This one is for webapp2.
-    @property
-    def _oauth_request_full_url(self):
-        return self.request.url
-
-    @property
-    def _oauth_request_path(self):
-        return self.request.path
-
-    def _oauth_request_get(self, argument):
-        return self.request.get(argument)
-
-    def _oauth_redirect(self, url):
-        self.redirect(url)
-
-    def _oauth_abort(self, status_code):
-        self.abort(status_code)
-
-    def _oauth_set_secure_cookie(self, cookie, value):
-        self.session_store.set_secure_cookie(cookie, value)
-
-    def _oauth_get_secure_cookie(self, cookie):
-        return self.session_store.get_secure_cookie(cookie)
-
-    def _oauth_delete_cookie(self, cookie):
-        self.response.delete_cookie(cookie)
-
-    def _oauth_fetch(self, request, async_callback=None, *args, **kwargs):
+class HttpClient(object):
+    def fetch(self, request, async_callback=None, *args, **kwargs):
         """
         Fetches a response from the OAuth server for a given OAuth request.
 
-        Self contained HTTP request method can be replaced with
+        Self-contained HTTP request method can be replaced with
         one for your Web framework.
 
         :param request:
@@ -114,7 +101,7 @@ class HttpAdapterMixin(object):
             Any additional arguments to be passed to the ``async_callback``.
         """
         if async_callback:
-            http = AsyncHTTPClient()
+            http = _AsyncHttpClient()
 
             if args or kwargs:
                 async_callback = partial(async_callback, *args, **kwargs)
