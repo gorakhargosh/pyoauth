@@ -151,8 +151,21 @@ class ResponseAdapter(object):
     @property
     def content_type(self):
         """Determines the content type of the response."""
-        return self.get_header("Content-Type")
+        return self.get_header("Content-Type").split(";", 1)[0]
 
     def is_body_form_urlencoded(self):
         """Determines whether the response has content type form urlencoded."""
         return self.content_type == CONTENT_TYPE_FORM_URLENCODED
+
+    @property
+    def content_type_encoding(self):
+        """Determines the content type of the response."""
+        header = self.get_header("Content-Type")
+        if ";" in header:
+            content_type, encoding = header.split(";", 1)
+            if encoding:
+                return encoding.strip().split('=', 1)[1]
+            else:
+                return None
+        else:
+            return None
