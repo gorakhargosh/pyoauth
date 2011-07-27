@@ -433,51 +433,81 @@ class _OAuthClient(object):
         return oauth_verifier
 
     @classmethod
-    def parse_temporary_credentials_response(cls, response):
+    def parse_temporary_credentials_response(cls, response, strict=True):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         temporary credentials request.
 
         :param response:
             An instance of :class:`pyoauth.http.ResponseAdapter`.
+        :param strict:
+            ``True`` (default) for string response parsing; ``False`` to be a
+            bit lenient. Some non-compliant OAuth servers return credentials
+            without setting the content-type. Smugmug, for example, does this.
+            Setting this to ``False`` will not raise an error, but will
+            still warn you that the response content-type is not valid.
+            The temporary credentials response also expects
+            "oauth_callback_confirmed=true" in the response body, checking for
+            this is disabled when you set this argument to ``False``.
         :returns:
             A tuple of the form::
 
                 (pyoauth.oauth1.Credentials instance, other parameters)
         """
-        credentials, params = cls._parse_credentials_response(response)
+        credentials, params = cls._parse_credentials_response(response, strict)
 
         # The OAuth specification mandates that this parameter must be set to
         # `"true"`; otherwise, the response is invalid.
-        if params.get("oauth_callback_confirmed", [""])[0].lower() != "true":
-            raise ValueError(
-                "Invalid OAuth server response -- " \
-                "`oauth_callback_confirmed` MUST be set to `true`.")
+        if strict:
+            if params.get("oauth_callback_confirmed", [""])[0].lower() !="true":
+                raise ValueError(
+                    "Invalid OAuth server response -- " \
+                    "`oauth_callback_confirmed` MUST be set to `true`.")
+            else:
+                logging.warning(
+                    "Response parsing strict-mode disabled -- " \
+                    "OAuth server credentials response specifies invalid " \
+                    "`oauth_callback_confirmed` value: expected `true`; " \
+                    "got %r" % params
+                )
+
         return credentials, params
 
     @classmethod
-    def parse_token_credentials_response(cls, response):
+    def parse_token_credentials_response(cls, response, strict=True):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         token credentials request.
 
         :param response:
             An instance of :class:`pyoauth.http.ResponseAdapter`.
+        :param strict:
+            ``True`` (default) for string response parsing; ``False`` to be a
+            bit lenient. Some non-compliant OAuth servers return credentials
+            without setting the content-type. Smugmug, for example, does this.
+            Setting this to ``False`` will not raise an error, but will
+            still warn you that the response content-type is not valid.
         :returns:
             A tuple of the form::
 
                 (pyoauth.oauth1.Credentials instance, other parameters)
         """
-        return cls._parse_credentials_response(response)
+        return cls._parse_credentials_response(response, strict)
 
     @classmethod
-    def _parse_credentials_response(cls, response):
+    def _parse_credentials_response(cls, response, strict=True):
         """
         Parses the entity-body of the OAuth server response to an OAuth
         credential request.
 
         :param response:
             An instance of :class:`pyoauth.http.ResponseAdapter`.
+        :param strict:
+            ``True`` (default) for string response parsing; ``False`` to be a
+            bit lenient. Some non-compliant OAuth servers return credentials
+            without setting the content-type. Smugmug, for example, does this.
+            Setting this to ``False`` will not raise an error, but will
+            still warn you that the response content-type is not valid.
         :returns:
             A tuple of the form::
 
@@ -502,10 +532,17 @@ class _OAuthClient(object):
             % (response.status_code, response.status,))
 
         # The response body must be form URL-encoded.
-        if not response.is_body_form_urlencoded():
-            raise InvalidContentTypeError(
-                "OAuth credentials server response must " \
-                "have Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
+        if strict:
+            if not response.is_body_form_urlencoded():
+                raise InvalidContentTypeError(
+                    "OAuth credentials server response must " \
+                    "have Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
+            else:
+                logging.warning(
+                    "Response parsing strict-mode disabled -- " \
+                    "OAuth server credentials response specifies invalid " \
+                    "Content-Type: expected %r; got %r",
+                    CONTENT_TYPE_FORM_URLENCODED, response.content_type)
 
         params = parse_qs(response.body)
         credentials = Credentials(identifier=params["oauth_token"][0],
