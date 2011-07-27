@@ -115,11 +115,13 @@ class _OAuthClient(object):
             oauth_signature_method=oauth_signature_method,
             oauth_timestamp=oauth_timestamp,
             oauth_nonce=oauth_nonce,
-            oauth_version=oauth_version,
             )
         # If we have an oauth token.
         if oauth_token:
             oauth_params["oauth_token"] = oauth_token
+        # If we have a version.
+        if oauth_version:
+            oauth_params["oauth_version"] = oauth_version
 
         # Clean up oauth parameters in the arguments.
         extra_oauth_params = request_query_remove_non_oauth(extra_oauth_params)
@@ -222,7 +224,7 @@ class _OAuthClient(object):
                     "HTTP method GET does not take an entity body: got %r" % \
                     body
                 )
-        else:
+        elif params or oauth_params:
             # Append to payload and set content type.
             headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
             body = query_append(params, oauth_params)
