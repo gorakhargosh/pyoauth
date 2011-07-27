@@ -117,12 +117,11 @@ def percent_decode(value):
 
     :see: Percent Encoding (http://tools.ietf.org/html/rfc5849#section-3.6)
     :param value:
-        Value to percent-decode. Value will be UTF-8 encoded if
-        it is a Unicode string. '+' is treated as a ' ' character.
+        Value to percent-decode. '+' is treated as a ' ' character.
     :returns:
         Percent-decoded value.
     """
-    return unquote_plus(utf8_encode(value))
+    return unquote_plus(value)
 
 
 def urlencode_s(query_params, allow_func=None):
