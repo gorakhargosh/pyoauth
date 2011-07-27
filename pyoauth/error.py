@@ -45,13 +45,13 @@ class Error(RuntimeError):
         self._message = message
         super(Error, self).__init__()
 
-#    @property
-#    def message(self):
-#        """A hack to get around the deprecation errors in Python 2.6"""
-#        return self._message
-#
-#    def __str__(self):
-#        return self._message
+    @property
+    def message(self):
+        """A hack to get around the deprecation errors in Python 2.6"""
+        return self._message
+
+    def __str__(self):
+        return self._message
 
 
 class InvalidQueryParametersError(Error):
