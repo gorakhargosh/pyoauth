@@ -526,3 +526,48 @@ oauth_signature="MdpQcU8iPSUjWoN%2FUDMsK2sui9I%3D"''',
         )
         self.assertDictEqual(got_headers, expected_headers)
         self.assertEqual(got_realm, expected_realm)
+
+
+
+class Test_Client_fetch_temporary_credentials(unittest2.TestCase):
+    def setUp(self):
+        self.client_credentials = Credentials(
+            identifier="dpf43f3p2l4k3l03", shared_secret="kd94hf93k423kf44")
+        self.client = Client(
+            None,
+            self.client_credentials,
+            temporary_credentials_uri="https://photos.example.net/initiate",
+            token_credentials_uri="https://photos.example.net/token",
+            authorization_uri="https://photos.example.net/authorize")
+        self.temporary_credentials = Credentials(
+            identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
+        self.token_credentials = Credentials(
+            identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
+
+    def test_raises_ValueError_when_oauth_callback_is_invalid(self):
+        self.assertRaises(ValueError, self.client.fetch_temporary_credentials,
+                          "POST",
+                          oauth_callback="foobar")
+
+
+class Test_Client_fetch_token_credentials(unittest2.TestCase):
+    def setUp(self):
+        self.client_credentials = Credentials(
+            identifier="dpf43f3p2l4k3l03", shared_secret="kd94hf93k423kf44")
+        self.client = Client(
+            None,
+            self.client_credentials,
+            temporary_credentials_uri="https://photos.example.net/initiate",
+            token_credentials_uri="https://photos.example.net/token",
+            authorization_uri="https://photos.example.net/authorize")
+        self.temporary_credentials = Credentials(
+            identifier="hh5s93j4hdidpola", shared_secret="hdhd0244k9j7ao03")
+        self.token_credentials = Credentials(
+            identifier="nnch734d00sl2jdk", shared_secret="pfkkdhi9sl3r4s00")
+
+    def test_raises_IllegalArgumentError_when_oauth_callback_is_invalid(self):
+        self.assertRaises(IllegalArgumentError,
+                          self.client.fetch_token_credentials,
+                          self.temporary_credentials,
+                          "POST",
+                          oauth_callback="oob")

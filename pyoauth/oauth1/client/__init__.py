@@ -495,7 +495,7 @@ class Client(_OAuthClient):
             self._authentication_uri = None
 
     def fetch_temporary_credentials(self,
-                                    method, url, params=None,
+                                    method, params=None,
                                     body=None, headers=None,
                                     realm=None,
                                     async_callback=None,
@@ -508,8 +508,6 @@ class Client(_OAuthClient):
 
         :param method:
             HTTP method.
-        :param url:
-            Request URL
         :param params:
             Additional query/payload parameters.
             If a `body` argument to this function is specified,
@@ -544,7 +542,7 @@ class Client(_OAuthClient):
                 oauth_callback
             )
 
-        return self._fetch(method, url, params,
+        return self._fetch(method, self._temporary_credentials_uri, params,
                            body, headers,
                            async_callback=async_callback,
                            realm=realm,
@@ -554,7 +552,7 @@ class Client(_OAuthClient):
 
     def fetch_token_credentials(self,
                                 temporary_credentials,
-                                method, url, params=None,
+                                method, params=None,
                                 body=None, headers=None,
                                 realm=None, async_callback=None,
                                 oauth_signature_method=\
@@ -567,8 +565,6 @@ class Client(_OAuthClient):
             Temporary credentials obtained in a previous step.
         :param method:
             HTTP method.
-        :param url:
-            Request URL
         :param params:
             Additional query/payload parameters.
             If a `body` argument to this function is specified,
@@ -602,7 +598,7 @@ class Client(_OAuthClient):
                 extra_oauth_params["oauth_callback"]
             )
 
-        response = self._fetch(method, url, params,
+        response = self._fetch(method, self._token_credentials_uri, params,
                                body, headers,
                                async_callback=async_callback,
                                realm=realm,
