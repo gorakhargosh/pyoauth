@@ -69,4 +69,4 @@ class HttpClient(object):
                 request.headers
             )
             return ResponseAdapter(response.status, response.reason,
-                                   content, response.headers)
+                                   content, response)

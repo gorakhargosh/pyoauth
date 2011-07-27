@@ -540,7 +540,8 @@ class _OAuthClient(object):
             if strict:
                 raise InvalidContentTypeError(
                     "OAuth credentials server response must " \
-                    "have Content-Type: `%s`" % CONTENT_TYPE_FORM_URLENCODED)
+                    "have Content-Type: `%s`; got %r" %
+                    (CONTENT_TYPE_FORM_URLENCODED, response.content_type))
             else:
                 logging.warning(
                     "Response parsing strict-mode disabled -- " \
@@ -579,7 +580,7 @@ class Client(_OAuthClient):
             self._authentication_uri = None
 
     def fetch_temporary_credentials(self,
-                                    method, params=None,
+                                    method="POST", params=None,
                                     body=None, headers=None,
                                     realm=None,
                                     async_callback=None,
@@ -636,7 +637,8 @@ class Client(_OAuthClient):
 
     def fetch_token_credentials(self,
                                 temporary_credentials,
-                                method, params=None,
+                                oauth_verifier,
+                                method="POST", params=None,
                                 body=None, headers=None,
                                 realm=None, async_callback=None,
                                 oauth_signature_method=\
@@ -688,12 +690,13 @@ class Client(_OAuthClient):
                                realm=realm,
                                auth_credentials=temporary_credentials,
                                oauth_signature_method=oauth_signature_method,
+                               oauth_verifier=oauth_verifier,
                                **extra_oauth_params)
         return response
 
     def fetch(self,
               token_credentials,
-              method, url, params=None,
+              url, method="POST", params=None,
               body=None, headers=None,
               realm=None, async_callback=None,
               oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
