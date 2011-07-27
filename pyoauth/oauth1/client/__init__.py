@@ -241,7 +241,7 @@ class _OAuthClient(object):
             An instance of :class:`pyoauth.http.RequestAdapter`.
         """
         # http://tools.ietf.org/html/rfc5849#section-3.6
-        if "Authorization" in headers:
+        if "Authorization" in headers or "authorization" in headers:
             raise InvalidAuthorizationHeaderError(
                 "Authorization field is already present in headers: %r" % \
                 headers
