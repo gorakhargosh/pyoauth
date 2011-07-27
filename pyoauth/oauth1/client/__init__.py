@@ -650,13 +650,13 @@ class Client(_OAuthClient):
                                **extra_oauth_params)
         return response
 
-    def fetch_resource(self,
-                       token_credentials,
-                       method, url, params=None,
-                       body=None, headers=None,
-                       realm=None, async_callback=None,
-                       oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-                       **extra_oauth_params):
+    def fetch(self,
+              token_credentials,
+              method, url, params=None,
+              body=None, headers=None,
+              realm=None, async_callback=None,
+              oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
+              **extra_oauth_params):
         """
         Fetches a resource using the token credentials.
 
