@@ -370,7 +370,7 @@ def query_filter(query, predicate):
     :returns:
         A filtered dictionary of query parameters.
     """
-    return select_dict(lambda (k, v): predicate(k, v), query_unflatten(query))
+    return select_dict(lambda k, v: predicate(k, v), query_unflatten(query))
 
 
 def query_unflatten(query):
@@ -395,8 +395,7 @@ def query_unflatten(query):
         return parse_qs(query)
     elif isinstance(query, dict):
         # Un-flatten the dictionary.
-        def _choose(item):
-            key, value = item
+        def _choose(key, value):
             if not isinstance(value, list) and not isinstance(value, tuple):
                 return key, [value]
             else:

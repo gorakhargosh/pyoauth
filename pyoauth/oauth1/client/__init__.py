@@ -332,7 +332,7 @@ class _OAuthClient(object):
 
         # Split all the oauth parameters and function parameters.
         extra_oauth_params, kwargs = \
-            partition_dict(lambda (k,v): k.startswith('oauth_'), kwargs)
+            partition_dict(lambda k, v: k.startswith('oauth_'), kwargs)
 
         # Query/payload parameters must not contain OAuth-specific parameters.
         params = query_remove_oauth(params) if params else {}
