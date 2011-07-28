@@ -174,7 +174,11 @@ class _OAuthClient(object):
         # http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
         if body:
             try:
-                content_type = headers["content-type"]
+                try:
+                    content_type = headers["content-type"]
+                except KeyError:
+                    content_type = headers["Content-Type"]
+
                 if content_type == CONTENT_TYPE_FORM_URLENCODED:
                     # These parameters must also be included in the signature.
                     # Ignore OAuth-specific parameters. They must be specified
