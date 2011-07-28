@@ -249,7 +249,7 @@ def urlparse_normalized(url):
     return scheme, netloc, path, matrix_params, query, fragment
 
 
-#TODO: Add test for url_add_query uses OAuth param sort order.
+#TODO: Add test to ensure url_add_query uses OAuth param sort order.
 def url_add_query(url, query, predicate=None):
     """
     Adds additional query parameters to a URL while preserving existing ones.
