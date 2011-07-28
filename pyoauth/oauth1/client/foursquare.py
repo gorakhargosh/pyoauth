@@ -16,32 +16,46 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+# TODO: Largely untested because I don't have an OAuth 1.0 consumer.
 
+"""
+:module: pyoauth.oauth1.client.foursquare
+:synopsis: Foursquare OAuth 1.0 client implementation.
+
+.. autoclass:: FoursquareClient
+   :members:
+   :show-inheritance:
+"""
+
+from mom.builtins import is_bytes_or_unicode
 from pyoauth.oauth1.client import Client
+
 
 class FoursquareClient(Client):
     """
-    Creates an instance of a Foursquare OAuth 1.0 client.
-
-    :see: http://groups.google.com/group/foursquare-api/web/oauth
     """
-    _OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI = "https://www.foursquare.com/oauth/request_token"
-    _OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI = "https://www.foursquare.com/oauth/authorize"
+    _TEMP_URI = "https://www.foursquare.com/oauth/request_token"
+    _TOKEN_URI = "https://www.foursquare.com/oauth/access_token"
+    _AUTHORIZATION_URI = "https://www.foursquare.com/oauth/authorize"
     # Automatically redirects if user has already authorized.
-    _OAUTH_RESOURCE_OWNER_AUTHENTICATE_URI = "https://www.foursquare.com/oauth/authenticate"
-    _OAUTH_MOBILE_RESOURCE_OWNER_AUTHORIZATION_URI = "https://www.foursquare.com/mobile/oauth/authorize"
+    _AUTHENTICATION_URI = "https://www.foursquare.com/oauth/authenticate"
+    _MOBILE_AUTHORIZATION_URI = "https://www.foursquare.com/mobile/oauth/authorize"
     # Automatically redirects if the user has already authorized.
-    _OAUTH_MOBILE_RESOURCE_OWNER_AUTHENTICATE_URI = "https://www.foursquare.com/mobile/oauth/authenticate"
-    _OAUTH_TOKEN_CREDENTIALS_REQUEST_URI = "https://www.foursquare.com/oauth/access_token"
+    _MOBILE_AUTHENTICATION_URI = "https://www.foursquare.com/mobile/oauth/authenticate"
 
     def __init__(self,
+                 http_client,
                  client_credentials,
-                 use_authorization_header=True):
-        super(FoursquareClient, self).__init__(
-            client_credentials=client_credentials,
-            temporary_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            token_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            resource_owner_authorization_uri=self._OAUTH_RESOURCE_OWNER_AUTHENTICATE_URI,
-            use_authorization_header=use_authorization_header
-        )
+                 use_authorization_header=True,
+                 strict=False):
 
+        super(FoursquareClient, self).__init__(
+            http_client,
+            client_credentials=client_credentials,
+            temporary_credentials_uri=self._TEMP_URI,
+            token_credentials_uri=self._TOKEN_URI,
+            authorization_uri=self._AUTHORIZATION_URI,
+            authentication_uri=self._AUTHENTICATION_URI,
+            use_authorization_header=use_authorization_header,
+            strict=strict,
+        )
