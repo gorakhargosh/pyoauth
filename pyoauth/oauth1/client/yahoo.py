@@ -22,97 +22,58 @@ from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, SIGNATURE_METHOD_RSA_SHA1
 
 from pyoauth.oauth1.client import Client
 
+
 class YahooClient(Client):
     """
     Creates an instance of a Yahoo! OAuth 1.0 client.
 
     :see: http://developer.yahoo.com/oauth/guide/oauth-auth-flow.html
     """
-    _OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI = "https://api.login.yahoo.com/oauth/v2/get_request_token"
-    _OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI = "https://api.login.yahoo.com/oauth/v2/request_auth"
-    _OAUTH_TOKEN_CREDENTIALS_REQUEST_URI = "https://api.login.yahoo.com/oauth/v2/get_token"
+    _TEMP_URI = "https://api.login.yahoo.com/oauth/v2/get_request_token"
+    _AUTH_URI = "https://api.login.yahoo.com/oauth/v2/request_auth"
+    _TOKEN_URI = "https://api.login.yahoo.com/oauth/v2/get_token"
 
-    def __init__(self, client_credentials):
+    def __init__(self, http_client, client_credentials,
+                 xoauth_lang_pref="EN-US",
+                 use_authorization_header=False, strict=False):
+        self._xoauth_lang_pref = xoauth_lang_pref or None
         super(YahooClient, self).__init__(
-            client_credentials=client_credentials,
-            temporary_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            token_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            resource_owner_authorization_uri=self._OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI,
-            use_authorization_header=True
+            http_client,
+            client_credentials,
+            self._TEMP_URI,
+            self._TOKEN_URI,
+            self._AUTH_URI,
+            use_authorization_header=use_authorization_header,
+            strict=strict
         )
 
     @classmethod
-    def _check_signature_method(cls, signature_method):
+    def check_signature_method(cls, signature_method):
         if signature_method == SIGNATURE_METHOD_RSA_SHA1:
-            raise SignatureMethodNotSupportedError("Yahoo! OAuth 1.0 does not support the `%r` signature method." % signature_method)
+            raise SignatureMethodNotSupportedError(
+                "Yahoo! OAuth 1.0 does not support the `%r` signature method."
+                % signature_method
+            )
 
-    def build_temporary_credentials_request(self,
-                                            xoauth_lang_pref=None,
-                                            method="POST",
-                                            payload_params=None,
-                                            headers=None,
-                                            realm=None,
-                                            oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-                                            oauth_callback="oob",
-                                            **extra_oauth_params):
-        payload_params = payload_params or {}
-        yahoo_params = dict()
-        if xoauth_lang_pref:
-            yahoo_params["xoauth_lang_pref"] = xoauth_lang_pref
-        payload_params.update(yahoo_params)
+    def fetch_temporary_credentials(self,
+                                    method="POST", params=None,
+                                    body=None, headers=None,
+                                    realm=None,
+                                    async_callback=None,
+                                    oauth_signature_method=\
+                                        SIGNATURE_METHOD_HMAC_SHA1,
+                                    oauth_callback="oob",
+                                    **kwargs):
+        params = params or {}
+        params.update(dict(xoauth_lang_pref=self._xoauth_lang_pref))
 
-        YahooClient._check_signature_method(oauth_signature_method)
-
-        return super(YahooClient, self).build_temporary_credentials_request(
+        return super(YahooClient, self).fetch_temporary_credentials(
             method=method,
-            payload_params=payload_params,
-            headers=headers,
+            params=params,
+            body=body, headers=headers,
             realm=realm,
+            async_callback=async_callback,
             oauth_signature_method=oauth_signature_method,
             oauth_callback=oauth_callback,
-            **extra_oauth_params
-        )
-
-    def build_token_credentials_request(self,
-                                        temporary_credentials,
-                                        oauth_verifier,
-                                        method="POST",
-                                        payload_params=None,
-                                        headers=None,
-                                        realm=None,
-                                        oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-                                        **extra_oauth_params):
-        YahooClient._check_signature_method(oauth_signature_method)
-
-        return super(YahooClient, self).build_token_credentials_request(
-            temporary_credentials=temporary_credentials,
-            oauth_verifier=oauth_verifier,
-            method=method,
-            payload_params=payload_params,
-            headers=headers,
-            realm=realm,
-            oauth_signature_method=oauth_signature_method,
-            **extra_oauth_params
-        )
-
-    def build_resource_request(self,
-                               token_credentials,
-                               method,
-                               url,
-                               payload_params=None,
-                               headers=None,
-                               realm=None,
-                               oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-                               **extra_oauth_params):
-        YahooClient._check_signature_method(oauth_signature_method)
-
-        return super(YahooClient, self).build_resource_request(
-            token_credentials=token_credentials,
-            method=method,
-            url=url,
-            payload_params=payload_params,
-            headers=headers,
-            realm=realm,
-            oauth_signature_method=oauth_signature_method,
-            **extra_oauth_params
+            **kwargs
         )
