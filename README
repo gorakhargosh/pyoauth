@@ -29,6 +29,8 @@ Example::
                     'https://api.twitter.com/oauth/access_token',
                 authorization_uri=\
                     'https://api.twitter.com/oauth/authorize',
+                authentication_uri=\
+                    'https://api.twitter.com/oauth/authenticate',
             ),
             'temporary_credentials_params': {},
             'headers': {},
@@ -69,8 +71,12 @@ Example::
 
         # Open the web browser to allow the user to authorize and grab
         # the verification code. (Emulates redirect).
-        webbrowser.open(oauth.get_authorization_url(temporary_credentials),
-                        new=2, autoraise=True)
+        if "authentication_uri" in service["params"]:
+            webbrowser.open(oauth.get_authentication_url(temporary_credentials),
+                            new=2, autoraise=True)
+        else:
+            webbrowser.open(oauth.get_authorization_url(temporary_credentials),
+                            new=2, autoraise=True)
 
         # Get the verification code.
         oauth_verifier = oauth.check_verification_code(temporary_credentials,
