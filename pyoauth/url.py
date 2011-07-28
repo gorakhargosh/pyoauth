@@ -55,7 +55,7 @@ import logging
 
 from mom.builtins import is_sequence, bytes, is_bytes_or_unicode
 from mom.codec.text import utf8_encode_if_unicode, utf8_encode
-from mom.functional import select_dict
+from mom.functional import select_dict, map_dict
 
 from pyoauth._compat import urlparse, urlunparse, parse_qs as _parse_qs, \
     quote, \
@@ -310,7 +310,6 @@ def url_append_query(url, query):
     return urlunparse((scheme, netloc, path, params, query_s, fragment))
 
 
-
 def query_add(*queries):
     """
     Merges multiple query parameter dictionaries or strings.
@@ -396,13 +395,13 @@ def query_unflatten(query):
         return parse_qs(query)
     elif isinstance(query, dict):
         # Un-flatten the dictionary.
-        new_query_d = {}
-        for name, value in query.items():
+        def _choose(item):
+            key, value = item
             if not isinstance(value, list) and not isinstance(value, tuple):
-                new_query_d[name] = [value]
+                return key, [value]
             else:
-                new_query_d[name] = list(value)
-        return new_query_d
+                return key, list(value)
+        return map_dict(_choose, query)
         # Alternative, but slower:
         #return parse_qs(urlencode_s(query))
     elif query is None:
