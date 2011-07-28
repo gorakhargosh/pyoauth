@@ -101,7 +101,7 @@ API Documentation
    :maxdepth: 2
 
    api/oauth1
-   api/protocol
+   api/utilities
 
 
 Contribute
