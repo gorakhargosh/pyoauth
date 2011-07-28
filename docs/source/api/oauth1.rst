@@ -7,6 +7,10 @@
 Client implementations
 ======================
 
+`pyoauth.oauth1.protocol`
+=========================
+.. automodule:: pyoauth.oauth1.protocol
+
 `pyoauth.oauth1.client`
 =======================
 .. automodule:: pyoauth.oauth1.client

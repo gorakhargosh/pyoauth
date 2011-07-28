@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import unittest2
+from mom.builtins import is_bytes, is_bytes_or_unicode
+
 from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError, InvalidHttpRequestError, InvalidAuthorizationHeaderError, InvalidOAuthParametersError
 from pyoauth.http import ResponseAdapter, RequestAdapter, CONTENT_TYPE_FORM_URLENCODED
 from pyoauth.oauth1 import Credentials
 from pyoauth.oauth1.client import _OAuthClient, Client
-from mom.builtins import is_bytes, is_bytes_or_unicode
-from pyoauth.protocol import parse_authorization_header
+from pyoauth.oauth1.protocol import parse_authorization_header
 from pyoauth.url import percent_decode
+
 
 class Test__OAuthClient_oauth_version(unittest2.TestCase):
     def test_default_is_1_0(self):

@@ -11,7 +11,7 @@ from pyoauth.error import \
     InvalidAuthorizationHeaderError, \
     InvalidHttpMethodError, \
     InvalidUrlError
-from pyoauth.protocol import parse_authorization_header, \
+from pyoauth.oauth1.protocol import parse_authorization_header, \
     generate_base_string_query, \
     generate_authorization_header, \
     percent_decode, \

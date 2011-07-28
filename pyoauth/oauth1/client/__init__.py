@@ -30,20 +30,19 @@ from pyoauth.oauth1 import \
     SIGNATURE_METHOD_HMAC_SHA1, \
     SIGNATURE_METHOD_RSA_SHA1, \
     SIGNATURE_METHOD_PLAINTEXT, Credentials
-from pyoauth.protocol import \
+from pyoauth.oauth1.protocol import \
     generate_authorization_header, \
     generate_base_string, \
     generate_nonce, \
-    generate_timestamp
+    generate_timestamp, \
+    generate_hmac_sha1_signature, \
+    generate_rsa_sha1_signature, \
+    generate_plaintext_signature
 from pyoauth.url import \
     url_append_query, url_add_query, \
     query_append, request_query_remove_non_oauth, \
     oauth_url_sanitize, is_valid_callback_url, query_remove_oauth, \
     parse_qs, query_add
-from pyoauth.protocol import \
-    generate_hmac_sha1_signature, \
-    generate_rsa_sha1_signature, \
-    generate_plaintext_signature
 
 
 SIGNATURE_METHOD_MAP = {

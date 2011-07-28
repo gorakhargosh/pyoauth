@@ -3,13 +3,9 @@
 
 .. api_protocol:
 
-===========================
-Protocol-specific utilities
-===========================
-
-`pyoauth.protocol`
-==================
-.. automodule:: pyoauth.protocol
+=========
+Utilities
+=========
 
 `pyoauth.url`
 =============

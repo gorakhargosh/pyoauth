@@ -17,8 +17,8 @@
 # under the License.
 
 """
-:module: pyoauth.protocol
-:synopsis: OAuth protocol-specific utility functions.
+:module: pyoauth.oauth1.protocol
+:synopsis: OAuth 1.0 protocol-specific utility functions.
 
 Nonce, verification code, and timestamp
 ---------------------------------------
