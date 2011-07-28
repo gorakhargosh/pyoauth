@@ -105,14 +105,14 @@ class GoogleClient(Client):
             **kwargs
         )
 
-
+    @classmethod
     def parse_temporary_credentials_response(cls, response, strict=False):
         """
         Non-compliant server.
         """
         return Client.parse_temporary_credentials_response(response, strict)
 
-
+    @classmethod
     def parse_token_credentials_response(cls, response, strict=False):
         """
         Non-compliant server.
