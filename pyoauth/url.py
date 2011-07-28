@@ -370,7 +370,7 @@ def query_filter(query, predicate):
     :returns:
         A filtered dictionary of query parameters.
     """
-    return select_dict(lambda k, v: predicate(k, v), query_unflatten(query))
+    return select_dict(predicate, query_unflatten(query))
 
 
 def query_unflatten(query):
