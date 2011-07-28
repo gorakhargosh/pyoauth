@@ -23,21 +23,34 @@ class TwitterClient(Client):
     """
     Creates an instance of a Twitter OAuth 1.0 client.
     """
-    _OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI = "https://api.twitter.com/oauth/request_token"
-    _OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI = "https://api.twitter.com/oauth/authorize"
-    _OAUTH_RESOURCE_OWNER_AUTHENTICATION_URI = "http://api.twitter.com/oauth/authenticate"
-    _OAUTH_TOKEN_CREDENTIALS_REQUEST_URI = "https://api.twitter.com/oauth/access_token"
+    _TEMP_URI = "https://api.twitter.com/oauth/request_token"
+    _TOKEN_URI = "https://api.twitter.com/oauth/access_token"
+    _AUTHORIZATION_URI = "https://api.twitter.com/oauth/authorize"
+    _AUTHENTICATION_URI = "https://api.twitter.com/oauth/authenticate"
 
     def __init__(self,
+                 http_client,
                  client_credentials,
                  use_authorization_header=True):
         super(TwitterClient, self).__init__(
-            client_credentials=client_credentials,
-            temporary_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            token_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            resource_owner_authorization_uri=self._OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI,
-            resource_owner_authentication_uri=self._OAUTH_RESOURCE_OWNER_AUTHENTICATION_URI,
+            http_client,
+            client_credentials,
+            self._TEMP_URI,
+            self._TOKEN_URI,
+            self._AUTHORIZATION_URI,
+            self._AUTHENTICATION_URI,
             use_authorization_header=use_authorization_header
         )
 
+    def parse_temporary_credentials_response(cls, response, strict=False):
+        """
+        Non-compliant server.
+        """
+        return Client.parse_temporary_credentials_response(response, strict)
 
+
+    def parse_token_credentials_response(cls, response, strict=False):
+        """
+        Non-compliant server.
+        """
+        return Client.parse_token_credentials_response(response, strict)
