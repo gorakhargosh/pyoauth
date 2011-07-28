@@ -20,6 +20,7 @@ from __future__ import absolute_import
 import logging
 
 from mom.codec.text import utf8_encode
+from mom.functional import partition_dict
 
 from pyoauth.http import CONTENT_TYPE_FORM_URLENCODED, RequestAdapter
 from pyoauth.error import \
@@ -288,7 +289,7 @@ class _OAuthClient(object):
                  auth_credentials=None,
                  oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
                  oauth_version="1.0",
-                 **extra_oauth_params):
+                 **kwargs):
         """
         Makes an OAuth request.
 
@@ -316,8 +317,9 @@ class _OAuthClient(object):
             OAuth token/temporary credentials (if available).
         :param oauth_signature_method:
             Signature method.
-        :param extra_oauth_params:
-            Additional OAuth parameters.
+        :param kwargs:
+            Additional parameters including those that may begin with
+            ``oauth_``.
         :returns:
             HTTP response (:class:`pyoauth.http.ResponseAdapter`) if
             ``async_callback`` is not specified;
@@ -327,6 +329,10 @@ class _OAuthClient(object):
         method = method.upper()
         body = body or ""
         headers = headers or {}
+
+        # Split all the oauth parameters and non-oauth parameters.
+        extra_oauth_params, kwargs = \
+            partition_dict(lambda (k,v): k.startswith('oauth_'), kwargs)
 
         # Query/payload parameters must not contain OAuth-specific parameters.
         params = query_remove_oauth(params) if params else {}
@@ -342,6 +348,7 @@ class _OAuthClient(object):
             oauth_token = oauth_token_secret = None
 
         # Make OAuth-specific parameter dictionary.
+
         oauth_params = cls._generate_oauth_params(
             oauth_consumer_key=client_credentials.identifier,
             oauth_signature_method=oauth_signature_method,
@@ -371,7 +378,7 @@ class _OAuthClient(object):
               realm=None,
               auth_credentials=None,
               oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-              **extra_oauth_params):
+              **kwargs):
         """
         Makes an OAuth request.
 
@@ -399,8 +406,9 @@ class _OAuthClient(object):
             OAuth token/temporary credentials (if available).
         :param oauth_signature_method:
             Signature method.
-        :param extra_oauth_params:
-            Additional OAuth parameters.
+        :param kwargs:
+            Additional parameters including those that may begin with
+            ``oauth_``.
         :returns:
             HTTP response (:class:`pyoauth.http.ResponseAdapter`) if
             ``async_callback`` is not specified;
@@ -414,7 +422,7 @@ class _OAuthClient(object):
             auth_credentials,
             oauth_signature_method,
             self.oauth_version,
-            **extra_oauth_params
+            **kwargs
         )
         return self._http_client.fetch(request, async_callback)
 
@@ -602,7 +610,7 @@ class Client(_OAuthClient):
                                     oauth_signature_method=\
                                         SIGNATURE_METHOD_HMAC_SHA1,
                                     oauth_callback="oob",
-                                    **extra_oauth_params):
+                                    **kwargs):
         """
         Fetches temporary credentials.
 
@@ -628,8 +636,9 @@ class Client(_OAuthClient):
             Signature method.
         :param oauth_callback:
             OAuth callback URL; default case-sensitive "oob" (out-of-band).
-        :param extra_oauth_params:
-            Additional OAuth parameters.
+        :param kwargs:
+            Additional parameters including those that may begin with
+            ``oauth_``.
         :returns:
             HTTP response (:class:`pyoauth.http.ResponseAdapter`) if
             ``async_callback`` is not specified;
@@ -648,7 +657,7 @@ class Client(_OAuthClient):
                            realm=realm,
                            oauth_signature_method=oauth_signature_method,
                            oauth_callback=oauth_callback,
-                           **extra_oauth_params)
+                           **kwargs)
 
     def fetch_token_credentials(self,
                                 temporary_credentials,
@@ -658,7 +667,7 @@ class Client(_OAuthClient):
                                 realm=None, async_callback=None,
                                 oauth_signature_method=\
                                     SIGNATURE_METHOD_HMAC_SHA1,
-                                **extra_oauth_params):
+                                **kwargs):
         """
         Fetches token credentials using the temporary credentials.
 
@@ -684,19 +693,20 @@ class Client(_OAuthClient):
             Authorization realm.
         :param oauth_signature_method:
             Signature method.
-        :param extra_oauth_params:
-            Additional OAuth parameters.
+        :param kwargs:
+            Additional parameters including those that may begin with
+            ``oauth_``.
         :returns:
             HTTP response (:class:`pyoauth.http.ResponseAdapter`) if
             ``async_callback`` is not specified;
             otherwise, ``async_callback`` is called with the response as its
             argument.
         """
-        if "oauth_callback" in extra_oauth_params:
+        if "oauth_callback" in kwargs:
             raise IllegalArgumentError(
                 '`oauth_callback` is reserved for requesting temporary '\
                 'credentials only: got %r' % \
-                extra_oauth_params["oauth_callback"]
+                kwargs["oauth_callback"]
             )
 
         response = self._fetch(method, self._token_credentials_uri, params,
@@ -706,7 +716,7 @@ class Client(_OAuthClient):
                                auth_credentials=temporary_credentials,
                                oauth_signature_method=oauth_signature_method,
                                oauth_verifier=oauth_verifier,
-                               **extra_oauth_params)
+                               **kwargs)
         return response
 
     def fetch(self,
@@ -715,7 +725,7 @@ class Client(_OAuthClient):
               body=None, headers=None,
               realm=None, async_callback=None,
               oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1,
-              **extra_oauth_params):
+              **kwargs):
         """
         Fetches a resource using the token credentials.
 
@@ -743,8 +753,8 @@ class Client(_OAuthClient):
             Authorization realm.
         :param oauth_signature_method:
             Signature method.
-        :param extra_oauth_params:
-            Additional OAuth parameters.
+        :param kwargs:
+            Additional parameters including any that begin with ``oauth_``.
         :returns:
             HTTP response (:class:`pyoauth.http.ResponseAdapter`) if
             ``async_callback`` is not specified;
@@ -757,7 +767,7 @@ class Client(_OAuthClient):
                                realm=realm,
                                auth_credentials=token_credentials,
                                oauth_signature_method=oauth_signature_method,
-                               **extra_oauth_params)
+                               **kwargs)
         return response
 
     def get_authorization_url(self, temporary_credentials, **query_params):
