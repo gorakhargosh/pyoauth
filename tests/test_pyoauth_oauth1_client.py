@@ -4,7 +4,7 @@
 import unittest2
 from mom.builtins import is_bytes, is_bytes_or_unicode
 
-from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError, InvalidHttpRequestError, InvalidAuthorizationHeaderError, InvalidOAuthParametersError
+from pyoauth.error import InvalidSignatureMethodError, IllegalArgumentError, InvalidHttpResponseError, HttpError, InvalidContentTypeError, InvalidHttpRequestError, InvalidAuthorizationHeaderError, InvalidOAuthParametersError, SignatureMethodNotSupportedError
 from pyoauth.http import ResponseAdapter, RequestAdapter, CONTENT_TYPE_FORM_URLENCODED
 from pyoauth.oauth1 import Credentials
 from pyoauth.oauth1.client import _OAuthClient, Client
@@ -229,7 +229,7 @@ a:link {
         ), percent_decode("MdpQcU8iPSUjWoN%2FUDMsK2sui9I%3D"))
 
 
-    def test_raises_InvalidSignatureMethodError_when_invalid_signature_method(self):
+    def test_raises_SignatureMethodNotSupportedError_when_invalid_signature_method(self):
         params = {
             "method": "POST",
             "url": "https://photos.example.net/initiate",
@@ -243,7 +243,7 @@ a:link {
                 oauth_callback="http://printer.example.com/ready",
             )
         }
-        self.assertRaises(InvalidSignatureMethodError,
+        self.assertRaises(SignatureMethodNotSupportedError,
               _OAuthClient._generate_signature,
               params["method"],
               params["url"],
