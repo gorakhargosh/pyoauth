@@ -41,7 +41,7 @@ URL parsing and convenience utilities
 Query parameters
 ----------------
 .. autofunction:: query_add
-.. autofunction:: query_filter
+.. autofunction:: query_select
 .. autofunction:: query_unflatten
 
 Parameter sanitization
@@ -348,14 +348,14 @@ def query_append(*queries):
     return "&".join(sub_queries)
 
 
-def query_filter(query, predicate):
+def query_select(query, predicate):
     """
     Filters query parameters out of a query parameter dictionary or
     query string.
 
     Example::
 
-        query_filter(query, lambda k, v: k.startswith("oauth_"))
+        query_select(query, lambda k, v: k.startswith("oauth_"))
 
     :param query:
         Query parameter dictionary or query string.
@@ -470,7 +470,7 @@ def request_query_remove_non_oauth(query):
         else:
             logging.warning("Invalid protocol parameter ignored: `%r`", name)
             return False
-    return query_filter(query, predicate)
+    return query_select(query, predicate)
 
 
 def query_remove_oauth(query):
@@ -502,7 +502,7 @@ def query_remove_oauth(query):
                 "Protocol parameter ignored from URL query parameters: `%r`",
                 name)
             return False
-    return query_filter(query, predicate)
+    return query_select(query, predicate)
 
 
 def oauth_url_sanitize(url, force_secure=True):
