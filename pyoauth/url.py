@@ -53,10 +53,9 @@ Parameter sanitization
 
 import logging
 
-import itertools
-
 from mom.builtins import is_sequence, bytes, is_bytes_or_unicode
 from mom.codec.text import utf8_encode_if_unicode, utf8_encode
+from mom.functional import select_dict
 
 from pyoauth._compat import urlparse, urlunparse, parse_qs as _parse_qs, \
     quote, \
@@ -126,7 +125,7 @@ def percent_decode(value):
     return unquote_plus(value)
 
 
-def urlencode_s(query_params, allow_func=None):
+def urlencode_s(query_params, predicate=None):
     """
     Serializes a dictionary of query parameters into a string of query
     parameters, ``name=value`` pairs separated by ``&``, sorted first by
@@ -137,13 +136,13 @@ def urlencode_s(query_params, allow_func=None):
 
     :param query_params:
         Dictionary of query parameters.
-    :param allow_func:
+    :param predicate:
         A callback that will be called for each query parameter and should
         return ``False`` or a falsy value if that parameter should not be
         included. By default, all query parameters are included. The function
         takes the following method signature::
 
-            def allow_func(name, value):
+            def predicate(name, value):
                 return is_name_allowed(name) and is_value_allowed(value)
     :returns:
         A string of query parameters, ``name=value`` pairs separated by ``&``,
@@ -151,10 +150,10 @@ def urlencode_s(query_params, allow_func=None):
         percent-encoding rules and specification.
     """
     return "&".join([key + "=" + value for key, value in
-                     urlencode_sl(query_params, allow_func=allow_func)])
+                     urlencode_sl(query_params, predicate)])
 
 
-def urlencode_sl(query_params, allow_func=None):
+def urlencode_sl(query_params, predicate=None):
     """
     Serializes a dictionary of query parameters into a list of query
     parameters, ``(name, value)`` pairs, sorted first by ``name`` then by
@@ -164,13 +163,13 @@ def urlencode_sl(query_params, allow_func=None):
 
     :param query_params:
         Dictionary of query parameters.
-    :param allow_func:
+    :param predicate:
         A callback that will be called for each query parameter and should
         return ``False`` or a falsy value if that parameter should not be
         included. By default, all query parameters are included. The function
         takes the following method signature::
 
-            def allow_func(name, value):
+            def predicate(name, value):
                 return is_name_allowed(name) and is_value_allowed(value)
     :returns:
         A list of query parameters, ``(name, value)`` pairs, sorted first by
@@ -182,7 +181,7 @@ def urlencode_sl(query_params, allow_func=None):
     for key, value in query_params.items():
         # Keys are also percent-encoded according to OAuth spec.
         key = percent_encode(utf8_encode(key))
-        if allow_func and not allow_func(key, value):
+        if predicate and not predicate(key, value):
             continue
         elif is_bytes_or_unicode(value):
             encoded_pairs.append((key, percent_encode(value),))
@@ -251,7 +250,7 @@ def urlparse_normalized(url):
 
 
 #TODO: Add test for url_add_query uses OAuth param sort order.
-def url_add_query(url, query, allow_func=None):
+def url_add_query(url, query, predicate=None):
     """
     Adds additional query parameters to a URL while preserving existing ones.
 
@@ -263,13 +262,13 @@ def url_add_query(url, query, allow_func=None):
     :param query:
         The additional query parameters as a dictionary object or a query
         string.
-    :param allow_func:
+    :param predicate:
         A callback that will be called for each query parameter and should
         return ``False`` or a falsy value if that parameter should not be
         included. By default, all query parameters are included. The function
         takes the following method signature::
 
-            def allow_func(name, value):
+            def predicate(name, value):
                 return is_name_allowed(name) and is_value_allowed(value)
     :returns:
         A normalized URL with the fragment and existing query parameters
@@ -278,7 +277,7 @@ def url_add_query(url, query, allow_func=None):
     scheme, netloc, path, params, query_s, fragment = urlparse_normalized(url)
 
     query_d = query_add(query_s, query)
-    query_s = urlencode_s(query_d, allow_func=allow_func)
+    query_s = urlencode_s(query_d, predicate)
     return urlunparse((scheme, netloc, path, params, query_s, fragment))
 
 
@@ -350,40 +349,29 @@ def query_append(*queries):
     return "&".join(sub_queries)
 
 
-def query_filter(query, allow_func=None):
+def query_filter(query, predicate):
     """
     Filters query parameters out of a query parameter dictionary or
     query string.
 
     Example::
 
-        def allow_only_parameter_names_starting_with_oauth(name, value):
-            return name.startswith("oauth")
-
-        query_filter(query,
-            allow_func=allow_only_parameter_names_starting_with_oauth)
+        query_filter(query, lambda k, v: k.startswith("oauth_"))
 
     :param query:
         Query parameter dictionary or query string.
-    :param allow_func:
+    :param predicate:
         A callback that will be called for each query parameter and should
         return ``False`` or a falsy value if that parameter should not be
         included. By default, all query parameters are included. The function
         takes the following method signature::
 
-            def allow_func(name, value):
+            def predicate(name, value):
                 return is_name_allowed(name) and is_value_allowed(value)
     :returns:
         A filtered dictionary of query parameters.
     """
-    query_d = query_unflatten(query)
-    new_query_d = {}
-    for name, value in query_d.items():
-        if allow_func and not allow_func(name, value):
-            continue
-        else:
-            new_query_d[name] = value
-    return new_query_d
+    return select_dict(lambda (k, v): predicate(k, v), query_unflatten(query))
 
 
 def query_unflatten(query):
@@ -445,7 +433,7 @@ def request_query_remove_non_oauth(query):
     :returns:
         Filtered protocol parameters dictionary.
     """
-    def allow_func(name, value):
+    def predicate(name, value):
         """
         Allows only valid oauth parameters.
 
@@ -484,7 +472,7 @@ def request_query_remove_non_oauth(query):
         else:
             logging.warning("Invalid protocol parameter ignored: `%r`", name)
             return False
-    return query_filter(query, allow_func=allow_func)
+    return query_filter(query, predicate)
 
 
 def query_remove_oauth(query):
@@ -499,7 +487,7 @@ def query_remove_oauth(query):
     :returns:
         Filtered URL query parameter dictionary.
     """
-    def allow_func(name, _):
+    def predicate(name, _):
         """
         Removes any parameters beginning with ``oauth_``.
 
@@ -516,7 +504,7 @@ def query_remove_oauth(query):
                 "Protocol parameter ignored from URL query parameters: `%r`",
                 name)
             return False
-    return query_filter(query, allow_func=allow_func)
+    return query_filter(query, predicate)
 
 
 def oauth_url_sanitize(url, force_secure=True):

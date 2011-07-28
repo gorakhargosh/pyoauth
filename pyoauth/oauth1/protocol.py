@@ -468,7 +468,7 @@ def generate_base_string_query(url_query, oauth_params):
                             #"oauth_consumer_secret", # Sanitized above.
                             #"oauth_token_secret",    # Sanitized above.
                             )
-    query = urlencode_s(query_d, allow_func=allow_func)
+    query = urlencode_s(query_d, allow_func)
     return query
 
 
