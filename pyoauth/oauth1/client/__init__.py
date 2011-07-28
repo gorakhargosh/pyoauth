@@ -26,7 +26,7 @@ from pyoauth.http import CONTENT_TYPE_FORM_URLENCODED, RequestAdapter
 from pyoauth.error import \
     InvalidAuthorizationHeaderError, InvalidSignatureMethodError, \
     IllegalArgumentError, InvalidHttpRequestError, \
-    InvalidContentTypeError, HttpError, InvalidHttpResponseError
+    InvalidContentTypeError, HttpError, InvalidHttpResponseError, SignatureMethodNotSupportedError
 from pyoauth.oauth1 import \
     SIGNATURE_METHOD_HMAC_SHA1, \
     SIGNATURE_METHOD_RSA_SHA1, \
@@ -79,6 +79,16 @@ class _OAuthClient(object):
         Override if you need a different method.
         """
         return generate_timestamp()
+
+    @classmethod
+    def check_signature_method(cls, signature_method):
+        """Override this if you need to check your signature method.
+        Should raise an error if the method is not supported."""
+        if signature_method not in SIGNATURE_METHOD_MAP:
+            raise SignatureMethodNotSupportedError(
+                "OAuth 1.0 does not support the `%r` signature method." % \
+                signature_method
+            )
 
     @classmethod
     def _generate_oauth_params(cls,
@@ -205,6 +215,7 @@ class _OAuthClient(object):
         base_string = generate_base_string(method, signature_url, oauth_params)
 
         signature_method = oauth_params["oauth_signature_method"]
+        cls.check_signature_method(signature_method)
         try:
             sign_func = SIGNATURE_METHOD_MAP[signature_method]
             return sign_func(base_string,
@@ -586,7 +597,8 @@ class Client(_OAuthClient):
                  token_credentials_uri,
                  authorization_uri,
                  authentication_uri=None,
-                 use_authorization_header=True):
+                 use_authorization_header=True,
+                 strict=True):
         super(Client, self).__init__(client_credentials,
                                      http_client,
                                      use_authorization_header)
@@ -601,6 +613,7 @@ class Client(_OAuthClient):
                 oauth_url_sanitize(authentication_uri, False)
         else:
             self._authentication_uri = None
+        self._strict = strict
 
     def fetch_temporary_credentials(self,
                                     method="POST", params=None,
@@ -651,13 +664,24 @@ class Client(_OAuthClient):
                 oauth_callback
             )
 
-        return self._fetch(method, self._temporary_credentials_uri, params,
+        if async_callback:
+            def _async_callback(response):
+                return async_callback(
+                    *self.parse_temporary_credentials_response(response,
+                                                               self._strict)
+                )
+        else:
+            _async_callback = async_callback
+
+        resp = self._fetch(method, self._temporary_credentials_uri, params,
                            body, headers,
-                           async_callback=async_callback,
+                           async_callback=_async_callback,
                            realm=realm,
                            oauth_signature_method=oauth_signature_method,
                            oauth_callback=oauth_callback,
                            **kwargs)
+        return self.parse_temporary_credentials_response(resp, self._strict)
+
 
     def fetch_token_credentials(self,
                                 temporary_credentials,
@@ -709,15 +733,24 @@ class Client(_OAuthClient):
                 kwargs["oauth_callback"]
             )
 
+        if async_callback:
+            def _async_callback(response):
+                return async_callback(
+                    *self.parse_token_credentials_response(response,
+                                                           self._strict)
+                )
+        else:
+            _async_callback = async_callback
+
         response = self._fetch(method, self._token_credentials_uri, params,
                                body, headers,
-                               async_callback=async_callback,
+                               async_callback=_async_callback,
                                realm=realm,
                                auth_credentials=temporary_credentials,
                                oauth_signature_method=oauth_signature_method,
                                oauth_verifier=oauth_verifier,
                                **kwargs)
-        return response
+        return self.parse_token_credentials_response(response, self._strict)
 
     def fetch(self,
               token_credentials,

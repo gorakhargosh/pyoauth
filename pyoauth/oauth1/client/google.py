@@ -46,18 +46,25 @@ class GoogleClient(Client):
     def __init__(self,
                  http_client,
                  client_credentials,
-                 use_authorization_header=True):
+                 scopes,
+                 use_authorization_header=True,
+                 strict=False):
+        self._scope = scopes \
+                      if is_bytes_or_unicode(scopes) \
+                      else " ".join(scopes)
+
         super(GoogleClient, self).__init__(
             http_client,
             client_credentials=client_credentials,
             temporary_credentials_uri=self._TEMP_URI,
             token_credentials_uri=self._TOKEN_URI,
             authorization_uri=self._AUTH_URI,
-            use_authorization_header=use_authorization_header
+            use_authorization_header=use_authorization_header,
+            strict=strict,
         )
 
     @classmethod
-    def _check_signature_method(cls, signature_method):
+    def check_signature_method(cls, signature_method):
         if signature_method == SIGNATURE_METHOD_PLAINTEXT:
             raise SignatureMethodNotSupportedError(
                 "Google OAuth does not support the `%r` signature method." % \
@@ -73,26 +80,8 @@ class GoogleClient(Client):
                                         SIGNATURE_METHOD_HMAC_SHA1,
                                     oauth_callback="oob",
                                     **kwargs):
-        """
-
-        :param scopes:
-            A list of scopes to use with the credential request.
-        :param xoauth_displayname:
-            The display name of the application.
-        """
         params = params or {}
-        xoauth_displayname = kwargs.get('xoauth_displayname')
-        try:
-            scopes = kwargs['scopes']
-        except KeyError:
-            raise KeyError("Missing keyword argument: `scopes`")
-        scope = scopes if is_bytes_or_unicode(scopes) else " ".join(scopes)
-        google_params = dict(scope=scope)
-        if xoauth_displayname:
-            google_params["xoauth_displayname"] = xoauth_displayname
-        params.update(google_params)
-
-        GoogleClient._check_signature_method(oauth_signature_method)
+        params.update(dict(scope=self._scope))
 
         return super(GoogleClient, self).fetch_temporary_credentials(
             method=method,
@@ -104,17 +93,3 @@ class GoogleClient(Client):
             oauth_callback=oauth_callback,
             **kwargs
         )
-
-    @classmethod
-    def parse_temporary_credentials_response(cls, response, strict=False):
-        """
-        Non-compliant server.
-        """
-        return Client.parse_temporary_credentials_response(response, strict)
-
-    @classmethod
-    def parse_token_credentials_response(cls, response, strict=False):
-        """
-        Non-compliant server.
-        """
-        return Client.parse_token_credentials_response(response, strict)
