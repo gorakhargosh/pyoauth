@@ -330,7 +330,7 @@ class _OAuthClient(object):
         body = body or ""
         headers = headers or {}
 
-        # Split all the oauth parameters and non-oauth parameters.
+        # Split all the oauth parameters and function parameters.
         extra_oauth_params, kwargs = \
             partition_dict(lambda (k,v): k.startswith('oauth_'), kwargs)
 
