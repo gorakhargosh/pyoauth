@@ -16,7 +16,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1
+from mom.builtins import is_bytes_or_unicode
+from pyoauth.error import SignatureMethodNotSupportedError
+from pyoauth.oauth1 import SIGNATURE_METHOD_RSA_SHA1
 from pyoauth.oauth1.client import Client
 
 class LinkedInClient(Client):
@@ -25,28 +27,30 @@ class LinkedInClient(Client):
 
     :see: http://developer.linkedin.com/docs/DOC-1251
     """
-    _OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI = "https://api.linkedin.com/uas/oauth/requestToken"
-    _OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI = "https://www.linkedin.com/uas/oauth/authorize"
-    _OAUTH_TOKEN_CREDENTIALS_REQUEST_URI = "https://api.linkedin.com/uas/accessToken"
-    _OAUTH_TOKEN_CREDENTIALS_INVALIDATE_URI = "https://api.linkedin.com/uas/oauth/invalidateToken"
+    _TEMP_URI = "https://api.linkedin.com/uas/oauth/requestToken"
+    _AUTH_URI = "https://www.linkedin.com/uas/oauth/authorize"
+    _TOKEN_URI = "https://api.linkedin.com/uas/oauth/accessToken"
+    _TOKEN_INVALIDATE_URI = "https://api.linkedin.com/uas/oauth/invalidateToken"
 
     def __init__(self,
+                 http_client,
                  client_credentials,
-                 use_authorization_header=True):
+                 use_authorization_header=True,
+                 strict=False):
         super(LinkedInClient, self).__init__(
+            http_client,
             client_credentials=client_credentials,
-            temporary_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            token_credentials_request_uri=self._OAUTH_TEMPORARY_CREDENTIALS_REQUEST_URI,
-            resource_owner_authorization_uri=self._OAUTH_RESOURCE_OWNER_AUTHORIZATION_URI,
-            use_authorization_header=use_authorization_header
+            temporary_credentials_uri=self._TEMP_URI,
+            token_credentials_uri=self._TOKEN_URI,
+            authorization_uri=self._AUTH_URI,
+            use_authorization_header=use_authorization_header,
+            strict=strict,
         )
 
-
-    def build_invalidate_token_credentials_request(self,
-                                                   token_credentials,
-                                                   oauth_signature_method=SIGNATURE_METHOD_HMAC_SHA1):
-        return self._build_request(self,
-                                   "GET",
-                                   self._OAUTH_TOKEN_CREDENTIALS_INVALIDATE_URI,
-                                   token_or_temporary_credentials=token_credentials,
-                                   oauth_signature_method=oauth_signature_method)
+    @classmethod
+    def check_signature_method(cls, signature_method):
+        if signature_method == SIGNATURE_METHOD_RSA_SHA1:
+            raise SignatureMethodNotSupportedError(
+                "LinkedIn OAuth does not support the `%r` signature method." % \
+                signature_method
+            )
