@@ -318,8 +318,7 @@ class OAuthMixin(object):
         :param realm:
             The OAuth authorization realm.
         """
-        self._auth_redirect(callback_uri=callback_uri,
-                            realm=realm, authenticate=False)
+        self._auth_redirect(callback_uri, realm, False)
 
     def authenticate_redirect(self, callback_uri="oob", realm=None,
                               *args, **kwargs):
@@ -334,8 +333,7 @@ class OAuthMixin(object):
         """
         # Ask for temporary credentials, and when we get them, redirect
         # to authentication URL.
-        self._auth_redirect(callback_uri=callback_uri,
-                            realm=realm, authenticate=True)
+        self._auth_redirect(callback_uri, realm, True)
 
     def _auth_redirect(self, callback_uri, realm, authenticate):
         """
@@ -382,7 +380,7 @@ class OAuthMixin(object):
     def _on_temporary_credentials(self, authenticate, credentials):
         # Obtain the temporary credentials from the response
         # and save them temporarily in a session cookie.
-        self._set_temporary_credentials_cookie(credentials)
+        self.adapter_set_credentials_cookie(credentials)
         if authenticate:
             # Redirects to the authentication URL.
             url = self.oauth_client.get_authentication_url(credentials)
@@ -412,7 +410,7 @@ class OAuthMixin(object):
         oauth_verifier = self.adapter_request_get("oauth_verifier")
 
         # Obtain the temporary credentials saved in the browser cookie.
-        temp = self._get_temporary_credentials_from_cookie()
+        temp = self.adapter_read_credentials_cookie()
 
         # Verify that the oauth_token matches the one sent by the server
         # in the query string.
@@ -425,20 +423,6 @@ class OAuthMixin(object):
             temp, oauth_verifier=oauth_verifier, realm=realm
         )
         #self._oauth_get_user(token, callback)
-
-    def _get_temporary_credentials_from_cookie(self, name="_oauth_temporary_credentials"):
-        # Get the temporary credentials stored in the secure cookie and clear
-        # the cookie.
-        cookie = self.adapter_get_secure_cookie(name)
-        if cookie:
-            self.adapter_delete_cookie(name)
-            return Credentials(**cookie)
-        else:
-            logging.warning("Missing OAuth temporary credentials cookie.")
-            return None
-
-    def _set_temporary_credentials_cookie(self, credentials, cookie_name="_oauth_temporary_credentials"):
-        self.adapter_set_secure_cookie(cookie_name, credentials.to_dict())
 
     def _oauth_get_user(self, token_credentials, callback):
         raise NotImplementedError("OAuth mixin subclass authors must implement this.")

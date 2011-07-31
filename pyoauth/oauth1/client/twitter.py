@@ -32,7 +32,8 @@ class TwitterClient(Client):
     def __init__(self,
                  http_client,
                  client_credentials,
-                 use_authorization_header=True):
+                 use_authorization_header=True,
+                 strict=False):
         super(TwitterClient, self).__init__(
             http_client,
             client_credentials,
@@ -40,22 +41,9 @@ class TwitterClient(Client):
             self._TOKEN_URI,
             self._AUTHORIZATION_URI,
             self._AUTHENTICATION_URI,
-            use_authorization_header=use_authorization_header
+            use_authorization_header=use_authorization_header,
+            strict=strict
         )
-
-    @classmethod
-    def parse_temporary_credentials_response(cls, response, strict=False):
-        """
-        Non-compliant server.
-        """
-        return Client.parse_temporary_credentials_response(response, strict)
-
-    @classmethod
-    def parse_token_credentials_response(cls, response, strict=False):
-        """
-        Non-compliant server.
-        """
-        return Client.parse_token_credentials_response(response, strict)
 
 
 class TwitterMixin(OAuthMixin):
