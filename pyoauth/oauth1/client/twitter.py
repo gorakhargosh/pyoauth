@@ -18,6 +18,7 @@
 
 
 from pyoauth.oauth1.client import Client
+from pyoauth.oauth1.client.mixins import OAuthMixin
 
 class TwitterClient(Client):
     """
@@ -55,3 +56,11 @@ class TwitterClient(Client):
         Non-compliant server.
         """
         return Client.parse_token_credentials_response(response, strict)
+
+
+class TwitterMixin(OAuthMixin):
+    """
+    OAuth handler mixin. Use with an HttpAdapterMixin for your framework.
+    """
+    pass
+

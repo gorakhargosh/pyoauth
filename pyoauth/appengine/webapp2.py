@@ -18,10 +18,10 @@
 from __future__ import absolute_import
 
 from pyoauth.appengine.httpclient import HttpClient
-from pyoauth.http import HttpAdapterMixin
+from pyoauth.http import HttpAdapterMixin as _HttpAdapterMixin
 
 
-class Webapp2HttpAdapterMixin(HttpAdapterMixin):
+class HttpAdapterMixin(_HttpAdapterMixin):
     # Framework-specific adaptor.
     # This one is for webapp2.
     @property

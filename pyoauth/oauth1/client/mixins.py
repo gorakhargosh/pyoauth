@@ -370,13 +370,14 @@ class OAuthMixin(object):
 
         # Ask for temporary credentials, and when we get them, redirect
         # to either the authentication or authorization URL.
-        async_callback = partial(self._on_temporary_credentials,
-                                 authenticate=authenticate)
-        self.oauth_client.fetch_temporary_credentials(
+        #async_callback = partial(self._on_temporary_credentials,
+        #                         authenticate=authenticate)
+        temp, _ = self.oauth_client.fetch_temporary_credentials(
             realm=realm,
-            oauth_callback=callback_uri,
-            async_callback=async_callback
+            oauth_callback=callback_uri
+        #    async_callback=async_callback
         )
+        self._on_temporary_credentials(authenticate, temp)
 
     def _on_temporary_credentials(self, authenticate, credentials):
         # Obtain the temporary credentials from the response
@@ -411,46 +412,19 @@ class OAuthMixin(object):
         oauth_verifier = self.adapter_request_get("oauth_verifier")
 
         # Obtain the temporary credentials saved in the browser cookie.
-        temporary_credentials = self._get_temporary_credentials_from_cookie()
-        if not temporary_credentials:
-            callback(None)
-            return
+        temp = self._get_temporary_credentials_from_cookie()
 
         # Verify that the oauth_token matches the one sent by the server
         # in the query string.
-        try:
-            self.oauth_client.check_verification_code(
-                temporary_credentials,
-                oauth_token,
-                oauth_verifier
-            )
-        except InvalidHttpRequestError, e:
-            logging.exception(e)
-            callback(None)
-            return
-
-        # Ask for token credentials.
-        credentials, _ = self.oauth_client.fetch_token_credentials(
-            temporary_credentials,
-            oauth_verifier=oauth_verifier,
-            realm=realm
+        self.oauth_client.check_verification_code(
+            temp, oauth_token, oauth_verifier
         )
 
-
-    def _on_token_credentials(self, callback, response):
-        if response:
-            try:
-                params, credentials = \
-                    self.oauth_client.parse_token_credentials_response(response)
-                self._oauth_get_user(credentials, callback)
-            except Exception, e:
-                logging.exception(e)
-                callback(None)
-                return
-        else:
-            logging.warning("OAuth token credentials could not be fetched.")
-            callback(None)
-            return
+        # Ask for token credentials.
+        token, _ = self.oauth_client.fetch_token_credentials(
+            temp, oauth_verifier=oauth_verifier, realm=realm
+        )
+        #self._oauth_get_user(token, callback)
 
     def _get_temporary_credentials_from_cookie(self, name="_oauth_temporary_credentials"):
         # Get the temporary credentials stored in the secure cookie and clear
@@ -475,4 +449,3 @@ class OAuthMixin(object):
         else:
             user["oauth_token_credentials"] = token_credentials.to_dict()
             callback(user)
-
