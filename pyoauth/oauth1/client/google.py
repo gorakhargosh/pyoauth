@@ -63,6 +63,13 @@ class GoogleClient(Client):
             strict=strict,
         )
 
+    @property
+    def scope(self):
+        """
+        Returns the OAuth scope.
+        """
+        return self._scope
+
     @classmethod
     def check_signature_method(cls, signature_method):
         if signature_method == SIGNATURE_METHOD_PLAINTEXT:

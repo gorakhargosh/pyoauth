@@ -615,6 +615,16 @@ class Client(_OAuthClient):
             self._authentication_uri = None
         self._strict = strict
 
+    @property
+    def client_credentials(self):
+        """
+        Returns the client credentials associated with this client.
+
+        :returns:
+            Client credentials instance.
+        """
+        return self._client_credentials
+
     def fetch_temporary_credentials(self,
                                     method="POST", params=None,
                                     body=None, headers=None,
