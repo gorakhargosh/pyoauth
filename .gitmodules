@@ -1,3 +1,6 @@
 [submodule "docs/source/_themes/sphinx-theme-minimalism"]
 	path = docs/source/_themes/sphinx-theme-minimalism
 	url = git://github.com/gorakhargosh/sphinx-theme-minimalism.git
+[submodule "vendor/mom"]
+	path = vendor/mom
+	url = git://github.com/gorakhargosh/mom.git

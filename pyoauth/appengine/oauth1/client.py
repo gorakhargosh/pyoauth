@@ -36,14 +36,6 @@ class OAuthMixin(HttpAdapterMixin):
     """
     Framework-agnostic OAuth 1.0 handler mixin implementation.
     """
-    @property
-    def oauth_client_identifier(self):
-        raise NotImplementedError("This property must be overridden by the user handler to return the shared secret string.")
-
-    @property
-    def oauth_client_shared_secret(self):
-        raise NotImplementedError("This property must be overridden by the user handler to return the shared secret string.")
-
     @cached_property
     def oauth_client(self):
         raise NotImplementedError("This cached_property must be overridden by the derivative mixin author to return an OAuth client instance.")
