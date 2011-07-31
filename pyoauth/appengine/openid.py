@@ -165,7 +165,6 @@ class OpenIdMixin(object):
                 })
         return args
 
-
     def _on_authentication_verified(self, callback, response):
         """
         Called after the authentication attempt. It calls the callback function
@@ -187,7 +186,6 @@ class OpenIdMixin(object):
             return
 
         request_arguments = self.adapter_request_params
-        claimed_id = self.adapter_request_get("openid.claimed_id", "")
 
         # Make sure we got back at least an email from Attribute Exchange.
         ax_ns = None
@@ -201,37 +199,53 @@ class OpenIdMixin(object):
             ax_name = self._get_ax_name(ax_args, uri, ax_ns)
             return self.adapter_request_get(ax_name, u"")
 
-        email = get_ax_arg(self.ATTRIB_EMAIL)
-        country = get_ax_arg(self.ATTRIB_COUNTRY)
+        claimed_id = self.adapter_request_get("openid.claimed_id", "")
         name = get_ax_arg(self.ATTRIB_FULL_NAME)
         first_name = get_ax_arg(self.ATTRIB_FIRST_NAME)
         last_name = get_ax_arg(self.ATTRIB_LAST_NAME)
         username = get_ax_arg(self.ATTRIB_USERNAME)
+        email = get_ax_arg(self.ATTRIB_EMAIL)
         locale = get_ax_arg(self.ATTRIB_LANGUAGE).lower()
+        country = get_ax_arg(self.ATTRIB_COUNTRY)
 
+        user = self._get_user_dict(name, first_name, last_name, username,
+                                   email, locale, country, claimed_id)
+        callback(user)
+
+    @classmethod
+    def _get_user_dict(cls, name, first_name, last_name, username, email,
+                       locale, country, claimed_id):
         user = dict()
+
         name_parts = []
+        # First name and last name.
         if first_name:
             user["first_name"] = first_name
             name_parts.append(first_name)
         if last_name:
             user["last_name"] = last_name
             name_parts.append(last_name)
+
+        # Full name.
         if name:
             user["name"] = name
         elif name_parts:
             user["name"] = u" ".join(name_parts)
         elif email:
             user["name"] = email.split("@")[0]
-        if email: user["email"] = email
-        if locale: user["locale"] = locale
-        if username: user["username"] = username
-        if country: user["country"] = country
 
-        # Get the claimed ID. Not in facebook code. Borrowed from Tipfy.
-        user["claimed_id"] = claimed_id
-
-        callback(user)
+        # Other properties.
+        if email:
+            user["email"] = email
+        if locale:
+            user["locale"] = locale
+        if username:
+            user["username"] = username
+        if country:
+            user["country"] = country
+        if claimed_id:
+            user["claimed_id"] = claimed_id
+        return user
 
     @classmethod
     def _get_ax_args(cls, request_arguments, ax_ns):
