@@ -17,13 +17,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import absolute_import, with_statement
+
 import logging
 
 from urllib import urlencode
+from functools import partial
 from mom.functional import select_dict, map_dict
 from pyoauth._compat import urljoin
 from pyoauth.url import url_add_query
 from pyoauth.http import RequestAdapter, CONTENT_TYPE_FORM_URLENCODED
+from pyoauth.error import InvalidHttpRequestError
+from pyoauth.oauth1 import Credentials
 
 
 class OpenIdMixin(object):
@@ -52,7 +57,8 @@ class OpenIdMixin(object):
     SPEC_OAUTH_NS = "http://specs.openid.net/extensions/oauth/1.0"
     SPEC_AX_NS = "http://openid.net/srv/ax/1.0"
 
-    def authenticate_redirect(self, callback_uri=None, ax_attrs=None):
+    def authenticate_redirect(self, callback_uri=None, ax_attrs=None,
+                              oauth_scope=None):
         """
         Redirects to the authentication URL for this service.
 
@@ -74,7 +80,7 @@ class OpenIdMixin(object):
         ax_attrs = ax_attrs or ("name", "email",
                                 "language", "username", "country")
         callback_uri = callback_uri or self.adapter_request_path
-        args = self._openid_args(callback_uri, ax_attrs=ax_attrs)
+        args = self._openid_args(callback_uri, ax_attrs, oauth_scope)
         self.adapter_redirect(url_add_query(self._OPENID_ENDPOINT, args))
 
     def get_authenticated_user(self, callback):
@@ -278,3 +284,195 @@ class OpenIdMixin(object):
                 ax_name = "openid." + ax_ns + ".value." + part
                 break
         return ax_name
+
+
+class OAuthMixin(object):
+    """
+    Framework-agnostic OAuth 1.0 handler mixin implementation.
+    """
+    @property
+    def oauth_client(self):
+        raise NotImplementedError(
+            "This property must be overridden by a derivative "
+            "mixin to return an OAuth client instance."
+        )
+
+    def authorize_redirect(self, callback_uri="oob", realm=None,
+                           *args, **kwargs):
+        """
+        Redirects the resource owner to obtain OAuth authorization for this
+        service.
+
+        You should call this method to log the user in, and then call
+        :func:`get_authenticated_user` in the handler you registered
+        as your callback URL to complete the authorization process.
+
+        This method sets a cookie called
+        ``_oauth_temporary_credentials`` which is subsequently used (and
+        cleared) in :func:`get_authenticated_user` for security purposes.
+
+        :param callback_uri:
+            The callback URI path. For example, ``/auth/ready?format=json``
+            The host on which this handler is running will be used as the
+            base URI for this path.
+        :param realm:
+            The OAuth authorization realm.
+        """
+        self._auth_redirect(callback_uri=callback_uri,
+                            realm=realm, authenticate=False)
+
+    def authenticate_redirect(self, callback_uri="oob", realm=None,
+                              *args, **kwargs):
+        """
+        Just like authorize_redirect(), but auto-redirects if authorized.
+
+        This is generally the right interface to use if you are using
+        single sign-on.
+
+        Override this method in subclasses if authentication URLs are not
+        supported.
+        """
+        # Ask for temporary credentials, and when we get them, redirect
+        # to authentication URL.
+        self._auth_redirect(callback_uri=callback_uri,
+                            realm=realm, authenticate=True)
+
+    def _auth_redirect(self, callback_uri, realm, authenticate):
+        """
+        Redirects the resource owner to obtain OAuth authorization for this
+        service.
+
+        You should call this method to log the user in, and then call
+        :func:`get_authenticated_user` in the handler you registered
+        as your callback URL to complete the authorization process.
+
+        This method sets a cookie called
+        ``_oauth_temporary_credentials`` which is subsequently used (and
+        cleared) in :func:`get_authenticated_user` for security purposes.
+
+        :param callback_uri:
+            The callback URI path. For example, ``/auth/ready?format=json``
+            The host on which this handler is running will be used as the
+            base URI for this path.
+        :param realm:
+            The OAuth authorization realm.
+        :param authenticate:
+            Internal parameter. Not meant for use in client code.
+
+            When set to ``True``, the resource owner will be redirected
+            to an "authentication" URL instead of an "authorization" URL.
+            Authentication URLs automatically redirect back to the application
+            if the application is already authorized.
+        """
+        callback_uri = callback_uri or "oob"
+        if callback_uri and callback_uri != "oob":
+            callback_uri = urljoin(self.adapter_request_full_url, callback_uri)
+
+        # Ask for temporary credentials, and when we get them, redirect
+        # to either the authentication or authorization URL.
+        async_callback = partial(self._on_temporary_credentials,
+                                 authenticate=authenticate)
+        self.oauth_client.fetch_temporary_credentials(
+            realm=realm,
+            oauth_callback=callback_uri,
+            async_callback=async_callback
+        )
+
+    def _on_temporary_credentials(self, authenticate, credentials):
+        # Obtain the temporary credentials from the response
+        # and save them temporarily in a session cookie.
+        self._set_temporary_credentials_cookie(credentials)
+        if authenticate:
+            # Redirects to the authentication URL.
+            url = self.oauth_client.get_authentication_url(credentials)
+        else:
+            # Redirects to the authorization URL.
+            url = self.oauth_client.get_authorization_url(credentials)
+        self.adapter_redirect(url)
+
+    def get_authenticated_user(self, callback, realm=None):
+        """
+        Gets the OAuth authorized user and access token on callback.
+
+        This method should be called from the handler for your registered
+        OAuth callback URL to complete the registration process. We call
+        callback with the authenticated user, which in addition to standard
+        attributes like 'name' includes the 'access_key' attribute, which
+        contains the OAuth access you can use to make authorized requests
+        to this service on behalf of the user.
+
+        :param callback:
+            The callback that will be called upon successful authorization
+            with the user object as its first argument.
+        :param realm:
+            The realm for the authorization header.
+        """
+        oauth_token = self.adapter_request_get("oauth_token")
+        oauth_verifier = self.adapter_request_get("oauth_verifier")
+
+        # Obtain the temporary credentials saved in the browser cookie.
+        temporary_credentials = self._get_temporary_credentials_from_cookie()
+        if not temporary_credentials:
+            callback(None)
+            return
+
+        # Verify that the oauth_token matches the one sent by the server
+        # in the query string.
+        try:
+            self.oauth_client.check_verification_code(
+                temporary_credentials,
+                oauth_token,
+                oauth_verifier
+            )
+        except InvalidHttpRequestError, e:
+            logging.exception(e)
+            callback(None)
+            return
+
+        # Ask for token credentials.
+        credentials, _ = self.oauth_client.fetch_token_credentials(
+            temporary_credentials,
+            oauth_verifier=oauth_verifier,
+            realm=realm
+        )
+
+
+    def _on_token_credentials(self, callback, response):
+        if response:
+            try:
+                params, credentials = \
+                    self.oauth_client.parse_token_credentials_response(response)
+                self._oauth_get_user(credentials, callback)
+            except Exception, e:
+                logging.exception(e)
+                callback(None)
+                return
+        else:
+            logging.warning("OAuth token credentials could not be fetched.")
+            callback(None)
+            return
+
+    def _get_temporary_credentials_from_cookie(self, name="_oauth_temporary_credentials"):
+        # Get the temporary credentials stored in the secure cookie and clear
+        # the cookie.
+        cookie = self.adapter_get_secure_cookie(name)
+        if cookie:
+            self.adapter_delete_cookie(name)
+            return Credentials(**cookie)
+        else:
+            logging.warning("Missing OAuth temporary credentials cookie.")
+            return None
+
+    def _set_temporary_credentials_cookie(self, credentials, cookie_name="_oauth_temporary_credentials"):
+        self.adapter_set_secure_cookie(cookie_name, credentials.to_dict())
+
+    def _oauth_get_user(self, token_credentials, callback):
+        raise NotImplementedError("OAuth mixin subclass authors must implement this.")
+
+    def _on_oauth_get_user(self, token_credentials, callback, user):
+        if not user:
+            callback(None)
+        else:
+            user["oauth_token_credentials"] = token_credentials.to_dict()
+            callback(user)
+
