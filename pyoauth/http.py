@@ -169,3 +169,50 @@ class ResponseAdapter(object):
                 return None
         else:
             return None
+
+
+class HttpAdapterMixin(object):
+    """
+    Abstract implementation of an HTTP request adapter mixin.
+    """
+    @property
+    def adapter_request_full_url(self):
+        raise NotImplementedError()
+
+    @property
+    def adapter_request_path(self):
+        raise NotImplementedError()
+
+    @property
+    def adapter_request_params(self):
+        raise NotImplementedError()
+
+    def adapter_request_get(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    @property
+    def adapter_request_host(self):
+        raise NotImplementedError()
+
+    @property
+    def adapter_request_scheme(self):
+        raise NotImplementedError()
+
+    def adapter_redirect(self, url):
+        raise NotImplementedError()
+
+    def adapter_abort(self, status_code):
+        raise NotImplementedError()
+
+    def adapter_set_secure_cookie(self, cookie, value):
+        raise NotImplementedError()
+
+    def adapter_get_secure_cookie(self, cookie):
+        raise NotImplementedError()
+
+    def adapter_delete_cookie(self, cookie):
+        raise NotImplementedError()
+
+    @property
+    def adapter_http_client(self):
+        raise NotImplementedError()
