@@ -272,8 +272,7 @@ class _OAuthClient(object):
             url = url_append_query(url_add_query(url, params), oauth_params)
             if body and method == "GET":
                 raise InvalidHttpRequestError(
-                    "HTTP method GET does not take an entity body: got %r" % \
-                    body
+                    "HTTP method GET does not take an entity body"
                 )
             if body and \
                "content-length" not in headers and \
