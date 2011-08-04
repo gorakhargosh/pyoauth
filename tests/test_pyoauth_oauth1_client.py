@@ -180,21 +180,21 @@ class Test__OAuthClient__generate_signature(unittest2.TestCase):
             oauth_token_secret="pfkkdhi9sl3r4s00",
             oauth_params=oauth_params,
         )
-        self.assertRaises(KeyError,
-            _OAuthClient._generate_signature,
-            "GET",
-            # I Know ^ is a GET request and we're specifying a body in this
-            # test. _generate_signature does not validate HTTP methods,
-            # but only generates signatures. This example must produce
-            # the same signature as in the RFC example, hence the test.
-            "http://photos.example.net/photos",
-            params=None,
-            body="file=vacation.jpg&size=original",
-            headers={},
-            oauth_consumer_secret="kd94hf93k423kf44",
-            oauth_token_secret="pfkkdhi9sl3r4s00",
-            oauth_params=oauth_params,
-        )
+#        self.assertRaises(KeyError,
+#            _OAuthClient._generate_signature,
+#            "GET",
+#            # I Know ^ is a GET request and we're specifying a body in this
+#            # test. _generate_signature does not validate HTTP methods,
+#            # but only generates signatures. This example must produce
+#            # the same signature as in the RFC example, hence the test.
+#            "http://photos.example.net/photos",
+#            params=None,
+#            body="file=vacation.jpg&size=original",
+#            headers={},
+#            oauth_consumer_secret="kd94hf93k423kf44",
+#            oauth_token_secret="pfkkdhi9sl3r4s00",
+#            oauth_params=oauth_params,
+#        )
 
     def test_ignores_body_params_if_content_type_is_not_urlencoded(self):
         oauth_params = dict(
@@ -388,16 +388,6 @@ class Test__OAuthClient_check_verification_code(unittest2.TestCase):
                           _OAuthClient.check_verification_code,
                           temporary_credentials, "non-matching-token",
                           "verification-code")
-
-    def test_returns_verification_code(self):
-        temporary_credentials = Credentials(identifier="hh5s93j4hdidpola",
-                                            shared_secret="hdhd0244k9j7ao03")
-        self.assertEqual(
-            _OAuthClient.check_verification_code(
-                temporary_credentials,
-                temporary_credentials.identifier,
-                "verification-code"
-            ), "verification-code")
 
 
 class Test__OAuthClient_urls(unittest2.TestCase):

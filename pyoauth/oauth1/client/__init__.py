@@ -203,9 +203,8 @@ class _OAuthClient(object):
                         (CONTENT_TYPE_FORM_URLENCODED, body)
                     )
             except KeyError:
-                raise KeyError(
-                    "Entity-body specified but `Content-Type` header " \
-                    "is missing: got body %r" % body
+                logging.warning(
+                    "Entity-body specified but `Content-Type` is missing "
                 )
 
         # Make oauth params and sign the request.
@@ -465,7 +464,6 @@ class _OAuthClient(object):
                 "does not match temporary credentials: `%r`" % \
                 (oauth_token, temporary_credentials.identifier)
             )
-        return oauth_verifier
 
     @classmethod
     def parse_temporary_credentials_response(cls, response, strict=True):
