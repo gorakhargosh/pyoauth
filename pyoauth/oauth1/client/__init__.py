@@ -705,6 +705,8 @@ class Client(_OAuthClient):
 
         :param temporary_credentials:
             Temporary credentials obtained in a previous step.
+        :param oauth_verifier:
+            The oauth verification code you received after user-authorization.
         :param method:
             HTTP method.
         :param params:
