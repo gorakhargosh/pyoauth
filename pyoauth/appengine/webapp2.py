@@ -16,9 +16,11 @@
 # under the License.
 
 from __future__ import absolute_import
+
 import logging
 
 from pyoauth.appengine.httpclient import HttpClient
+from pyoauth.constants import OAUTH_TEMP_COOKIE_NAME
 from pyoauth.http import HttpAdapterMixin as _HttpAdapterMixin
 from pyoauth.oauth1 import Credentials
 
@@ -64,7 +66,7 @@ class HttpAdapterMixin(_HttpAdapterMixin):
     def adapter_delete_cookie(self, cookie):
         self.response.delete_cookie(cookie)
 
-    def adapter_read_credentials_cookie(self, name="_oauth_temporary_credentials"):
+    def adapter_read_credentials_cookie(self, name=OAUTH_TEMP_COOKIE_NAME):
         # Get the temporary credentials stored in the secure cookie and clear
         # the cookie.
         cookie = self.adapter_get_secure_cookie(name)
@@ -75,7 +77,8 @@ class HttpAdapterMixin(_HttpAdapterMixin):
             logging.warning("Missing OAuth temporary credentials cookie.")
             return None
 
-    def adapter_set_credentials_cookie(self, credentials, cookie_name="_oauth_temporary_credentials"):
+    def adapter_set_credentials_cookie(self, credentials,
+                                       cookie_name=OAUTH_TEMP_COOKIE_NAME):
         self.adapter_set_secure_cookie(cookie_name, credentials.to_dict())
 
     @property

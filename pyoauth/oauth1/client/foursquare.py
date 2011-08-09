@@ -16,7 +16,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# TODO: Largely untested because I don't have an OAuth 1.0 consumer.
+# TODO: Largely untested because I don't have an OAuth 1.0 consumer key.
 
 """
 :module: pyoauth.oauth1.client.foursquare
@@ -27,21 +27,26 @@
    :show-inheritance:
 """
 
-from mom.builtins import is_bytes_or_unicode
+from __future__ import absolute_import
+
+from mom.builtins import is_bytes_or_unicode, b
 from pyoauth.oauth1.client import Client
 
 
 class FoursquareClient(Client):
     """
+    Foursquare OAuth 1.0 client.
     """
-    _TEMP_URI = "https://www.foursquare.com/oauth/request_token"
-    _TOKEN_URI = "https://www.foursquare.com/oauth/access_token"
-    _AUTHORIZATION_URI = "https://www.foursquare.com/oauth/authorize"
+    _TEMP_URI = b("https://www.foursquare.com/oauth/request_token")
+    _TOKEN_URI = b("https://www.foursquare.com/oauth/access_token")
+    _AUTHORIZATION_URI = b("https://www.foursquare.com/oauth/authorize")
     # Automatically redirects if user has already authorized.
-    _AUTHENTICATION_URI = "https://www.foursquare.com/oauth/authenticate"
-    _MOBILE_AUTHORIZATION_URI = "https://www.foursquare.com/mobile/oauth/authorize"
+    _AUTHENTICATION_URI = b("https://www.foursquare.com/oauth/authenticate")
+    _MOBILE_AUTHORIZATION_URI = \
+        b("https://www.foursquare.com/mobile/oauth/authorize")
     # Automatically redirects if the user has already authorized.
-    _MOBILE_AUTHENTICATION_URI = "https://www.foursquare.com/mobile/oauth/authenticate"
+    _MOBILE_AUTHENTICATION_URI = \
+        b("https://www.foursquare.com/mobile/oauth/authenticate")
 
     def __init__(self,
                  http_client,

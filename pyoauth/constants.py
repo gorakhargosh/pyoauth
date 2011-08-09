@@ -25,6 +25,7 @@ SYMBOL_NEWLINE = b("\n")
 SYMBOL_SEMICOLON = b(";")
 SYMBOL_PIPE = b("|")
 SYMBOL_ZERO = b("0")
+SYMBOL_SPACE = b(" ")
 
 OAUTH_VERSION_1 = b("1.0")
 OAUTH_REALM = b("realm")
@@ -45,6 +46,11 @@ OAUTH_PARAM_CALLBACK_CONFIRMED = b("oauth_callback_confirmed")
 OAUTH_VALUE_CALLBACK_CONFIRMED = b("true")
 OAUTH_VALUE_CALLBACK_OOB = b("oob")
 
+OAUTH_TEMP_COOKIE_NAME = b("_oauthtempcred")
+
+HMAC_SHA1 = b("HMAC-SHA1")
+RSA_SHA1 = b("RSA-SHA1")
+PLAINTEXT = b("PLAINTEXT")
 
 HTTP_GET = b("GET")
 HTTP_POST = b("POST")

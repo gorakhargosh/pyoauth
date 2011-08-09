@@ -16,7 +16,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import absolute_import
 
+from mom.builtins import b
+from pyoauth.constants import HTTP_POST, OAUTH_VALUE_CALLBACK_OOB
 from pyoauth.error import SignatureMethodNotSupportedError
 from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, SIGNATURE_METHOD_RSA_SHA1
 
@@ -29,12 +32,12 @@ class YahooClient(Client):
 
     :see: http://developer.yahoo.com/oauth/guide/oauth-auth-flow.html
     """
-    _TEMP_URI = "https://api.login.yahoo.com/oauth/v2/get_request_token"
-    _AUTH_URI = "https://api.login.yahoo.com/oauth/v2/request_auth"
-    _TOKEN_URI = "https://api.login.yahoo.com/oauth/v2/get_token"
+    _TEMP_URI = b("https://api.login.yahoo.com/oauth/v2/get_request_token")
+    _AUTH_URI = b("https://api.login.yahoo.com/oauth/v2/request_auth")
+    _TOKEN_URI = b("https://api.login.yahoo.com/oauth/v2/get_token")
 
     def __init__(self, http_client, client_credentials,
-                 xoauth_lang_pref="EN-US",
+                 xoauth_lang_pref=b("EN-US"),
                  use_authorization_header=False, strict=False):
         self._xoauth_lang_pref = xoauth_lang_pref or None
         super(YahooClient, self).__init__(
@@ -56,13 +59,13 @@ class YahooClient(Client):
             )
 
     def fetch_temporary_credentials(self,
-                                    method="POST", params=None,
+                                    method=HTTP_POST, params=None,
                                     body=None, headers=None,
                                     realm=None,
                                     async_callback=None,
                                     oauth_signature_method=\
                                         SIGNATURE_METHOD_HMAC_SHA1,
-                                    oauth_callback="oob",
+                                    oauth_callback=OAUTH_VALUE_CALLBACK_OOB,
                                     **kwargs):
         params = params or {}
         params.update(dict(xoauth_lang_pref=self._xoauth_lang_pref))

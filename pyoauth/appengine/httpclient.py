@@ -16,12 +16,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import absolute_import
+
 import logging
 
 from functools import partial
 from google.appengine.api import urlfetch
 
 from pyoauth.http import ResponseAdapter
+from vendor.mom.mom.builtins import b
 
 
 class HttpResponseError(object):

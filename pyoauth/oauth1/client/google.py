@@ -25,8 +25,10 @@
    :show-inheritance:
 """
 
-from mom.builtins import is_bytes_or_unicode
+from __future__ import absolute_import
 
+from mom.builtins import is_bytes_or_unicode, b
+from pyoauth.constants import SYMBOL_SPACE, HTTP_POST, OAUTH_VALUE_CALLBACK_OOB
 from pyoauth.error import SignatureMethodNotSupportedError
 from pyoauth.oauth1 import \
     SIGNATURE_METHOD_HMAC_SHA1, SIGNATURE_METHOD_PLAINTEXT
@@ -39,9 +41,9 @@ class GoogleClient(Client):
 
     :see: http://code.google.com/apis/accounts/docs/OAuth_ref.html
     """
-    _TEMP_URI = "https://www.google.com/accounts/OAuthGetRequestToken"
-    _AUTH_URI = "https://www.google.com/accounts/OAuthAuthorizeToken"
-    _TOKEN_URI = "https://www.google.com/accounts/OAuthGetAccessToken"
+    _TEMP_URI = b("https://www.google.com/accounts/OAuthGetRequestToken")
+    _AUTH_URI = b("https://www.google.com/accounts/OAuthAuthorizeToken")
+    _TOKEN_URI = b("https://www.google.com/accounts/OAuthGetAccessToken")
 
     def __init__(self,
                  http_client,
@@ -51,7 +53,7 @@ class GoogleClient(Client):
                  strict=False):
         self._scope = scopes \
                       if is_bytes_or_unicode(scopes) \
-                      else " ".join(scopes)
+                      else SYMBOL_SPACE.join(scopes)
 
         super(GoogleClient, self).__init__(
             http_client,
@@ -74,18 +76,18 @@ class GoogleClient(Client):
     def check_signature_method(cls, signature_method):
         if signature_method == SIGNATURE_METHOD_PLAINTEXT:
             raise SignatureMethodNotSupportedError(
-                "Google OAuth does not support the `%r` signature method." % \
+                "Google OAuth does not support the `%r` signature method." %
                 signature_method
             )
 
     def fetch_temporary_credentials(self,
-                                    method="POST", params=None,
+                                    method=HTTP_POST, params=None,
                                     body=None, headers=None,
                                     realm=None,
                                     async_callback=None,
                                     oauth_signature_method=\
                                         SIGNATURE_METHOD_HMAC_SHA1,
-                                    oauth_callback="oob",
+                                    oauth_callback=OAUTH_VALUE_CALLBACK_OOB,
                                     **kwargs):
         params = params or {}
         params.update(dict(scope=self._scope))

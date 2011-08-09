@@ -20,7 +20,7 @@ import logging
 
 from mom.builtins import b
 from mom.codec import base64_urlsafe_encode, base64_urlsafe_decode
-from pyoauth.constants import SYMBOL_PIPE
+from pyoauth.constants import SYMBOL_PIPE, OAUTH_TEMP_COOKIE_NAME
 from pyoauth.httplib2.httpclient import HttpClient
 from pyoauth.http import HttpAdapterMixin as _HttpAdapterMixin
 from pyoauth.oauth1 import Credentials
@@ -68,7 +68,7 @@ class HttpAdapterMixin(_HttpAdapterMixin):
     def adapter_delete_cookie(self, cookie):
         self.clear_cookie(cookie)
 
-    def adapter_read_credentials_cookie(self, name=b("_oauthtempcred")):
+    def adapter_read_credentials_cookie(self, name=OAUTH_TEMP_COOKIE_NAME):
         # Get the temporary credentials stored in the secure cookie and clear
         # the cookie.
         cookie = self.adapter_get_secure_cookie(name)
@@ -81,7 +81,7 @@ class HttpAdapterMixin(_HttpAdapterMixin):
             return None
 
     def adapter_set_credentials_cookie(self, credentials,
-                                       cookie_name=b("_oauthtempcred")):
+                                       cookie_name=OAUTH_TEMP_COOKIE_NAME):
         value = SYMBOL_PIPE.join(map(base64_urlsafe_encode,
                                      [credentials.identifier,
                                      credentials.shared_secret]))

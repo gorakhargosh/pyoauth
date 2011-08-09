@@ -17,17 +17,21 @@
 # under the License.
 
 
+from __future__ import absolute_import
+
+from mom.builtins import b
 from pyoauth.oauth1.client import Client
 from pyoauth.oauth1.client.mixins import OAuthMixin
+
 
 class TwitterClient(Client):
     """
     Creates an instance of a Twitter OAuth 1.0 client.
     """
-    _TEMP_URI = "https://api.twitter.com/oauth/request_token"
-    _TOKEN_URI = "https://api.twitter.com/oauth/access_token"
-    _AUTHORIZATION_URI = "https://api.twitter.com/oauth/authorize"
-    _AUTHENTICATION_URI = "https://api.twitter.com/oauth/authenticate"
+    _TEMP_URI = b("https://api.twitter.com/oauth/request_token")
+    _TOKEN_URI = b("https://api.twitter.com/oauth/access_token")
+    _AUTHORIZATION_URI = b("https://api.twitter.com/oauth/authorize")
+    _AUTHENTICATION_URI = b("https://api.twitter.com/oauth/authenticate")
 
     def __init__(self,
                  http_client,
