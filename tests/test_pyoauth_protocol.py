@@ -4,7 +4,7 @@
 import unittest2
 
 from mom.builtins import is_bytes_or_unicode, is_bytes
-from mom.codec import bytes_to_long, base64_decode
+from mom.codec import bytes_to_integer, base64_decode
 
 from pyoauth.error import \
     InvalidOAuthParametersError, \
@@ -52,7 +52,7 @@ class Test_generate_client_secret(unittest2.TestCase):
     def test_range(self):
         for i in range(100):
             n_bits = 144
-            value = bytes_to_long(base64_decode(generate_client_secret(144)))
+            value = bytes_to_integer(base64_decode(generate_client_secret(144)))
             self.assertTrue(value >= 0 and value < (2L ** n_bits))
 
 
