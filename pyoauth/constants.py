@@ -14,6 +14,7 @@ SYMBOL_COMMA = b(",")
 SYMBOL_EQUAL = b("=")
 SYMBOL_INVERTED_DOUBLE_QUOTE = b('"')
 SYMBOL_NEWLINE = b("\n")
+SYMBOL_SEMICOLON = b(";")
 
 OAUTH_REALM = b("realm")
 OAUTH_AUTH_SCHEME = b('OAuth ')
@@ -25,3 +26,4 @@ OAUTH_PARAM_SIGNATURE = b("oauth_signature")
 OAUTH_PARAM_CONSUMER_SECRET = b("oauth_consumer_secret")
 OAUTH_PARAM_TOKEN_SECRET = b("oauth_token_secret")
 
+CONTENT_TYPE = b("Content-Type")
