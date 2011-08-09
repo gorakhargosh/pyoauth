@@ -27,8 +27,18 @@ Request and Response Adapters
 
 """
 
+from __future__ import absolute_import
 
-CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded"
+from mom.codec.text import ascii_encode
+from mom.builtins import b
+
+
+HTTP_METHODS = tuple(map(ascii_encode, ("POST", "GET", "PUT", "DELETE",
+               "OPTIONS", "TRACE", "HEAD", "CONNECT",
+               "PATCH")))
+
+CONTENT_TYPE_FORM_URLENCODED = b("application/x-www-form-urlencoded")
+
 
 class RequestAdapter(object):
     """Adaptor HTTP Request class.
@@ -151,7 +161,7 @@ class ResponseAdapter(object):
     @property
     def content_type(self):
         """Determines the content type of the response."""
-        return self.get_header("Content-Type").split(";", 1)[0]
+        return self.get_header(b("Content-Type")).split(b(";"), 1)[0]
 
     def is_body_form_urlencoded(self):
         """Determines whether the response has content type form urlencoded."""
@@ -160,11 +170,11 @@ class ResponseAdapter(object):
     @property
     def content_type_encoding(self):
         """Determines the content type of the response."""
-        header = self.get_header("Content-Type")
+        header = self.get_header(b("Content-Type"))
         if ";" in header:
-            content_type, encoding = header.split(";", 1)
+            content_type, encoding = header.split(b(";"), 1)
             if encoding:
-                return encoding.strip().split('=', 1)[1]
+                return encoding.strip().split(b('='), 1)[1]
             else:
                 return None
         else:
