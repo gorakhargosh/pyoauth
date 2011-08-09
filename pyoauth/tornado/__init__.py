@@ -18,7 +18,7 @@
 from __future__ import absolute_import
 import logging
 
-from mom.codec import base64_encode, base64_decode
+from mom.codec import base64_urlsafe_encode, base64_urlsafe_decode
 from pyoauth.httplib2.httpclient import HttpClient
 from pyoauth.http import HttpAdapterMixin as _HttpAdapterMixin
 from pyoauth.oauth1 import Credentials
@@ -66,21 +66,21 @@ class HttpAdapterMixin(_HttpAdapterMixin):
     def adapter_delete_cookie(self, cookie):
         self.clear_cookie(cookie)
 
-    def adapter_read_credentials_cookie(self, name="_oauth_temporary_credentials"):
+    def adapter_read_credentials_cookie(self, name="_oauthtempcred"):
         # Get the temporary credentials stored in the secure cookie and clear
         # the cookie.
         cookie = self.adapter_get_secure_cookie(name)
         if cookie:
             self.adapter_delete_cookie(name)
-            identifier, shared_secret = map(base64_decode, cookie.split("|"))
-            return Credentials(identifier, shared_secret)
+            id, secret = map(base64_urlsafe_decode, cookie.split("|"))
+            return Credentials(id, secret)
         else:
             logging.warning("Missing OAuth temporary credentials cookie.")
             return None
 
     def adapter_set_credentials_cookie(self, credentials,
-                                       cookie_name="_oauth_temporary_credentials"):
-        value = "|".join(map(base64_encode, [credentials.identifier,
+                                       cookie_name="_oauthtempcred"):
+        value = "|".join(map(base64_urlsafe_encode, [credentials.identifier,
                                              credentials.shared_secret]))
         self.adapter_set_secure_cookie(cookie_name, value)
 
