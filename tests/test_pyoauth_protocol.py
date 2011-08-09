@@ -6,6 +6,8 @@ import unittest2
 from mom.builtins import is_bytes_or_unicode, is_bytes
 from mom.codec import bytes_to_integer, base64_decode
 
+from tests.constants import constants
+
 from pyoauth.error import \
     InvalidOAuthParametersError, \
     InvalidAuthorizationHeaderError, \
@@ -39,7 +41,7 @@ class Test_generate_nonce(unittest2.TestCase):
 
     def test_range(self):
         value = long(generate_nonce(64))
-        self.assertTrue(value >= 0 and value < (2L ** 64))
+        self.assertTrue(value >= 0 and value < (1 << 64)) # 2**64
 
 
 class Test_generate_client_secret(unittest2.TestCase):
@@ -53,7 +55,7 @@ class Test_generate_client_secret(unittest2.TestCase):
         for i in range(100):
             n_bits = 144
             value = bytes_to_integer(base64_decode(generate_client_secret(144)))
-            self.assertTrue(value >= 0 and value < (2L ** n_bits))
+            self.assertTrue(value >= 0 and value < (1 << n_bits)) # 2**n_bits
 
 
 class Test_generate_verification_code(unittest2.TestCase):
@@ -435,10 +437,10 @@ a2=r%20b\
 &oauth_timestamp=137131201\
 &oauth_token=kkk9d7dh3k39sjv7"""
         self.simplegeo_example_url_query_params = {
-            'multi': ['FOO', 'BAR', u'\u00ae', '\xc2\xae'],
+            'multi': ['FOO', 'BAR', constants.test_unicode_string, constants.test_utf8_bytes],
             'multi_same': ['FOO', 'FOO'],
-            'uni_utf8_bytes': '\xc2\xae',
-            'uni_unicode_object': u'\u00ae',
+            'uni_utf8_bytes': constants.test_utf8_bytes,
+            'uni_unicode_object': constants.test_unicode_string,
         }
         self.simplegeo_example_oauth_params = {
             'oauth_version': "1.0",

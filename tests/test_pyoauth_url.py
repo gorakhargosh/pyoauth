@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import unittest2
 
+from tests.constants import constants
 from mom.codec.text import utf8_encode_if_unicode
-from urlparse import urlparse
+from pyoauth._compat import urlparse
 
 from pyoauth.error import InvalidUrlError, \
     InvalidQueryParametersError, \
@@ -150,23 +153,12 @@ class Test_percent_encode(unittest2.TestCase):
                        "´",
                        "å",
                        ]
-        self.uni_utf8_bytes = '\xc2\xae'
-        self.uni_unicode_object = u'\u00ae'
+        self.uni_utf8_bytes = constants.test_utf8_bytes
+        self.uni_unicode_object = constants.test_unicode_string
 
     def test_oauth_test_cases(self):
         # http://wiki.oauth.net/w/page/12238556/TestCases
-        ex = [
-            ('abcABC123', 'abcABC123'),
-            ('-._~', '-._~'),
-            ('%', '%25'),
-            ('+', '%2B'),
-            ('&=*', '%26%3D%2A'),
-            (u'\u000A', '%0A'),
-            (u'\u0020', '%20'),
-            (u'\u007F', '%7F'),
-            (u'\u0080', '%C2%80'),
-            (u'\u3001', '%E3%80%81'),
-        ]
+        ex = constants.percent_encode_test_cases
         for k, v in ex:
             self.assertEqual(percent_encode(k), v)
 
@@ -254,12 +246,12 @@ class Test_percent_decode(unittest2.TestCase):
                        "/",
                        "`",
                        "´",
-                       u"å",
+                       constants.test_unicode_angstrom,
                        ]
 
     def test_percent_encoded_unicode_input(self):
         self.assertEqual(percent_decode("%FF%FE%E5%00%E9%00%EE%00%F8%00%FC%00"),
-                     u'åéîøü'.encode("utf-16"))
+                     constants.test_unicode_aeiou.encode("utf-16"))
 
     def test_plus_is_treated_as_space_character(self):
         self.assertEqual(
@@ -268,18 +260,7 @@ class Test_percent_decode(unittest2.TestCase):
 
     def test_oauth_test_cases(self):
         # http://wiki.oauth.net/w/page/12238556/TestCases
-        ex = [
-            ('abcABC123', 'abcABC123'),
-            ('-._~', '-._~'),
-            ('%', '%25'),
-            ('+', '%2B'),
-            ('&=*', '%26%3D%2A'),
-            (u'\u000A', '%0A'),
-            (u'\u0020', '%20'),
-            (u'\u007F', '%7F'),
-            (u'\u0080', '%C2%80'),
-            (u'\u3001', '%E3%80%81'),
-        ]
+        ex = constants.percent_encode_test_cases
         for k, v in ex:
             self.assertEqual(percent_decode(v), utf8_encode_if_unicode(k))
 
