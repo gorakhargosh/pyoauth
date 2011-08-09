@@ -76,7 +76,11 @@ OAuth authorization headers.
 
 from __future__ import absolute_import
 
-from itertools import imap
+try:
+    # Python 2.x
+    from itertools import imap as map
+except ImportError:
+    pass
 
 from mom.codec import decimal_encode, base64_encode, base64_decode
 from mom.codec.text import utf8_encode
@@ -367,7 +371,7 @@ def _generate_plaintext_signature(client_shared_secret,
     client_shared_secret = client_shared_secret or ""
     token_shared_secret = token_shared_secret or ""
     if _percent_encode:
-        return "&".join(imap(percent_encode,
+        return "&".join(map(percent_encode,
                             (client_shared_secret, token_shared_secret)))
     else:
         # User clients can forget to do this and this has been fixed
@@ -423,7 +427,7 @@ def generate_base_string(method, url, oauth_params):
         None,
         None
     ))
-    return "&".join(imap(percent_encode,
+    return "&".join(map(percent_encode,
                         (method_normalized, normalized_url, query_string)))
 
 
