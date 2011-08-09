@@ -4,7 +4,10 @@
 # All the byte literals used throughout the codebase.
 #
 # The major reason why we're doing this is to avoid the call overhead to
-# b() repeatedly. We need b() because we're supporting Python 2.5 as well
+# b() repeatedly. The second reason is when we drop support for Python 2.5.
+# there's only one place to edit and get rid of b() (well, almost).
+#
+# We need b() because we're supporting Python 2.5 as well
 # which does not have byte literal syntax sugar. b fakes it for all versions
 # of Python 2.5+.
 
