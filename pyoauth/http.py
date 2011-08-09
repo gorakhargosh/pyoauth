@@ -31,7 +31,7 @@ from __future__ import absolute_import
 
 from mom.codec.text import ascii_encode
 from mom.builtins import b
-from pyoauth.constants import CONTENT_TYPE, SYMBOL_SEMICOLON, SYMBOL_EQUAL
+from pyoauth.constants import HEADER_CONTENT_TYPE_CAPS, SYMBOL_SEMICOLON, SYMBOL_EQUAL
 
 
 HTTP_METHODS = tuple(map(ascii_encode, ("POST", "GET", "PUT", "DELETE",
@@ -162,7 +162,7 @@ class ResponseAdapter(object):
     @property
     def content_type(self):
         """Determines the content type of the response."""
-        return self.get_header(CONTENT_TYPE).split(SYMBOL_SEMICOLON, 1)[0]
+        return self.get_header(HEADER_CONTENT_TYPE_CAPS).split(SYMBOL_SEMICOLON, 1)[0]
 
     def is_body_form_urlencoded(self):
         """Determines whether the response has content type form urlencoded."""
@@ -171,7 +171,7 @@ class ResponseAdapter(object):
     @property
     def content_type_encoding(self):
         """Determines the content type of the response."""
-        header = self.get_header(CONTENT_TYPE)
+        header = self.get_header(HEADER_CONTENT_TYPE_CAPS)
         if SYMBOL_SEMICOLON in header:
             content_type, encoding = header.split(SYMBOL_SEMICOLON, 1)
             if encoding:
