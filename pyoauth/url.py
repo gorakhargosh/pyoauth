@@ -135,7 +135,6 @@ def percent_decode(value):
     :returns:
         Percent-decoded value.
     """
-    value = utf8_decode_if_bytes(value)
     return utf8_decode_if_bytes(unquote_plus(value))
 
 

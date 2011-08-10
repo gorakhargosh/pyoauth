@@ -275,11 +275,9 @@ class Test_percent_decode(unittest2.TestCase):
 
     def test_oauth_test_cases(self):
         # http://wiki.oauth.net/w/page/12238556/TestCases
-        ex = constants.percent_encode_test_cases
+        ex = constants.percent_decode_test_cases
         for decoded, encoded in ex:
-            got = percent_decode(encoded)
-            logging.warning(">>>>>>>>>>>>>>>>>>>>>>>> %r", got)
-            self.assertEqual(got, decoded)
+            self.assertEqual(percent_decode(encoded), decoded)
 
             
 class Test_urlencode_s(unittest2.TestCase):

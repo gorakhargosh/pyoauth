@@ -16,11 +16,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import absolute_import
+
+from mom.builtins import is_bytes, b
+from mom.codec.text import utf8_decode
 
 try:
     # Python 3.
     from urllib.parse import urlparse, urlunparse, parse_qs, quote, \
-        unquote_plus, urljoin, unquote
+        unquote_to_bytes, urljoin, unquote
+    def unquote_plus(v):
+        if is_bytes(v):
+            v = v.replace(b('+'), b(' '))
+        else:
+            v = v.replace('+', ' ')
+        return utf8_decode(unquote_to_bytes(v))
 except ImportError:
     # Python 2.5+
     from urlparse import urlparse, urlunparse, urljoin
