@@ -20,11 +20,11 @@
 try:
     # Python 3.
     from urllib.parse import urlparse, urlunparse, parse_qs, quote, \
-        unquote_plus, urljoin
+        unquote_plus, urljoin, unquote
 except ImportError:
     # Python 2.5+
     from urlparse import urlparse, urlunparse, urljoin
-    from urllib import quote, unquote_plus
+    from urllib import quote, unquote_plus, unquote
     try:
         # Python 2.6+
         from urlparse import parse_qs
@@ -46,3 +46,4 @@ parse_qs = parse_qs
 unquote_plus = unquote_plus
 quote = quote
 urlparse = urlparse
+unquote = unquote
