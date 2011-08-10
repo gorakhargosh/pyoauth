@@ -17,6 +17,7 @@
 # under the License.
 
 from __future__ import absolute_import
+from pyoauth.http import ResponseAdapter
 
 
 class HttpClient(object):
@@ -65,16 +66,16 @@ class HttpClient(object):
 #                deadline=10
 #            )
         else:
-            try:
-                response = urlfetch.fetch(
-                    url=request.url,
-                    payload=request.body,
-                    method=request.method,
-                    headers=request.headers,
-                    deadline=10)
-            except urlfetch.DownloadError, e:
-                logging.exception(e)
-                response = None
+#            try:
+            response = urlfetch.fetch(
+                url=request.url,
+                payload=request.body,
+                method=request.method,
+                headers=request.headers,
+                deadline=10)
+#            except urlfetch.DownloadError, e:
+#                logging.exception(e)
+#                response = None
             return ResponseAdapter(response.status_code, response.status,
                                    response.content, response.headers)
 

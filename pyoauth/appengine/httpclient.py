@@ -55,19 +55,20 @@ def create_rpc_callback(rpc, callback, *args, **kwargs):
         callback = partial(callback, *args, **kwargs)
 
     def wrapper(*args, **kwargs):
-        try:
-            result = rpc.get_result()
-            code = result.status_code
-            # Add 'body' and 'error' attributes expected by tornado.
-            setattr(result, 'body', result.content)
-            if code < 200 or code >= 300:
-                setattr(result, 'error', 'Error %d' % code)
-            else:
-                setattr(result, 'error', None)
+#        try:
+        result = rpc.get_result()
+        code = result.status_code
+        # Add 'body' and 'error' attributes expected by tornado.
+        setattr(result, 'body', result.content)
+        if code < 200 or code >= 300:
+            setattr(result, 'error', 'Error %d' % code)
+        else:
+            setattr(result, 'error', None)
 
-        except urlfetch.DownloadError, e:
-            logging.exception(e)
-            result = HttpResponseError()
+# Not valid Python 3 syntax.
+#        except urlfetch.DownloadError, e:
+#            logging.exception(e)
+#            result = HttpResponseError()
 
         try:
             args += (result,)
@@ -123,16 +124,16 @@ class HttpClient(object):
                 deadline=10
             )
         else:
-            try:
-                response = urlfetch.fetch(
-                    url=request.url,
-                    payload=request.body,
-                    method=request.method,
-                    headers=request.headers,
-                    deadline=10)
-            except urlfetch.DownloadError, e:
-                logging.exception(e)
-                response = None
+#            try:
+            response = urlfetch.fetch(
+                url=request.url,
+                payload=request.body,
+                method=request.method,
+                headers=request.headers,
+                deadline=10)
+#            except urlfetch.DownloadError, e:
+#                logging.exception(e)
+#                response = None
             return ResponseAdapter(response.status_code, response.status,
                                    response.content, response.headers)
 
