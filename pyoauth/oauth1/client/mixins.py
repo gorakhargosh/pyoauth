@@ -17,18 +17,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+
 from __future__ import absolute_import, with_statement
 
 import logging
 
 from urllib import urlencode
-from functools import partial
 from mom.functional import select_dict, map_dict
 from pyoauth._compat import urljoin
+from pyoauth.constants import OPENID_MODE_CHECK_AUTHENTICATION, \
+    HEADER_CONTENT_TYPE, HTTP_POST, OAUTH_VALUE_CALLBACK_OOB, \
+    OAUTH_PARAM_TOKEN, OAUTH_PARAM_VERIFIER, OPENID_MODE_CHECKID_SETUP, \
+    OPENID_AX_MODE_FETCH_REQUEST
 from pyoauth.url import url_add_query
 from pyoauth.http import RequestAdapter, CONTENT_TYPE_FORM_URLENCODED
-from pyoauth.error import InvalidHttpRequestError
-from pyoauth.oauth1 import Credentials
 
 
 class OpenIdMixin(object):
@@ -101,12 +103,12 @@ class OpenIdMixin(object):
 
         # Verify the OpenID response via direct request to the OP
         args = map_dict(lambda k, v: (k, v[-1]), request_arguments)
-        args["openid.mode"] = u"check_authentication"
+        args["openid.mode"] = OPENID_MODE_CHECK_AUTHENTICATION
         url = self._OPENID_ENDPOINT
 
         response = http.fetch(RequestAdapter(
-            "POST", url, urlencode(args), {
-                "content-type": CONTENT_TYPE_FORM_URLENCODED,
+            HTTP_POST, url, urlencode(args), {
+                HEADER_CONTENT_TYPE: CONTENT_TYPE_FORM_URLENCODED,
             }
         ))
         self._on_authentication_verified(callback, response)
@@ -136,12 +138,12 @@ class OpenIdMixin(object):
             "openid.identity": self.SPEC_IDENTIFIER_SELECT,
             "openid.return_to": url,
             "openid.realm": request_protocol + "://" + request_host + "/",
-            "openid.mode": "checkid_setup",
+            "openid.mode": OPENID_MODE_CHECKID_SETUP,
         }
         if ax_attrs:
             args.update({
                 "openid.ns.ax": self.SPEC_AX_NS,
-                "openid.ax.mode": "fetch_request",
+                "openid.ax.mode": OPENID_AX_MODE_FETCH_REQUEST,
             })
             ax_attrs = set(ax_attrs)
             required = []
@@ -297,7 +299,8 @@ class OAuthMixin(object):
             "mixin to return an OAuth client instance."
         )
 
-    def authorize_redirect(self, callback_uri="oob", realm=None,
+    def authorize_redirect(self, callback_uri=OAUTH_VALUE_CALLBACK_OOB,
+                           realm=None,
                            *args, **kwargs):
         """
         Redirects the resource owner to obtain OAuth authorization for this
@@ -320,7 +323,8 @@ class OAuthMixin(object):
         """
         self._auth_redirect(callback_uri, realm, False)
 
-    def authenticate_redirect(self, callback_uri="oob", realm=None,
+    def authenticate_redirect(self, callback_uri=OAUTH_VALUE_CALLBACK_OOB,
+                              realm=None,
                               *args, **kwargs):
         """
         Just like authorize_redirect(), but auto-redirects if authorized.
@@ -362,8 +366,8 @@ class OAuthMixin(object):
             Authentication URLs automatically redirect back to the application
             if the application is already authorized.
         """
-        callback_uri = callback_uri or "oob"
-        if callback_uri and callback_uri != "oob":
+        callback_uri = callback_uri or OAUTH_VALUE_CALLBACK_OOB
+        if callback_uri and callback_uri != OAUTH_VALUE_CALLBACK_OOB:
             callback_uri = urljoin(self.adapter_request_full_url, callback_uri)
 
         # Ask for temporary credentials, and when we get them, redirect
@@ -406,8 +410,8 @@ class OAuthMixin(object):
         :param realm:
             The realm for the authorization header.
         """
-        oauth_token = self.adapter_request_get("oauth_token")
-        oauth_verifier = self.adapter_request_get("oauth_verifier")
+        oauth_token = self.adapter_request_get(OAUTH_PARAM_TOKEN)
+        oauth_verifier = self.adapter_request_get(OAUTH_PARAM_VERIFIER)
 
         # Obtain the temporary credentials saved in the browser cookie.
         temp = self.adapter_read_credentials_cookie()
@@ -432,4 +436,6 @@ class OAuthMixin(object):
             callback(None)
         else:
             user["oauth_token_credentials"] = token_credentials.to_dict()
+            # For compatibility with tornado.
+            user["access_token"] = token_credentials.to_dict()
             callback(user)

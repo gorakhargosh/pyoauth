@@ -87,7 +87,8 @@ import time
 
 from mom.builtins import b
 from mom.codec import decimal_encode, base64_encode, base64_decode
-from mom.codec.text import utf8_encode, ascii_encode
+from mom.codec.text import utf8_encode, utf8_decode_if_bytes, \
+    utf8_encode_if_unicode
 from mom.security.hash import hmac_sha1_base64_digest, sha1_digest
 from mom.security.random import \
     generate_random_bits, \
@@ -95,17 +96,12 @@ from mom.security.random import \
 
 from pyoauth.constants import \
     SYMBOL_INVERTED_DOUBLE_QUOTE, \
-    OAUTH_AUTH_HEADER_PREFIX, \
-    OAUTH_AUTH_SCHEME, \
     SYMBOL_EQUAL, \
     SYMBOL_COMMA, \
-    OAUTH_REALM, \
-    SYMBOL_NEWLINE, \
     OAUTH_AUTH_SCHEME_PATTERN, \
-    OAUTH_AUTH_SCHEME_LOWERCASE, \
     SYMBOL_EMPTY_BYTES, \
     OAUTH_PARAM_SIGNATURE, \
-    SYMBOL_AMPERSAND
+    SYMBOL_AMPERSAND, OAUTH_PARAM_REALM
 from pyoauth._compat import urlunparse
 from pyoauth.http import HTTP_METHODS
 from pyoauth.url import percent_encode, percent_decode, \
@@ -394,7 +390,8 @@ def _generate_plaintext_signature(client_shared_secret,
         # by OAuth 1.0a, so we use this piece of code to detect whether
         # the user's OAuth client library complies with the specification
         # when in debugging mode.
-        return SYMBOL_AMPERSAND.join((client_shared_secret, token_shared_secret))
+        return SYMBOL_AMPERSAND.join((client_shared_secret,
+                                      token_shared_secret))
 
 
 def generate_base_string(method, url, oauth_params):
@@ -405,7 +402,8 @@ def generate_base_string(method, url, oauth_params):
     Any query parameter by the name "oauth_signature" will be excluded
     from the base string.
 
-    :see: Signature base string (http://tools.ietf.org/html/rfc5849#section-3.4.1)
+    :see: Signature base string
+    (http://tools.ietf.org/html/rfc5849#section-3.4.1)
 
     :param method:
         HTTP request method.
@@ -420,7 +418,7 @@ def generate_base_string(method, url, oauth_params):
         Base string.
     """
     allowed_methods = HTTP_METHODS
-    method_normalized = ascii_encode(method.upper())
+    method_normalized = method.upper()
     if method_normalized not in allowed_methods:
         raise InvalidHttpMethodError(
             "Method must be one of the HTTP methods %s: "\
@@ -494,7 +492,7 @@ def generate_base_string_query(url_query, oauth_params):
 
 def generate_authorization_header(oauth_params,
                                   realm=None,
-                                  param_delimiter=SYMBOL_COMMA):
+                                  param_delimiter=","):
     """
     Builds the Authorization header value.
 
@@ -521,12 +519,12 @@ def generate_authorization_header(oauth_params,
     :returns:
         A properly formatted Authorization header value.
     """
+    param_delimiter = utf8_encode_if_unicode(param_delimiter)
     if realm:
-        value = OAUTH_AUTH_HEADER_PREFIX + utf8_encode(realm) + \
-                SYMBOL_INVERTED_DOUBLE_QUOTE + \
-                utf8_encode(param_delimiter)
+        value = b('OAuth realm="') + utf8_encode_if_unicode(realm) + \
+                SYMBOL_INVERTED_DOUBLE_QUOTE + param_delimiter
     else:
-        value = OAUTH_AUTH_SCHEME
+        value = b("OAuth ")
     oauth_params = request_query_remove_non_oauth(oauth_params)
     normalized_param_pairs = urlencode_sl(oauth_params)
     value += param_delimiter.join([k +
@@ -537,8 +535,9 @@ def generate_authorization_header(oauth_params,
                                for k, v in normalized_param_pairs])
     return value
 
+
 def parse_authorization_header(header_value,
-                               param_delimiter=SYMBOL_COMMA,
+                               param_delimiter=',',
                                strict=True):
     """
     Parses the OAuth Authorization header.
@@ -570,6 +569,7 @@ def parse_authorization_header(header_value,
         realm will be ``None`` if the authorization header does not have
         a ``realm`` parameter.
     """
+    header_value = utf8_decode_if_bytes(header_value)
     realm = None
     params = {}
     for name, value \
@@ -581,7 +581,7 @@ def parse_authorization_header(header_value,
         # in the Authorization header value.
         #
         #params[name] = [value]
-        if not name == OAUTH_REALM:
+        if not name == OAUTH_PARAM_REALM:
             # The ``realm`` parameter is not included into the protocol
             # parameters list.
             if name in params:
@@ -599,7 +599,7 @@ def parse_authorization_header(header_value,
 
 
 def _parse_authorization_header_l(header,
-                                  param_delimiter=SYMBOL_COMMA,
+                                  param_delimiter=",",
                                   strict=True):
     """
     Parses the OAuth Authorization header preserving the order of the
@@ -630,10 +630,10 @@ def _parse_authorization_header_l(header,
         A list of parameter name value pairs in order of appearance.
     """
     if strict:
-        if SYMBOL_NEWLINE in header:
+        if "\n" in header:
             raise ValueError("Header value must be on a single line: got `%r`" \
                              % (header,))
-        if param_delimiter != SYMBOL_COMMA:
+        if param_delimiter != ",":
             raise ValueError("The param delimiter must be a comma: got `%r`" \
                              % (param_delimiter,))
     header = _authorization_header_strip_scheme(header.strip())
@@ -655,7 +655,8 @@ def _parse_authorization_header_l(header,
     return decoded_pairs
 
 
-def _authorization_header_strip_scheme(header, _pattern=OAUTH_AUTH_SCHEME_PATTERN):
+def _authorization_header_strip_scheme(header,
+                                       _pattern=OAUTH_AUTH_SCHEME_PATTERN):
     """
     Strips the auth-scheme component from an OAuth Authorization header.
 
@@ -668,11 +669,10 @@ def _authorization_header_strip_scheme(header, _pattern=OAUTH_AUTH_SCHEME_PATTER
     :returns:
         The header without the authorization scheme.
     """
-    if not header.lower().startswith(OAUTH_AUTH_SCHEME_LOWERCASE):
+    if not header.lower().startswith("oauth "):
         raise ValueError("Authorization scheme must be `OAuth`: got `%r`" \
                          % header)
-
-    return re.sub(_pattern, SYMBOL_EMPTY_BYTES, header, 1)
+    return re.sub(_pattern, "", header, 1)
 
 
 def _authorization_header_parse_param(param):
@@ -692,7 +692,7 @@ def _authorization_header_parse_param(param):
     """
     # Split into a name, value pair.
     try:
-        name, value = param.split(SYMBOL_EQUAL, 1)
+        name, value = param.split("=", 1)
     except ValueError:
         raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" \
                                               % (param,))
@@ -707,8 +707,8 @@ def _authorization_header_parse_param(param):
             "bad parameter value: `%r` -- missing quotes?" % (param,))
 
     # Value must be quoted between " characters.
-    if value[0] != SYMBOL_INVERTED_DOUBLE_QUOTE or \
-       value[-1] != SYMBOL_INVERTED_DOUBLE_QUOTE:
+    if value[0] != '"' or \
+       value[-1] != '"':
         raise InvalidAuthorizationHeaderError(
             "missing quotes around parameter value: `%r` "\
             "-- values must be quoted using (\")" % (param,))
@@ -722,11 +722,11 @@ def _authorization_header_parse_param(param):
     # Names and values must be percent-decoded except for the ``realm``
     # parameter.
     name = percent_decode(name)
-    if name.lower() == OAUTH_REALM:
+    if name.lower() == "realm":
         # "realm" is case-insensitive.
         # The realm parameter value is a simple quoted string.
         # It is neither percent-encoded nor percent-decoded in OAuth.
-        name = OAUTH_REALM
+        name = "realm"
     else:
         # Percent decode if the parameter is not ``realm``.
         value = percent_decode(value)

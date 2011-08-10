@@ -53,19 +53,31 @@ Parameter sanitization
 
 import logging
 
-from mom.builtins import is_sequence, bytes, is_bytes_or_unicode
-from mom.codec.text import utf8_encode_if_unicode, utf8_encode
+from mom.builtins import is_sequence, bytes, is_bytes_or_unicode, is_bytes
+from mom.codec.text import utf8_encode_if_unicode, \
+    utf8_encode, utf8_decode_if_bytes
 from mom.functional import select_dict, map_dict
 
+from mom.builtins import b
 from pyoauth._compat import urlparse, urlunparse, parse_qs as _parse_qs, \
     quote, \
     unquote_plus
+from pyoauth.constants import SYMBOL_QUESTION_MARK, \
+    SYMBOL_AMPERSAND, SYMBOL_EQUAL, OAUTH_PARAM_PREFIX, \
+    OAUTH_VALUE_CALLBACK_OOB, OAUTH_PARAM_CONSUMER_SECRET, \
+    OAUTH_PARAM_TOKEN_SECRET, SYMBOL_EMPTY_BYTES
 from pyoauth.error import InvalidQueryParametersError, \
     InsecureOAuthParametersError, \
     InvalidOAuthParametersError, \
     InsecureOAuthUrlError, \
     InvalidUrlError
 
+# Redefine str to behave like in Python 3.
+
+try:
+    str = unicode
+except NameError:
+    pass
 
 def parse_qs(query_string):
     """
@@ -79,8 +91,8 @@ def parse_qs(query_string):
         Query string to parse. If ``query_string`` starts with a ``?`` character
         it will be ignored for convenience.
     """
-    query_string = utf8_encode_if_unicode(query_string) or ""
-    if query_string.startswith("?"):
+    query_string = utf8_encode_if_unicode(query_string) or SYMBOL_EMPTY_BYTES
+    if query_string.startswith(SYMBOL_QUESTION_MARK):
         logging.warning(
             "Ignoring `?` query string prefix -- `%r`", query_string)
         query_string = query_string[1:]
@@ -106,8 +118,9 @@ def percent_encode(value):
         Percent-encoded string.
    """
     # Escapes '/' too
-    value = bytes(utf8_encode_if_unicode(value))
-    return quote(value, safe="~")
+    if not is_bytes(value):
+        value = utf8_encode(str(value))
+    return quote(value, safe="~").encode("ascii")
 
 
 def percent_decode(value):
@@ -122,7 +135,8 @@ def percent_decode(value):
     :returns:
         Percent-decoded value.
     """
-    return unquote_plus(value)
+    value = utf8_decode_if_bytes(value)
+    return utf8_decode_if_bytes(unquote_plus(value))
 
 
 def urlencode_s(query_params, predicate=None):
@@ -149,8 +163,9 @@ def urlencode_s(query_params, predicate=None):
         sorted first by ``name`` and then by ``value`` based on the OAuth
         percent-encoding rules and specification.
     """
-    return "&".join([key + "=" + value for key, value in
-                     urlencode_sl(query_params, predicate)])
+    return SYMBOL_AMPERSAND.join(
+        key + SYMBOL_EQUAL + value
+        for key, value in urlencode_sl(query_params, predicate))
 
 
 def urlencode_sl(query_params, predicate=None):
@@ -178,10 +193,10 @@ def urlencode_sl(query_params, predicate=None):
     """
     query_params = query_params or {}
     encoded_pairs = []
-    for key, value in query_params.items():
+    for k, value in query_params.items():
         # Keys are also percent-encoded according to OAuth spec.
-        key = percent_encode(utf8_encode(key))
-        if predicate and not predicate(key, value):
+        key = percent_encode(k)
+        if predicate and not predicate(k, value):
             continue
         elif is_bytes_or_unicode(value):
             encoded_pairs.append((key, percent_encode(value),))
@@ -222,29 +237,32 @@ def urlparse_normalized(url):
 
     scheme      = parts.scheme.lower()
     # Netloc.
-    username    = parts.username or ""
-    password    = (":" + parts.password) if parts.password else ""
+    username    = parts.username or SYMBOL_EMPTY_BYTES
+    password    = (b(":") + parts.password) if parts.password \
+                  else SYMBOL_EMPTY_BYTES
     credentials = username + password
-    credentials = (credentials + "@") if credentials else ""
+    credentials = (credentials + b("@")) if credentials else SYMBOL_EMPTY_BYTES
+    hostname = utf8_encode_if_unicode(parts.hostname.lower())
 
     # Exclude default port numbers.
     # See:
     if parts.port:
-        if (scheme == "http" and parts.port == 80) \
-        or (scheme == "https" and parts.port == 443):
-            port = ""
+        if (scheme == b("http") and parts.port == 80) \
+        or (scheme == b("https") and parts.port == 443):
+            port = SYMBOL_EMPTY_BYTES
         else:
-            port = (":" + str(parts.port)) if parts.port else ""
+            port = (b(":") + str(parts.port).encode("ascii")) if parts.port \
+                   else SYMBOL_EMPTY_BYTES
     else:
-        port = ""
+        port = SYMBOL_EMPTY_BYTES
 
-    netloc        = credentials + parts.hostname.lower() + port
+    netloc        = credentials + hostname + port
     # http://tools.ietf.org/html/rfc3986#section-3
     # and http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.2.2
-    path          = parts.path or "/"
-    matrix_params = parts.params or ""
-    fragment      = parts.fragment or ""
-    query         = parts.query or ""
+    path          = parts.path or b("/")
+    matrix_params = parts.params or SYMBOL_EMPTY_BYTES
+    fragment      = parts.fragment or SYMBOL_EMPTY_BYTES
+    query         = parts.query or SYMBOL_EMPTY_BYTES
 
     return scheme, netloc, path, matrix_params, query, fragment
 
@@ -305,7 +323,7 @@ def url_append_query(url, query):
     if not query:
         return url
     scheme, netloc, path, params, query_s, fragment = urlparse_normalized(url)
-    query_s = (query_s + "&") if query_s else query_s
+    query_s = (query_s + SYMBOL_AMPERSAND) if query_s else query_s
     query_s = query_s + urlencode_s(query_unflatten(query))
     return urlunparse((scheme, netloc, path, params, query_s, fragment))
 
@@ -345,7 +363,7 @@ def query_append(*queries):
         query_s = urlencode_s(query_unflatten(query))
         if query_s:
             sub_queries.append(query_s)
-    return "&".join(sub_queries)
+    return SYMBOL_AMPERSAND.join(sub_queries)
 
 
 def query_select(query, predicate):
@@ -444,7 +462,8 @@ def request_query_remove_non_oauth(query):
         :returns:
             ``True`` if the parameter should be included; ``False`` otherwise.
         """
-        if name.startswith("oauth_"):
+        name = utf8_decode_if_bytes(name)
+        if name.startswith(OAUTH_PARAM_PREFIX):
             # This gets rid of "realm" or any non-OAuth param.
             if len(value) > 1:
                 # Multiple values for a protocol parameter are not allowed.
@@ -460,7 +479,8 @@ def request_query_remove_non_oauth(query):
                 raise InvalidOAuthParametersError(
                     "Multiple protocol parameter values found %r=%r" \
                     % (name, value))
-            elif name in ("oauth_consumer_secret", "oauth_token_secret", ):
+            elif name in (OAUTH_PARAM_CONSUMER_SECRET,
+                          OAUTH_PARAM_TOKEN_SECRET, ):
                 raise InsecureOAuthParametersError(
                     "[SECURITY-ISSUE] Client attempting to transmit "\
                     "confidential protocol parameter `%r`. Communication "\
@@ -495,7 +515,8 @@ def query_remove_oauth(query):
             ``True`` if should be included; ``False`` otherwise.
         """
         # This gets rid of any params beginning with "oauth_"
-        if not name.startswith("oauth_"):
+        name = utf8_decode_if_bytes(name)
+        if not name.startswith(OAUTH_PARAM_PREFIX):
             return True
         else:
             logging.warning(
@@ -520,11 +541,11 @@ def oauth_url_sanitize(url, force_secure=True):
     """
     scheme, netloc, path, params, query, _ = urlparse_normalized(url)
     query = urlencode_s(query_remove_oauth(query))
-    if force_secure and scheme != "https":
+    if force_secure and scheme != b("https"):
         raise InsecureOAuthUrlError(
             "OAuth 1.0 specification requires the use of SSL/TLS for "\
             "inter-server communication.")
-    elif not force_secure and scheme != "https":
+    elif not force_secure and scheme != b("https"):
         logging.warning(
             "CAUTION: RFC specification requires the use of SSL/TLS "\
             "for credential requests.")
@@ -542,11 +563,10 @@ def is_valid_callback_url(url):
     :returns:
         ``True`` if valid; ``False`` otherwise.
     """
-    if not is_bytes_or_unicode(url):
+    if not is_bytes(url):
         return False
-    if url == "oob":
+    if url == OAUTH_VALUE_CALLBACK_OOB:
         return True
     else:
         scheme, netloc, _, _, _, _ = urlparse(url)
-        return scheme.lower() in ("http", "https") and netloc
-
+        return scheme.lower() in (b("http"), b("https")) and netloc

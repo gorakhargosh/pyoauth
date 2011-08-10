@@ -7,11 +7,11 @@ test_unicode_string = '\u00ae'
 test_utf8_bytes = b'\xc2\xae'
 
 percent_encode_test_cases = [
-    (b'abcABC123', b'abcABC123'),
-    (b'-._~', b'-._~'),
-    (b'%', b'%25'),
-    (b'+', b'%2B'),
-    (b'&=*', b'%26%3D%2A'),
+    ('abcABC123', b'abcABC123'),
+    ('-._~', b'-._~'),
+    ('%', b'%25'),
+    ('+', b'%2B'),
+    ('&=*', b'%26%3D%2A'),
     ('\u000A', b'%0A'),
     ('\u0020', b'%20'),
     ('\u007F', b'%7F'),

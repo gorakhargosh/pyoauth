@@ -19,8 +19,8 @@ from __future__ import absolute_import
 
 import logging
 
-from mom.codec.text import utf8_encode
-from mom.functional import partition_dict
+from mom.codec.text import utf8_encode, utf8_decode_if_bytes
+from mom.functional import partition_dict, map_dict
 
 from pyoauth.constants import \
     OAUTH_PARAM_VERSION, OAUTH_PARAM_SIGNATURE, OAUTH_PARAM_TOKEN, \
@@ -295,7 +295,7 @@ class _OAuthClient(object):
                 # Append to payload and set content type.
                 body = utf8_encode(query_append(params, oauth_params))
                 headers[HEADER_CONTENT_TYPE] = CONTENT_TYPE_FORM_URLENCODED
-                headers[HEADER_CONTENT_LENGTH] = str(len(body))
+                headers[HEADER_CONTENT_LENGTH] = str(len(body)).encode("ascii")
             else:
                 # Zero-length body.
                 body = SYMBOL_EMPTY_BYTES
@@ -596,6 +596,8 @@ class _OAuthClient(object):
                     CONTENT_TYPE_FORM_URLENCODED, response.content_type)
 
         params = parse_qs(response.body)
+        # Ensure the keys to this dictionary are unicode strings in Python 3.x.
+        params = map_dict(lambda k, v: (utf8_decode_if_bytes(k), v), params)
         credentials = Credentials(identifier=params[OAUTH_PARAM_TOKEN][0],
                             shared_secret=params[OAUTH_PARAM_TOKEN_SECRET][0])
         return credentials, params

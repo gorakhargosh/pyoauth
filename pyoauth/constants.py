@@ -26,23 +26,28 @@ SYMBOL_SEMICOLON = b(";")
 SYMBOL_PIPE = b("|")
 SYMBOL_ZERO = b("0")
 SYMBOL_SPACE = b(" ")
+SYMBOL_QUESTION_MARK = b("?")
 
+# Used in construction.
 OAUTH_VERSION_1 = b("1.0")
 OAUTH_REALM = b("realm")
-OAUTH_AUTH_SCHEME = b('OAuth ')
-OAUTH_AUTH_SCHEME_LOWERCASE = b("oauth ")
-OAUTH_AUTH_SCHEME_PATTERN = re.compile(b(r"(^OAuth[\s]+)"), re.IGNORECASE)
-OAUTH_AUTH_HEADER_PREFIX = b('OAuth realm="')
+OAUTH_AUTH_SCHEME_PATTERN = re.compile(r"(^OAuth[\s]+)", re.IGNORECASE)
 
-OAUTH_PARAM_PREFIX = b("oauth_")
-OAUTH_PARAM_SIGNATURE = b("oauth_signature")
-OAUTH_PARAM_CONSUMER_SECRET = b("oauth_consumer_secret")
-OAUTH_PARAM_TOKEN_SECRET = b("oauth_token_secret")
-OAUTH_PARAM_TOKEN = b("oauth_token")
-OAUTH_PARAM_VERSION = b("oauth_version")
-OAUTH_PARAM_SIGNATURE_METHOD = b("oauth_signature_method")
-OAUTH_PARAM_CALLBACK = b("oauth_callback")
-OAUTH_PARAM_CALLBACK_CONFIRMED = b("oauth_callback_confirmed")
+OAUTH_PARAM_REALM = "realm"
+OAUTH_PARAM_PREFIX = "oauth_"
+OAUTH_PARAM_SIGNATURE = "oauth_signature"
+OAUTH_PARAM_CONSUMER_KEY = "oauth_consumer_key"
+OAUTH_PARAM_CONSUMER_SECRET = "oauth_consumer_secret"
+OAUTH_PARAM_TOKEN_SECRET = "oauth_token_secret"
+OAUTH_PARAM_TOKEN = "oauth_token"
+OAUTH_PARAM_NONCE = "oauth_nonce"
+OAUTH_PARAM_TIMESTAMP = "oauth_timestamp"
+OAUTH_PARAM_VERSION = "oauth_version"
+OAUTH_PARAM_VERIFIER = "oauth_verifier"
+OAUTH_PARAM_SIGNATURE_METHOD = "oauth_signature_method"
+OAUTH_PARAM_CALLBACK = "oauth_callback"
+OAUTH_PARAM_CALLBACK_CONFIRMED = "oauth_callback_confirmed"
+
 OAUTH_VALUE_CALLBACK_CONFIRMED = b("true")
 OAUTH_VALUE_CALLBACK_OOB = b("oob")
 
@@ -54,10 +59,18 @@ PLAINTEXT = b("PLAINTEXT")
 
 HTTP_GET = b("GET")
 HTTP_POST = b("POST")
+HTTP_REASON_OK = b("OK")
+HTTP_REASON_MULTIPLE_CHOICES = b("Multiple choices")
+HTTP_REASON_CONTINUE = b("continue")
 
-HEADER_CONTENT_TYPE = b("content-type")
-HEADER_CONTENT_TYPE_CAPS = b("Content-Type")
-HEADER_AUTHORIZATION = b("authorization")
-HEADER_AUTHORIZATION_CAPS = b("Authorization")
-HEADER_CONTENT_LENGTH = b("content-length")
-HEADER_CONTENT_LENGTH_CAPS = b("Content-Length")
+HEADER_CONTENT_TYPE = "content-type"
+HEADER_CONTENT_TYPE_CAPS = "Content-Type"
+HEADER_AUTHORIZATION = "authorization"
+HEADER_AUTHORIZATION_CAPS = "Authorization"
+HEADER_CONTENT_LENGTH = "content-length"
+HEADER_CONTENT_LENGTH_CAPS = "Content-Length"
+
+OPENID_MODE_CHECK_AUTHENTICATION = "check_authentication"
+                                   # u"check_authentication"
+OPENID_MODE_CHECKID_SETUP = "checkid_setup"
+OPENID_AX_MODE_FETCH_REQUEST = "fetch_request"

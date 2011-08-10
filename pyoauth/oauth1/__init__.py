@@ -28,8 +28,11 @@
 from __future__ import absolute_import
 
 from pyoauth.constants import HMAC_SHA1, RSA_SHA1, PLAINTEXT
+from mom.codec.text import utf8_encode
+
 
 # Signature methods.
+
 SIGNATURE_METHOD_HMAC_SHA1 = HMAC_SHA1
 SIGNATURE_METHOD_RSA_SHA1 = RSA_SHA1
 SIGNATURE_METHOD_PLAINTEXT = PLAINTEXT
@@ -53,8 +56,8 @@ class Credentials(object):
         :param shared_secret:
             Shared secret (old: secret)
         """
-        self._identifier = identifier
-        self._shared_secret = shared_secret
+        self._identifier = utf8_encode(identifier)
+        self._shared_secret = utf8_encode(shared_secret)
 
     @property
     def identifier(self):
