@@ -86,7 +86,8 @@ import re
 import time
 
 from mom.builtins import b
-from mom.codec import decimal_encode, base64_encode, base64_decode
+from mom.codec import decimal_encode, \
+    base64_encode, base64_decode, base58_encode
 from mom.codec.text import utf8_encode, utf8_decode_if_bytes, \
     utf8_encode_if_unicode
 from mom.security.hash import hmac_sha1_base64_digest, sha1_digest
@@ -97,7 +98,6 @@ from mom.security.random import \
 from pyoauth.constants import \
     SYMBOL_INVERTED_DOUBLE_QUOTE, \
     SYMBOL_EQUAL, \
-    SYMBOL_COMMA, \
     OAUTH_AUTH_SCHEME_PATTERN, \
     SYMBOL_EMPTY_BYTES, \
     OAUTH_PARAM_SIGNATURE, \
@@ -155,7 +155,20 @@ def generate_client_secret(n_bits=144):
     return base64_encode(generate_random_bits(n_bits))
 
 
-def generate_verification_code(length=8):
+def generate_verification_code(n_bits=64):
+    """
+    Compact human-inputable strong verification code.
+
+    :param n_bits:
+        Bits size. 64 is default.
+    :returns:
+        A base58-encoded random unsigned integral human-inputable compact
+        verification code.
+    """
+    return base58_encode(generate_random_bits(n_bits))
+
+
+def _generate_hex_verification_code(length=8):
     """
     Generates an OAuth verification code.
 

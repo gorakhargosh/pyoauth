@@ -35,7 +35,7 @@ from pyoauth.oauth1.protocol import parse_authorization_header, \
     generate_base_string_query, \
     generate_authorization_header, \
     percent_decode, \
-    generate_verification_code, \
+    _generate_hex_verification_code, \
     generate_timestamp, \
     generate_hmac_sha1_signature, \
     generate_rsa_sha1_signature, \
@@ -79,26 +79,26 @@ class Test_generate_client_secret(unittest2.TestCase):
 class Test_generate_verification_code(unittest2.TestCase):
     def test_length(self):
         default_length = 8
-        self.assertEqual(len(generate_verification_code()), default_length,
+        self.assertEqual(len(_generate_hex_verification_code()), default_length,
                      "Verification code length does not match "\
                      "default expected length of %d." % default_length)
-        self.assertEqual(len(generate_verification_code(length=10)), 10,
+        self.assertEqual(len(_generate_hex_verification_code(length=10)), 10,
                      "Verification code length does not match expected length.")
 
-        self.assertRaises(ValueError, generate_verification_code, 33)
-        self.assertRaises(ValueError, generate_verification_code, 0)
-        self.assertRaises(ValueError, generate_verification_code, -1)
-        self.assertRaises(ValueError, generate_verification_code, 33)
-        self.assertRaises(TypeError, generate_verification_code, None)
-        self.assertRaises(TypeError, generate_verification_code, "")
+        self.assertRaises(ValueError, _generate_hex_verification_code, 33)
+        self.assertRaises(ValueError, _generate_hex_verification_code, 0)
+        self.assertRaises(ValueError, _generate_hex_verification_code, -1)
+        self.assertRaises(ValueError, _generate_hex_verification_code, 33)
+        self.assertRaises(TypeError, _generate_hex_verification_code, None)
+        self.assertRaises(TypeError, _generate_hex_verification_code, "")
 
     def test_uniqueness(self):
-        self.assertNotEqual(generate_verification_code(),
-                         generate_verification_code(),
+        self.assertNotEqual(_generate_hex_verification_code(),
+                         _generate_hex_verification_code(),
                          "Verification code is not unique.")
 
     def test_is_string(self):
-        self.assertTrue(is_bytes(generate_verification_code()),
+        self.assertTrue(is_bytes(_generate_hex_verification_code()),
                     "Verification code is not a byte string.")
 
 
