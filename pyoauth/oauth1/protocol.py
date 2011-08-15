@@ -160,7 +160,7 @@ def generate_verification_code(n_bits=64):
     Compact human-inputable strong verification code.
 
     :param n_bits:
-        Bits size. 64 is default.
+        Bit size. 64 is default.
     :returns:
         A base58-encoded random unsigned integral human-inputable compact
         verification code.
@@ -437,10 +437,10 @@ def generate_base_string(method, url, oauth_params):
             "Method must be one of the HTTP methods %s: "\
             "got `%s` instead" % (allowed_methods, method))
     if not url:
-        raise InvalidUrlError("URL must be specified: got `%r`" % (url,))
+        raise InvalidUrlError("URL must be specified: got `%r`" % url)
     if not isinstance(oauth_params, dict):
-        raise InvalidOAuthParametersError(
-            "Dictionary required: got `%r`" % (oauth_params,))
+        raise InvalidOAuthParametersError("Dictionary required: got `%r`" %
+                                          oauth_params)
 
     scheme, netloc, path, matrix_params, query, _ = urlparse_normalized(url)
     query_string = generate_base_string_query(query, oauth_params)
@@ -499,8 +499,6 @@ def generate_base_string_query(url_query, oauth_params):
                             )
     query = urlencode_s(query_d, allow_func)
     return query
-
-
 
 
 def generate_authorization_header(oauth_params,
@@ -644,11 +642,11 @@ def _parse_authorization_header_l(header,
     """
     if strict:
         if "\n" in header:
-            raise ValueError("Header value must be on a single line: got `%r`" \
-                             % (header,))
+            raise ValueError("Header value must be on a single line: got `%r`" %
+                             header)
         if param_delimiter != ",":
-            raise ValueError("The param delimiter must be a comma: got `%r`" \
-                             % (param_delimiter,))
+            raise ValueError("The param delimiter must be a comma: got `%r`" %
+                             param_delimiter)
     header = _authorization_header_strip_scheme(header.strip())
     decoded_pairs = []
     for param in (p.strip() for p in header.split(param_delimiter)):
@@ -683,8 +681,8 @@ def _authorization_header_strip_scheme(header,
         The header without the authorization scheme.
     """
     if not header.lower().startswith("oauth "):
-        raise ValueError("Authorization scheme must be `OAuth`: got `%r`" \
-                         % header)
+        raise ValueError("Authorization scheme must be `OAuth`: got `%r`" %
+                         header)
     return re.sub(_pattern, "", header, 1)
 
 
@@ -707,8 +705,8 @@ def _authorization_header_parse_param(param):
     try:
         name, value = param.split("=", 1)
     except ValueError:
-        raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" \
-                                              % (param,))
+        raise InvalidAuthorizationHeaderError("bad parameter field: `%r`" %
+                                              param)
 
     # Get rid of all the whitespace surrounding the name and value.
     # Already done in parent function when splitting into param pairs.
@@ -717,14 +715,14 @@ def _authorization_header_parse_param(param):
     # Value must be at least ""
     if len(value) < 2:
         raise InvalidAuthorizationHeaderError(
-            "bad parameter value: `%r` -- missing quotes?" % (param,))
+            "bad parameter value: `%r` -- missing quotes?" % param)
 
     # Value must be quoted between " characters.
     if value[0] != '"' or \
        value[-1] != '"':
         raise InvalidAuthorizationHeaderError(
             "missing quotes around parameter value: `%r` "\
-            "-- values must be quoted using (\")" % (param,))
+            "-- values must be quoted using (\")" % param)
 
     # We only need to remove a *single pair* of quotes.
     # Do not use str.strip('"') because that will remove more " characters than
