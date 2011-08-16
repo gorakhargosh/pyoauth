@@ -130,14 +130,17 @@ class OpenIdMixin(object):
         ax_attrs = ax_attrs or ()
         url = urljoin(self.adapter_request_full_url, callback_uri)
         request_host = self.adapter_request_host
-        request_protocol = self.adapter_request_scheme
+        #request_protocol = self.adapter_request_scheme
 
         args = {
             "openid.ns": self.SPEC_OPENID_NS,
             "openid.claimed_id": self.SPEC_IDENTIFIER_SELECT,
             "openid.identity": self.SPEC_IDENTIFIER_SELECT,
             "openid.return_to": url,
-            "openid.realm": request_protocol + "://" + request_host + "/",
+            #"openid.realm": request_protocol + "://" + request_host + "/",
+            # See:
+            # https://github.com/facebook/tornado/commit/1882670c5f9dd9be5840e1fac91e3ef98ba1deeb
+            "openid.realm": urljoin(url, "/"),
             "openid.mode": OPENID_MODE_CHECKID_SETUP,
         }
         if ax_attrs:
@@ -205,7 +208,7 @@ class OpenIdMixin(object):
         ax_args = self._get_ax_args(request_arguments, ax_ns)
         def get_ax_arg(uri, ax_args=ax_args, ax_ns=ax_ns):
             ax_name = self._get_ax_name(ax_args, uri, ax_ns)
-            return self.adapter_request_get(ax_name, u"")
+            return self.adapter_request_get(ax_name, "")
 
         claimed_id = self.adapter_request_get("openid.claimed_id", "")
         name = get_ax_arg(self.ATTRIB_FULL_NAME)
