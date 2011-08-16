@@ -7,10 +7,10 @@ from mom._compat import have_python3
 from mom.builtins import b
 
 if have_python3:
-    from tests import py3kconstants
+    from pyoauth.tests import py3kconstants
     constants = py3kconstants
 else:
-    from tests import py2kconstants
+    from pyoauth.tests import py2kconstants
     constants = py2kconstants
 
     

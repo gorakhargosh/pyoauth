@@ -39,7 +39,7 @@ from pyoauth.url import \
     query_append, \
     is_valid_callback_url
 
-from tests.constants import constants
+from pyoauth.tests.constants import constants
 
 
 def _url_equals(url1, url2):

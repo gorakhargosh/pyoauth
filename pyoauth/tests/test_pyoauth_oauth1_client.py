@@ -28,7 +28,7 @@ from pyoauth.oauth1 import Credentials, SIGNATURE_METHOD_HMAC_SHA1
 from pyoauth.oauth1.client import _OAuthClient, Client
 from pyoauth.oauth1.protocol import parse_authorization_header
 from pyoauth.url import percent_decode
-from tests.constants import TEST_CONSUMER_KEY, TEST_NONCE, \
+from pyoauth.tests.constants import TEST_CONSUMER_KEY, TEST_NONCE, \
     TEST_TIMESTAMP, TEST_EXTRA_PARAM_VALUE, TEST_IGNORE_THIS_TEXT, \
     TEST_TOKEN, BAD_SIGNATURE_METHOD, BAD_SIGNATURE, \
     RFC_OAUTH_CALLBACK_URI, RFC_NONCE_1, RFC_TIMESTAMP_1, \

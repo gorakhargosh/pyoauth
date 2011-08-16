@@ -15,7 +15,7 @@ from pyoauth.constants import HTTP_POST, HTTP_GET, OAUTH_VERSION_1, \
 from pyoauth.oauth1 import SIGNATURE_METHOD_HMAC_SHA1, \
     SIGNATURE_METHOD_RSA_SHA1, SIGNATURE_METHOD_PLAINTEXT
 
-from tests.constants import constants, \
+from pyoauth.tests.constants import constants, \
     RFC_REALM, RFC_TEMP_URI, RFC_CLIENT_SECRET, \
     RFC_CLIENT_IDENTIFIER, RFC_TIMESTAMP_1, \
     RFC_NONCE_1, RFC_OAUTH_CALLBACK_URI, \
