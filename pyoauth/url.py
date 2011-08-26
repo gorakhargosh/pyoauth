@@ -542,11 +542,11 @@ def oauth_url_sanitize(url, force_secure=True):
     query = urlencode_s(query_remove_oauth(query))
     if force_secure and scheme != b("https"):
         raise InsecureOAuthUrlError(
-            "OAuth 1.0 specification requires the use of SSL/TLS for "\
+            "OAuth specification requires the use of SSL/TLS for "\
             "inter-server communication.")
     elif not force_secure and scheme != b("https"):
         logging.warning(
-            "CAUTION: RFC specification requires the use of SSL/TLS "\
+            "INSECURE URL: OAuth specification requires the use of SSL/TLS "\
             "for credential requests.")
     return urlunparse((scheme, netloc, path, params, query, None))
 
