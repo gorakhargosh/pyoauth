@@ -16,10 +16,9 @@ client = GoogleClient(HttpClient(), client_credentials,
 def main():
     temp, _ = client.fetch_temporary_credentials()
     webbrowser.open(client.get_authorization_url(temp), new=2, autoraise=True)
-    oauth_verifier = \
-        client.check_verification_code(temp,
-                                       temp.identifier,
-                                       raw_input("Enter verification code: "))
+
+    oauth_verifier = raw_input("Enter verification code: ")
+    client.check_verification_code(temp, temp.identifier, oauth_verifier)
     token, _ = client.fetch_token_credentials(temp, oauth_verifier)
     pprint(token.to_dict())
 
