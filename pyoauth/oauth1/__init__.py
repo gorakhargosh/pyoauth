@@ -45,7 +45,7 @@ SIGNATURE_METHODS = [
 
 class Credentials(object):
     """
-    Convenience wrapper for a pair of OAuth 1.0 credentials.
+    Convenience wrapper for a pair of OAuth credentials.
     """
     def __init__(self, identifier, shared_secret):
         """
