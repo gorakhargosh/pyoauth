@@ -20,7 +20,7 @@
 :module: pyoauth.error
 :synopsis: Contains errors and exception classes raised by the library.
 
-.. autoclass:: Error
+.. autoclass:: OAuthError
 .. autoclass:: InvalidQueryParametersError
 .. autoclass:: InsecureOAuthParametersError
 .. autoclass:: InvalidOAuthParametersError
@@ -37,13 +37,13 @@
 .. autoclass:: SignatureMethodNotSupportedError
 """
 
-class Error(RuntimeError):
+class OAuthError(RuntimeError):
     """
     Base exception class.
     """
     def __init__(self, message="OAuth error occurred"):
         self._message = message
-        super(Error, self).__init__()
+        super(OAuthError, self).__init__()
 
     @property
     def message(self):
@@ -54,87 +54,87 @@ class Error(RuntimeError):
         return self._message
 
 
-class InvalidQueryParametersError(Error):
+class InvalidQueryParametersError(OAuthError):
     """
     Raised when a query parameter is invalid.
     """
     pass
 
-class InsecureOAuthParametersError(Error):
+class InsecureOAuthParametersError(OAuthError):
     """
     Raised when an OAuth confidential parameter is passed into protocol
     parameters.
     """
     pass
 
-class InvalidOAuthParametersError(Error):
+class InvalidOAuthParametersError(OAuthError):
     """
     Raised when invalid protocol parameters are detected.
     """
     pass
 
-class InsecureOAuthUrlError(Error):
+class InsecureOAuthUrlError(OAuthError):
     """
     Raised when an insecure (non-HTTPS) URL is detected for requesting OAuth
     credentials.
     """
     pass
 
-class InvalidUrlError(Error):
+class InvalidUrlError(OAuthError):
     """
     Raised when a specified URL is invalid for consumption by a routine.
     """
     pass
 
-class InvalidHttpMethodError(Error):
+class InvalidHttpMethodError(OAuthError):
     """
     Raised when an invalid HTTP method is used.
     """
     pass
 
-class InvalidAuthorizationHeaderError(Error):
+class InvalidAuthorizationHeaderError(OAuthError):
     """
     Raised when an invalid Authorization header is detected.
     """
     pass
 
-class IllegalArgumentError(Error):
+class IllegalArgumentError(OAuthError):
     """
     Raised when an illegal argument is passed to a function.
     """
     pass
 
-class InvalidHttpRequestError(Error):
+class InvalidHttpRequestError(OAuthError):
     """
     Raised when an invalid HTTP request is detected.
     """
     pass
 
-class InvalidHttpResponseError(Error):
+class InvalidHttpResponseError(OAuthError):
     """
     Raised when an invalid HTTP response is detected.
     """
     pass
 
-class HttpError(Error):
+class HttpError(OAuthError):
     """
     General HTTP error.
     """
     pass
 
-class InvalidContentTypeError(Error):
+class InvalidContentTypeError(OAuthError):
     """
     Raised when an invalid content type header value is detected.
     """
     pass
 
-class InvalidSignatureMethodError(Error):
+class InvalidSignatureMethodError(OAuthError):
     """
     Raised when the signature method specified is invalid.
     """
     pass
 
-class SignatureMethodNotSupportedError(Error):
+class SignatureMethodNotSupportedError(OAuthError):
     """
     Raised when the signature method specified is not supported.
     """
