@@ -105,15 +105,16 @@ class BearerClient(object):
         if not code:
             raise ValueError("argument ``code`` not specified")
 
-        body = urlencode_s({
+        params = {
             "code": code,
             "client_id": self._client_credentials.identifier,
             "client_secret": self._client_credentials.shared_secret,
             "redirect_uri": redirect_uri,
             "grant_type": "authorization_code",
-        })
+        }
         if payload_params:
-            body.update(payload_params)
+            params.update(payload_params)
+        body = urlencode_s(params)
         headers = {
             HEADER_CONTENT_TYPE: CONTENT_TYPE_FORM_URLENCODED,
         }
@@ -147,14 +148,15 @@ class BearerClient(object):
             Refreshed access token.
         """
         # TODO: Add async_callback.
-        body = urlencode_s({
+        params = {
             "client_id": self._client_credentials.identifier,
             "client_secret": self._client_credentials.shared_secret,
             "refresh_token": refresh_token,
             "grant_type": "refresh_token",
-        })
+        }
         if payload_params:
-            body.update(payload_params)
+            params.update(payload_params)
+        body = urlencode_s(params)
         headers = {
             HEADER_CONTENT_TYPE: CONTENT_TYPE_FORM_URLENCODED,
         }
