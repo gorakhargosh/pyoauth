@@ -4,6 +4,10 @@
 import webbrowser
 from pprint import pprint
 
+# To help you see what's happening in the terminal.
+import httplib2
+httplib2.debuglevel = 1
+
 from pyoauth.httplib2.httpclient import HttpClient
 from pyoauth.oauth1.client.google import GoogleClient
 from pyoauth.oauth1 import Credentials
