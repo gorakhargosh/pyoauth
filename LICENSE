@@ -1,6 +1,6 @@
-Copyright (C) 2009 Facebook
-Copyright (C) 2010 Rick Copeland <rcopeland@geek.net>
-Copyright (C) 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
+Copyright 2009 Facebook
+Copyright 2010 Rick Copeland <rcopeland@geek.net>
+Copyright 2011 Yesudeep Mangalapilly <yesudeep@gmail.com>
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may
 not use this file except in compliance with the License. You may obtain
@@ -20,7 +20,7 @@ under the License.
 Some parts of the code are taken from the python-oauth2 project which has
 been released under the terms of the MIT license.
 
-Copyright (C) 2007-2010 Leah Culver, Joe Stump, Mark Paschal, Vic Fryzel
+Copyright 2007-2010 Leah Culver, Joe Stump, Mark Paschal, Vic Fryzel
 
 MIT License
 -----------
