@@ -69,10 +69,10 @@ bin/python: bin/buildout
 	@bin/buildout
 
 push:
-	@echo "Pushing repository to remote:google"
+	@echo "Pushing repository to remote:google [code.google.com]"
 	@git push google master
-	@echo "Pushing repository to remote:origin"
-	@git push origin master
+	@echo "Pushing repository to remote:github [github.com]"
+	@git push github master
 
 clean:
 	@make -C docs/ clean > /dev/null
